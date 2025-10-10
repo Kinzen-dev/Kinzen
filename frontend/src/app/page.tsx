@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/shared/components/ui/card';
 import { Navigation } from '@/shared/components/navigation';
+import { MobileMenuOverlay } from '@/shared/components/mobile-menu-overlay';
 import { PageTransition } from '@/shared/components/page-transition';
 import { ArrowRight, Github, Linkedin, Mail, Star, Zap } from 'lucide-react';
 import {
@@ -27,12 +28,16 @@ import {
   SiNodedotjs,
 } from 'react-icons/si';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 export default function Home() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <Navigation />
+        <Navigation onMobileMenuToggle={setIsMobileMenuOpen} isMobileMenuOpen={isMobileMenuOpen} />
+        <MobileMenuOverlay isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
         <main className="container mx-auto px-4 py-8">
           {/* Hero Section */}

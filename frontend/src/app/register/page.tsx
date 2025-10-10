@@ -2,15 +2,17 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { RegisterForm } from '@/features/auth/components/register-form';
 import { Navigation } from '@/shared/components/navigation';
+import { MobileMenuOverlay } from '@/shared/components/mobile-menu-overlay';
 import { PageTransition } from '@/shared/components/page-transition';
 import { useAuth } from '@/shared/hooks/use-auth';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -22,7 +24,8 @@ export default function RegisterPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <Navigation />
+        <Navigation onMobileMenuToggle={setIsMobileMenuOpen} isMobileMenuOpen={isMobileMenuOpen} />
+        <MobileMenuOverlay isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
         <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
           <div className="flex flex-col items-center space-y-4">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -41,7 +44,8 @@ export default function RegisterPage() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <Navigation />
+        <Navigation onMobileMenuToggle={setIsMobileMenuOpen} isMobileMenuOpen={isMobileMenuOpen} />
+        <MobileMenuOverlay isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
         <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-4">
           <RegisterForm />

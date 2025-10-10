@@ -1,21 +1,27 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/components/ui/button';
 import { ThemeToggle } from '@/shared/components/theme-toggle';
 import { Sparkles } from 'lucide-react';
 
 interface NavigationProps {
-  showHomeButton?: boolean;
   className?: string;
+  onMobileMenuToggle?: (isOpen: boolean) => void;
+  isMobileMenuOpen?: boolean;
 }
 
-export function Navigation({ showHomeButton = true, className = '' }: NavigationProps) {
-  const pathname = usePathname();
-  const isHomePage = pathname === '/';
+export function Navigation({
+  className = '',
+  onMobileMenuToggle,
+  isMobileMenuOpen = false,
+}: NavigationProps) {
+  const toggleMobileMenu = () => {
+    const newState = !isMobileMenuOpen;
+    onMobileMenuToggle?.(newState);
+  };
 
   return (
     <motion.header
@@ -44,25 +50,25 @@ export function Navigation({ showHomeButton = true, className = '' }: Navigation
           </motion.div>
         </div>
 
+        {/* Center - Lifestyle Menu (Desktop only) */}
+        <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 transform items-center md:flex">
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 400, damping: 17 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/lifestyle">
+              <Button variant="ghost" className="text-lg font-medium">
+                Lifestyle
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+
         {/* Right side - Navigation actions */}
         <div className="flex items-center space-x-2">
-          {/* Home button */}
-          {showHomeButton && !isHomePage && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 400, damping: 17 }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Link href="/">
-                <Button variant="ghost" size="icon" title="Go to Home">
-                  <Home className="h-4 w-4" />
-                </Button>
-              </Link>
-            </motion.div>
-          )}
-
           {/* Theme toggle */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -72,6 +78,20 @@ export function Navigation({ showHomeButton = true, className = '' }: Navigation
             whileTap={{ scale: 0.9 }}
           >
             <ThemeToggle />
+          </motion.div>
+
+          {/* Mobile hamburger menu */}
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.4, type: 'spring', stiffness: 400, damping: 17 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="md:hidden"
+          >
+            <Button variant="ghost" size="icon" onClick={toggleMobileMenu} title="Open menu">
+              <Menu className="h-5 w-5" />
+            </Button>
           </motion.div>
         </div>
       </div>
