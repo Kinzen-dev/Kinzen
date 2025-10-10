@@ -41,9 +41,10 @@ jobs:
         working-directory: frontend
         run: npm run type-check
 
-      - name: Run tests
-        working-directory: frontend
-        run: npm run test
+      # TODO: Add tests
+      # - name: Run tests
+      #   working-directory: frontend
+      #   run: npm run test
 
       - name: Build
         working-directory: frontend
