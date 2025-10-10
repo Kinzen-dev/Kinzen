@@ -5,11 +5,20 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
 import { AppModule } from './app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
+
+  // Serve Swagger UI static assets from node_modules
+  // Use require.resolve to find the actual swagger-ui-dist location
+  const swaggerUiPath = require('swagger-ui-dist').getAbsoluteFSPath();
+  app.useStaticAssets(swaggerUiPath, {
+    prefix: '/docs/',
+  });
 
   // Swagger Documentation
   const config = new DocumentBuilder()
@@ -27,7 +36,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
 
   // Setup Swagger at root level (NOT under API prefix)
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
   // Global prefix for API routes
   const apiPrefix = configService.get('app.apiPrefix');
