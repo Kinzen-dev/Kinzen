@@ -11,12 +11,34 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
-  // Global prefix
+  // Swagger Documentation
+  const config = new DocumentBuilder()
+    .setTitle('Kinzen API')
+    .setDescription(
+      'Kinzen Backend API - Personal website featuring portfolio, cars, stocks, football, and more',
+    )
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('users', 'User management endpoints')
+    .addTag('health', 'Health check endpoints')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  // Setup Swagger at root level (NOT under API prefix)
+  SwaggerModule.setup('docs', app, document);
+
+  // Global prefix for API routes
   const apiPrefix = configService.get('app.apiPrefix');
   app.setGlobalPrefix(apiPrefix);
 
   // Security
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Allow loading Swagger UI assets
+    }),
+  );
   app.use(compression());
 
   // CORS
@@ -38,38 +60,12 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger Documentation
-  const config = new DocumentBuilder()
-    .setTitle('Kinzen API')
-    .setDescription(
-      'Kinzen Backend API - Personal website featuring portfolio, cars, stocks, football, and more',
-    )
-    .setVersion('1.0')
-    .addBearerAuth()
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('users', 'User management endpoints')
-    .addTag('health', 'Health check endpoints')
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
-    customSiteTitle: 'Kinzen API Documentation',
-    customCss: `
-      @import url('https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui.min.css');
-    `,
-    customfavIcon: 'https://nestjs.com/img/logo_text.svg',
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-    customJs: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui-bundle.min.js',
-  });
-
   // Start server
   const port = configService.get('app.port');
   await app.listen(port);
 
   logger.log(`🚀 Application is running on: http://localhost:${port}/${apiPrefix}`);
-  logger.log(`📚 Swagger documentation: http://localhost:${port}/${apiPrefix}/docs`);
+  logger.log(`📚 Swagger documentation: http://localhost:${port}/docs`);
   logger.log(`🔧 Environment: ${configService.get('app.nodeEnv')}`);
 }
 
