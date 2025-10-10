@@ -47,6 +47,7 @@ JWT_REFRESH_SECRET=${jwtRefreshSecret}
 NODE_ENV=production
 PORT=3001
 API_PREFIX=api/v1
+DATABASE_URL=postgresql://postgres:dPQmPVXNmPoNAMLxgmDXuQeqbqtKUVRq@tramway.proxy.rlwy.net:36236/railway
 JWT_SECRET=${jwtSecret}
 JWT_REFRESH_SECRET=${jwtRefreshSecret}
 JWT_EXPIRES_IN=15m
@@ -114,6 +115,7 @@ Your backend is now deployed with Infrastructure as Code!
     log('NODE_ENV=production', 'cyan');
     log('PORT=3001', 'cyan');
     log('API_PREFIX=api/v1', 'cyan');
+    log('DATABASE_URL=postgresql://postgres:dPQmPVXNmPoNAMLxgmDXuQeqbqtKUVRq@tramway.proxy.rlwy.net:36236/railway', 'cyan');
     log(`JWT_SECRET=${jwtSecret}`, 'cyan');
     log(`JWT_REFRESH_SECRET=${jwtRefreshSecret}`, 'cyan');
     log('JWT_EXPIRES_IN=15m', 'cyan');
