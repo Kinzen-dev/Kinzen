@@ -148,9 +148,25 @@ All services will be available:
 
 ## 📖 Documentation
 
-- [Backend README](./backend/README.md)
-- [Frontend README](./frontend/README.md)
-- [Infrastructure README](./infrastructure/README.md)
+### Quick Start Guides
+- [Getting Started](./GETTING_STARTED_KINZEN.md) - Complete setup guide
+- [Quick Start](./QUICKSTART.md) - Fast track for experienced developers
+- [Local Testing Guide](./LOCAL_TESTING_GUIDE.md) - How to test locally
+- [Testing Steps](./TESTING_STEPS.md) - Testing checklist
+
+### Component Documentation
+- [Backend README](./backend/README.md) - Backend architecture and setup
+- [Frontend README](./frontend/README.md) - Frontend structure and components
+- [Infrastructure README](./infrastructure/README.md) - Infrastructure setup and deployment
+
+### CI/CD & Deployment
+- [CI/CD Pipeline Guide](./CI_CD_PIPELINE_GUIDE.md) - Complete CI/CD setup and configuration
+- [Pipeline Status](./PIPELINE_STATUS.md) - Current pipeline status and explanation
+
+### Features & Architecture
+- [Features Roadmap](./FEATURES_ROADMAP.md) - Upcoming features and timeline
+- [Architecture for Features](./ARCHITECTURE_FOR_FEATURES.md) - How to build new features
+- [Contributing Guide](./CONTRIBUTING.md) - How to contribute
 
 ## 🧪 Testing
 
@@ -303,13 +319,23 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## 🔄 CI/CD
 
-GitHub Actions workflows:
+GitHub Actions workflows provide automated testing and deployment:
 
-- **Backend CI**: Lint, Test, Build, Deploy
-- **Frontend CI**: Lint, Test, Build, Deploy
-- Automatic deployments to staging/production
-- Docker image building and pushing
-- Security scanning
+### Current Status
+- **Backend CI**: ✅ Lint, Type Check, Unit Tests, E2E Tests, Coverage
+- **Frontend CI**: ✅ Lint, Type Check, Build
+- **Build Jobs**: 🔄 Commented out (requires Docker Hub credentials)
+- **Deploy Jobs**: 🔄 Commented out (requires Docker Hub + Vercel credentials)
+
+### Full Pipeline (When Enabled)
+- Automatic builds on push to `main` and `develop`
+- Docker image building and pushing to Docker Hub
+- Automatic deployments to staging (from `develop` branch)
+- Automatic deployments to production (from `main` branch)
+- Code coverage reporting with Codecov
+
+**📚 See [CI/CD Pipeline Guide](./CI_CD_PIPELINE_GUIDE.md) for complete setup instructions**  
+**📊 See [Pipeline Status](./PIPELINE_STATUS.md) for visual overview**
 
 ## 🛠️ Development Workflow
 
