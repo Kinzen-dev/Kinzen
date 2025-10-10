@@ -11,6 +11,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
+  // Get API prefix first for Swagger configuration
+  const apiPrefix = configService.get('app.apiPrefix');
+  const port = configService.get('app.port');
+
   // Swagger Documentation
   const config = new DocumentBuilder()
     .setTitle('Kinzen API')
@@ -18,6 +22,8 @@ async function bootstrap() {
       'Kinzen Backend API - Personal website featuring portfolio, cars, stocks, football, and more',
     )
     .setVersion('1.0')
+    .addServer(`http://localhost:${port}/${apiPrefix}`, 'Local Development')
+    .addServer(`/${apiPrefix}`, 'Current Server')
     .addBearerAuth()
     .addTag('auth', 'Authentication endpoints')
     .addTag('users', 'User management endpoints')
@@ -39,7 +45,6 @@ async function bootstrap() {
   });
 
   // Global prefix for API routes
-  const apiPrefix = configService.get('app.apiPrefix');
   app.setGlobalPrefix(apiPrefix);
 
   // Security
@@ -70,7 +75,6 @@ async function bootstrap() {
   );
 
   // Start server
-  const port = configService.get('app.port');
   await app.listen(port);
 
   logger.log(`🚀 Application is running on: http://localhost:${port}/${apiPrefix}`);
