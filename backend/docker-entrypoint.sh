@@ -16,7 +16,14 @@ fi
 
 # Run database migrations
 echo "📦 Running database migrations..."
-npx prisma migrate deploy || echo "⚠️ No migrations to apply (this is OK for fresh database)"
+echo "🔍 Checking migrations folder..."
+ls -la prisma/migrations/ || echo "❌ Migrations folder not found"
+
+echo "🚀 Deploying migrations..."
+npx prisma migrate deploy
+
+echo "🔍 Checking if tables were created..."
+npx prisma db execute --stdin <<< "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';" || echo "⚠️ Could not check tables"
 
 # Generate Prisma Client (in case it's needed)
 echo "🔧 Ensuring Prisma Client is generated..."
