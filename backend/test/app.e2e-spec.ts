@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { Response } from 'supertest';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -33,7 +34,7 @@ describe('AppController (e2e)', () => {
       return request(app.getHttpServer())
         .get('/api/v1/health')
         .expect(200)
-        .expect((res) => {
+        .expect((res: Response) => {
           expect(res.body.status).toBe('ok');
           expect(res.body.timestamp).toBeDefined();
         });
@@ -45,7 +46,7 @@ describe('AppController (e2e)', () => {
       return request(app.getHttpServer())
         .get('/api/v1/health/readiness')
         .expect(200)
-        .expect((res) => {
+        .expect((res: Response) => {
           expect(res.body.status).toBe('ready');
         });
     });
