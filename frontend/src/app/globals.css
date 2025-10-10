@@ -163,9 +163,45 @@ html {
   }
 }
 
-/* Smooth scrolling for browsers that support it */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
+/* Toast notifications positioning */
+.toast-notification {
+  margin-top: 20px !important;
+}
+
+/* Ensure toasts don't overlap with header on desktop */
+@media (min-width: 768px) {
+  [data-sonner-toaster] {
+    top: 100px !important;
   }
+
+  [data-sonner-toast] {
+    margin-top: 8px !important;
+  }
+}
+
+/* Custom toast styling */
+[data-sonner-toast] {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+[data-sonner-toast][data-type='error'] {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
+
+[data-sonner-toast][data-type='success'] {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+[data-sonner-toast][data-type='warning'] {
+  background: hsl(38, 92%, 50%);
+  color: hsl(38, 92%, 10%);
+}
+
+[data-sonner-toast][data-type='info'] {
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
 }

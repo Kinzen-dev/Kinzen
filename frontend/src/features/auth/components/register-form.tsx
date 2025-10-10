@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '../api/auth.api';
+import { getErrorMessage, getErrorTitle } from '@/shared/lib/error-utils';
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -41,8 +42,12 @@ export function RegisterForm() {
       toast.success('Registration successful! Please login.');
       router.push('/login');
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
-      toast.error(errorMessage);
+      const errorMessage = getErrorMessage(error);
+      const errorTitle = getErrorTitle(error);
+      toast.error(errorTitle, {
+        description: errorMessage,
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -112,4 +117,3 @@ export function RegisterForm() {
     </Card>
   );
 }
-

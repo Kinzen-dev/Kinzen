@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { authApi } from '../api/auth.api';
 import { setTokens } from '@/lib/api-client';
 import { useAuth } from '@/hooks/use-auth';
+import { getErrorMessage, getErrorTitle } from '@/shared/lib/error-utils';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -45,8 +46,12 @@ export function LoginForm() {
       toast.success('Login successful!');
       router.push('/dashboard');
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
-      toast.error(errorMessage);
+      const errorMessage = getErrorMessage(error);
+      const errorTitle = getErrorTitle(error);
+      toast.error(errorTitle, {
+        description: errorMessage,
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -94,4 +99,3 @@ export function LoginForm() {
     </Card>
   );
 }
-
