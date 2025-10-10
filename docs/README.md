@@ -11,6 +11,8 @@ docs/
 ├── development/        # Development guidelines and architecture
 ├── ci-cd/             # CI/CD pipeline documentation
 ├── project/           # Project planning and roadmap
+├── troubleshooting/   # Problem-solving guides and fixes
+├── deployment-temp/   # Temporary deployment documentation
 └── archive/           # Historical and completed documentation
 ```
 
@@ -53,6 +55,15 @@ Roadmap and project information:
 
 - **[Features Roadmap](./project/FEATURES_ROADMAP.md)** - Planned features and timeline
 - **[Project Summary](./project/PROJECT_SUMMARY.md)** - High-level project overview
+
+### 🔧 Troubleshooting
+
+Problem-solving guides and fixes:
+
+- Prisma database issues and solutions
+- Railway deployment troubleshooting
+- Migration and schema problems
+- Service linking and environment variable fixes
 
 ### 🗄️ Archive
 

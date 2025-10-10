@@ -71,6 +71,7 @@ kinzen/
 │   ├── development/       # Development docs
 │   ├── ci-cd/            # CI/CD documentation
 │   ├── project/          # Project planning
+│   ├── troubleshooting/  # Problem-solving guides
 │   └── archive/          # Historical docs
 └── scripts/               # Utility scripts
 ```
