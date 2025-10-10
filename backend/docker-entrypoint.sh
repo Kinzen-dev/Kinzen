@@ -21,9 +21,8 @@ ls -la prisma/migrations/ || echo "❌ Migrations folder not found"
 
 echo "🚀 Deploying migrations..."
 npx prisma migrate deploy || {
-    echo "⚠️ No migrations found, creating initial migration..."
-    npx prisma migrate dev --name init --create-only || echo "⚠️ Could not create migration"
-    npx prisma migrate deploy || echo "⚠️ Could not deploy migrations"
+    echo "⚠️ No migrations found, pushing schema directly..."
+    npx prisma db push --accept-data-loss || echo "⚠️ Could not push schema"
 }
 
 echo "🔍 Checking if tables were created..."

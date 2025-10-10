@@ -16,8 +16,14 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Ensure migrations are copied
+# Debug: Check if migrations exist
+RUN echo "🔍 Checking migrations after COPY . ." && ls -la prisma/migrations/ || echo "❌ No migrations found"
+
+# Ensure migrations are copied explicitly
 COPY prisma/migrations ./prisma/migrations/
+
+# Debug: Check migrations after explicit copy
+RUN echo "🔍 Checking migrations after explicit copy" && ls -la prisma/migrations/ || echo "❌ Still no migrations found"
 
 # Generate Prisma Client
 RUN npm run prisma:generate
