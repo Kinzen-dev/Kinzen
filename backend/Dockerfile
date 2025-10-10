@@ -47,6 +47,7 @@ COPY --chown=nestjs:nodejs --from=builder /app/node_modules/.prisma ./node_modul
 
 # Fix Prisma permissions
 RUN chown -R nestjs:nodejs /app/node_modules/.prisma
+RUN chown -R nestjs:nodejs /app/node_modules/prisma
 
 # Copy entrypoint script
 COPY --chown=nestjs:nodejs docker-entrypoint.sh ./

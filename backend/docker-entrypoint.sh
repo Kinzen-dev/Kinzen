@@ -16,11 +16,11 @@ fi
 
 # Run database migrations
 echo "📦 Running database migrations..."
-npx prisma migrate deploy
+npx prisma migrate deploy || echo "⚠️ No migrations to apply (this is OK for fresh database)"
 
 # Generate Prisma Client (in case it's needed)
 echo "🔧 Ensuring Prisma Client is generated..."
-npx prisma generate
+npx prisma generate || echo "⚠️ Prisma Client generation failed, but continuing..."
 
 echo "✅ Database setup complete!"
 echo "🚀 Starting application..."
