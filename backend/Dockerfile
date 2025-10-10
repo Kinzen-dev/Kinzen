@@ -16,6 +16,9 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Ensure migrations are copied
+COPY prisma/migrations ./prisma/migrations/
+
 # Generate Prisma Client
 RUN npm run prisma:generate
 

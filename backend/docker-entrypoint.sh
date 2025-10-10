@@ -20,10 +20,14 @@ echo "🔍 Checking migrations folder..."
 ls -la prisma/migrations/ || echo "❌ Migrations folder not found"
 
 echo "🚀 Deploying migrations..."
-npx prisma migrate deploy
+npx prisma migrate deploy || {
+    echo "⚠️ No migrations found, creating initial migration..."
+    npx prisma migrate dev --name init --create-only || echo "⚠️ Could not create migration"
+    npx prisma migrate deploy || echo "⚠️ Could not deploy migrations"
+}
 
 echo "🔍 Checking if tables were created..."
-npx prisma db execute --stdin <<< "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';" || echo "⚠️ Could not check tables"
+echo "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';" | npx prisma db execute --stdin || echo "⚠️ Could not check tables"
 
 # Generate Prisma Client (in case it's needed)
 echo "🔧 Ensuring Prisma Client is generated..."
