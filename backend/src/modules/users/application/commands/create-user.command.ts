@@ -6,4 +6,3 @@ export class CreateUserCommand {
     public readonly lastName?: string,
   ) {}
 }
-

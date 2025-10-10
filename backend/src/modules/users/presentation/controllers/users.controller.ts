@@ -56,4 +56,3 @@ export class UsersController {
     return UserResponseDto.fromEntity(user);
   }
 }
-

@@ -18,4 +18,3 @@ import { GetUserByIdHandler } from './application/queries/handlers/get-user-by-i
   exports: [USER_REPOSITORY],
 })
 export class UsersModule {}
-

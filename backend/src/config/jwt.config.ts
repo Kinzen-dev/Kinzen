@@ -6,4 +6,3 @@ export default registerAs('jwt', () => ({
   refreshSecret: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret-change-this',
   refreshExpiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d',
 }));
-

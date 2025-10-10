@@ -25,10 +25,7 @@ import { HealthModule } from './modules/health/health.module';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, jwtConfig, redisConfig, corsConfig],
-      envFilePath: [
-        `.env.${process.env.NODE_ENV || 'development'}`,
-        '.env',
-      ],
+      envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`, '.env'],
     }),
 
     // Rate limiting
@@ -68,4 +65,3 @@ import { HealthModule } from './modules/health/health.module';
   ],
 })
 export class AppModule {}
-

@@ -5,4 +5,3 @@ export interface BaseRepositoryInterface<T> {
   update(id: string, data: Partial<T>): Promise<T>;
   delete(id: string): Promise<void>;
 }
-

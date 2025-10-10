@@ -1,0 +1,29 @@
+echo "🔍 Running pre-commit checks..."
+
+# Run linting for both frontend and backend
+echo "📝 Running linters..."
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Please fix the issues before committing."
+  exit 1
+fi
+
+# Run type checking for frontend
+echo "🔧 Running type checks..."
+cd frontend && npm run type-check
+if [ $? -ne 0 ]; then
+  echo "❌ Type checking failed. Please fix the issues before committing."
+  exit 1
+fi
+cd ..
+
+# Run tests for backend only (frontend has no tests yet)
+echo "🧪 Running backend tests..."
+cd backend && npm run test
+if [ $? -ne 0 ]; then
+  echo "❌ Backend tests failed. Please fix the issues before committing."
+  exit 1
+fi
+cd ..
+
+echo "✅ All pre-commit checks passed!"

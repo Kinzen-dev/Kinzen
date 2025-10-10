@@ -19,7 +19,10 @@
     "format": "npm run format:backend && npm run format:frontend",
     "format:backend": "cd backend && npm run format",
     "format:frontend": "cd frontend && npm run format",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+    "type-check": "cd frontend && npm run type-check",
+    "pre-commit": "npm run lint && npm run type-check && npm run test",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "prepare": "husky"
   },
   "keywords": [
     "nestjs",
@@ -33,7 +36,8 @@
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "husky": "^9.0.11"
   },
   "workspaces": [
     "backend",

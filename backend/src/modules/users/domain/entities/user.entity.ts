@@ -26,4 +26,3 @@ export class UserEntity {
     return this.hasRole('admin');
   }
 }
-
