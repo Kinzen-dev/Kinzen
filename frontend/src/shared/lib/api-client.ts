@@ -63,6 +63,7 @@ export function getToken(): string | null {
 export function setToken(token: string): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem('accessToken', token);
+  localStorage.setItem('tokenTimestamp', Date.now().toString());
 }
 
 export function getRefreshToken(): string | null {
@@ -79,10 +80,10 @@ export function clearTokens(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  localStorage.removeItem('tokenTimestamp');
 }
 
 export function setTokens(accessToken: string, refreshToken: string): void {
   setToken(accessToken);
   setRefreshToken(refreshToken);
 }
-
