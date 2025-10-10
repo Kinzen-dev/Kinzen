@@ -151,7 +151,7 @@ export default function Home() {
                   color: 'from-pink-500 to-pink-600',
                   delay: 1.3,
                 },
-              ].map((feature, index) => (
+              ].map((feature, _index) => (
                 <motion.div
                   key={feature.title}
                   initial={{ opacity: 0, y: 50, scale: 0.9 }}

@@ -21,7 +21,7 @@ function isTokenExpired(tokenTimestamp: number): boolean {
 
 export const useAuth = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       user: null,
       isAuthenticated: false,
       isLoading: true,
