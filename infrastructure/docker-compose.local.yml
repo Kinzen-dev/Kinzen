@@ -1,0 +1,100 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: kinzen-postgres-local
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: kinzen_local
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: kinzen-redis-local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_local:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend (Development mode with hot reload)
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: kinzen-backend-local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/kinzen_local?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: local-dev-secret-key
+      JWT_EXPIRATION: 24h
+      JWT_REFRESH_SECRET: local-dev-refresh-secret-key
+      JWT_REFRESH_EXPIRATION: 30d
+    ports:
+      - "3001:3001"
+    volumes:
+      - ../backend/src:/app/src
+      - ../backend/prisma:/app/prisma
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npx nest start --watch
+
+  # Frontend (Development mode with hot reload)
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      target: deps
+    container_name: kinzen-frontend-local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend/src:/app/src
+      - ../frontend/public:/app/public
+      - ../frontend/package.json:/app/package.json
+      - ../frontend/next.config.js:/app/next.config.js
+      - ../frontend/tailwind.config.ts:/app/tailwind.config.ts
+      - ../frontend/postcss.config.js:/app/postcss.config.js
+      - ../frontend/tsconfig.json:/app/tsconfig.json
+    depends_on:
+      - backend
+    command: npx next dev
+
+volumes:
+  postgres_data_local:
+  redis_data_local:
+
+networks:
+  default:
+    name: kinzen-network-local

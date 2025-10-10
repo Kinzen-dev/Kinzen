@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kinzen-config
+  namespace: kinzen
+data:
+  redis-host: "redis-service"
+  api-url: "https://api.yourdomain.com/api/v1"
+  app-url: "https://yourdomain.com"
