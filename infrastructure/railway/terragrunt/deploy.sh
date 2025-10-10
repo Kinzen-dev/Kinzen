@@ -41,11 +41,19 @@ check_railway_auth() {
         railway login
     fi
     
-    # Get Railway token
-    RAILWAY_TOKEN=$(railway whoami --token)
+    # Get Railway token (new CLI syntax)
+    RAILWAY_TOKEN=$(railway whoami --json | jq -r '.token' 2>/dev/null || echo "")
     if [ -z "$RAILWAY_TOKEN" ]; then
-        echo -e "${RED}❌ Could not get Railway token${NC}"
-        exit 1
+        echo -e "${YELLOW}⚠️ Could not get Railway token automatically${NC}"
+        echo -e "${YELLOW}Please set RAILWAY_TOKEN environment variable:${NC}"
+        echo "export RAILWAY_TOKEN=your-token-here"
+        echo ""
+        echo "You can get your token from: https://railway.app/account/tokens"
+        read -p "Do you want to continue anyway? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
     fi
     
     export RAILWAY_TOKEN

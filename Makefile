@@ -195,3 +195,24 @@ restart: stop start
 check: lint test
 	@echo "✅ All checks passed!"
 
+# Railway Infrastructure as Code
+railway-deploy:
+	@echo "🚂 Deploying to Railway with Infrastructure as Code..."
+	cd infrastructure/railway && ./railway-iac.sh
+
+railway-deploy-api:
+	@echo "🚂 Deploying to Railway with Node.js API..."
+	cd infrastructure/railway && node railway-api-deploy.js
+
+railway-status:
+	@echo "📊 Checking Railway deployment status..."
+	railway status
+
+railway-logs:
+	@echo "📋 Viewing Railway logs..."
+	railway logs
+
+railway-domain:
+	@echo "🌐 Getting Railway domain..."
+	railway domain
+
