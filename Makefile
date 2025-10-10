@@ -204,6 +204,10 @@ railway-deploy-api:
 	@echo "🚂 Deploying to Railway with Node.js API..."
 	cd infrastructure/railway && node railway-api-deploy.js
 
+railway-setup:
+	@echo "🚂 Complete Railway setup with Infrastructure as Code..."
+	node railway-complete-setup.js
+
 railway-status:
 	@echo "📊 Checking Railway deployment status..."
 	railway status
