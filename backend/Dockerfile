@@ -34,9 +34,10 @@ RUN npm run build
 # Remove dev dependencies
 RUN npm prune --production
 
-# Copy entrypoint script
+# Copy entrypoint script and table creation script
 COPY docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
+COPY create-tables.sh ./
+RUN chmod +x docker-entrypoint.sh create-tables.sh
 
 # Expose port
 EXPOSE 3001

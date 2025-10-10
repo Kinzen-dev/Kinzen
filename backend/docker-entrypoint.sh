@@ -19,14 +19,8 @@ echo "📦 Running database migrations..."
 echo "🔍 Checking migrations folder..."
 ls -la prisma/migrations/ || echo "❌ Migrations folder not found"
 
-echo "🚀 Deploying migrations..."
-if npx prisma migrate deploy; then
-    echo "✅ Migrations deployed successfully"
-else
-    echo "⚠️ No migrations found, pushing schema directly..."
-    npx prisma db push --accept-data-loss
-    echo "✅ Schema pushed to database"
-fi
+echo "🚀 FORCING database table creation..."
+./create-tables.sh
 
 echo "🔍 Checking if tables were created..."
 echo "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';" | npx prisma db execute --stdin || echo "⚠️ Could not check tables"
