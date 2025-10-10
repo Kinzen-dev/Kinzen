@@ -60,11 +60,19 @@ kinzen/
 │   │   ├── features/      # Feature modules
 │   │   └── shared/        # Shared components & utilities
 │   └── public/            # Static assets
-└── infrastructure/         # Infrastructure as Code
-    ├── docker-compose.*.yml
-    ├── kubernetes/
-    ├── terraform/
-    └── nginx/
+├── infrastructure/         # Infrastructure as Code
+│   ├── docker-compose.*.yml
+│   ├── kubernetes/
+│   ├── terraform/
+│   └── nginx/
+├── docs/                   # Project documentation
+│   ├── guides/            # Getting started guides
+│   ├── setup/             # Setup & configuration
+│   ├── development/       # Development docs
+│   ├── ci-cd/            # CI/CD documentation
+│   ├── project/          # Project planning
+│   └── archive/          # Historical docs
+└── scripts/               # Utility scripts
 ```
 
 ## 🏗️ Architecture
@@ -148,25 +156,35 @@ All services will be available:
 
 ## 📖 Documentation
 
-### Quick Start Guides
-- [Getting Started](./GETTING_STARTED_KINZEN.md) - Complete setup guide
-- [Quick Start](./QUICKSTART.md) - Fast track for experienced developers
-- [Local Testing Guide](./LOCAL_TESTING_GUIDE.md) - How to test locally
-- [Testing Steps](./TESTING_STEPS.md) - Testing checklist
+All documentation is organized in the `/docs` directory for easy navigation:
 
-### Component Documentation
+### 📚 Getting Started
+- [Quick Start Guide](./docs/guides/QUICKSTART.md) - Fast track for experienced developers
+- [Complete Setup Guide](./docs/guides/GETTING_STARTED_KINZEN.md) - Detailed setup instructions
+- [Local Testing Guide](./docs/guides/LOCAL_TESTING_GUIDE.md) - How to test locally
+- [Deployment Quick Start](./docs/guides/DEPLOYMENT_QUICKSTART.md) - Quick deployment guide
+
+### ⚙️ Setup & Configuration
+- [Deployment Setup Checklist](./docs/setup/DEPLOYMENT_SETUP_CHECKLIST.md) - Complete deployment checklist
+
+### 👨‍💻 Development
+- [Contributing Guide](./CONTRIBUTING.md) - How to contribute to this project
+- [Architecture Guide](./docs/development/ARCHITECTURE_FOR_FEATURES.md) - How to build new features
+- [Testing Steps](./docs/development/TESTING_STEPS.md) - Testing procedures
+
+### 🔄 CI/CD & Deployment
+- [CI/CD Pipeline Guide](./docs/ci-cd/CI_CD_PIPELINE_GUIDE.md) - Complete CI/CD setup
+- [CI/CD Fix Summary](./docs/ci-cd/CI_CD_FIX_SUMMARY.md) - Recent fixes and improvements
+- [Pipeline Status](./docs/ci-cd/PIPELINE_STATUS.md) - Current pipeline status
+
+### 📊 Project Information
+- [Features Roadmap](./docs/project/FEATURES_ROADMAP.md) - Upcoming features and timeline
+- [Project Summary](./docs/project/PROJECT_SUMMARY.md) - Project overview and goals
+
+### 📦 Component Documentation
 - [Backend README](./backend/README.md) - Backend architecture and setup
 - [Frontend README](./frontend/README.md) - Frontend structure and components
 - [Infrastructure README](./infrastructure/README.md) - Infrastructure setup and deployment
-
-### CI/CD & Deployment
-- [CI/CD Pipeline Guide](./CI_CD_PIPELINE_GUIDE.md) - Complete CI/CD setup and configuration
-- [Pipeline Status](./PIPELINE_STATUS.md) - Current pipeline status and explanation
-
-### Features & Architecture
-- [Features Roadmap](./FEATURES_ROADMAP.md) - Upcoming features and timeline
-- [Architecture for Features](./ARCHITECTURE_FOR_FEATURES.md) - How to build new features
-- [Contributing Guide](./CONTRIBUTING.md) - How to contribute
 
 ## 🧪 Testing
 
@@ -319,23 +337,22 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## 🔄 CI/CD
 
-GitHub Actions workflows provide automated testing and deployment:
+GitHub Actions workflows provide automated testing, building, and deployment:
 
-### Current Status
-- **Backend CI**: ✅ Lint, Type Check, Unit Tests, E2E Tests, Coverage
+### Current Status ✅
+- **Backend CI**: ✅ Lint, Type Check, Unit Tests, E2E Tests
 - **Frontend CI**: ✅ Lint, Type Check, Build
-- **Build Jobs**: 🔄 Commented out (requires Docker Hub credentials)
-- **Deploy Jobs**: 🔄 Commented out (requires Docker Hub + Vercel credentials)
+- **Docker Build**: ✅ Push to Docker Hub (kinzendocker/kinzen-backend, kinzendocker/kinzen-frontend)
+- **Vercel Deploy**: ✅ Auto-deploy to production on push to `main`
 
-### Full Pipeline (When Enabled)
-- Automatic builds on push to `main` and `develop`
-- Docker image building and pushing to Docker Hub
-- Automatic deployments to staging (from `develop` branch)
-- Automatic deployments to production (from `main` branch)
-- Code coverage reporting with Codecov
+### Automated Workflows
+- ✅ Tests run on every push and PR
+- ✅ Docker images built and pushed to Docker Hub on merge to `main`
+- ✅ Frontend auto-deploys to Vercel on push to `main` (production)
+- ✅ All pipelines are fully operational
 
-**📚 See [CI/CD Pipeline Guide](./CI_CD_PIPELINE_GUIDE.md) for complete setup instructions**  
-**📊 See [Pipeline Status](./PIPELINE_STATUS.md) for visual overview**
+**📚 See [CI/CD Pipeline Guide](./docs/ci-cd/CI_CD_PIPELINE_GUIDE.md) for complete setup**  
+**📊 See [Pipeline Status](./docs/ci-cd/PIPELINE_STATUS.md) for detailed status**
 
 ## 🛠️ Development Workflow
 
