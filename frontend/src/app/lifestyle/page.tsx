@@ -14,7 +14,7 @@ import { MobileMenuOverlay } from '@/shared/components/mobile-menu-overlay';
 import { PageTransition } from '@/shared/components/page-transition';
 import {
   Heart,
-  Coffee,
+  Car,
   BookOpen,
   Music,
   Camera,
@@ -23,6 +23,7 @@ import {
   Palette,
   Gamepad2,
   Sparkles,
+  Coffee,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -32,10 +33,12 @@ export default function LifestylePage() {
 
   const lifestyleCategories = [
     {
-      icon: Coffee,
-      title: 'Coffee Culture',
-      description: 'Discover the art of brewing, coffee shops, and the perfect morning routine.',
-      color: 'from-amber-500 to-orange-600',
+      icon: Car,
+      title: 'My own cars',
+      description:
+        'Explore my car collection with detailed specifications, stories, and experiences.',
+      color: 'from-red-500 to-orange-600',
+      href: '/cars',
     },
     {
       icon: BookOpen,
@@ -161,6 +164,26 @@ export default function LifestylePage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {lifestyleCategories.map((category, index) => {
                 const IconComponent = category.icon;
+                const cardContent = (
+                  <Card className="h-full cursor-pointer transition-all duration-300 hover:shadow-lg">
+                    <CardHeader className="pb-4">
+                      <div
+                        className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${category.color}`}
+                      >
+                        <IconComponent className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle className="transition-colors group-hover:text-primary">
+                        {category.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription className="text-sm leading-relaxed">
+                        {category.description}
+                      </CardDescription>
+                    </CardContent>
+                  </Card>
+                );
+
                 return (
                   <motion.div
                     key={category.title}
@@ -170,23 +193,7 @@ export default function LifestylePage() {
                     whileHover={{ y: -5 }}
                     className="group"
                   >
-                    <Card className="h-full cursor-pointer transition-all duration-300 hover:shadow-lg">
-                      <CardHeader className="pb-4">
-                        <div
-                          className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${category.color}`}
-                        >
-                          <IconComponent className="h-6 w-6 text-white" />
-                        </div>
-                        <CardTitle className="transition-colors group-hover:text-primary">
-                          {category.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <CardDescription className="text-sm leading-relaxed">
-                          {category.description}
-                        </CardDescription>
-                      </CardContent>
-                    </Card>
+                    {category.href ? <Link href={category.href}>{cardContent}</Link> : cardContent}
                   </motion.div>
                 );
               })}
