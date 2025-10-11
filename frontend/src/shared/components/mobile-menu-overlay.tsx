@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { X } from 'lucide-react';
+import { X, Home, Heart, User, LogIn, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/shared/components/ui/button';
+import { useAuth } from '@/shared/hooks/use-auth';
 
 interface MobileMenuOverlayProps {
   isOpen: boolean;
@@ -11,6 +12,41 @@ interface MobileMenuOverlayProps {
 }
 
 export function MobileMenuOverlay({ isOpen, onClose }: MobileMenuOverlayProps) {
+  const { isAuthenticated, user } = useAuth();
+
+  const menuItems = [
+    {
+      href: '/',
+      label: 'Home',
+      icon: Home,
+      show: true,
+    },
+    {
+      href: '/lifestyle',
+      label: 'Lifestyle',
+      icon: Heart,
+      show: true,
+    },
+    {
+      href: '/dashboard',
+      label: 'Dashboard',
+      icon: User,
+      show: isAuthenticated,
+    },
+    {
+      href: '/login',
+      label: 'Login',
+      icon: LogIn,
+      show: !isAuthenticated,
+    },
+    {
+      href: '/register',
+      label: 'Register',
+      icon: UserPlus,
+      show: !isAuthenticated,
+    },
+  ].filter((item) => item.show);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -38,19 +74,42 @@ export function MobileMenuOverlay({ isOpen, onClose }: MobileMenuOverlayProps) {
                 </Button>
               </div>
 
-              {/* Menu items - Centered */}
-              <div className="flex flex-col items-center space-y-8">
+              {/* User info for authenticated users */}
+              {isAuthenticated && user && (
                 <motion.div
-                  initial={{ y: 20, opacity: 0 }}
+                  initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.1 }}
+                  className="mb-8 text-center"
                 >
-                  <Link href="/lifestyle" onClick={onClose}>
-                    <Button variant="ghost" className="px-8 py-4 text-2xl font-medium">
-                      Lifestyle
-                    </Button>
-                  </Link>
+                  <div className="mb-2 text-sm text-muted-foreground">Welcome back</div>
+                  <div className="text-lg font-semibold">{user.firstName || user.email}</div>
                 </motion.div>
+              )}
+
+              {/* Menu items - Centered */}
+              <div className="flex flex-col items-center space-y-6">
+                {menuItems.map((item, index) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <motion.div
+                      key={item.href}
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.1 + index * 0.1 }}
+                    >
+                      <Link href={item.href} onClick={onClose}>
+                        <Button
+                          variant="ghost"
+                          className="flex items-center space-x-3 px-8 py-4 text-xl font-medium"
+                        >
+                          <IconComponent className="h-5 w-5" />
+                          <span>{item.label}</span>
+                        </Button>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           </motion.div>

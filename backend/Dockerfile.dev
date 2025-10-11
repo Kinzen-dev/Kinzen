@@ -1,0 +1,25 @@
+# Development Dockerfile for NestJS
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies for development)
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Generate Prisma Client
+RUN npm run prisma:generate
+
+# Expose port
+EXPOSE 3001
+
+# Start in development mode with hot reload
+CMD ["npm", "run", "start:dev"]

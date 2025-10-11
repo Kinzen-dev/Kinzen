@@ -24,17 +24,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ThemeProvider defaultTheme="system" storageKey="kinzen-ui-theme">
         <AuthProvider>
           {children}
-          <Toaster
-            position="top-right"
-            richColors
-            offset={80}
-            toastOptions={{
-              style: {
-                marginTop: '20px',
-              },
-              className: 'toast-notification',
-            }}
-          />
+          <Toaster position="top-right" duration={4000} richColors closeButton />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

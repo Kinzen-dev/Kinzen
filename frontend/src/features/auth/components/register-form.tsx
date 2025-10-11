@@ -39,11 +39,13 @@ export function RegisterForm() {
       setIsLoading(true);
       await authApi.register(data);
 
-      toast.success('Registration successful! Please login.');
+      toast.dismiss(); // Dismiss any existing toasts
+      toast.success('Registration successful! Please login.', { duration: 4000 });
       router.push('/login');
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       const errorTitle = getErrorTitle(error);
+      toast.dismiss(); // Dismiss any existing toasts
       toast.error(errorTitle, {
         description: errorMessage,
         duration: 5000,

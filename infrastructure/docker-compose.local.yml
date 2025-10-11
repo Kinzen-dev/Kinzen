@@ -39,8 +39,7 @@ services:
   backend:
     build:
       context: ../backend
-      dockerfile: Dockerfile
-      target: builder
+      dockerfile: Dockerfile.dev
     container_name: kinzen-backend-local
     restart: unless-stopped
     environment:
@@ -58,19 +57,19 @@ services:
     volumes:
       - ../backend/src:/app/src
       - ../backend/prisma:/app/prisma
+      - ../backend/package.json:/app/package.json
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: npx nest start --watch
+    command: npm run start:dev
 
   # Frontend (Development mode with hot reload)
   frontend:
     build:
       context: ../frontend
-      dockerfile: Dockerfile
-      target: deps
+      dockerfile: Dockerfile.dev
     container_name: kinzen-frontend-local
     restart: unless-stopped
     environment:
@@ -89,7 +88,7 @@ services:
       - ../frontend/tsconfig.json:/app/tsconfig.json
     depends_on:
       - backend
-    command: npx next dev
+    command: npm run dev
 
 volumes:
   postgres_data_local:

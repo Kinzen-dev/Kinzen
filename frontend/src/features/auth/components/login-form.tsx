@@ -43,11 +43,13 @@ export function LoginForm() {
       setTokens(response.accessToken, response.refreshToken);
       setUser(response.user);
 
-      toast.success('Login successful!');
+      toast.dismiss(); // Dismiss any existing toasts
+      toast.success('Login successful!', { duration: 3000 });
       router.push('/dashboard');
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       const errorTitle = getErrorTitle(error);
+      toast.dismiss(); // Dismiss any existing toasts
       toast.error(errorTitle, {
         description: errorMessage,
         duration: 5000,
