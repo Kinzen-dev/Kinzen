@@ -329,6 +329,118 @@ html {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 3D Perspective Effects for Cars Page */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1000 > * {
+  transform-style: preserve-3d;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced backdrop blur */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Gradient text animations */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Performance optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* GPU acceleration for smooth animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  .perspective-1000 {
+    perspective: 500px; /* Reduce perspective on mobile for better performance */
+  }
+
+  /* Reduce blur effects on mobile */
+  .backdrop-blur-sm {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Disable hover effects on touch devices */
+  .hover\:scale-105:hover {
+    transform: none;
+  }
+
+  .hover\:shadow-xl:hover {
+    box-shadow: none;
+  }
+}
+
+/* Cars page specific performance optimizations */
+.cars-page {
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* Optimize animations for better performance */
+.cars-page * {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduce motion for better performance on lower-end devices */
+@media (max-width: 1024px) {
+  .cars-page .perspective-1000 {
+    perspective: 500px;
+  }
+
+  .cars-page .backdrop-blur-sm {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+
 .tech-icon:hover {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
   transform: scale(1.1);
