@@ -12,7 +12,8 @@ import {
 import { Navigation } from '@/shared/components/navigation';
 import { MobileMenuOverlay } from '@/shared/components/mobile-menu-overlay';
 import { PageTransition } from '@/shared/components/page-transition';
-import { ArrowRight, Github, Linkedin, Mail, Star, Zap } from 'lucide-react';
+import { WebGLHeroBanner } from '@/shared/components/webgl-hero-banner';
+import { ArrowRight, Github, Linkedin, Mail, Zap } from 'lucide-react';
 import {
   SiNextdotjs,
   SiNestjs,
@@ -39,65 +40,15 @@ export default function Home() {
         <Navigation onMobileMenuToggle={setIsMobileMenuOpen} isMobileMenuOpen={isMobileMenuOpen} />
         <MobileMenuOverlay isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
 
-        <main className="container mx-auto px-4 py-8">
-          {/* Hero Section */}
-          <motion.section
-            className="py-20 text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-          >
-            <div className="mx-auto max-w-4xl">
-              <motion.div
-                className="animate-fade-in mb-8 inline-flex items-center rounded-full border bg-muted/50 px-4 py-2 text-sm"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-              >
-                <Star className="mr-2 h-4 w-4 text-yellow-500" />
-                Welcome to my digital universe
-              </motion.div>
-              <motion.h1
-                className="animate-fade-in-up mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
-              >
-                Building Everything That{' '}
-                <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  Comes to Mind
-                </span>
-              </motion.h1>
-              <motion.p
-                className="animate-fade-in-up mb-8 text-balance text-xl text-muted-foreground sm:text-2xl"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
-              >
-                A personal portfolio showcasing my journey through technology, creativity, and
-                passion projects
-              </motion.p>
-              <motion.div
-                className="animate-fade-in-up flex flex-col gap-4 sm:flex-row sm:justify-center"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              >
-                <Link href="/login">
-                  <Button size="lg" className="group">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button size="lg" variant="outline">
-                    Explore Portfolio
-                  </Button>
-                </Link>
-              </motion.div>
-            </div>
-          </motion.section>
+        {/* WebGL Hero Banner with Particle Effects */}
+        <WebGLHeroBanner
+          title="Building Everything That Comes to Mind"
+          subtitle="Welcome to my digital universe"
+          description="A personal portfolio showcasing my journey through technology, creativity, and passion projects"
+          ctaText="Get Started"
+        />
 
+        <main className="container mx-auto px-4 py-8">
           {/* Features Grid */}
           <motion.section
             className="py-20"
