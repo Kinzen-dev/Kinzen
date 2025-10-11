@@ -135,6 +135,39 @@ export function WebGLHeroBanner({
 
     setIsWebGLSupported(true);
 
+    // Initialize canvas size immediately
+    const initializeCanvasSize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+
+      // Set canvas size to match container
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      // Set CSS size to match container
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+
+      // Set viewport
+      gl.viewport(0, 0, canvas.width, canvas.height);
+
+      return { width: canvas.width, height: canvas.height };
+    };
+
+    // Initial size setup with multiple attempts to ensure DOM is ready
+    const setupCanvasSize = () => {
+      const canvasSize = initializeCanvasSize();
+      // If canvas size is still 0, try again
+      if (canvasSize.width === 0 || canvasSize.height === 0) {
+        setTimeout(setupCanvasSize, 50);
+      }
+    };
+
+    // Try immediately, then with delays
+    setupCanvasSize();
+    setTimeout(setupCanvasSize, 100);
+    setTimeout(setupCanvasSize, 300);
+
     // Create shader
     function createShader(gl: WebGLRenderingContext, type: number, source: string) {
       const shader = gl.createShader(type);
@@ -201,11 +234,12 @@ export function WebGLHeroBanner({
     const colors = new Float32Array(particleCount * 3);
     const particleIds = new Float32Array(particleCount);
 
-    // Initialize particles
+    // Initialize particles with proper canvas size
+    const currentCanvasSize = initializeCanvasSize();
     for (let i = 0; i < particleCount; i++) {
       // Random positions across the canvas
-      positions[i * 2] = Math.random() * canvas.width;
-      positions[i * 2 + 1] = Math.random() * canvas.height;
+      positions[i * 2] = Math.random() * currentCanvasSize.width;
+      positions[i * 2 + 1] = Math.random() * currentCanvasSize.height;
 
       // Random sizes (4-16 pixels for maximum visibility)
       sizes[i] = 4 + Math.random() * 12;
@@ -258,11 +292,8 @@ export function WebGLHeroBanner({
 
       time += 0.016; // ~60fps
 
-      // Update canvas size
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      // Update canvas size using the proper function
+      const currentSize = initializeCanvasSize();
 
       // Clear canvas
       gl.clearColor(0.0, 0.0, 0.0, 0.0);
@@ -273,7 +304,7 @@ export function WebGLHeroBanner({
 
       // Set uniforms
       gl.uniform1f(timeLocation, time);
-      gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+      gl.uniform2f(resolutionLocation, currentSize.width, currentSize.height);
 
       // Bind and update buffers
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -332,19 +363,41 @@ export function WebGLHeroBanner({
     };
   }, [isLightTheme, vertexShaderSource, fragmentShaderSource]);
 
-  // Handle window resize
+  // Handle window resize and container size changes
   useEffect(() => {
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
+    const handleResize = () => {
+      // Use the same sizing logic as in the main effect
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
     };
 
+    // Use ResizeObserver for more reliable container size detection
+    let resizeObserver: ResizeObserver | null = null;
+    if (window.ResizeObserver) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(canvas);
+    }
+
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
   }, []);
 
   return (
