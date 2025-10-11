@@ -287,6 +287,8 @@ export function WebGLHeroBanner({
 
     // Animation loop
     let time = 0;
+    let lastCanvasSize = { width: 0, height: 0 };
+
     function animate() {
       if (!canvas || !gl) return;
 
@@ -294,6 +296,14 @@ export function WebGLHeroBanner({
 
       // Update canvas size using the proper function
       const currentSize = initializeCanvasSize();
+
+      // Only update viewport if size actually changed
+      if (
+        currentSize.width !== lastCanvasSize.width ||
+        currentSize.height !== lastCanvasSize.height
+      ) {
+        lastCanvasSize = currentSize;
+      }
 
       // Clear canvas
       gl.clearColor(0.0, 0.0, 0.0, 0.0);
@@ -363,27 +373,51 @@ export function WebGLHeroBanner({
     };
   }, [isLightTheme, vertexShaderSource, fragmentShaderSource]);
 
-  // Handle window resize and container size changes
+  // Handle window resize and container size changes with debouncing
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const handleResize = () => {
-      // Use the same sizing logic as in the main effect
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+    let resizeTimeout: NodeJS.Timeout;
+    let isResizing = false;
 
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
+    const handleResize = () => {
+      // Debounce resize events to prevent rapid firing during DevTools responsive mode
+      if (isResizing) return;
+      isResizing = true;
+
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        // Use the same sizing logic as in the main effect
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+
+        // Only resize if dimensions have actually changed
+        const newWidth = rect.width * dpr;
+        const newHeight = rect.height * dpr;
+
+        if (canvas.width !== newWidth || canvas.height !== newHeight) {
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+          canvas.style.width = rect.width + 'px';
+          canvas.style.height = rect.height + 'px';
+        }
+
+        isResizing = false;
+      }, 16); // ~60fps debounce
     };
 
     // Use ResizeObserver for more reliable container size detection
     let resizeObserver: ResizeObserver | null = null;
     if (window.ResizeObserver) {
-      resizeObserver = new ResizeObserver(() => {
-        handleResize();
+      resizeObserver = new ResizeObserver((entries) => {
+        // Only trigger if the canvas element itself is being resized
+        for (const entry of entries) {
+          if (entry.target === canvas) {
+            handleResize();
+            break;
+          }
+        }
       });
       resizeObserver.observe(canvas);
     }
@@ -392,6 +426,7 @@ export function WebGLHeroBanner({
     window.addEventListener('orientationchange', handleResize);
 
     return () => {
+      clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
       if (resizeObserver) {
