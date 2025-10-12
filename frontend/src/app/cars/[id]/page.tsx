@@ -24,8 +24,22 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getCarById } from '@/shared/lib/car-data';
-import CarModel from '@/shared/components/car-model-webgl';
 import { use, memo, useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import WebGL component with SSR disabled
+const CarModel = dynamic(() => import('@/shared/components/car-model-webgl'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center bg-muted/20">
+      <div className="text-center">
+        <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+        <div className="text-sm text-muted-foreground">Loading 3D Model...</div>
+        <div className="text-xs text-muted-foreground">Preparing WebGL renderer</div>
+      </div>
+    </div>
+  ),
+});
 
 interface CarDetailPageProps {
   params: Promise<{

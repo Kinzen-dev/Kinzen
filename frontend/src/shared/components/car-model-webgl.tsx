@@ -8,6 +8,9 @@ import { Car, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { getCarById } from '@/shared/lib/car-data';
 
+// Ensure this component only renders on client side
+const isClient = typeof window !== 'undefined';
+
 interface CarModelProps {
   carId: number;
   className?: string;
@@ -130,6 +133,15 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
         camera={{ position: [6, 4, 6], fov: 45 }}
         style={{ background: 'transparent' }}
         shadows
+        gl={{ 
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance"
+        }}
+        onCreated={({ gl }) => {
+          // Ensure WebGL context is properly initialized
+          gl.setClearColor('#000000', 0);
+        }}
         onPointerMissed={() => {
           // Prevent scroll when clicking outside the 3D model
         }}
@@ -238,6 +250,21 @@ const CarModel = memo(({ carId, className = '' }: CarModelProps) => {
   const has3DModel = carId === 1;
 
   console.log('WebGLCarModel rendering:', { carId, has3DModel, car: car?.name });
+
+  // Show loading state during SSR or initial client render
+  if (!isClient) {
+    return (
+      <div className={`relative overflow-hidden rounded-lg ${className}`}>
+        <div className="flex h-full w-full items-center justify-center bg-muted/20">
+          <div className="text-center">
+            <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+            <div className="text-sm text-muted-foreground">Loading 3D Model...</div>
+            <div className="text-xs text-muted-foreground">Initializing WebGL</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative overflow-hidden rounded-lg ${className}`}>
