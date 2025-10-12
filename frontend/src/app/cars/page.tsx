@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import { getAllCars } from '@/shared/lib/car-data';
 
 export default function CarsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,85 +76,8 @@ export default function CarsPage() {
     setParticles(newParticles);
   }, [isReducedMotion]);
 
-  // Sample car data - you can replace this with your actual cars
-  const myCars = [
-    {
-      id: 1,
-      name: 'BMW M3 Competition',
-      year: 2023,
-      make: 'BMW',
-      model: 'M3 Competition',
-      engine: '3.0L Twin-Turbo I6',
-      horsepower: 503,
-      torque: 479,
-      fuelType: 'Gasoline',
-      transmission: '8-Speed Automatic',
-      drivetrain: 'RWD',
-      seating: 5,
-      location: 'Garage 1',
-      image: '/cars/bmw-m3.jpg', // You'll need to add actual images
-      description:
-        'My daily driver and weekend track weapon. The perfect balance of luxury and performance.',
-      features: [
-        'M Sport Package',
-        'Carbon Fiber Trim',
-        'Harman Kardon Audio',
-        'Adaptive Suspension',
-      ],
-      purchaseDate: '2023-03-15',
-      mileage: 8500,
-      favorite: true,
-    },
-    {
-      id: 2,
-      name: 'Porsche 911 Turbo S',
-      year: 2022,
-      make: 'Porsche',
-      model: '911 Turbo S',
-      engine: '3.8L Twin-Turbo H6',
-      horsepower: 640,
-      torque: 590,
-      fuelType: 'Gasoline',
-      transmission: '8-Speed PDK',
-      drivetrain: 'AWD',
-      seating: 4,
-      location: 'Garage 2',
-      image: '/cars/porsche-911.jpg',
-      description:
-        'The ultimate supercar for special occasions. Incredible acceleration and handling.',
-      features: ['Sport Chrono Package', 'PASM Suspension', 'Bose Audio', 'Carbon Ceramic Brakes'],
-      purchaseDate: '2022-08-20',
-      mileage: 3200,
-      favorite: true,
-    },
-    {
-      id: 3,
-      name: 'Mercedes-AMG GT 63 S',
-      year: 2023,
-      make: 'Mercedes-Benz',
-      model: 'AMG GT 63 S',
-      engine: '4.0L Twin-Turbo V8',
-      horsepower: 630,
-      torque: 664,
-      fuelType: 'Gasoline',
-      transmission: '9-Speed AMG Speedshift',
-      drivetrain: 'AWD',
-      seating: 4,
-      location: 'Garage 1',
-      image: '/cars/mercedes-amg-gt.jpg',
-      description:
-        'The perfect grand tourer. Comfortable for long trips yet aggressive when needed.',
-      features: [
-        'AMG Performance Package',
-        'AMG Track Package',
-        'Burmester Audio',
-        'AMG Ride Control',
-      ],
-      purchaseDate: '2023-01-10',
-      mileage: 12000,
-      favorite: false,
-    },
-  ];
+  // Get cars from the centralized data service
+  const myCars = getAllCars();
 
   return (
     <PageLayout>
@@ -243,8 +167,8 @@ export default function CarsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.8 }}
               >
-                Discover the cars I own, each with its own story, specifications, and the
-                experiences that make them special to me. From daily drivers to weekend warriors.
+                Discover my diverse car collection, each serving a unique purpose - from luxury
+                daily driving to family adventures and efficient city commuting.
               </motion.p>
 
               <motion.div
@@ -344,7 +268,8 @@ export default function CarsPage() {
                   transition={{ delay: 0.2, duration: 0.8 }}
                   viewport={{ once: true }}
                 >
-                  {myCars.length} cars that represent my passion for automotive excellence
+                  {myCars.length} cars that represent my diverse automotive needs - from luxury
+                  commuting to family adventures and city efficiency
                 </motion.p>
               </motion.div>
 
@@ -503,10 +428,12 @@ export default function CarsPage() {
                               </span>
                             </div>
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                              <Button size="sm" variant="outline" className="backdrop-blur-sm">
-                                <ExternalLink className="mr-2 h-4 w-4" />
-                                View Details
-                              </Button>
+                              <Link href={`/cars/${car.id}`}>
+                                <Button size="sm" variant="outline" className="backdrop-blur-sm">
+                                  <ExternalLink className="mr-2 h-4 w-4" />
+                                  View Details
+                                </Button>
+                              </Link>
                             </motion.div>
                           </motion.div>
                         </CardContent>
@@ -656,8 +583,10 @@ export default function CarsPage() {
                   transition={{ delay: 0.3, duration: 0.8 }}
                   viewport={{ once: true }}
                 >
-                  Each car has its own story and unique characteristics. Let me know if you'd like
-                  to learn more about any specific vehicle in my collection.
+                  Each car in my collection serves a specific purpose - from the luxury of the
+                  Mercedes CLS for daily commuting, to the rugged Isuzu MU-X for family adventures,
+                  and the efficient Suzuki Swift for city driving. Let me know if you'd like to
+                  learn more about any specific vehicle.
                 </motion.p>
 
                 <motion.div
