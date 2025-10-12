@@ -1,4 +1,4 @@
-.PHONY: help install dev build test clean docker-up docker-down deploy-k8s
+.PHONY: help install dev build test clean docker-up docker-down deploy-k8s start-all services-up stop-all
 
 # Default target
 help:
@@ -14,6 +14,9 @@ help:
 	@echo "  make docker-up      - Start Docker Compose (local)"
 	@echo "  make docker-down    - Stop Docker Compose"
 	@echo "  make docker-logs    - View Docker logs"
+	@echo "  make start-all      - Start all services with helpful info"
+	@echo "  make services-up    - Alias for start-all"
+	@echo "  make stop-all       - Stop all services"
 	@echo "  make deploy-k8s     - Deploy to Kubernetes"
 	@echo "  make db-migrate     - Run database migrations"
 	@echo "  make db-seed        - Seed database"
@@ -186,8 +189,20 @@ setup: install db-generate setup-hooks
 start: docker-up
 	@echo "✅ Application started!"
 
+start-all: docker-up
+	@echo "🚀 All services started successfully!"
+	@echo "📱 Frontend: http://localhost:3000"
+	@echo "🔧 Backend API: http://localhost:3001/api/v1"
+	@echo "📚 API Docs: http://localhost:3001/docs"
+	@echo "💚 Health Check: http://localhost:3001/api/v1/health"
+
+services-up: start-all
+
 stop: docker-down
 	@echo "✅ Application stopped!"
+
+stop-all: docker-down
+	@echo "🛑 All services stopped!"
 
 restart: stop start
 	@echo "✅ Application restarted!"
