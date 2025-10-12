@@ -17,7 +17,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@react-three/drei": "^10.7.6",
-    "@react-three/fiber": "^9.3.0",
+    "@react-three/fiber": "^8.17.10",
     "@tanstack/react-query": "^5.17.9",
     "@types/three": "^0.180.0",
     "axios": "^1.6.5",
@@ -60,5 +60,11 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.3.3",
     "vitest": "^1.1.1"
+  },
+  "overrides": {
+    "expo": "npm:@expo/webpack-config@^0.19.0"
+  },
+  "resolutions": {
+    "expo": "npm:@expo/webpack-config@^0.19.0"
   }
 }
