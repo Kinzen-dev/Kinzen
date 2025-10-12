@@ -1,12 +1,14 @@
 'use client';
 
-import { useRef, useEffect, memo, useState } from 'react';
+import { useRef, useEffect, memo, useState, Suspense } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
+import type { OrbitControls as OrbitControlsType } from 'three-stdlib';
 import { Group } from 'three';
 import { Car, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { getCarById } from '@/shared/lib/car-data';
+import WebGLErrorBoundary from './webgl-error-boundary';
 
 interface CarModelProps {
   carId: number;
@@ -17,7 +19,7 @@ interface CarModelProps {
 const MercedesCLS300dModel = memo(() => {
   const meshRef = useRef<Group>(null);
 
-  // Load the real Mercedes CLS 300d GLB model
+  // Load the real Mercedes CLS 300d GLB model with error handling
   const { scene } = useGLTF('/models/mercedes_cls_300d.glb');
 
   useEffect(() => {
@@ -26,6 +28,11 @@ const MercedesCLS300dModel = memo(() => {
       // No material modifications - render as-is
     }
   }, [scene]);
+
+  // Add error handling for React 19 compatibility
+  if (!scene) {
+    return null;
+  }
 
   return (
     <group ref={meshRef} position={[0, 0, 0]} scale={[1, 1, 1]}>
@@ -52,7 +59,7 @@ function CameraController() {
 
 // Main 3D Car Viewer Component
 function CarModelViewer({ carId: _carId }: { carId: number }) {
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef<OrbitControlsType>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
@@ -125,78 +132,95 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
 
   return (
     <div className="relative h-full w-full rounded-lg bg-gradient-to-br from-muted/20 to-muted/10">
-      {/* Three.js Canvas */}
-      <Canvas
-        camera={{ position: [6, 4, 6], fov: 45 }}
-        style={{ background: 'transparent' }}
-        shadows
-        gl={{
-          antialias: true,
-          alpha: true,
-          powerPreference: 'high-performance',
-          preserveDrawingBuffer: true,
-        }}
-        onCreated={({ gl }) => {
-          // Ensure WebGL context is properly initialized
-          gl.setClearColor('#000000', 0);
+      {/* Three.js Canvas with Error Boundary */}
+      <WebGLErrorBoundary>
+        <Suspense
+          fallback={
+            <div className="flex h-full w-full items-center justify-center">
+              <div className="text-center">
+                <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                <div className="text-sm text-muted-foreground">Loading 3D Model...</div>
+              </div>
+            </div>
+          }
+        >
+          <Canvas
+            camera={{ position: [6, 4, 6], fov: 45 }}
+            style={{ background: 'transparent' }}
+            shadows
+            gl={{
+              antialias: true,
+              alpha: true,
+              powerPreference: 'high-performance',
+              preserveDrawingBuffer: true,
+            }}
+            onCreated={({ gl }) => {
+              try {
+                // Ensure WebGL context is properly initialized
+                gl.setClearColor('#000000', 0);
 
-          // Handle context loss
-          const canvas = gl.domElement;
-          canvas.addEventListener('webglcontextlost', (event) => {
-            console.warn('WebGL context lost, preventing default');
-            event.preventDefault();
-          });
+                // Handle context loss
+                const canvas = gl.domElement;
+                canvas.addEventListener('webglcontextlost', (event) => {
+                  console.warn('WebGL context lost, preventing default');
+                  event.preventDefault();
+                });
 
-          canvas.addEventListener('webglcontextrestored', () => {
-            console.log('WebGL context restored');
-          });
-        }}
-        onPointerMissed={() => {
-          // Prevent scroll when clicking outside the 3D model
-        }}
-      >
-        {/* Neutral Lighting for Pure GLB */}
-        <ambientLight intensity={0.4} />
-        <directionalLight
-          position={[5, 5, 5]}
-          intensity={1.0}
-          castShadow
-          shadow-mapSize={[2048, 2048]}
-          color="#ffffff"
-        />
-        <hemisphereLight args={['#ffffff', '#ffffff', 0.2]} />
+                canvas.addEventListener('webglcontextrestored', () => {
+                  console.log('WebGL context restored');
+                });
+              } catch (error) {
+                console.error('WebGL initialization error:', error);
+              }
+            }}
+            onPointerMissed={() => {
+              // Prevent scroll when clicking outside the 3D model
+            }}
+          >
+            {/* Neutral Lighting for Pure GLB */}
+            <ambientLight intensity={0.4} />
+            <directionalLight
+              position={[5, 5, 5]}
+              intensity={1.0}
+              castShadow
+              shadow-mapSize={[2048, 2048]}
+              color="#ffffff"
+            />
+            <hemisphereLight args={['#ffffff', '#ffffff', 0.2]} />
 
-        {/* Environment */}
-        <Environment preset="apartment" />
+            {/* Environment */}
+            <Environment preset="apartment" />
 
-        {/* Car Model */}
-        <MercedesCLS300dModel />
+            {/* Car Model */}
+            <MercedesCLS300dModel />
 
-        {/* Contact Shadows */}
-        <ContactShadows position={[0, -1, 0]} opacity={0.25} scale={10} blur={1.5} far={4.5} />
+            {/* Contact Shadows */}
+            <ContactShadows position={[0, -1, 0]} opacity={0.25} scale={10} blur={1.5} far={4.5} />
 
-        {/* Orbit Controls for mouse interaction */}
-        <OrbitControls
-          ref={controlsRef}
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          minDistance={2}
-          maxDistance={15}
-          minPolarAngle={Math.PI / 6}
-          maxPolarAngle={Math.PI - Math.PI / 6}
-          autoRotate={false} // Disabled auto-rotation
-          enableDamping={true}
-          dampingFactor={0.05}
-          touches={{
-            ONE: 2, // Single touch for pan
-            TWO: 1, // Two touches for zoom/rotate
-          }}
-        />
+            {/* Orbit Controls for mouse interaction */}
+            <OrbitControls
+              ref={controlsRef}
+              enablePan={true}
+              enableZoom={true}
+              enableRotate={true}
+              minDistance={2}
+              maxDistance={15}
+              minPolarAngle={Math.PI / 6}
+              maxPolarAngle={Math.PI - Math.PI / 6}
+              autoRotate={false} // Disabled auto-rotation
+              enableDamping={true}
+              dampingFactor={0.05}
+              touches={{
+                ONE: 2, // Single touch for pan
+                TWO: 1, // Two touches for zoom/rotate
+              }}
+            />
 
-        {/* Camera Controller */}
-        <CameraController />
-      </Canvas>
+            {/* Camera Controller */}
+            <CameraController />
+          </Canvas>
+        </Suspense>
+      </WebGLErrorBoundary>
 
       {/* Controls Overlay */}
       <div className="absolute right-4 top-4 z-10 flex flex-col gap-2">

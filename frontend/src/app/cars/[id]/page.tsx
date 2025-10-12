@@ -25,7 +25,7 @@ import {
 import { motion } from 'framer-motion';
 import { getCarById } from '@/shared/lib/car-data';
 import CarModel from '@/shared/components/car-model-webgl';
-import { use, memo, useState, useEffect } from 'react';
+import { use, memo, useState, useEffect, Suspense } from 'react';
 
 interface CarDetailPageProps {
   params: Promise<{
@@ -109,7 +109,23 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
                   <div className="relative h-96 overflow-hidden rounded-2xl shadow-2xl">
                     {/* 3D Model with Lazy Loading and Client-Side Check */}
                     {shouldLoad3D && isClient ? (
-                      <CarModel carId={car.id} className="h-full w-full" />
+                      <Suspense
+                        fallback={
+                          <div className="flex h-full w-full items-center justify-center bg-muted/20">
+                            <div className="text-center">
+                              <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                              <div className="text-sm text-muted-foreground">
+                                Loading 3D Model...
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Initializing WebGL...
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      >
+                        <CarModel carId={car.id} className="h-full w-full" />
+                      </Suspense>
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-muted/20">
                         <div className="text-center">

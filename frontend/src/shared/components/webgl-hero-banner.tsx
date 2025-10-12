@@ -32,7 +32,7 @@ export function WebGLHeroBanner({
   className = '',
 }: WebGLHeroBannerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const [isWebGLSupported, setIsWebGLSupported] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const { theme } = useTheme();
