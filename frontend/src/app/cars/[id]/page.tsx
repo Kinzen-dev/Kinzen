@@ -24,22 +24,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getCarById } from '@/shared/lib/car-data';
+import CarModel from '@/shared/components/car-model-webgl';
 import { use, memo, useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-
-// Dynamically import WebGL component with SSR disabled
-const CarModel = dynamic(() => import('@/shared/components/car-model-webgl'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-muted/20">
-      <div className="text-center">
-        <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-        <div className="text-sm text-muted-foreground">Loading 3D Model...</div>
-        <div className="text-xs text-muted-foreground">Preparing WebGL renderer</div>
-      </div>
-    </div>
-  ),
-});
 
 interface CarDetailPageProps {
   params: Promise<{
@@ -52,6 +38,12 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
   const carId = parseInt(resolvedParams.id);
   const car = getCarById(carId);
   const [shouldLoad3D, setShouldLoad3D] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side before rendering WebGL components
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Lazy load 3D model after component mounts
   useEffect(() => {
@@ -115,8 +107,8 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
                   transition={{ delay: 0.2, duration: 0.8 }}
                 >
                   <div className="relative h-96 overflow-hidden rounded-2xl shadow-2xl">
-                    {/* 3D Model with Lazy Loading */}
-                    {shouldLoad3D ? (
+                    {/* 3D Model with Lazy Loading and Client-Side Check */}
+                    {shouldLoad3D && isClient ? (
                       <CarModel carId={car.id} className="h-full w-full" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-muted/20">
