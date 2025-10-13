@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/components/ui/button';
 import { useTheme } from '@/shared/contexts/theme-context';
+import { webglContextManager } from '@/shared/lib/webgl-context-manager';
 
 interface WebGLHeroBannerProps {
   title: string;
@@ -36,6 +37,11 @@ export function WebGLHeroBanner({
   const [isWebGLSupported, setIsWebGLSupported] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const { theme } = useTheme();
+
+  // Context recovery callback
+  const handleContextRecovery = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
 
   // Determine if we're in light theme
   const isLightTheme =
@@ -118,6 +124,18 @@ export function WebGLHeroBanner({
     []
   );
 
+  // Register with context manager
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      webglContextManager.registerContext('hero-banner', canvas, null, handleContextRecovery);
+    }
+
+    return () => {
+      webglContextManager.unregisterContext('hero-banner');
+    };
+  }, [handleContextRecovery]);
+
   // Initialize WebGL
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -126,27 +144,46 @@ export function WebGLHeroBanner({
     // Reset loading state when theme changes
     setIsLoaded(false);
 
-    const gl = (canvas.getContext('webgl') ||
-      canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+    const gl = (canvas.getContext('webgl', {
+      preserveDrawingBuffer: true,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+    }) ||
+      canvas.getContext('experimental-webgl', {
+        preserveDrawingBuffer: true,
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance',
+      })) as WebGLRenderingContext | null;
+
     if (!gl) {
       console.log('WebGL not supported, using fallback');
       return;
     }
 
+    // Update context manager with the actual WebGL context
+    webglContextManager.registerContext('hero-banner', canvas, gl, handleContextRecovery);
+
     setIsWebGLSupported(true);
 
     // Initialize canvas size immediately
     const initializeCanvasSize = () => {
+      // Get the actual container dimensions
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
 
-      // Set canvas size to match container
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      // Use the actual container width and height
+      const containerWidth = rect.width;
+      const containerHeight = rect.height;
 
-      // Set CSS size to match container
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
+      // Set canvas size to match container exactly
+      canvas.width = containerWidth * dpr;
+      canvas.height = containerHeight * dpr;
+
+      // Set CSS size to match container exactly
+      canvas.style.width = containerWidth + 'px';
+      canvas.style.height = containerHeight + 'px';
 
       // Set viewport
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -226,16 +263,22 @@ export function WebGLHeroBanner({
     const timeLocation = gl.getUniformLocation(program, 'u_time');
     const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
-    // Create particle data
-    const particleCount = 300;
+    // Animation loop
+    let time = 0;
+    let lastCanvasSize = { width: 0, height: 0 };
+
+    // Initialize particles with proper canvas size
+    const currentCanvasSize = initializeCanvasSize();
+    lastCanvasSize = currentCanvasSize;
+
+    // Create particle data - optimized count for better performance
+    const particleCount = 200;
     const positions = new Float32Array(particleCount * 2);
     const sizes = new Float32Array(particleCount);
     const alphas = new Float32Array(particleCount);
     const colors = new Float32Array(particleCount * 3);
     const particleIds = new Float32Array(particleCount);
 
-    // Initialize particles with proper canvas size
-    const currentCanvasSize = initializeCanvasSize();
     for (let i = 0; i < particleCount; i++) {
       // Random positions across the canvas
       positions[i * 2] = Math.random() * currentCanvasSize.width;
@@ -285,24 +328,26 @@ export function WebGLHeroBanner({
     const colorBuffer = gl.createBuffer();
     const particleIdBuffer = gl.createBuffer();
 
-    // Animation loop
-    let time = 0;
-    let lastCanvasSize = { width: 0, height: 0 };
-
     function animate() {
-      if (!canvas || !gl) return;
+      if (!canvas || !gl || webglContextManager.isContextLost('hero-banner')) return;
 
-      time += 0.016; // ~60fps
+      time += 0.016; // ~60fps - optimized frame rate
 
-      // Update canvas size using the proper function
-      const currentSize = initializeCanvasSize();
+      // Check if canvas size needs updating (only every 2 seconds to optimize performance)
+      if (Math.floor(time) % 2 === 0 && time % 1 < 0.016) {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const newWidth = rect.width * dpr;
+        const newHeight = rect.height * dpr;
 
-      // Only update viewport if size actually changed
-      if (
-        currentSize.width !== lastCanvasSize.width ||
-        currentSize.height !== lastCanvasSize.height
-      ) {
-        lastCanvasSize = currentSize;
+        if (canvas.width !== newWidth || canvas.height !== newHeight) {
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+          canvas.style.width = rect.width + 'px';
+          canvas.style.height = rect.height + 'px';
+          gl.viewport(0, 0, newWidth, newHeight);
+          lastCanvasSize = { width: newWidth, height: newHeight };
+        }
       }
 
       // Clear canvas
@@ -314,7 +359,7 @@ export function WebGLHeroBanner({
 
       // Set uniforms
       gl.uniform1f(timeLocation, time);
-      gl.uniform2f(resolutionLocation, currentSize.width, currentSize.height);
+      gl.uniform2f(resolutionLocation, lastCanvasSize.width, lastCanvasSize.height);
 
       // Bind and update buffers
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -371,7 +416,7 @@ export function WebGLHeroBanner({
         }
       }
     };
-  }, [isLightTheme, vertexShaderSource, fragmentShaderSource]);
+  }, [isLightTheme, vertexShaderSource, fragmentShaderSource, handleContextRecovery]);
 
   // Handle window resize and container size changes with debouncing
   useEffect(() => {
@@ -388,19 +433,25 @@ export function WebGLHeroBanner({
 
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        // Use the same sizing logic as in the main effect
         const rect = canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
-
-        // Only resize if dimensions have actually changed
-        const newWidth = rect.width * dpr;
-        const newHeight = rect.height * dpr;
+        const containerWidth = rect.width;
+        const containerHeight = rect.height;
+        const newWidth = containerWidth * dpr;
+        const newHeight = containerHeight * dpr;
 
         if (canvas.width !== newWidth || canvas.height !== newHeight) {
           canvas.width = newWidth;
           canvas.height = newHeight;
-          canvas.style.width = rect.width + 'px';
-          canvas.style.height = rect.height + 'px';
+          canvas.style.width = containerWidth + 'px';
+          canvas.style.height = containerHeight + 'px';
+
+          // Update WebGL viewport
+          const webglContext =
+            canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (webglContext && 'viewport' in webglContext) {
+            (webglContext as WebGLRenderingContext).viewport(0, 0, newWidth, newHeight);
+          }
         }
 
         isResizing = false;
@@ -422,13 +473,39 @@ export function WebGLHeroBanner({
       resizeObserver.observe(canvas);
     }
 
+    // Handle orientation change with immediate response
+    const handleOrientationChange = () => {
+      setTimeout(() => {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const containerWidth = rect.width;
+        const containerHeight = rect.height;
+        const newWidth = containerWidth * dpr;
+        const newHeight = containerHeight * dpr;
+
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        canvas.style.width = containerWidth + 'px';
+        canvas.style.height = containerHeight + 'px';
+
+        // Update viewport immediately
+        const webglContext = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (webglContext && 'viewport' in webglContext) {
+          (webglContext as WebGLRenderingContext).viewport(0, 0, newWidth, newHeight);
+        }
+
+        // Force WebGL recovery if context is lost
+        webglContextManager.forceRecovery();
+      }, 50);
+    };
+
     window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
 
     return () => {
       clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
@@ -436,15 +513,23 @@ export function WebGLHeroBanner({
   }, []);
 
   return (
-    <section className={`relative h-screen overflow-hidden ${className}`}>
+    <section className={`hero-banner-section relative h-screen overflow-hidden ${className}`}>
       {/* WebGL Canvas Background */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 h-full w-full"
+        className="webgl-canvas-container absolute inset-0 h-full w-full"
         style={{
           background: isLightTheme
             ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 30%, #e2e8f0 70%, #cbd5e1 100%)'
             : 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 0,
         }}
       />
 

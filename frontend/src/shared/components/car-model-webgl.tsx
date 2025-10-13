@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, memo, useState, Suspense } from 'react';
+import { useRef, useEffect, memo, useState, Suspense, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsType } from 'three-stdlib';
@@ -8,6 +8,7 @@ import { Car, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { getCarById } from '@/shared/lib/car-data';
 import WebGLErrorBoundary from './webgl-error-boundary';
+import { webglContextManager } from '@/shared/lib/webgl-context-manager';
 
 interface CarModelProps {
   carId: number;
@@ -30,6 +31,7 @@ MercedesCLS300dModel.displayName = 'MercedesCLS300dModel';
 // Main 3D Car Viewer Component
 function CarModelViewer({ carId: _carId }: { carId: number }) {
   const controlsRef = useRef<OrbitControlsType>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
@@ -83,6 +85,68 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
     return () => clearInterval(interval);
   }, []);
 
+  // Context recovery callback
+  const handleContextRecovery = useCallback(() => {
+    setIsLoading(false);
+    if (controlsRef.current) {
+      controlsRef.current.update();
+    }
+  }, []);
+
+  // Register with context manager
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      webglContextManager.registerContext(
+        `car-model-${_carId}`,
+        canvas,
+        null,
+        handleContextRecovery
+      );
+    }
+
+    return () => {
+      webglContextManager.unregisterContext(`car-model-${_carId}`);
+    };
+  }, [_carId, handleContextRecovery]);
+
+  // Handle window resize and orientation changes
+  useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout;
+
+    const handleResize = () => {
+      // Debounce resize events
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        // Force a re-render when window resizes or orientation changes
+        if (controlsRef.current) {
+          controlsRef.current.update();
+        }
+        // Force WebGL recovery if context is lost
+        webglContextManager.forceRecovery();
+      }, 50); // Reduced timeout for faster response
+    };
+
+    const handleOrientationChange = () => {
+      // Immediate response for orientation changes
+      setTimeout(() => {
+        if (controlsRef.current) {
+          controlsRef.current.update();
+        }
+        webglContextManager.forceRecovery();
+      }, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
+
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+    };
+  }, []);
+
   if (loadError) {
     return (
       <div className="relative h-full w-full rounded-lg bg-gradient-to-br from-muted/20 to-muted/10">
@@ -112,8 +176,13 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
 
   return (
     <div
-      className="relative h-full w-full rounded-lg bg-gradient-to-br from-muted/20 to-muted/10"
-      style={{ outline: 'none', border: 'none' }}
+      className="relative h-full w-full overflow-hidden rounded-lg bg-gradient-to-br from-muted/20 to-muted/10"
+      style={{
+        outline: 'none',
+        border: 'none',
+        minHeight: '300px',
+        aspectRatio: '4/3',
+      }}
     >
       {/* Three.js Canvas */}
       <WebGLErrorBoundary>
@@ -128,6 +197,7 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
           }
         >
           <Canvas
+            ref={canvasRef}
             camera={{ position: [6, 4, 6], fov: 45 }}
             style={
               {
@@ -147,20 +217,19 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
               powerPreference: 'high-performance',
               preserveDrawingBuffer: true,
             }}
-            onCreated={({ gl }) => {
+            onCreated={({ gl, scene: _scene, camera: _camera }) => {
               try {
                 // Ensure WebGL context is properly initialized
                 gl.setClearColor('#000000', 0);
 
-                // Handle context loss
+                // Update context manager with the actual WebGL context
                 const canvas = gl.domElement;
-                canvas.addEventListener('webglcontextlost', (event) => {
-                  event.preventDefault();
-                });
-
-                canvas.addEventListener('webglcontextrestored', () => {
-                  // Context restored
-                });
+                webglContextManager.registerContext(
+                  `car-model-${_carId}`,
+                  canvas,
+                  gl.getContext() as WebGLRenderingContext,
+                  handleContextRecovery
+                );
 
                 // Ensure canvas works properly
                 canvas.style.pointerEvents = 'auto';
@@ -247,11 +316,16 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
       </div>
 
       {/* Instructions */}
-      <div className="absolute bottom-4 left-4 z-10">
-        <div className="rounded-lg border border-border/20 bg-background/80 px-3 py-2 text-sm text-foreground backdrop-blur-sm">
+      <div className="webgl-controls-overlay absolute bottom-4 left-4 z-10">
+        <div className="webgl-controls-content rounded-lg border border-border/20 bg-background/80 px-3 py-2 text-sm text-foreground backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <Car className="h-4 w-4" />
-            <span>Drag to rotate • Scroll to zoom • WebGL 3D Model</span>
+            <span className="webgl-controls-text">
+              <span className="hidden sm:inline">
+                Drag to rotate • Scroll to zoom • WebGL 3D Model
+              </span>
+              <span className="sm:hidden">Drag • Scroll • 3D</span>
+            </span>
           </div>
         </div>
       </div>

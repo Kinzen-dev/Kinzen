@@ -70,7 +70,7 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
         <main className="relative z-10">
           {/* Breadcrumb Navigation */}
           <motion.section
-            className="py-8"
+            className="py-4 sm:py-6 lg:py-8"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -92,13 +92,13 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
 
           {/* Hero Section - 3D Model */}
           <motion.section
-            className="relative py-16"
+            className="relative py-8 sm:py-12 lg:py-16"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.0, ...springConfig }}
           >
             <div className="container mx-auto px-4">
-              <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+              <div className="car-detail-grid grid gap-8 lg:grid-cols-2 lg:gap-16">
                 {/* 3D Car Model */}
                 <motion.div
                   className="relative"
@@ -106,7 +106,7 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2, duration: 0.8 }}
                 >
-                  <div className="relative h-96 overflow-hidden rounded-2xl shadow-2xl">
+                  <div className="car-model-container webgl-canvas-container relative overflow-hidden rounded-2xl shadow-2xl">
                     {/* 3D Model with Lazy Loading and Client-Side Check */}
                     {shouldLoad3D && isClient ? (
                       <Suspense
@@ -142,20 +142,20 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
 
                 {/* Car Info */}
                 <motion.div
-                  className="space-y-8"
+                  className="car-info-section space-y-8"
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4, duration: 0.8 }}
                 >
                   <div>
                     <motion.h1
-                      className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl"
+                      className="car-title mb-4 text-4xl font-bold tracking-tight sm:text-5xl"
                       whileHover={{ scale: 1.02 }}
                     >
                       {car.name}
                     </motion.h1>
                     <motion.p
-                      className="text-xl text-muted-foreground"
+                      className="car-subtitle text-xl text-muted-foreground"
                       whileHover={{ x: 5 }}
                       transition={{ type: 'spring', stiffness: 400 }}
                     >
@@ -164,14 +164,14 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
                   </div>
 
                   <motion.p
-                    className="text-lg leading-relaxed text-muted-foreground transition-colors hover:text-foreground"
+                    className="car-description text-lg leading-relaxed text-muted-foreground transition-colors hover:text-foreground"
                     transition={{ duration: 0.3 }}
                   >
                     {car.description}
                   </motion.p>
 
                   {/* Key Stats */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                     {[
                       { icon: Gauge, label: 'Power', value: `${car.horsepower} HP` },
                       { icon: Fuel, label: 'Fuel', value: car.fuelType },
@@ -199,7 +199,7 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
 
                   {/* Action Buttons */}
                   <motion.div
-                    className="flex flex-col gap-4 sm:flex-row"
+                    className="car-action-buttons flex flex-col gap-4 sm:flex-row"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.0, duration: 0.5 }}
@@ -208,7 +208,7 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
                       <Button
                         size="lg"
                         variant="outline"
-                        className="w-full border-2 transition-all duration-300 hover:bg-primary hover:text-primary-foreground sm:w-auto"
+                        className="btn w-full border-2 transition-all duration-300 hover:bg-primary hover:text-primary-foreground sm:w-auto"
                       >
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to Cars
@@ -217,7 +217,7 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                       <Button
                         size="lg"
-                        className="w-full bg-gradient-to-r from-red-500 to-orange-600 shadow-lg transition-all duration-300 hover:from-red-600 hover:to-orange-700 hover:shadow-xl sm:w-auto"
+                        className="btn w-full bg-gradient-to-r from-red-500 to-orange-600 shadow-lg transition-all duration-300 hover:from-red-600 hover:to-orange-700 hover:shadow-xl sm:w-auto"
                       >
                         <Star className="mr-2 h-4 w-4" />
                         Add to Favorites
@@ -230,9 +230,9 @@ export default memo(function CarDetailPage({ params }: CarDetailPageProps) {
           </motion.section>
 
           {/* Detailed Information */}
-          <section className="py-16">
+          <section className="py-12 sm:py-16">
             <div className="container mx-auto px-4">
-              <div className="grid gap-8 lg:grid-cols-3">
+              <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
                 {/* Specifications */}
                 {car.specifications && (
                   <motion.div

@@ -29,6 +29,11 @@ export class WebGLErrorBoundary extends Component<Props, State> {
     // Log the error for debugging
     console.error('WebGL Error Boundary caught an error:', error, errorInfo);
 
+    // Log specific WebGL context issues
+    if (error.message.includes('Context Lost') || error.message.includes('WebGL')) {
+      console.error('WebGL context issue detected:', error.message);
+    }
+
     // Log specific React 19 compatibility issues
     if (error.message.includes('ReactCurrentBatchConfig')) {
       console.error('React 19 compatibility issue detected with WebGL components');
