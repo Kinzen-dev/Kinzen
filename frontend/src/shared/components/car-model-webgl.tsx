@@ -1,10 +1,9 @@
 'use client';
 
 import { useRef, useEffect, memo, useState, Suspense } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsType } from 'three-stdlib';
-import { Group } from 'three';
 import { Car, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { getCarById } from '@/shared/lib/car-data';
@@ -15,47 +14,18 @@ interface CarModelProps {
   className?: string;
 }
 
-// Mercedes CLS 300d 3D Model Component - Pure GLB (Memoized with Loading)
+// Mercedes CLS 300d 3D Model Component
 const MercedesCLS300dModel = memo(() => {
-  const meshRef = useRef<Group>(null);
-
-  // Load the real Mercedes CLS 300d GLB model with error handling
   const { scene } = useGLTF('/models/mercedes_cls_300d.glb');
 
-  useEffect(() => {
-    if (scene) {
-      console.log('Pure Mercedes CLS 300d GLB model loaded - no modifications applied');
-      // No material modifications - render as-is
-    }
-  }, [scene]);
-
-  // Add error handling for React 19 compatibility
   if (!scene) {
     return null;
   }
 
-  return (
-    <group ref={meshRef} position={[0, 0, 0]} scale={[1, 1, 1]}>
-      <primitive object={scene} />
-    </group>
-  );
+  return <primitive object={scene} />;
 });
 
 MercedesCLS300dModel.displayName = 'MercedesCLS300dModel';
-
-// Camera Controller Component
-function CameraController() {
-  const { camera } = useThree();
-
-  useEffect(() => {
-    // Set initial camera position for optimal Mercedes CLS viewing
-    camera.position.set(6, 4, 6);
-    camera.lookAt(0, 0, 0);
-    camera.updateProjectionMatrix();
-  }, [camera]);
-
-  return null;
-}
 
 // Main 3D Car Viewer Component
 function CarModelViewer({ carId: _carId }: { carId: number }) {
@@ -85,7 +55,6 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
-        console.warn('GLB model loading timeout - file may be too large');
         setLoadError(true);
         setIsLoading(false);
       }
@@ -101,6 +70,17 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
     }, 2000); // Show loading for at least 2 seconds
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Simple periodic check to ensure controls stay enabled
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (controlsRef.current && !controlsRef.current.enabled) {
+        controlsRef.current.enabled = true;
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (loadError) {
@@ -131,8 +111,11 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
   }
 
   return (
-    <div className="relative h-full w-full rounded-lg bg-gradient-to-br from-muted/20 to-muted/10">
-      {/* Three.js Canvas with Error Boundary */}
+    <div
+      className="relative h-full w-full rounded-lg bg-gradient-to-br from-muted/20 to-muted/10"
+      style={{ outline: 'none', border: 'none' }}
+    >
+      {/* Three.js Canvas */}
       <WebGLErrorBoundary>
         <Suspense
           fallback={
@@ -146,7 +129,17 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
         >
           <Canvas
             camera={{ position: [6, 4, 6], fov: 45 }}
-            style={{ background: 'transparent' }}
+            style={
+              {
+                background: 'transparent',
+                pointerEvents: 'auto',
+                touchAction: 'none',
+                userSelect: 'none',
+                outline: 'none',
+                border: 'none',
+                WebkitTapHighlightColor: 'transparent',
+              } as React.CSSProperties
+            }
             shadows
             gl={{
               antialias: true,
@@ -162,12 +155,27 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
                 // Handle context loss
                 const canvas = gl.domElement;
                 canvas.addEventListener('webglcontextlost', (event) => {
-                  console.warn('WebGL context lost, preventing default');
                   event.preventDefault();
                 });
 
                 canvas.addEventListener('webglcontextrestored', () => {
-                  console.log('WebGL context restored');
+                  // Context restored
+                });
+
+                // Ensure canvas works properly
+                canvas.style.pointerEvents = 'auto';
+                canvas.style.touchAction = 'none';
+                canvas.style.userSelect = 'none';
+                canvas.style.outline = 'none';
+                canvas.style.border = 'none';
+                (
+                  canvas.style as CSSStyleDeclaration & { WebkitTapHighlightColor?: string }
+                ).WebkitTapHighlightColor = 'transparent';
+                canvas.tabIndex = 0;
+
+                // Ensure canvas receives events
+                canvas.addEventListener('pointerdown', () => {
+                  canvas.focus();
                 });
               } catch (error) {
                 console.error('WebGL initialization error:', error);
@@ -177,7 +185,6 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
               // Prevent scroll when clicking outside the 3D model
             }}
           >
-            {/* Neutral Lighting for Pure GLB */}
             <ambientLight intensity={0.4} />
             <directionalLight
               position={[5, 5, 5]}
@@ -188,16 +195,10 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
             />
             <hemisphereLight args={['#ffffff', '#ffffff', 0.2]} />
 
-            {/* Environment */}
             <Environment preset="apartment" />
-
-            {/* Car Model */}
             <MercedesCLS300dModel />
-
-            {/* Contact Shadows */}
             <ContactShadows position={[0, -1, 0]} opacity={0.25} scale={10} blur={1.5} far={4.5} />
 
-            {/* Orbit Controls for mouse interaction */}
             <OrbitControls
               ref={controlsRef}
               enablePan={true}
@@ -207,22 +208,17 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
               maxDistance={15}
               minPolarAngle={Math.PI / 6}
               maxPolarAngle={Math.PI - Math.PI / 6}
-              autoRotate={false} // Disabled auto-rotation
+              autoRotate={false}
               enableDamping={true}
               dampingFactor={0.05}
-              touches={{
-                ONE: 2, // Single touch for pan
-                TWO: 1, // Two touches for zoom/rotate
-              }}
+              screenSpacePanning={false}
+              makeDefault={false}
             />
-
-            {/* Camera Controller */}
-            <CameraController />
           </Canvas>
         </Suspense>
       </WebGLErrorBoundary>
 
-      {/* Controls Overlay */}
+      {/* Controls */}
       <div className="absolute right-4 top-4 z-10 flex flex-col gap-2">
         <Button
           size="sm"
@@ -263,7 +259,7 @@ function CarModelViewer({ carId: _carId }: { carId: number }) {
   );
 }
 
-// Fallback component for cars without 3D models
+// Fallback for cars without 3D models
 function CarModelFallback({ carName }: { carName: string }) {
   return (
     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600">
@@ -276,13 +272,11 @@ function CarModelFallback({ carName }: { carName: string }) {
   );
 }
 
-// Main Car Model Component (Memoized)
+// Main Car Model Component
 const CarModel = memo(({ carId, className = '' }: CarModelProps) => {
   const car = getCarById(carId);
   // For now, only Mercedes CLS 300d (id: 1) has a 3D model
   const has3DModel = carId === 1;
-
-  console.log('WebGLCarModel rendering:', { carId, has3DModel, car: car?.name });
 
   return (
     <div className={`relative overflow-hidden rounded-lg ${className}`}>
