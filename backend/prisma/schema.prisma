@@ -23,6 +23,7 @@ model User {
 
   refreshTokens RefreshToken[]
   profile       Profile?
+  gameScores    GameScore[]
 
   @@map("users")
 }
@@ -68,5 +69,21 @@ model Project {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("projects")
+}
+
+// Mini Game Scores
+model GameScore {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  gameName  String   @map("game_name")
+  score     Int
+  duration  Int      // Duration in seconds
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([gameName])
+  @@index([score(sort: Desc)])
+  @@map("game_scores")
 }
 

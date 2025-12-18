@@ -18,6 +18,7 @@ import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { GamesModule } from './modules/games/games.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { HealthModule } from './modules/health/health.module';
     UsersModule,
     AuthModule,
     HealthModule,
+    GamesModule,
   ],
   providers: [
     // Global Guards

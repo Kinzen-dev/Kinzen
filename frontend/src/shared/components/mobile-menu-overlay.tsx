@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { X, Home, Heart, User, LogIn, UserPlus } from 'lucide-react';
+import { X, Home, Heart, Gamepad2, User, LogIn, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/shared/hooks/use-auth';
@@ -25,6 +25,12 @@ export function MobileMenuOverlay({ isOpen, onClose }: MobileMenuOverlayProps) {
       href: '/lifestyle',
       label: 'Lifestyle',
       icon: Heart,
+      show: true,
+    },
+    {
+      href: '/games',
+      label: 'Games',
+      icon: Gamepad2,
       show: true,
     },
     {

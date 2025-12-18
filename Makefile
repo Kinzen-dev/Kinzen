@@ -1,16 +1,19 @@
-.PHONY: help install dev build test clean docker-up docker-down deploy-k8s start-all services-up stop-all
+.PHONY: help install dev dev-local build test clean docker-up docker-down deploy-k8s start-all services-up stop-all db-up db-down
 
 # Default target
 help:
 	@echo "Portfolio - Available Commands"
 	@echo "================================"
 	@echo "  make install        - Install all dependencies"
-	@echo "  make dev            - Start development servers"
+	@echo "  make dev            - Start development servers (requires DB running)"
+	@echo "  make dev-local      - Start DB + development servers"
 	@echo "  make build          - Build all applications"
 	@echo "  make test           - Run all tests"
 	@echo "  make lint           - Run linters"
 	@echo "  make format         - Format code"
 	@echo "  make clean          - Clean build artifacts"
+	@echo "  make db-up          - Start only database services"
+	@echo "  make db-down        - Stop database services"
 	@echo "  make docker-up      - Start Docker Compose (local)"
 	@echo "  make docker-down    - Stop Docker Compose"
 	@echo "  make docker-logs    - View Docker logs"
@@ -33,11 +36,27 @@ dev:
 	@echo "🚀 Starting development servers..."
 	@make -j2 dev-backend dev-frontend
 
+dev-local: db-up
+	@echo "🚀 Starting local development (database + dev servers)..."
+	@make -j2 dev-backend dev-frontend
+
 dev-backend:
 	cd backend && npm run start:dev
 
 dev-frontend:
 	cd frontend && npm run dev
+
+# Start only database services (for local dev)
+db-up:
+	@echo "🗄️ Starting database services..."
+	cd infrastructure && docker-compose -f docker-compose.local.yml up -d postgres redis
+	@echo "⏳ Waiting for database to be ready..."
+	@sleep 3
+	@echo "✅ Database services ready!"
+
+db-down:
+	@echo "🗄️ Stopping database services..."
+	cd infrastructure && docker-compose -f docker-compose.local.yml stop postgres redis
 
 # Build
 build:
