@@ -168,10 +168,11 @@
     border-bottom: 1px solid var(--rule);
   }
 
-  /* Thai inside a readout: use the Thai text face, not a monospaced system fallback
-     (which spaced the letters out, e.g. "เ ม . ย ."). */
+  /* Thai pages: readouts use the text face (Geist + Noto Sans Thai) with tabular figures.
+     A monospace face has no Thai, so Thai dates and labels inside it came out letter-spaced
+     ("เ ม . ย ."); one consistent face on Thai pages reads better than mixed fallbacks. */
   :lang(th) .readout {
-    font-family: var(--font-geist-mono), var(--font-thai), ui-monospace, monospace;
+    font-family: var(--font-sans);
   }
 
   /* Machine output only: timestamps, stack lists, readouts. */
