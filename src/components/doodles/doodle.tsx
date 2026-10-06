@@ -30,6 +30,8 @@ const PROJECT_DOODLES: Record<string, DoodleName> = {
   "visual-qa": "magnifier-bug",
   "visual-qa-harness": "magnifier-bug",
   cadence: "mic",
+  "anymind-ec": "shop-bag",
+  "anymind-ec-platform": "shop-bag",
 };
 
 /** Doodle for a project, by id (`proj-helm`), short id (`helm`) or slug (`visual-qa-harness`). */
