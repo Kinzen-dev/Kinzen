@@ -3,6 +3,8 @@
    ------------------------------------------------------------------ */
 .tools-marquees {
   display: grid;
+  /* minmax(0, 1fr): a marquee's track is max-content wide; the column must not grow to it. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
   margin-bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
 }
@@ -33,6 +35,16 @@
     max-width: 96rem;
     margin-inline: auto;
   }
+  /* The shared marquee rows do not shrink (flex-shrink 0), so their wrap never kicks in:
+     let the visible row take the track width and wrap. */
+  .tools-marquee .marquee-track {
+    width: 100%;
+  }
+  .tools-marquee .marquee-row {
+    flex-shrink: 1;
+    min-width: 0;
+    padding-inline-end: 0;
+  }
 }
 
 .tools-groups {
@@ -55,6 +67,24 @@
   border: 1px solid var(--rule);
   border-radius: var(--radius-card);
   background: var(--surface);
+}
+/* Phones: one card with ruled rows instead of six stacked cards. */
+@media (max-width: 39.99rem) {
+  .tools-groups {
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    overflow: clip;
+  }
+  .tools-card {
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .tools-card + .tools-card {
+    border-top: 1px solid var(--rule);
+  }
 }
 .tools-swatch {
   width: 0.75rem;
