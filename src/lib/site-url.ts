@@ -15,17 +15,15 @@ export function neutralPath(pathname: string): string {
   return stripped === "" ? "/" : stripped;
 }
 
-/**
- * Canonical + hreflang for a locale-neutral path ("/", "/work/helm").
- * The canonical points at the given locale's URL; languages always list both.
- */
+/** Canonical + hreflang for a locale-neutral path (e.g. "/", "/cv", "/work/helm"). */
 export function alternates(path: string, locale: Locale = "en") {
+  const neutral = neutralPath(path);
   return {
-    canonical: localePath(locale, path),
+    canonical: localePath(locale, neutral),
     languages: {
-      en: localePath("en", path),
-      th: localePath("th", path),
-      "x-default": localePath("en", path),
+      en: localePath("en", neutral),
+      th: localePath("th", neutral),
+      "x-default": localePath("en", neutral),
     },
   };
 }

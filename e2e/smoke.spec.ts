@@ -27,6 +27,14 @@ test.describe("shell", () => {
     });
   }
 
+  test("hreflang alternates are correct on the Thai home", async ({ request }) => {
+    const html = await (await request.get("/th")).text();
+    expect(html).toContain('<link rel="canonical" href="https://www.kinzen.dev/th"');
+    expect(html).toContain('hrefLang="th" href="https://www.kinzen.dev/th"');
+    expect(html).toContain('hrefLang="en" href="https://www.kinzen.dev"');
+    expect(html).not.toContain("/th/th");
+  });
+
   test("English is canonical without a prefix", async ({ request }) => {
     const res = await request.get("/en", { maxRedirects: 0 });
     expect(res.status()).toBe(308);

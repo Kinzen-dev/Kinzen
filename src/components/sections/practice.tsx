@@ -20,7 +20,7 @@ export function Practice({
     <section id="practice" aria-labelledby="practice-title" className="shell pt-24 md:pt-32">
       <SectionHeader id="practice" title={dict.sections.practice} intro={dict.sections.practiceIntro} />
 
-      <ul className="grid border-t border-l border-rule md:grid-cols-3">
+      <ul data-reveal-group className="grid border-t border-l border-rule md:grid-cols-3">
         {practices.map((p) => (
           <li key={p.id} className="grid content-start gap-3 border-r border-b border-rule p-6 md:p-8">
             {icons?.[p.id] ? <div className="mb-2 size-16 text-ink">{icons[p.id]}</div> : null}
