@@ -217,7 +217,20 @@ void main(){
   c = mix(tc, hc, 0.7);
   float a = clamp(dot(c, vec3(0.2126, 0.7152, 0.0722)), 0.0, 1.0);
   vec3 dark = c + uGround * (1.0 - c);
-  float cov = smoothstep(0.0, 1.0, a * uInkGain);
+  // Paper: sparse particles leave ground-coloured pinholes inside the letters, which read as
+  // dirt on a light page. Close them with a small dilation of the scene density (light theme
+  // only, 8 taps), so letters print as solid ink with grain left at the edges.
+  float cov = 0.0;
+  if (uMode > 0.5) {
+    vec2 px = 1.6 / uRes;
+    float m = 0.0;
+    for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) {
+      m = max(m, dot(texture(uScene, uv + vec2(float(i), float(j)) * px).rgb, vec3(0.2126, 0.7152, 0.0722)));
+    }
+    cov = smoothstep(0.0, 1.0, max(a, m * uExposure * uFade * 0.85) * uInkGain);
+  } else {
+    cov = smoothstep(0.0, 1.0, a * uInkGain);
+  }
   vec3 light = mix(uGround, uInk, cov);
   light *= mix(1.0, 0.82, smoothstep(0.5, 1.0, a));
   vec3 outc = mix(dark, light, uMode);
