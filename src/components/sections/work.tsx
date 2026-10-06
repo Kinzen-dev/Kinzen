@@ -33,12 +33,17 @@ export function Work({
   dict,
   renderIcon,
   sectionId = "work",
+  title,
+  className = "shell pt-16 md:pt-20",
 }: {
   locale: Locale;
   dict: Dictionary;
   renderIcon?: (projectId: string) => ReactNode;
   /** Anchor id of the section (the /work index and the home page use different ones). */
   sectionId?: string;
+  /** Section heading (defaults to the dictionary's "Selected systems"). */
+  title?: string;
+  className?: string;
 }) {
   const rows = ledgerRows(locale, dict);
 
@@ -65,8 +70,8 @@ export function Work({
   }
 
   return (
-    <section id={sectionId} aria-labelledby={`${sectionId}-title`} className="shell pt-16 md:pt-20">
-      <SectionHeader id={sectionId} title={plain(dict.sections.work)} intro={dict.sections.workIntro} />
+    <section id={sectionId} aria-labelledby={`${sectionId}-title`} className={className}>
+      <SectionHeader id={sectionId} title={title ?? plain(dict.sections.work)} intro={dict.sections.workIntro} />
       <Ledger rows={rows} labels={ledgerLabels(dict)} areas={areas} plates={plates} icons={icons} />
     </section>
   );

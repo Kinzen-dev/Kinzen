@@ -65,18 +65,16 @@ test("Back from a project page restores home after a section jump", async ({ pag
     await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Experience" }).click();
   }
   await expect(page).toHaveURL(/#experience$/);
-  await page.locator("#work").scrollIntoViewIfNeeded();
-  await page.getByRole("button", { name: "Helm" }).first().click();
-  await page
-    .getByRole("link", { name: /Open project page/ })
-    .first()
-    .click();
-  await expect(page).toHaveURL(/\/work\/helm$/);
+  // v3: home shows project cards (the ledger moved to /work).
+  const card = page.locator("#work .mw-link", { hasText: "Ronglen" });
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
+  await expect(page).toHaveURL(/\/work\/ronglen$/);
   await page.goBack();
   await expect(page).toHaveURL(/#experience$/);
   // The home page is back on screen, not the project page under a home URL.
   await expect(page.locator("#work")).toBeAttached();
-  await expect(page.getByRole("heading", { level: 1 })).not.toHaveText("Helm");
+  await expect(page.getByRole("heading", { level: 1 })).not.toHaveText("Ronglen");
 });
 
 test("opening a works row never squeezes the name column (tablet and landscape widths)", async ({ page, isMobile }) => {
@@ -85,20 +83,18 @@ test("opening a works row never squeezes the name column (tablet and landscape w
   await page.addInitScript(() => sessionStorage.clear());
   for (const width of [844, 1024]) {
     await page.setViewportSize({ width, height: 600 });
-    await page.goto("/");
-    const name = page.locator("#work tbody th").first();
+    await page.goto("/work");
+    const name = page.locator("#index tbody th").first();
     await name.scrollIntoViewIfNeeded();
     const before = (await name.boundingBox())!.width;
-    await page.getByRole("button", { name: "Helm" }).first().click();
-    await expect(page.locator('#work [aria-expanded="true"]')).toHaveCount(1);
+    await page.getByRole("button", { name: "Helm", exact: true }).click();
+    await expect(page.locator('#index [aria-expanded="true"]')).toHaveCount(1);
     expect(Math.abs((await name.boundingBox())!.width - before)).toBeLessThan(2);
   }
 });
 
-test("Back to an earlier section entry shows that section even after a row opened above it", async ({
-  page,
-  isMobile,
-}) => {
+// v3: home has no ledger rows to open any more; the history entries themselves stay covered.
+test("Back to an earlier section entry shows that section", async ({ page, isMobile }) => {
   test.skip(isMobile, "uses the desktop header");
   const nav = page.getByRole("navigation", { name: "Main" });
   await page.goto("/");
@@ -106,8 +102,6 @@ test("Back to an earlier section entry shows that section even after a row opene
   await expect(page).toHaveURL(/#experience$/);
   await nav.getByRole("link", { name: "Work", exact: true }).click();
   await expect(page).toHaveURL(/#work$/);
-  await page.getByRole("button", { name: "Helm" }).first().click();
-  await expect(page.locator('#work [aria-expanded="true"]')).toHaveCount(1);
   await page.goBack();
   await expect(page).toHaveURL(/#experience$/);
   await expect

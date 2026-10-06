@@ -43,7 +43,7 @@
     align-items: baseline;
     gap: 0.5rem;
     min-height: 2.25rem;
-    padding: 0.35rem 0.9rem;
+    padding: 0.35rem var(--inset-pill);
     border: 1px solid var(--rule);
     border-radius: 999px;
     font-size: var(--text-sm);
@@ -104,13 +104,23 @@
     }
   }
 
+  /* Tinted rows (hover, open) and the open panel are one card with ONE inset on both sides
+     (padding audit finding 1). The table bleeds that inset into the gutter, so at rest the text
+     still sits on the shell grid lines (aligned with the heading and the pills) while a tint has
+     the same room left and right. Never wider than the gutter: the card never leaves the screen. */
+  .ledger {
+    --ledger-inset: min(var(--inset-card), var(--gutter));
+  }
   .ledger-table {
-    width: 100%;
+    width: calc(100% + 2 * var(--ledger-inset));
+    margin-inline: calc(-1 * var(--ledger-inset));
     overflow-wrap: break-word;
-    border-collapse: collapse;
+    /* Separate borders: rules live on the cells, so tinted cells can round their corners. */
+    border-collapse: separate;
+    border-spacing: 0;
     text-align: left;
   }
-  .ledger-table thead tr {
+  .ledger-table thead th {
     border-bottom: 1px solid var(--rule-strong);
   }
   .ledger-table thead th {
@@ -148,10 +158,15 @@
   }
 
   .ledger-row {
-    border-bottom: 1px solid var(--rule);
     cursor: pointer;
   }
-  .ledger-row[data-open] {
+  .ledger-row > * {
+    border-bottom: 1px solid var(--rule);
+  }
+  /* A tinted card carries no rules: neither its own nor the one of the row right above it. */
+  .ledger-row[data-open] > *,
+  .ledger-table tr:has(+ .ledger-row[data-open]) > *,
+  .ledger-table tr:has(+ .ledger-row:not([data-filtered]):hover) > * {
     border-bottom-color: transparent;
   }
   .ledger-row[data-open] > *,
@@ -194,7 +209,7 @@
   }
 
   .ledger-toggle-col {
-    width: 2.75rem;
+    width: calc(2.75rem + var(--ledger-inset));
     text-align: right;
   }
   .ledger-toggle {
@@ -220,11 +235,9 @@
     transform: rotate(0deg);
   }
 
-  .ledger-panel-row {
-    border-bottom: 1px solid var(--rule-strong);
-  }
   .ledger-panel-row > td {
-    padding: 0 0.75rem 2rem;
+    padding: 0 var(--ledger-inset) 2rem;
+    border-bottom: 1px solid transparent;
   }
   .ledger-panel {
     display: grid;
@@ -284,6 +297,7 @@
      pointer over the list must not strobe bright bands. */
   .ledger-row:not([data-filtered]):hover > * {
     background: var(--surface);
+    border-bottom-color: transparent;
   }
   .ledger-row:not([data-filtered]):hover .ledger-name {
     text-decoration: underline;
@@ -292,21 +306,40 @@
   }
 }
 
-/* Cells keep their inner padding but the first and last sit on the page grid lines. */
-.ledger-table tr:not(.ledger-panel-row) > :is(th, td):first-child {
-  padding-inline-start: 0;
+/* First and last cells: the bleed inset, so text lands on the shell grid lines and every tint
+   (hover, open row, panel) has the same inset on both sides. */
+.ledger-table tr > :is(th, td):first-child {
+  padding-inline-start: var(--ledger-inset);
 }
-.ledger-table tr:not(.ledger-panel-row) > :is(th, td):last-child {
-  padding-inline-end: 0;
+.ledger-table tr > :is(th, td):last-child {
+  padding-inline-end: var(--ledger-inset);
 }
-/* The opened panel is a tinted card: give its content room from the tint's edge. */
-.ledger-table .ledger-panel-row > td {
-  padding-inline: 1rem;
+/* Rounded tints once the gutter is wider than the inset (the card no longer meets the screen
+   edge). Hover: a small pill row; open: one card from the row to the bottom of its panel. */
+@media (min-width: 64rem) {
+  /* Only while tinted: at rest the rule would bend up into the rounded corner. */
+  .ledger-row:not([data-filtered], [data-open]):hover > :first-child {
+    border-start-start-radius: var(--radius-sm);
+    border-end-start-radius: var(--radius-sm);
+  }
+  .ledger-row:not([data-filtered], [data-open]):hover > :last-child {
+    border-start-end-radius: var(--radius-sm);
+    border-end-end-radius: var(--radius-sm);
+  }
+  .ledger-row[data-open] > :first-child {
+    border-start-start-radius: var(--radius-card);
+    border-end-start-radius: 0;
+  }
+  .ledger-row[data-open] > :last-child {
+    border-start-end-radius: var(--radius-card);
+    border-end-end-radius: 0;
+  }
+  .ledger-panel-row > td {
+    border-end-start-radius: var(--radius-card);
+    border-end-end-radius: var(--radius-card);
+  }
 }
 @media (min-width: 48rem) {
-  .ledger-table .ledger-panel-row > td {
-    padding-inline: 1.5rem;
-  }
   /* Fixed columns from tablet up: opening a row must never re-flow the columns sideways.
      (Phones keep auto layout: only the name and toggle columns exist there.) */
   .ledger-table {
@@ -322,7 +355,7 @@
     width: 18%;
   }
   .ledger-table thead th:nth-child(6) {
-    width: 2.75rem;
+    width: calc(2.75rem + var(--ledger-inset));
   }
 }
 @media (min-width: 64rem) {
