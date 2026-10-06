@@ -48,7 +48,7 @@ const T_CALM = 2000;
 const T_OPEN = 300;
 /** Release window (s): particle i is let go at RELEASE_0 + RELEASE_SPAN * u^2. */
 const RELEASE_0 = 0.05;
-const RELEASE_SPAN = 0.75;
+const RELEASE_SPAN = 0.5;
 /** The opening dust: one visible speck per this many CSS px^2 of stage, at this brightness. */
 const SPECK_AREA = 130;
 const SPECK_LVL = 1.1;
