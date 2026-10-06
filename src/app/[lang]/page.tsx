@@ -1,7 +1,6 @@
 import type { Locale } from "@/content/schema";
 import { getDictionary } from "@/i18n/dictionaries";
 import { Hero } from "@/components/sections/hero";
-import { Work } from "@/components/sections/work";
 import { Experience } from "@/components/sections/experience";
 import { Practice } from "@/components/sections/practice";
 import { Skills } from "@/components/sections/skills";
@@ -9,7 +8,7 @@ import { About } from "@/components/sections/about";
 import { Contact } from "@/components/sections/contact";
 import { JsonLd, profilePageJsonLd } from "@/lib/json-ld";
 import { HeroFx } from "@/fx/react/hero-fx";
-import { Doodle, projectDoodle } from "@/components/doodles/doodle";
+import { Doodle } from "@/components/doodles/doodle";
 import { AgentDemo } from "@/components/agent-demo/agent-demo";
 import { getV3 } from "@/i18n/v3";
 import { SectionHeader } from "@/components/sections/section-header";
@@ -45,22 +44,12 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {/* v3 work showcase (D5): two sticky scenes, then the card collage; the ledger lives on /work. */}
       <section id="work" aria-labelledby="work-title" className="pt-24 md:pt-32">
         <div className="shell">
-          <SectionHeader id="work" title={dict.sections.work} intro={dict.sections.workIntro} />
+          <SectionHeader id="work" title={dict.sections.work} intro={v3.moreWork.sectionIntro} />
         </div>
         <YimwhanScene locale={locale} dict={dict} v3={v3} />
         <HelmScene locale={locale} dict={dict} v3={v3} />
         <MoreWork locale={locale} dict={dict} v3={v3} />
       </section>
-      {/* Until v3-06 lands, the ledger stays reachable here. */}
-      <Work
-        locale={locale}
-        dict={dict}
-        sectionId="systems"
-        renderIcon={(id) => {
-          const name = projectDoodle(id);
-          return name ? <Doodle name={name} className="size-full" /> : null;
-        }}
-      />
       <Experience locale={locale} dict={dict} />
       <Practice locale={locale} dict={dict} icons={practiceIcons} demo={<AgentDemo copy={dict.demo} />} />
       <Skills locale={locale} dict={dict} />
