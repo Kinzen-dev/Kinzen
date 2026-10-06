@@ -4,6 +4,9 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { localePath } from "@/lib/site-url";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitch } from "./language-switch";
+import { CommandPalette } from "./palette/command-palette";
+import { paletteData } from "./palette/palette-data";
+import { RevealLayer } from "./motion/reveal-layer";
 
 export function navItems(locale: Locale, dict: Dictionary) {
   const home = localePath(locale, "/");
@@ -55,6 +58,9 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           <ThemeToggle
             labels={{ toggle: dict.a11y.themeToggle, light: dict.a11y.themeLight, dark: dict.a11y.themeDark }}
           />
+          <CommandPalette data={paletteData(locale, dict)} />
+          {/* Site-wide entrance motion; renders nothing. Lives here so every page gets it. */}
+          <RevealLayer />
           <button
             type="button"
             popoverTarget="mobile-nav"

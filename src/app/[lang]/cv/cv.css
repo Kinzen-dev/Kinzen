@@ -1,0 +1,284 @@
+/* ------------------------------------------------------------------
+   /cv: the same content as a one-to-two page A4 document.
+   Screen: the site register (ground, ink, real rules).
+   Print: black on white, no site chrome, compact type, A4 at 14mm.
+   ------------------------------------------------------------------ */
+.cv {
+  padding-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.cv-head {
+  display: grid;
+  gap: 1.25rem 1.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.cv-name {
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl--line-height);
+  letter-spacing: -0.045em;
+}
+
+.cv-alt-name {
+  margin-top: 0.5rem;
+  color: var(--ink-2);
+}
+
+.cv-role {
+  margin-top: 0.5rem;
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  color: var(--ink-2);
+}
+
+.cv-lede {
+  max-width: 60ch;
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+}
+
+.cv-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+.cv-contact a {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 48rem) {
+  .cv-head {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+  .cv-lede,
+  .cv-contact {
+    grid-column: 1 / -1;
+  }
+}
+
+.cv-section {
+  display: grid;
+  gap: 1rem 1.5rem;
+  border-top: 1px solid var(--rule-strong);
+  padding-block: 1.25rem 2.25rem;
+}
+
+@media (min-width: 48rem) {
+  .cv-section {
+    grid-template-columns: minmax(10rem, 3fr) 9fr;
+  }
+}
+
+.cv-h2 {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  letter-spacing: -0.02em;
+}
+
+.cv-list {
+  display: grid;
+}
+
+.cv-entry {
+  padding-block: 1.25rem;
+  border-top: 1px solid var(--rule);
+}
+.cv-entry:first-child {
+  padding-top: 0.125rem;
+  border-top: 0;
+}
+
+.cv-entry-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+}
+
+.cv-entry-title {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.cv-dates {
+  white-space: nowrap;
+}
+
+.cv-meta {
+  color: var(--ink-2);
+}
+
+.cv-text {
+  margin-top: 0.25rem;
+  max-width: 64ch;
+  color: var(--ink-2);
+}
+
+.cv-points {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+  max-width: 66ch;
+  color: var(--ink-2);
+}
+
+.cv-points > li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.cv-points > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 0.625rem;
+  height: 1px;
+  background: var(--ink-3);
+}
+
+.cv-stack {
+  margin-top: 0.625rem;
+}
+
+.cv-skills {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.cv-skill-row {
+  display: grid;
+  gap: 0.125rem 1.5rem;
+}
+
+@media (min-width: 40rem) {
+  .cv-skill-row {
+    grid-template-columns: 12rem 1fr;
+  }
+}
+
+.cv-skill-row dt {
+  font-weight: 600;
+}
+.cv-skill-row dd {
+  color: var(--ink-2);
+}
+
+.cv-langs {
+  display: grid;
+  gap: 0.25rem;
+}
+
+/* ------------------------------------------------------------------ */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+@media print {
+  /* Only the document: no skip link, header, footer, nav or palette. */
+  body:has([data-cv]) > :not(main) {
+    display: none !important;
+  }
+
+  html:root:has([data-cv]) {
+    color-scheme: light;
+    --ground: #fff;
+    --surface: #fff;
+    --ink: #000;
+    --ink-2: #1f1f1f;
+    --ink-3: #555;
+    --rule: #c8c8c8;
+    --rule-strong: #000;
+    --gold: #000;
+    background: #fff;
+    color: #000;
+  }
+
+  html:root:has([data-cv]) body {
+    background: #fff;
+    min-height: 0;
+  }
+
+  .cv {
+    max-width: none;
+    padding: 0;
+    font-size: 9.5pt;
+    line-height: 1.42;
+  }
+
+  .cv .readout {
+    font-size: 8pt;
+  }
+
+  .cv-print-action {
+    display: none;
+  }
+
+  .cv-head {
+    grid-template-columns: 1fr;
+    gap: 2.5mm;
+    padding-bottom: 5mm;
+  }
+
+  .cv-name {
+    font-size: 22pt;
+    line-height: 1.05;
+  }
+  .cv-alt-name,
+  .cv-role {
+    margin-top: 1mm;
+    font-size: 11pt;
+  }
+  .cv-lede {
+    max-width: none;
+    font-size: 10pt;
+  }
+  .cv-contact {
+    font-size: 9pt;
+    gap: 0.5mm 6mm;
+  }
+
+  .cv a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .cv-section {
+    grid-template-columns: 32mm 1fr;
+    gap: 2mm 6mm;
+    padding-block: 3mm 4mm;
+  }
+
+  .cv-h2 {
+    font-size: 10.5pt;
+    break-after: avoid;
+  }
+
+  .cv-entry {
+    padding-block: 2.5mm;
+    break-inside: avoid;
+  }
+
+  .cv-points {
+    gap: 1mm;
+    margin-top: 1.5mm;
+    max-width: none;
+  }
+
+  .cv-stack {
+    margin-top: 1.5mm;
+  }
+
+  .cv-skills {
+    gap: 1.2mm;
+  }
+  .cv-skill-row {
+    grid-template-columns: 36mm 1fr;
+  }
+}
