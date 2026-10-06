@@ -44,6 +44,13 @@
     flex-shrink: 1;
     min-width: 0;
     padding-inline-end: 0;
+    --marquee-gap: 0.5rem;
+  }
+  /* Forty still chips: smaller, pill-sized, so the wrapped block stays short. */
+  .tools-marquee .tool-chip {
+    height: 2.25rem;
+    padding-inline: var(--inset-pill);
+    font-size: var(--text-sm);
   }
 }
 
