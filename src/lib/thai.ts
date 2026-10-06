@@ -1,20 +1,27 @@
 /**
  * Thai line breaking. Browsers split Thai with a dictionary (ICU) that cuts compound
- * words at their parts ("ทันต|กรรม", "หน้า|ร้าน"), which native readers read as broken
+ * words at their parts ("ทันต|กรรม", "ใช้|งาน"), which native readers read as broken
  * words. CSS cannot fix it portably (Chromium ignores `word-break: keep-all` for Thai).
  *
- * We insert U+2060 WORD JOINER, which every engine honours as "no break here":
- * - a short Thai run (one phrase between spaces) is kept whole, so lines break at the
- *   spaces Thai writers already put between phrases;
- * - in longer runs, known compounds are kept whole and the dictionary breaks the rest.
- * Combining marks stay attached to their base; joiners never sit before them.
+ * One model, two renderings. A Thai run (text between spaces) becomes a list of
+ * unbreakable ATOMS:
+ * - a run up to SHORT_RUN characters is one atom (Thai writers already put spaces
+ *   between phrases, so lines break at those spaces);
+ * - a longer run is split at dictionary word boundaries, except inside known compounds.
+ * Then:
+ * - `thaiGlue` (HTML) puts U+2060 WORD JOINER inside every atom, which every engine
+ *   honours as "no break here";
+ * - `thaiBreaks` (OG images, where satori has no Thai dictionary) puts U+200B between
+ *   atoms, so the card wraps only where the page would.
+ * Use `thaiGlue` only for VISIBLE text. Metadata, aria values and images get plain text.
  */
 const WJ = "⁠";
+const ZWSP = "​";
 const THAI_RUN = /[฀-๿]+/g;
 const COMBINING = /[ัิ-ฺ็-๎]/;
 
 /** Phrases up to this many characters never break inside. */
-const SHORT_RUN = 16;
+const SHORT_RUN = 24;
 
 /** Compounds the dictionary splits; extend when a break shows up in QA. */
 const COMPOUNDS = [
@@ -43,26 +50,76 @@ const COMPOUNDS = [
   "ตรวจสอบ",
   "เทคโนโลยี",
   "คอมพิวเตอร์",
-];
+  "คอมไพล์",
+  "ผู้ช่วย",
+  "ผู้ให้บริการ",
+  "บริการ",
+  "องค์ประกอบ",
+  "น่าจะ",
+  "ใช้งาน",
+  "พนักงาน",
+  "เคียงข้าง",
+  "กลับมา",
+  "ตัวไหน",
+  "การตรวจ",
+  "การพูด",
+  "ประมวลผล",
+  "ผู้ก่อตั้ง",
+  "ผู้ใช้",
+  "ปัจจุบัน",
+].sort((a, b) => b.length - a.length);
 
-function joinAll(word: string): string {
-  let out = "";
-  for (const ch of word) out += out && !COMBINING.test(ch) ? WJ + ch : ch;
+const segmenter = new Intl.Segmenter("th", { granularity: "word" });
+
+/** Split one Thai run into atoms that must not break inside. */
+function atoms(run: string): string[] {
+  if ([...run].length <= SHORT_RUN) return [run];
+
+  // Character ranges covered by known compounds (longest first, no overlaps).
+  const covered: [number, number][] = [];
+  for (const word of COMPOUNDS) {
+    let from = 0;
+    for (;;) {
+      const at = run.indexOf(word, from);
+      if (at < 0) break;
+      const end = at + word.length;
+      if (!covered.some(([s, e]) => at < e && end > s)) covered.push([at, end]);
+      from = at + 1;
+    }
+  }
+
+  const out: string[] = [];
+  for (const { segment, index } of segmenter.segment(run)) {
+    // A boundary at `index` is forbidden if it falls strictly inside a compound.
+    const inside = covered.some(([s, e]) => index > s && index < e);
+    if (inside && out.length) out[out.length - 1] += segment;
+    else out.push(segment);
+  }
   return out;
 }
 
-const GLUED = COMPOUNDS.sort((a, b) => b.length - a.length).map((w) => [w, joinAll(w)] as const);
-
-export function thaiGlue(text: string): string {
-  return text.replace(THAI_RUN, (run) => {
-    if ([...run].length <= SHORT_RUN) return joinAll(run);
-    let out = run;
-    for (const [plain, glued] of GLUED) out = out.split(plain).join(glued);
-    return out;
-  });
+function joinInside(atom: string): string {
+  let out = "";
+  for (const ch of atom) out += out && !COMBINING.test(ch) ? WJ + ch : ch;
+  return out;
 }
 
-/** Remove the joiners again, e.g. for text that is copied or compared. */
+/** Visible HTML text: no line break inside any atom. */
+export function thaiGlue(text: string): string {
+  return text.replace(THAI_RUN, (run) => atoms(run).map(joinInside).join(""));
+}
+
+/** Image text (satori): explicit break opportunities between atoms only. */
+export function thaiBreaks(text: string): string {
+  return stripJoiners(text).replace(THAI_RUN, (run) => atoms(run).join(ZWSP));
+}
+
+/** Remove the joiners again (metadata, aria, copied text, comparisons). */
 export function stripJoiners(text: string): string {
   return text.replaceAll(WJ, "");
+}
+
+/** Attribute values (aria-label, title, alt) must be plain text. */
+export function plain<T extends string | undefined>(text: T): T {
+  return (text === undefined ? text : stripJoiners(text)) as T;
 }

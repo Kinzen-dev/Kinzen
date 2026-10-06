@@ -15,6 +15,11 @@ const HIDDEN_MARKERS: { pattern: RegExp; reason: string }[] = [
   { pattern: /Open to senior and lead engineering roles/, reason: "hidden availability copy leaked" },
   { pattern: /github\.com\/Kinzen-dev"/, reason: "GitHub profile link is hidden until cleanup" },
   { pattern: /CLAIMS\.md|claimId|provenance/, reason: "provenance must never render" },
+  // Thai line-break joiners belong in visible text only, never in metadata or attributes.
+  {
+    pattern: /(?:<title>[^<]*|(?:content|aria-label|alt|title)="[^"]*)\u2060/,
+    reason: "word joiner leaked into metadata or an attribute",
+  },
 ];
 
 function walk(dir: string): string[] {

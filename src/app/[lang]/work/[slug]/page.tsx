@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ViewTransition } from "react";
-import { getProject, projects, t } from "@/content";
+import { getProject, projects, t, tPlain } from "@/content";
 import type { Locale } from "@/content/schema";
-import { getDictionary } from "@/i18n/dictionaries";
+import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
 import { alternates, localePath } from "@/lib/site-url";
 import { JsonLd, projectJsonLd } from "@/lib/json-ld";
 import { ProjectPlate, getPlateSpec } from "@/components/plates";
@@ -12,6 +12,7 @@ import { StatusMark } from "@/components/sections/work";
 import { periodLabel } from "@/components/work/format";
 import { workTitleTransition } from "@/components/work/transition";
 import "@/components/work/transitions.css";
+import { plain } from "@/lib/thai";
 
 export const dynamicParams = false;
 
@@ -25,9 +26,9 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/work/[slug
   const locale = lang as Locale;
   const project = getProject(slug);
   if (!project) return {};
-  const dict = getDictionary(locale);
+  const dict = getPlainDictionary(locale);
   const path = `/work/${slug}`;
-  const description = t(project.tagline, locale);
+  const description = tPlain(project.tagline, locale);
   const image = {
     url: localePath(locale, `${path}/og.png`),
     width: 1200,
@@ -186,7 +187,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
       )}
 
       {next.id !== project.id && (
-        <nav aria-label={dict.project.next} className="mt-24 border-t border-rule-strong pt-6">
+        <nav aria-label={plain(dict.project.next)} className="mt-24 border-t border-rule-strong pt-6">
           <p className="text-sm text-ink-3">{dict.project.next}</p>
           <Link href={localePath(locale, `/work/${next.slug}`)} className="group mt-2 block">
             <span className="block text-2xl font-semibold tracking-[-0.045em] transition-colors duration-200 group-hover:text-gold">

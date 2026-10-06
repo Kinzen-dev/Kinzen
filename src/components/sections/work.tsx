@@ -5,6 +5,7 @@ import { Ledger } from "../work/ledger";
 import { ledgerLabels, ledgerRows } from "../work/rows";
 import { ProjectPlate, getPlateSpec } from "../plates";
 import { SectionHeader } from "./section-header";
+import { plain } from "@/lib/thai";
 
 export { yearLabel } from "../work/rows";
 
@@ -60,7 +61,7 @@ export function Work({
 
   return (
     <section id="work" aria-labelledby="work-title" className="shell pt-16 md:pt-20">
-      <SectionHeader id="work" title={dict.sections.work} intro={dict.sections.workIntro} />
+      <SectionHeader id="work" title={plain(dict.sections.work)} intro={dict.sections.workIntro} />
       <Ledger rows={rows} labels={ledgerLabels(dict)} areas={areas} plates={plates} icons={icons} />
     </section>
   );

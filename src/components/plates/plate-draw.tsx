@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { plain } from "@/lib/thai";
 
 const noop = () => () => {};
 
@@ -84,7 +85,7 @@ export function PlateDraw({ label, children }: { label: string; children: ReactN
       ref={ref}
       className="plate-scroll"
       role="region"
-      aria-label={label}
+      aria-label={plain(label)}
       tabIndex={scrolls ? 0 : undefined}
       data-scrolls={scrolls ? "" : undefined}
     >

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import type { Locale } from "@/content/schema";
+import { thaiBreaks } from "@/lib/thai";
 
 /**
  * Open Graph cards in the site register: warm dark ground, ink, one gold accent,
@@ -43,13 +44,6 @@ async function fonts() {
 const SANS = "Geist, Noto Sans Thai";
 const MONO = "Geist Mono, Noto Sans Thai";
 
-/** Thai has no spaces between words: mark word boundaries so the card can wrap. */
-function breakable(text: string, locale: Locale) {
-  if (locale !== "th") return text;
-  const segmenter = new Intl.Segmenter("th", { granularity: "word" });
-  return Array.from(segmenter.segment(text), (s) => s.segment).join("​");
-}
-
 function Dot({ live }: { live: boolean }) {
   return (
     <div
@@ -65,17 +59,9 @@ function Dot({ live }: { live: boolean }) {
   );
 }
 
-export async function homeCard({
-  name,
-  role,
-  studio,
-  city,
-}: {
-  name: string;
-  role: string;
-  studio: string;
-  city: string;
-}) {
+export async function homeCard(input: { name: string; role: string; studio: string; city: string }) {
+  // Page text carries word joiners; images need plain text with explicit Thai break points.
+  const [name, role, studio, city] = [input.name, input.role, input.studio, input.city].map(thaiBreaks);
   return new ImageResponse(
     <div
       style={{
@@ -148,6 +134,8 @@ export async function projectCard({
   period: string;
   drawing?: string;
 }) {
+  [name, tagline, status, period] = [name, tagline, status, period].map(thaiBreaks);
+  if (drawing) drawing = thaiBreaks(drawing);
   // Fit long names on one line: Geist 600 averages ~0.56em per character.
   const nameSize = Math.min(140, Math.floor(1072 / (name.length * 0.56)));
   return new ImageResponse(
@@ -180,7 +168,7 @@ export async function projectCard({
             maxWidth: 1000,
           }}
         >
-          {breakable(tagline, locale)}
+          {tagline}
         </div>
       </div>
       <div

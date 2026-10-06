@@ -9,6 +9,8 @@ import { paletteData } from "./palette/palette-data";
 import { RevealLayer } from "./motion/reveal-layer";
 import { MobileNav } from "./mobile-nav";
 import { AnchorFocus } from "./anchor-focus";
+import { PlainCopy } from "./plain-copy";
+import { plain } from "@/lib/thai";
 
 export function navItems(locale: Locale, dict: Dictionary) {
   const home = localePath(locale, "/");
@@ -35,7 +37,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
         <Link
           href={localePath(locale, "/")}
           className="mr-auto flex items-baseline gap-2 font-semibold tracking-[-0.02em]"
-          aria-label={dict.a11y.home}
+          aria-label={plain(dict.a11y.home)}
         >
           <span data-masthead-mark className="text-[1.0625rem]">
             KINZEN
@@ -45,7 +47,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           </span>
         </Link>
 
-        <nav aria-label={dict.a11y.mainNav} className="hidden lg:block">
+        <nav aria-label={plain(dict.a11y.mainNav)} className="hidden lg:block">
           <ul className="flex items-center gap-6 text-sm">
             {items.map((item) => (
               <li key={item.href}>
@@ -66,6 +68,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           {/* Site-wide entrance motion; renders nothing. Lives here so every page gets it. */}
           <RevealLayer />
           <AnchorFocus />
+          <PlainCopy />
           <MobileNav
             items={items}
             labels={{ open: dict.a11y.openMenu, close: dict.a11y.close, nav: dict.a11y.mainNav }}

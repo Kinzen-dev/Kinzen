@@ -3,6 +3,7 @@ import type { Locale } from "@/content/schema";
 import { practices, t } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { SectionHeader } from "./section-header";
+import { plain } from "@/lib/thai";
 
 /** How King works with AI agents. `demo` is the interactive guard illustration. */
 export function Practice({
@@ -18,7 +19,7 @@ export function Practice({
 }) {
   return (
     <section id="practice" aria-labelledby="practice-title" className="shell pt-24 md:pt-32">
-      <SectionHeader id="practice" title={dict.sections.practice} intro={dict.sections.practiceIntro} />
+      <SectionHeader id="practice" title={plain(dict.sections.practice)} intro={dict.sections.practiceIntro} />
 
       <ul data-reveal-group className="grid border-t border-l border-rule md:grid-cols-3">
         {practices.map((p) => (

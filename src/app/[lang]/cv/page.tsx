@@ -2,17 +2,18 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { education, experience, languages, links, profile, projects, skillItems, skills, t } from "@/content";
-import { getDictionary } from "@/i18n/dictionaries";
+import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
 import { alternates, localePath, SITE_URL } from "@/lib/site-url";
 import { monthYear } from "@/components/timeline/format";
 import { PrintButton } from "./print-button";
 import "./cv.css";
 import { inlineList } from "@/lib/text";
+import { plain } from "@/lib/thai";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/cv">): Promise<Metadata> {
   const { lang } = await params;
   const locale = lang as Locale;
-  const dict = getDictionary(locale);
+  const dict = getPlainDictionary(locale);
   return {
     title: dict.cv.title,
     description: dict.cv.description,
@@ -64,7 +65,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
           <PrintButton label={dict.cv.print} />
         </div>
         <p className="cv-lede">{t(profile.oneLiner, locale)}</p>
-        <ul className="cv-contact" aria-label={dict.cv.contact}>
+        <ul className="cv-contact" aria-label={plain(dict.cv.contact)}>
           <li>
             {place}
             {profile.location.remote ? ` (${dict.cv.remote})` : null}
@@ -91,7 +92,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         </ul>
       </header>
 
-      <Section id="experience" title={dict.cv.experience}>
+      <Section id="experience" title={plain(dict.cv.experience)}>
         <ol className="cv-list">
           {experience.map((era) => (
             <li key={era.id} className="cv-entry">
@@ -118,7 +119,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         </ol>
       </Section>
 
-      <Section id="projects" title={dict.cv.projects}>
+      <Section id="projects" title={plain(dict.cv.projects)}>
         <ul className="cv-list">
           {projects.map((p) => (
             <li key={p.id} className="cv-entry">
@@ -136,7 +137,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         </ul>
       </Section>
 
-      <Section id="skills" title={dict.cv.skills}>
+      <Section id="skills" title={plain(dict.cv.skills)}>
         <dl className="cv-skills">
           {skills.map((group) => (
             <div key={group.id} className="cv-skill-row">
@@ -147,7 +148,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         </dl>
       </Section>
 
-      <Section id="education" title={dict.cv.education}>
+      <Section id="education" title={plain(dict.cv.education)}>
         {education.map((e) => (
           <div key={e.school.en} className="cv-entry-head">
             <p>
@@ -161,7 +162,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         ))}
       </Section>
 
-      <Section id="languages" title={dict.cv.languages}>
+      <Section id="languages" title={plain(dict.cv.languages)}>
         <ul className="cv-langs">
           {languages.map((l) => (
             <li key={l.name.en}>

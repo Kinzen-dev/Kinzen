@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { plain } from "@/lib/thai";
 
 type Theme = "light" | "dark";
 
@@ -40,8 +41,8 @@ export function ThemeToggle({ labels }: { labels: { toggle: string; light: strin
     <button
       type="button"
       onClick={toggle}
-      aria-label={theme ? label : labels.toggle}
-      title={theme ? label : labels.toggle}
+      aria-label={plain(theme ? label : labels.toggle)}
+      title={plain(theme ? label : labels.toggle)}
       className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors duration-200 hover:text-ink"
     >
       <svg

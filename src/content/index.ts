@@ -10,6 +10,11 @@ export function t(value: Localized, locale: Locale): string {
   return locale === "th" && value.th ? thaiGlue(value.th) : value.en;
 }
 
+/** Same as `t` but without line-break glue: for metadata, JSON-LD, images and aria values. */
+export function tPlain(value: Localized, locale: Locale): string {
+  return (locale === "th" && value.th) || value.en;
+}
+
 export function tList(value: LocalizedList, locale: Locale): string[] {
   return locale === "th" && value.th ? value.th.map(thaiGlue) : value.en;
 }

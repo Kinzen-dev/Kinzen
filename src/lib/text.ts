@@ -3,5 +3,5 @@
  * one line); lines break only between items.
  */
 export function inlineList(items: readonly string[]): string {
-  return items.map((item) => item.replaceAll(" ", "\u00a0")).join(", ");
+  return items.map((item) => item.replaceAll(" ", "\u00a0").replaceAll("-", "\u2011")).join(", ");
 }

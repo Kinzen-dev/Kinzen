@@ -482,7 +482,13 @@ function glueDeep<T>(value: T): T {
 }
 
 const dictionaries: Record<Locale, Dictionary> = { en, th: glueDeep(th) };
+const plainDictionaries: Record<Locale, Dictionary> = { en, th };
 
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale];
+}
+
+/** Interface strings without line-break glue: for metadata, JSON-LD and images. */
+export function getPlainDictionary(locale: Locale): Dictionary {
+  return plainDictionaries[locale];
 }

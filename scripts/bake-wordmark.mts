@@ -87,7 +87,10 @@ const mask = await page.evaluate(
     const EDGE = 8;
     const on = (x: number, y: number) =>
       x >= EDGE && y >= EDGE && x < W - EDGE && y < H - EDGE && data[(y * W + x) * 4] > threshold;
-    let minX = W, maxX = -1, minY = H, maxY = -1;
+    let minX = W,
+      maxX = -1,
+      minY = H,
+      maxY = -1;
     for (let y = 0; y < H; y++)
       for (let x = 0; x < W; x++)
         if (on(x, y)) {
@@ -97,23 +100,32 @@ const mask = await page.evaluate(
           if (y > maxY) maxY = y;
         }
     if (maxX < 0) throw new Error("empty mask");
-    const w = maxX - minX + 1, h = maxY - minY + 1;
+    const w = maxX - minX + 1,
+      h = maxY - minY + 1;
     const runs: number[] = [];
     let ink = 0;
     for (let y = minY; y <= maxY; y++) {
       // Alternating off/on run lengths; each row starts with an off run (may be 0).
-      let state = false, len = 0;
+      let state = false,
+        len = 0;
       for (let x = minX; x <= maxX; x++) {
         const v = on(x, y);
         if (v) ink++;
         if (v === state) len++;
-        else { runs.push(len); state = v; len = 1; }
+        else {
+          runs.push(len);
+          state = v;
+          len = 1;
+        }
       }
       runs.push(len);
     }
     const pad = padEm * fontPx;
     return {
-      w, h, runs, ink,
+      w,
+      h,
+      runs,
+      ink,
       // Ink box origin relative to the line box (content box) origin, in em.
       x0: (minX - pad) / fontPx,
       y0: (minY - pad) / fontPx,

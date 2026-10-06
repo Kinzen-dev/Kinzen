@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { locales, type Locale } from "@/content/schema";
 import { localePath, neutralPath } from "@/lib/site-url";
+import { plain } from "@/lib/thai";
 
 export function LanguageSwitch({
   locale,
@@ -19,7 +20,7 @@ export function LanguageSwitch({
   const path = neutralPath(pathname);
 
   return (
-    <nav aria-label={label} className="flex items-center text-sm">
+    <nav aria-label={plain(label)} className="flex items-center text-sm">
       {locales.map((target, i) => (
         <span key={target} className="flex items-center">
           {i > 0 && (

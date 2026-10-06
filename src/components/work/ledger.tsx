@@ -17,6 +17,7 @@ import { workTitleTransition } from "./transition";
 import "./ledger.css";
 import "./transitions.css";
 import { inlineList } from "@/lib/text";
+import { plain } from "@/lib/thai";
 
 type SortKey = "name" | "year";
 type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
@@ -156,7 +157,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
     <div className="ledger">
       <div className="ledger-toolbar">
         <div className="ledger-pills">
-          <div className="ledger-group" role="group" aria-label={labels.filterLabel}>
+          <div className="ledger-group" role="group" aria-label={plain(labels.filterLabel)}>
             {[{ id: "all" as const, label: labels.filterAll, count: rows.length }, ...areas].map((a) => (
               <button
                 key={a.id}
@@ -172,7 +173,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
           </div>
         </div>
         {/* Phones have no column headers to sort by: the same sort lives on its own line. */}
-        <div className="ledger-sortbar" role="group" aria-label={labels.sortBy}>
+        <div className="ledger-sortbar" role="group" aria-label={plain(labels.sortBy)}>
           <span aria-hidden="true">{labels.sortBy}</span>
           {sortButton("name", labels.name, "ledger-pill")}
           {sortButton("year", labels.year, "ledger-pill")}

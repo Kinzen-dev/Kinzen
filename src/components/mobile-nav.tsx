@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { plain } from "@/lib/thai";
 
 /**
  * Full-screen phone menu as a modal <dialog>: the page behind is inert (focus stays in
@@ -22,7 +23,7 @@ export function MobileNav({
         type="button"
         onClick={() => ref.current?.showModal()}
         className="grid size-9 place-items-center text-ink-2 hover:text-ink lg:hidden"
-        aria-label={labels.open}
+        aria-label={plain(labels.open)}
         aria-haspopup="dialog"
       >
         <svg
@@ -39,7 +40,7 @@ export function MobileNav({
 
       <dialog
         ref={ref}
-        aria-label={labels.nav}
+        aria-label={plain(labels.nav)}
         className="mobile-nav m-0 h-dvh max-h-none w-full max-w-none border-0 bg-ground p-0 text-ink backdrop:bg-transparent lg:hidden"
       >
         <div className="shell flex h-[var(--header-h)] items-center justify-between border-b border-rule">
@@ -48,7 +49,7 @@ export function MobileNav({
             type="button"
             onClick={() => ref.current?.close()}
             className="grid size-9 place-items-center text-ink-2 hover:text-ink"
-            aria-label={labels.close}
+            aria-label={plain(labels.close)}
           >
             <svg
               viewBox="0 0 24 24"
@@ -62,7 +63,7 @@ export function MobileNav({
             </svg>
           </button>
         </div>
-        <nav aria-label={labels.nav} className="shell">
+        <nav aria-label={plain(labels.nav)} className="shell">
           <ul>
             {items.map((item) => (
               <li key={item.href} className="border-b border-rule">

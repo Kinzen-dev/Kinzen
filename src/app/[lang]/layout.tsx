@@ -4,7 +4,7 @@ import { Geist, Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { locales, type Locale } from "@/content/schema";
-import { getDictionary } from "@/i18n/dictionaries";
+import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
 import { SITE_URL, alternates, localePath } from "@/lib/site-url";
 import { ThemeScript } from "@/components/theme-script";
 import { SiteHeader } from "@/components/site-header";
@@ -33,7 +33,7 @@ function isLocale(value: string): value is Locale {
 export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) return {};
-  const dict = getDictionary(lang);
+  const dict = getPlainDictionary(lang);
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: dict.meta.title, template: "%s | Kinzen" },

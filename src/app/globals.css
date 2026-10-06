@@ -164,6 +164,12 @@
     border-bottom: 1px solid var(--rule);
   }
 
+  /* Thai inside a readout: use the Thai text face, not a monospaced system fallback
+     (which spaced the letters out, e.g. "เ ม . ย ."). */
+  :lang(th) .readout {
+    font-family: var(--font-thai), var(--font-geist-mono), ui-monospace, monospace;
+  }
+
   /* Machine output only: timestamps, stack lists, readouts. */
   .readout {
     font-family: var(--font-mono);
@@ -258,6 +264,13 @@ html:has(dialog[open]) {
    Hero wordmark: fills the shell width edge to edge. Six capitals of
    Geist 600 at -0.06em tracking measure about 3.2em wide.
    ------------------------------------------------------------------ */
+/* Phones in landscape: cap the wordmark so the name and actions share the first screen. */
+@media (orientation: landscape) and (max-height: 32rem) {
+  .hero-wordmark {
+    font-size: min(calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24), 34svh) !important;
+  }
+}
+
 .hero-wordmark {
   font-size: calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24);
   line-height: 0.76;

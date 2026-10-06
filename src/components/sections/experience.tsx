@@ -5,11 +5,12 @@ import { EraThread } from "../timeline/era-thread";
 import { monthYear } from "../timeline/format";
 import { SectionHeader } from "./section-header";
 import { inlineList } from "@/lib/text";
+import { plain } from "@/lib/thai";
 
 export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <section id="experience" aria-labelledby="experience-title" className="shell pt-24 md:pt-32">
-      <SectionHeader id="experience" title={dict.sections.experience} />
+      <SectionHeader id="experience" title={plain(dict.sections.experience)} />
 
       <div data-era-timeline className="era-timeline">
         <ol data-era-list>

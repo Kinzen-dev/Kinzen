@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { plain } from "@/lib/thai";
 
 export function CopyEmail({ email, labels }: { email: string; labels: { copy: string; copied: string } }) {
   const [copied, setCopied] = useState(false);
@@ -19,7 +20,7 @@ export function CopyEmail({ email, labels }: { email: string; labels: { copy: st
     <button
       type="button"
       onClick={copy}
-      aria-label={labels.copy}
+      aria-label={plain(labels.copy)}
       className="group inline-flex h-11 items-center gap-2 border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
     >
       <svg

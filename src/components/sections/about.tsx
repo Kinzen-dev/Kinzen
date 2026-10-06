@@ -3,11 +3,12 @@ import type { Locale } from "@/content/schema";
 import { education, languages, personal, profile, t, tList } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { SectionHeader } from "./section-header";
+import { plain } from "@/lib/thai";
 
 export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dictionary; offClockArt?: ReactNode }) {
   return (
     <section id="about" aria-labelledby="about-title" className="shell pt-24 md:pt-32">
-      <SectionHeader id="about" title={dict.sections.about} />
+      <SectionHeader id="about" title={plain(dict.sections.about)} />
 
       <div className="grid gap-12 md:grid-cols-12 md:gap-6">
         <div className="grid gap-5 md:col-span-7">

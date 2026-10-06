@@ -1,5 +1,6 @@
 import type { Locale, Project } from "@/content/schema";
-import { education, experience, lastUpdated, links, profile, skillItems, skills, t } from "@/content";
+import { education, experience, lastUpdated, links, profile, skillItems, skills, tPlain } from "@/content";
+import { stripJoiners } from "./thai";
 import { SITE_URL, localePath } from "./site-url";
 
 /**
@@ -29,8 +30,8 @@ function person(locale: Locale): Json {
     "@id": PERSON_ID,
     name: profile.name,
     alternateName: [profile.preferredName, profile.handle, profile.displayName.th].filter(Boolean),
-    jobTitle: t(profile.role, locale),
-    description: t(profile.oneLiner, locale),
+    jobTitle: tPlain(profile.role, locale),
+    description: tPlain(profile.oneLiner, locale),
     url: abs(localePath(locale, "/")),
     image: abs(localePath(locale, "/og.png")),
     ...(email ? { email: email.href } : {}),
@@ -43,8 +44,8 @@ function person(locale: Locale): Json {
       addressLocality: profile.location.city.en,
       addressCountry: "TH",
     },
-    alumniOf: education.map((e) => ({ "@type": "CollegeOrUniversity", name: t(e.school, locale) })),
-    knowsAbout: skills.flatMap((s) => skillItems(s, locale)),
+    alumniOf: education.map((e) => ({ "@type": "CollegeOrUniversity", name: tPlain(e.school, locale) })),
+    knowsAbout: skills.flatMap((s) => skillItems(s, locale).map(stripJoiners)),
     knowsLanguage: ["th", "en"],
   };
 }
@@ -77,7 +78,7 @@ export function projectJsonLd(project: Project, locale: Locale): Json {
     "@type": "CreativeWork",
     "@id": `${url}#work`,
     name: project.name,
-    description: t(project.tagline, locale),
+    description: tPlain(project.tagline, locale),
     url,
     image: abs(localePath(locale, `/work/${project.slug}/og.png`)),
     inLanguage: inLanguage(locale),

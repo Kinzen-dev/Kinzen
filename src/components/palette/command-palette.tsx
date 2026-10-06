@@ -6,6 +6,7 @@ import { localePath, neutralPath } from "@/lib/site-url";
 import { rank } from "./fuzzy";
 import type { PaletteCommand, PaletteData } from "./palette-data";
 import "./palette.css";
+import { plain } from "@/lib/thai";
 
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -211,8 +212,8 @@ export function CommandPalette({ data }: { data: PaletteData }) {
         type="button"
         onClick={open}
         aria-haspopup="dialog"
-        aria-label={labels.trigger}
-        title={`${labels.trigger} (Ctrl K, /)`}
+        aria-label={plain(labels.trigger)}
+        title={plain(`${labels.trigger} (Ctrl K, /)`)}
         className="flex h-9 items-center gap-2 px-2 text-ink-2 transition-colors duration-200 hover:text-ink"
       >
         <svg
@@ -234,7 +235,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
       <dialog
         ref={dialogRef}
         className="palette"
-        aria-label={labels.title}
+        aria-label={plain(labels.title)}
         onClick={(e) => {
           if (e.target === e.currentTarget) close();
         }}
@@ -260,7 +261,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
               aria-controls={listId}
               aria-autocomplete="list"
               aria-activedescendant={activeCmd ? optionId(activeCmd) : undefined}
-              aria-label={labels.placeholder}
+              aria-label={plain(labels.placeholder)}
               placeholder={labels.placeholder}
               autoComplete="off"
               autoCorrect="off"
@@ -275,7 +276,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
               onKeyDown={onInputKey}
               className="palette-input"
             />
-            <button type="button" onClick={close} className="palette-close" aria-label={labels.close}>
+            <button type="button" onClick={close} className="palette-close" aria-label={plain(labels.close)}>
               <svg
                 viewBox="0 0 24 24"
                 className="size-5"
@@ -289,7 +290,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
             </button>
           </div>
 
-          <div id={listId} role="listbox" aria-label={labels.title} className="palette-list">
+          <div id={listId} role="listbox" aria-label={plain(labels.title)} className="palette-list">
             {searching
               ? results.map(option)
               : groups.map(({ group, items }) => (

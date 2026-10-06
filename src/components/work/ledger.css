@@ -279,22 +279,50 @@
 /* Row hover is a hard swap to ink, only where a real pointer hovers. Unlayered on purpose:
    it must beat the colour utilities inside the row. */
 @media (hover: hover) {
+  /* Hover is a quiet tint plus an underlined name, not a full ink flip: sweeping the
+     pointer over the list must not strobe bright bands. */
   .ledger-row:not([data-filtered]):hover > * {
-    background: var(--ink);
-    color: var(--ground);
+    background: var(--surface);
   }
-  .ledger-row:not([data-filtered]):hover :is(.text-ink-2, .text-ink-3, .readout) {
-    color: color-mix(in oklab, var(--ground) 76%, var(--ink));
-  }
-  .ledger-row:not([data-filtered]):hover .ledger-ring {
-    border-color: var(--ground);
+  .ledger-row:not([data-filtered]):hover .ledger-name {
+    text-decoration: underline;
+    text-decoration-color: var(--gold);
+    text-underline-offset: 0.2em;
   }
 }
 
 /* Cells keep their inner padding but the first and last sit on the page grid lines. */
-.ledger-table :is(th, td):first-child {
+.ledger-table tr:not(.ledger-panel-row) > :is(th, td):first-child {
   padding-inline-start: 0;
 }
-.ledger-table :is(th, td):last-child {
+.ledger-table tr:not(.ledger-panel-row) > :is(th, td):last-child {
   padding-inline-end: 0;
+}
+/* The opened panel is a tinted card: give its content room from the tint's edge. */
+.ledger-table .ledger-panel-row > td {
+  padding-inline: 1rem;
+}
+@media (min-width: 48rem) {
+  .ledger-table .ledger-panel-row > td {
+    padding-inline: 1.5rem;
+  }
+  /* Fixed columns: opening a row must never re-flow the columns sideways. */
+  .ledger-table {
+    table-layout: fixed;
+  }
+  .ledger-table thead th:nth-child(2) {
+    width: 13%;
+  }
+  .ledger-table thead th:nth-child(3) {
+    width: 22%;
+  }
+  .ledger-table thead th:nth-child(4) {
+    width: 13%;
+  }
+  .ledger-table thead th:nth-child(5) {
+    width: 14%;
+  }
+  .ledger-table thead th:nth-child(6) {
+    width: 2.75rem;
+  }
 }
