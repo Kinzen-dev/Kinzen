@@ -213,7 +213,7 @@ const yimwhan: PlateSpec = {
       at: [897, 600],
       lines: {
         en: ["Blocks diagnoses, dosing advice", "and cure claims in every", "patient-facing reply"],
-        th: ["กันการวินิจฉัย การแนะนำยา", "และการอ้างผลการรักษา", "ในทุกคำตอบที่ถึงคนไข้"],
+        th: ["กันการวินิจฉัย การแนะนำขนาดยา", "และการอ้างว่ารักษาหาย", "ในทุกคำตอบที่ถึงคนไข้"],
       },
     },
     {
@@ -225,7 +225,7 @@ const yimwhan: PlateSpec = {
       at: [1044, 146],
       lines: {
         en: ["Replay of 500 real", "messages: 37 model", "violations caught", "in code"],
-        th: ["ทดสอบย้อน 500 ข้อความจริง", "โค้ดดักคำตอบที่ผิดกฎ", "ได้ 37 ครั้ง"],
+        th: ["รันซ้ำ 500 ข้อความจริง", "โค้ดดักคำตอบที่ผิดกฎ", "ได้ 37 ครั้ง"],
       },
     },
     {
@@ -249,7 +249,7 @@ const yimwhan: PlateSpec = {
       at: [252, 214],
       lines: {
         en: ["Silence frames injected", "server-side when the carrier", "suppresses silence"],
-        th: ["ใส่เฟรมเสียงเงียบที่ฝั่ง server", "เมื่อเครือข่ายตัดช่วงเงียบ", "ของสายออก"],
+        th: ["เติมเฟรมเงียบจากฝั่งเซิร์ฟเวอร์", "เมื่อผู้ให้บริการเครือข่าย", "ตัดช่วงเงียบทิ้ง"],
       },
     },
     {

@@ -38,7 +38,7 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
                     className="inline-flex h-11 items-center border border-rule px-4 text-sm font-medium transition-colors duration-200 hover:border-rule-strong"
                   >
                     {l.label}
-                    <span className="sr-only"> (opens in a new tab)</span>
+                    <span className="sr-only"> {dict.a11y.newTab}</span>
                   </a>
                 ))}
               </div>

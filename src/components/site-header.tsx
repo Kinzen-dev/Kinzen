@@ -33,7 +33,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
         <Link
           href={localePath(locale, "/")}
           className="mr-auto flex items-baseline gap-2 font-semibold tracking-[-0.02em]"
-          aria-label="Kinzen, home"
+          aria-label={dict.a11y.home}
         >
           <span data-masthead-mark className="text-[1.0625rem]">
             KINZEN
@@ -95,7 +95,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
             popoverTarget="mobile-nav"
             popoverTargetAction="hide"
             className="grid size-9 place-items-center text-ink-2 hover:text-ink"
-            aria-label="Close"
+            aria-label={dict.a11y.close}
           >
             <svg
               viewBox="0 0 24 24"

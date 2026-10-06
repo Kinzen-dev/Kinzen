@@ -1,5 +1,5 @@
 import type { Locale, Project } from "@/content/schema";
-import { education, experience, lastUpdated, links, profile, skills, t } from "@/content";
+import { education, experience, lastUpdated, links, profile, skillItems, skills, t } from "@/content";
 import { SITE_URL, localePath } from "./site-url";
 
 /**
@@ -44,7 +44,7 @@ function person(locale: Locale): Json {
       addressCountry: "TH",
     },
     alumniOf: education.map((e) => ({ "@type": "CollegeOrUniversity", name: t(e.school, locale) })),
-    knowsAbout: skills.flatMap((s) => s.items),
+    knowsAbout: skills.flatMap((s) => skillItems(s, locale)),
     knowsLanguage: ["th", "en"],
   };
 }
