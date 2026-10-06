@@ -75,8 +75,8 @@ export function NotesBoard({
     el.setPointerCapture(e.pointerId);
     el.dataset.dragging = "";
     raise(el);
-    el.focus({ preventScroll: true });
-    e.preventDefault(); // no text selection while dragging
+    // No preventDefault: the native mousedown focuses the note (so no keyboard ring appears),
+    // and user-select: none on fine pointers keeps text from being selected mid-drag.
   };
 
   const onPointerMove = (e: PointerEvent<HTMLLIElement>) => {
