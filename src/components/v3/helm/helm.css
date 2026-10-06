@@ -1,0 +1,1140 @@
+/* ==================================================================
+   Helm scene (ticket v3-05). Light scene: copy + tools-lavender panel
+   holding a Helm window mockup. StickyStage writes data-step (0..4)
+   and --p (0..1) on .helm-stage; everything below is drawn from them.
+   Motion = transform / opacity only (typing = a cover sliding off the
+   text in character steps), plus a few paint-only SVG strokes.
+   ================================================================== */
+
+.helm-scene {
+  margin-top: clamp(4rem, 3rem + 5vw, 8rem);
+}
+
+/* ---------- layout ---------- */
+.helm-layout {
+  display: grid;
+  height: 100%;
+  align-content: center;
+  gap: 1.25rem;
+  padding-block: calc(var(--header-h) + 0.5rem) 1.25rem;
+}
+@media (min-width: 56rem) {
+  .helm-layout {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    align-items: center;
+    column-gap: clamp(2rem, 1rem + 3vw, 4.5rem);
+    padding-block: calc(var(--header-h) + 1rem) 2rem;
+  }
+}
+
+/* ---------- copy column ---------- */
+.helm-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.helm-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+:lang(th) .helm-kicker {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: var(--text-xs);
+}
+.helm-kicker i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+.helm-title {
+  margin-top: 0.75rem;
+  font-size: var(--text-2xl);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 600;
+  padding-bottom: 0.08em; /* descender room for the sweep's clipped text */
+}
+.helm-art {
+  position: relative;
+  flex: none;
+  width: clamp(6rem, 3rem + 10vw, 12.5rem);
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+/* A lavender wash behind the line art ties it to the panel. */
+.helm-art::before {
+  content: "";
+  position: absolute;
+  inset: 12% 8% 4% 10%;
+  border-radius: 46% 54% 52% 48% / 55% 45% 55% 45%;
+  background: var(--pastel);
+  z-index: -1;
+}
+.helm-art > .doodle {
+  display: block;
+}
+.helm-lede {
+  margin-top: 1rem;
+  max-width: 38ch;
+  color: var(--ink-2);
+}
+
+/* Beats: one at a time, stacked in one grid cell (no reflow between beats). */
+.helm-beats {
+  display: grid;
+  margin-top: clamp(1.25rem, 0.5rem + 2vw, 2.25rem);
+}
+.helm-beat {
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  opacity: 0;
+  translate: 0 0.6rem;
+  filter: blur(4px);
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    translate var(--dur-3) var(--ease-out),
+    filter var(--dur-3) var(--ease-out);
+}
+.helm-stage[data-step="0"] .helm-beat[data-beat="0"],
+.helm-stage[data-step="1"] .helm-beat[data-beat="1"],
+.helm-stage[data-step="2"] .helm-beat[data-beat="2"],
+.helm-stage[data-step="3"] .helm-beat[data-beat="3"],
+.helm-stage[data-step="4"] .helm-beat[data-beat="4"] {
+  opacity: 1;
+  translate: 0 0;
+  filter: none;
+}
+.helm-beat-n {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.helm-beat-title {
+  font-size: var(--text-lg);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.helm-beat-body {
+  max-width: 40ch;
+  color: var(--ink-2);
+}
+
+.helm-progress {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 1.25rem;
+  max-width: 20rem;
+}
+.helm-progress i {
+  position: relative;
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--rule);
+  overflow: clip;
+}
+.helm-progress i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform-origin: left;
+  scale: clamp(0, calc(var(--p, 1) * 5 - var(--i)), 1) 1;
+}
+
+.helm-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  margin-top: clamp(1.25rem, 0.5rem + 2vw, 2rem);
+}
+.helm-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.helm-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.helm-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--ground);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+.helm-cta span {
+  transition: translate var(--dur-2) var(--ease-out);
+}
+.helm-cta:hover {
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+.helm-cta:hover span {
+  translate: 0.2rem 0;
+}
+.helm-cta:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ---------- lavender panel ---------- */
+.helm-panel {
+  position: relative;
+  margin: 0;
+  padding: clamp(0.75rem, 0.2rem + 2.2vw, 2.5rem);
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(color-mix(in oklch, var(--pastel-ink) 13%, transparent) 1px, transparent 1.6px) 0 0 / 18px 18px,
+    var(--pastel);
+}
+.helm-window-wrap {
+  container: hw / inline-size;
+  margin-inline: auto;
+}
+@media (min-width: 56rem) {
+  /* Short desktop windows: the mockup gives up width before it overflows the stage. */
+  .helm-window-wrap {
+    max-width: calc((100svh - var(--header-h) - 9rem) * 1.6);
+  }
+}
+.helm-caption {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--pastel-ink);
+  text-align: center;
+}
+@media (min-width: 56rem) {
+  .helm-caption {
+    margin-top: 1rem;
+  }
+}
+
+/* ---------- phone: compress the copy so the window keeps its room ---------- */
+@media (max-width: 55.99rem) {
+  .helm-lede {
+    margin-top: 0.5rem;
+    font-size: var(--text-sm);
+  }
+  .helm-beat-title {
+    font-size: 1.0625rem;
+  }
+  .helm-beat-body {
+    font-size: var(--text-sm);
+  }
+  .helm-meta,
+  .helm-progress {
+    display: none;
+  }
+  .helm-title {
+    margin-top: 0.5rem;
+  }
+}
+@media (max-width: 55.99rem) and (max-height: 760px) {
+  .helm-lede {
+    display: none;
+  }
+}
+
+/* ==================================================================
+   The window (Helm "Instrument Dusk" palette; same in both themes,
+   like the real app). Sized in em from the container: the whole
+   mockup scales as one picture.
+   ================================================================== */
+.hw {
+  --hw-ground: hsl(264 24% 7%);
+  --hw-ground-2: hsl(263 21% 9%);
+  --hw-s1: hsl(261 19% 11%);
+  --hw-s2: hsl(259 17% 14%);
+  --hw-s3: hsl(257 15% 18%);
+  --hw-pane: hsl(263 22% 8.5%);
+  --hw-line: hsl(256 14% 22%);
+  --hw-line-2: hsl(256 13% 28%);
+  --hw-ink: hsl(42 30% 92%);
+  --hw-ink-2: hsl(44 12% 75%);
+  --hw-ink-3: hsl(255 9% 64%);
+  --hw-faint: hsl(255 8% 50%);
+  --hw-amber: hsl(38 92% 61%);
+  --hw-glow: hsl(38 92% 61% / 0.16);
+  --hw-green: hsl(151 46% 56%);
+  --hw-banner: hsl(140 25% 60%);
+  --hw-indigo: hsl(248 70% 74%);
+  --hw-cyan: hsl(186 72% 55%);
+  --hw-magenta: hsl(322 58% 62%);
+  --hw-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  position: relative;
+  display: grid;
+  grid-template-rows: 3.2em minmax(0, 1fr) 3.3em;
+  aspect-ratio: 16 / 10;
+  overflow: clip;
+  border-radius: 1em;
+  font-size: clamp(7.5px, 1.6cqi, 14px);
+  line-height: 1.35;
+  color: var(--hw-ink);
+  background:
+    radial-gradient(120% 90% at 82% -10%, var(--hw-glow), transparent 60%),
+    radial-gradient(70% 60% at 0% 110%, hsl(258 40% 30% / 0.22), transparent 70%),
+    var(--hw-ground);
+  box-shadow:
+    0 0 0 1px hsl(256 14% 24%),
+    0 2px 6px hsl(260 40% 10% / 0.18),
+    0 36px 70px -30px hsl(262 50% 18% / 0.55);
+  user-select: none;
+}
+.hw p {
+  margin: 0;
+}
+.hw b {
+  font-weight: inherit;
+}
+.hw-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+.hw-swap {
+  display: inline-grid;
+}
+.hw-swap > [data-show] {
+  grid-area: 1 / 1;
+  opacity: 0;
+  translate: 0 0.35em;
+  transition:
+    opacity 200ms var(--hw-ease),
+    translate 320ms var(--hw-ease);
+}
+.helm-stage[data-step="0"] .hw [data-show="empty"],
+.helm-stage:not([data-step="0"]) .hw [data-show="open"],
+.helm-stage:is([data-step="0"], [data-step="1"]) .hw [data-show="idle"],
+.helm-stage:is([data-step="2"], [data-step="3"]) .hw [data-show="working"],
+.helm-stage[data-step="4"] .hw [data-show="done"],
+.helm-stage:not([data-step="3"]) .hw [data-show="all"],
+.helm-stage[data-step="3"] .hw [data-show="peer"],
+.helm-stage:is([data-step="0"], [data-step="1"]) .hw [data-show="placeholder"],
+.helm-stage:not([data-step="0"], [data-step="1"]) .hw [data-show="typed"] {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* ---------- titlebar ---------- */
+.hw-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  padding-inline: 1em;
+  background: linear-gradient(var(--hw-s1), var(--hw-ground-2));
+  border-bottom: 1px solid var(--hw-line);
+}
+.hw-lights {
+  display: flex;
+  gap: 0.5em;
+}
+.hw-lights i {
+  width: 0.85em;
+  height: 0.85em;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+.hw-lights i:nth-child(2) {
+  background: #febc2e;
+}
+.hw-lights i:nth-child(3) {
+  background: #28c840;
+}
+.hw-vesper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.25em 0.75em 0.25em 0.55em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 999px;
+  font-size: 0.82em;
+  color: var(--hw-ink-2);
+}
+.hw-lamp {
+  width: 0.62em;
+  height: 0.62em;
+  flex: none;
+  border-radius: 50%;
+  background: var(--hw-amber);
+  box-shadow: 0 0 0.6em var(--hw-amber);
+  animation: hw-breathe 2.4s ease-in-out infinite;
+}
+.hw-crumb {
+  margin-inline: auto;
+  font-size: 0.82em;
+  color: var(--hw-ink-3);
+}
+.hw-crumb b {
+  margin-inline: 0.3em;
+  color: var(--hw-faint);
+}
+.hw-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  color: var(--hw-ink-3);
+}
+.hw-kbd {
+  padding: 0.1em 0.45em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 0.35em;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  color: var(--hw-ink-3);
+}
+
+/* ---------- body: rail + rack ---------- */
+.hw-body {
+  display: grid;
+  grid-template-columns: 12.5em minmax(0, 1fr);
+  min-height: 0;
+}
+.hw-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  padding: 1.1em 0.8em 0.9em;
+  background: var(--hw-s1);
+  border-right: 1px solid var(--hw-line);
+  min-width: 0;
+}
+.hw-label {
+  padding-inline: 0.45em;
+  font-family: var(--font-mono);
+  font-size: 0.66em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hw-ink-3);
+}
+.hw-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding-inline: 0.4em;
+  font-family: var(--font-mono);
+  font-size: 0.74em;
+  color: var(--hw-ink-3);
+}
+.hw-count .hw-swap {
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  border-radius: 999px;
+  background: var(--hw-s3);
+  color: var(--hw-ink);
+}
+.hw-spaces {
+  display: grid;
+  gap: 0.2em;
+  margin: 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+.hw-space {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  min-width: 0;
+  height: 2.5em;
+  padding-inline: 0.6em;
+  border-radius: 0.6em;
+  font-size: 0.9em;
+  color: var(--hw-ink-2);
+}
+.hw-space.is-active {
+  background: var(--hw-s3);
+  color: var(--hw-ink);
+  box-shadow: inset 0.2em 0 0 var(--hw-amber);
+}
+.hw-glyph {
+  position: relative;
+  width: 0.6em;
+  height: 0.6em;
+  flex: none;
+  border-radius: 50%;
+  background: var(--hue);
+  box-shadow: 0 0 0 0.25em color-mix(in oklch, var(--hue) 22%, transparent);
+}
+.hw-glyph::after {
+  content: "";
+  position: absolute;
+  inset: -0.3em;
+  border-radius: 50%;
+  border: 1px solid var(--hue);
+  opacity: 0;
+}
+.helm-stage:is([data-step="2"], [data-step="3"]) .hw-space.is-active .hw-glyph::after {
+  animation: hw-glyph 1.8s var(--hw-ease) infinite;
+}
+.hw-tag {
+  margin-left: auto;
+  justify-items: end;
+  font-family: var(--font-mono);
+  font-size: 0.66em;
+  letter-spacing: 0.1em;
+  color: var(--hw-ink-3);
+}
+.hw-tag [data-show="working"] {
+  color: var(--hue);
+}
+.hw-tag [data-show="done"] {
+  color: var(--hw-green);
+}
+.hw-mission {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: auto;
+  padding: 0.6em 0.8em;
+  border: 1px dashed var(--hw-line-2);
+  border-radius: 0.6em;
+  font-size: 0.82em;
+  color: var(--hw-ink-3);
+}
+.hw-mission b {
+  color: var(--hw-amber);
+}
+
+/* ---------- rack ---------- */
+.hw-rack {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.6em;
+  padding: 0.7em;
+  min-height: 0;
+}
+.hw-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7em;
+  font-size: 0.92em;
+  color: var(--hw-ink-3);
+  transition: opacity 240ms var(--hw-ease);
+}
+.hw-empty-icon {
+  width: 2.6em;
+  height: 2.6em;
+  color: var(--hw-line-2);
+}
+.hw-empty .hw-mission-cta {
+  margin-top: 0.3em;
+  color: var(--hw-ink-2);
+  border-color: color-mix(in oklch, var(--hw-amber) 55%, transparent);
+  animation: hw-cta 2.2s ease-in-out infinite;
+}
+.hw-mission-cta .hw-kbd {
+  margin-left: 0.4em;
+}
+.helm-stage:not([data-step="0"]) .hw-empty {
+  opacity: 0;
+}
+
+.hw-pane {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: clip;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.8em;
+  background: var(--hw-pane);
+  opacity: 0;
+  translate: 0 -0.6em;
+  scale: 0.96;
+  transition:
+    opacity 320ms var(--hw-ease) calc(var(--i) * 90ms),
+    translate 520ms var(--hw-ease) calc(var(--i) * 90ms),
+    scale 520ms var(--hw-ease) calc(var(--i) * 90ms),
+    border-color 200ms var(--hw-ease),
+    box-shadow 320ms var(--hw-ease);
+}
+.helm-stage:not([data-step="0"]) .hw-pane {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+/* Atlas holds focus while the crew works. */
+.helm-stage:is([data-step="2"], [data-step="3"]) .hw-pane[data-pane="atlas"] {
+  border-color: var(--hw-amber);
+  box-shadow:
+    0 0 0 1px var(--hw-amber),
+    0 0 1.6em -0.2em hsl(38 92% 61% / 0.35);
+}
+/* Sable lights up when the note lands. */
+.helm-stage[data-step="3"] .hw-pane[data-pane="sable"] {
+  animation: hw-ring 1.4s var(--hw-ease) 1.35s 2 both;
+}
+.helm-stage[data-step="4"] .hw-pane {
+  border-color: color-mix(in oklch, var(--hw-green) 45%, var(--hw-line));
+}
+
+.hw-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+  min-width: 0;
+  height: 2.6em;
+  padding-inline: 0.85em 0.7em;
+}
+.hw-sign {
+  font-size: 0.95em;
+  font-weight: 600 !important;
+}
+.hw-state {
+  font-family: var(--font-mono);
+  font-size: 0.58em;
+  letter-spacing: 0.11em;
+}
+.hw-state > b {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.25em 0.6em;
+  border-radius: 0.4em;
+  border: 1px solid var(--hw-line-2);
+  color: var(--hw-ink-3);
+  white-space: nowrap;
+}
+.hw-state [data-show="working"] {
+  border-color: transparent;
+  background: hsl(248 70% 74% / 0.16);
+  color: var(--hw-indigo);
+}
+.hw-state [data-show="done"] {
+  border-color: hsl(151 46% 56% / 0.45);
+  background: hsl(151 46% 56% / 0.12);
+  color: var(--hw-green);
+}
+.hw-state .hw-icon {
+  width: 1.4em;
+  height: 1.4em;
+}
+.hw-engine {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  margin-left: auto;
+  padding: 0.22em 0.75em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  color: var(--hw-ink-2);
+  white-space: nowrap;
+}
+.hw-engine[data-live] {
+  border-color: hsl(38 92% 61% / 0.55);
+  background: hsl(38 92% 61% / 0.1);
+  color: var(--hw-amber);
+}
+.hw-engine i {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: currentColor;
+}
+.hw-head-icon {
+  width: 1em;
+  height: 1em;
+  color: var(--hw-faint);
+}
+
+/* Activity strip: a hue gradient runs along it while the pane works. */
+.hw-strip {
+  position: relative;
+  height: 2px;
+  overflow: clip;
+  background: linear-gradient(90deg, var(--hw-line), transparent 80%);
+}
+.hw-strip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--hw-indigo) 40%, hsl(295 50% 64%) 60%, transparent);
+  opacity: 0;
+  translate: -100% 0;
+}
+.helm-stage:is([data-step="2"], [data-step="3"]) .hw-strip::after {
+  opacity: 1;
+  animation: hw-run 2.6s linear infinite;
+  animation-delay: calc(var(--i) * -0.7s);
+}
+.helm-stage[data-step="4"] .hw-strip {
+  background: linear-gradient(90deg, hsl(151 46% 56% / 0.7), transparent 85%);
+}
+
+/* Terminal. */
+.hw-term {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 0;
+  overflow: clip;
+  padding: 0.7em 0.9em;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  line-height: 1.65;
+  color: var(--hw-ink);
+}
+.hw-banner {
+  color: var(--hw-banner);
+}
+.hw-prompt {
+  color: var(--hw-ink-3);
+}
+.hw-prompt b {
+  color: var(--hw-amber);
+}
+.hw-line {
+  position: relative;
+  display: none;
+  max-width: 100%;
+  overflow: clip;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.hw-line[data-tone="ok"] {
+  color: var(--hw-green);
+}
+.hw-line[data-tone="note"] {
+  color: var(--hw-amber);
+}
+.hw-line[data-tone="dim"] {
+  color: var(--hw-ink-3);
+}
+.helm-stage[data-step="2"] .hw-line[data-at="2"],
+.helm-stage[data-step="3"] .hw-line:is([data-at="2"], [data-at="3"]),
+.helm-stage[data-step="4"] .hw-line {
+  display: block;
+}
+/* Typing: a cover in the pane colour slides off the text one character per step; its left
+   edge is the caret. Transform only. */
+.hw-line::after,
+.hw-typed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--cover, var(--hw-pane));
+  border-left: 0.55em solid transparent;
+  animation: hw-type var(--dur) steps(var(--chars)) var(--delay) both;
+}
+.hw-caret {
+  display: block;
+  width: 0.55em;
+  height: 1.2em;
+  margin-top: 0.15em;
+  background: var(--hw-amber);
+  animation: hw-blink 1.05s steps(1) infinite;
+}
+
+/* ---------- message in flight (step 3) ---------- */
+.hw-flight {
+  position: absolute;
+  inset: 0.7em;
+  container-type: size;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 260ms var(--hw-ease);
+}
+.helm-stage[data-step="3"] .hw-flight {
+  opacity: 1;
+}
+.hw-arc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.hw-arc path {
+  fill: none;
+  stroke: var(--hw-amber);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 2 6;
+}
+.helm-stage[data-step="3"] .hw-arc path {
+  animation: hw-march 0.9s linear infinite;
+}
+.hw-note {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  gap: 0.2em;
+  padding: 0.55em 0.8em;
+  border-radius: 0.5em;
+  background: oklch(0.93 0.045 295);
+  color: oklch(0.26 0.03 295);
+  font-size: 0.8em;
+  line-height: 1.3;
+  white-space: nowrap;
+  box-shadow:
+    0 1px 0 hsl(260 40% 10% / 0.2),
+    0 0.8em 1.6em -0.6em hsl(260 50% 5% / 0.7);
+  translate: calc(30cqw - 50%) calc(32cqh - 50%);
+  rotate: -4deg;
+}
+.helm-stage[data-step="3"] .hw-note {
+  animation: hw-fly 1.5s var(--hw-ease) 0.15s both;
+}
+.hw-note-route {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+.hw-note-route b {
+  color: oklch(0.55 0.13 60);
+}
+.hw-note-body {
+  font-weight: 600;
+}
+
+/* ---------- merge toast (step 4) ---------- */
+.hw-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 1.4em;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.55em 1em 0.55em 0.65em;
+  border: 1px solid hsl(151 46% 56% / 0.45);
+  border-radius: 999px;
+  background: hsl(259 17% 14% / 0.96);
+  box-shadow: 0 1em 2em -1em hsl(260 50% 4% / 0.8);
+  font-size: 0.86em;
+  white-space: nowrap;
+  opacity: 0;
+  translate: -50% 1em;
+  transition:
+    opacity 260ms var(--hw-ease),
+    translate 520ms var(--hw-ease);
+}
+.hw-toast .hw-icon {
+  width: 1.5em;
+  height: 1.5em;
+  padding: 0.25em;
+  border-radius: 50%;
+  background: var(--hw-green);
+  color: var(--hw-ground);
+}
+.hw-toast b {
+  font-family: var(--font-mono);
+  color: var(--hw-green);
+}
+.hw-toast-meta {
+  padding-left: 0.6em;
+  border-left: 1px solid var(--hw-line-2);
+  color: var(--hw-ink-3);
+}
+.helm-stage[data-step="4"] .hw-toast {
+  opacity: 1;
+  translate: -50% 0;
+  transition-delay: 0.9s;
+}
+
+/* ---------- command bar ---------- */
+.hw-command {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding-inline: 1em;
+  border-top: 1px solid var(--hw-line);
+  background: var(--hw-ground-2);
+}
+.hw-route {
+  display: inline-flex;
+  padding: 0.25em 0.75em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  color: var(--hw-ink-2);
+  white-space: nowrap;
+}
+.hw-route [data-show="peer"] {
+  color: var(--hw-amber);
+}
+.hw-composer {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  flex: 0 1 30em;
+  min-width: 0;
+  padding: 0.45em 0.8em;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.55em;
+  background: var(--hw-ground);
+  font-family: var(--font-mono);
+  font-size: 0.76em;
+  white-space: nowrap;
+  overflow: clip;
+}
+.hw-composer > b {
+  color: var(--hw-amber);
+}
+.hw-composer [data-show="placeholder"] {
+  color: var(--hw-faint);
+}
+.hw-typed {
+  position: relative;
+  display: inline-block;
+  --cover: var(--hw-ground);
+  --chars: 40;
+  --dur: 1100ms;
+  --delay: 0ms;
+}
+.hw-typed::after {
+  animation: none;
+  translate: calc(100% + 0.6em) 0;
+}
+.helm-stage[data-step="2"] .hw-typed::after {
+  animation: hw-type var(--dur) steps(var(--chars)) var(--delay) both;
+}
+
+/* ---------- phone composition: compact 2x2, no rail ---------- */
+@container hw (max-width: 36rem) {
+  .hw {
+    aspect-ratio: 1 / 0.8;
+    font-size: clamp(8px, 2.75cqi, 11.5px);
+    grid-template-rows: 3em minmax(0, 1fr) 3.1em;
+  }
+  .hw-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hw-rail,
+  .hw-tools .hw-icon,
+  .hw-head-icon,
+  .hw-state,
+  .hw-banner,
+  .hw-toast-meta,
+  [data-phone="hide"] {
+    display: none !important;
+  }
+  .hw-rack {
+    gap: 0.5em;
+    padding: 0.55em;
+  }
+  .hw-flight {
+    inset: 0.55em;
+  }
+  .hw-head {
+    padding-inline: 0.7em 0.6em;
+    height: 2.4em;
+  }
+  .hw-term {
+    padding: 0.55em 0.7em;
+    font-size: 0.74em;
+    line-height: 1.55;
+  }
+  .hw-composer {
+    flex: 1 1 auto;
+  }
+  .hw-toast {
+    bottom: 1em;
+    font-size: 0.8em;
+  }
+}
+
+/* ---------- keyframes ---------- */
+@keyframes hw-breathe {
+  0%,
+  100% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes hw-cta {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 hsl(38 92% 61% / 0);
+  }
+  50% {
+    box-shadow: 0 0 0 0.35em hsl(38 92% 61% / 0.14);
+  }
+}
+@keyframes hw-glyph {
+  from {
+    opacity: 0.9;
+    scale: 0.94;
+  }
+  to {
+    opacity: 0;
+    scale: 1.6;
+  }
+}
+@keyframes hw-run {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 100% 0;
+  }
+}
+@keyframes hw-type {
+  0% {
+    translate: 0 0;
+    border-left-color: transparent;
+  }
+  0.1% {
+    border-left-color: var(--hw-amber);
+  }
+  100% {
+    translate: calc(100% + 0.6em) 0;
+    border-left-color: var(--hw-amber);
+  }
+}
+@keyframes hw-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes hw-march {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+@keyframes hw-ring {
+  0% {
+    box-shadow: 0 0 0 0 hsl(38 92% 61% / 0.6);
+    border-color: var(--hw-amber);
+  }
+  100% {
+    box-shadow: 0 0 0 0.9em hsl(38 92% 61% / 0);
+    border-color: var(--hw-amber);
+  }
+}
+/* The note follows the arc M30 32 Q82 10 70 55 (rack percentages), sampled at t = 0 .25 .5 .75 1,
+   lands on Sable's header and is absorbed into the pane. */
+@keyframes hw-fly {
+  0% {
+    translate: calc(30cqw - 50%) calc(32cqh - 50%);
+    rotate: -8deg;
+    scale: 0.6;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    scale: 1;
+  }
+  22% {
+    translate: calc(52cqw - 50%) calc(25.2cqh - 50%);
+    rotate: -2deg;
+  }
+  44% {
+    translate: calc(66cqw - 50%) calc(26.8cqh - 50%);
+    rotate: 4deg;
+  }
+  64% {
+    translate: calc(72cqw - 50%) calc(36.7cqh - 50%);
+    rotate: 2deg;
+  }
+  84% {
+    translate: calc(70cqw - 50%) calc(55cqh - 50%);
+    rotate: -3deg;
+    scale: 1;
+    opacity: 1;
+  }
+  100% {
+    translate: calc(70cqw - 50%) calc(58cqh - 50%);
+    rotate: 0deg;
+    scale: 0.4;
+    opacity: 0;
+  }
+}
+
+/* ==================================================================
+   Reduced motion: StickyStage puts the stage in normal flow at the
+   last step. Show every beat as a list and the finished window, with
+   the hand-off still drawn so the static picture tells all five beats.
+   ================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .helm-layout {
+    height: auto;
+    padding-block: 0;
+    align-items: start;
+  }
+  .helm-beats {
+    gap: 1.25rem;
+  }
+  .helm-beat {
+    grid-area: auto;
+    opacity: 1;
+    translate: none;
+    filter: none;
+  }
+  .helm-progress {
+    display: none;
+  }
+  .helm-meta {
+    display: flex;
+  }
+  .helm-lede {
+    display: block;
+  }
+  /* The hand-off reads from the two terminal lines (Atlas -> Sable, Sable <- Atlas). */
+  .hw-flight {
+    display: none;
+  }
+  .hw-arc path,
+  .hw-lamp,
+  .hw-caret,
+  .hw-strip::after,
+  .hw-empty .hw-mission-cta {
+    animation: none !important;
+  }
+  .hw-line::after,
+  .hw-typed::after {
+    display: none;
+  }
+}
