@@ -5,12 +5,17 @@ import { Governor } from "../engine/governor";
 import { readPalette } from "../engine/palette";
 import { TargetClient } from "../targets/client";
 import { settledSeed } from "../targets/sample-mask";
-import type { Box } from "../targets/types";
+import type { Box, Targets } from "../targets/types";
 
 /**
  * The hero choreography, framework-free. One authored moment, then the material moving:
- *   burst (0 to 450 ms) -> the dust forms the wordmark under the DOM text -> once settled the
- *   DOM wordmark cross-fades out (data-fx="on") -> calm drift by 2.3 s.
+ *   burst (0 to 450 ms) -> the dust forms the wordmark under the DOM text -> once the glyph
+ *   particles have measurably converged onto the DOM glyphs the DOM wordmark cross-fades out
+ *   (data-fx="on") -> calm drift by 2.3 s.
+ * The opening plays once per page load and only while it can be seen: if the hero is off screen
+ * (or the tab hidden) when it would play, or leaves view mid-way, the field resumes settled.
+ * Resize: the canvas hides at once (the DOM wordmark shows) until the field has refit to the new
+ * layout, then cross-fades back; a stale frame never covers text.
  * Scroll-out (SIAN scrollFade): the name loosens into dust over 1.5 viewports, then the loop
  * stops. Reduced motion: seed at the final wordmark, settle, stop. Any failure: tier "off",
  * the server-rendered wordmark simply stays.
@@ -24,8 +29,15 @@ const STAGE: Record<"burst" | "form" | "calm" | "still", Partial<Params>> = {
 };
 
 const T_FORM = 450;
+/** Earliest DOM hand-off; it then waits for measured convergence. */
 const T_SETTLED = 1450;
+/** Hand off regardless after this (convergence cannot be measured, or never gets there). */
+const T_HANDOFF_MAX = 4000;
 const T_CALM = 2300;
+/** Mean glyph-particle distance to target (CSS px) under which the field reads as the DOM glyphs. */
+const CONV_PX = 1.5;
+/** A refit reveals regardless after this long. */
+const REFIT_MAX = 1200;
 
 export type StageEls = {
   /** The hero section ([data-hero]); receives data-fx and data-fx-tier. */
@@ -44,18 +56,66 @@ type Debug = {
   engine: ParticleEngine | null;
   governor: Governor | null;
   phase: string;
+  /** Last measured convergence (CSS px), -1 when unmeasured. */
+  conv: number;
+  ink: { x: number; y: number; w: number; h: number; src: string } | null;
 };
+
+let textCtx: CanvasRenderingContext2D | null = null;
+
+/**
+ * The DOM wordmark's rendered ink box in viewport px, measured rather than assumed: a Range over
+ * the text gives the pen origin and the font's content box (baseline = top + font ascent), and
+ * canvas text metrics with the same font and tracking give the ink extents around that origin
+ * (side bearings included). Null when the platform cannot measure (no letterSpacing on canvas,
+ * no font metrics) or the result disagrees with the baked geometry by more than 4%.
+ */
+function measureInk(el: HTMLElement, cs: CSSStyleDeclaration, fs: number): Box | null {
+  const text = (el.textContent ?? "").trim();
+  if (!text) return null;
+  textCtx ??= document.createElement("canvas").getContext("2d");
+  const ctx = textCtx as (CanvasRenderingContext2D & { letterSpacing?: string; fontKerning?: string }) | null;
+  if (!ctx || !("letterSpacing" in ctx)) return null;
+  ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${fs}px ${cs.fontFamily}`;
+  ctx.letterSpacing = cs.letterSpacing === "normal" ? "0px" : cs.letterSpacing;
+  ctx.fontKerning = cs.fontKerning === "none" ? "none" : "normal";
+  const m = ctx.measureText(text);
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const rr = range.getBoundingClientRect();
+  if (!rr.width || !m.fontBoundingBoxAscent) return null;
+  const baseline = rr.top + m.fontBoundingBoxAscent;
+  const box: Box = {
+    x: rr.left - m.actualBoundingBoxLeft,
+    y: baseline - m.actualBoundingBoxAscent,
+    w: m.actualBoundingBoxLeft + m.actualBoundingBoxRight,
+    h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent,
+  };
+  const off = (a: number, b: number) => Math.abs(a / (b * fs) - 1) > 0.04;
+  if (off(box.w, WORDMARK_EM.w) || off(box.h, WORDMARK_EM.h)) return null;
+  return box;
+}
 
 export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   const { hero, stage, canvas, wordmark } = els;
   const env = readEnv();
-  const debug: Debug = { tier: "off", reason: "", renderer: "", engine: null, governor: null, phase: "boot" };
+  const debug: Debug = {
+    tier: "off",
+    reason: "",
+    renderer: "",
+    engine: null,
+    governor: null,
+    phase: "boot",
+    conv: -1,
+    ink: null,
+  };
   (window as Window & { __kzFx?: Debug }).__kzFx = debug;
 
   const cleanups: (() => void)[] = [];
   let dead = false;
   const timers: number[] = [];
   const later = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
+  const clearTimers = () => timers.splice(0).forEach((t) => clearTimeout(t));
 
   const setTier = (tier: Tier, reason: string) => {
     debug.tier = tier;
@@ -65,7 +125,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
 
   const teardown = () => {
     dead = true;
-    timers.forEach((t) => clearTimeout(t));
+    clearTimers();
     cleanups.splice(0).forEach((fn) => fn());
   };
 
@@ -122,14 +182,22 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     const r = wordmark.getBoundingClientRect();
     const cs = getComputedStyle(wordmark);
     const fs = parseFloat(cs.fontSize);
-    const left = r.left + parseFloat(cs.paddingLeft) - c.left;
-    const top = r.top + parseFloat(cs.paddingTop) - c.top;
-    const ink: Box = {
-      x: left + WORDMARK_EM.x0 * fs,
-      y: top + WORDMARK_EM.y0 * fs,
-      w: WORDMARK_EM.w * fs,
-      h: WORDMARK_EM.h * fs,
-    };
+    const measured = measureInk(wordmark, cs, fs);
+    let ink: Box;
+    if (measured) {
+      ink = { x: measured.x - c.left, y: measured.y - c.top, w: measured.w, h: measured.h };
+    } else {
+      // Baked fallback: the ink box relative to the content box, from the bake.
+      const left = r.left + parseFloat(cs.paddingLeft) - c.left;
+      const top = r.top + parseFloat(cs.paddingTop) - c.top;
+      ink = {
+        x: left + WORDMARK_EM.x0 * fs,
+        y: top + WORDMARK_EM.y0 * fs,
+        w: WORDMARK_EM.w * fs,
+        h: WORDMARK_EM.h * fs,
+      };
+    }
+    debug.ink = { ...ink, src: measured ? "measured" : "baked" };
     return { cw: c.width, ch: c.height, fs, ink };
   };
   type Layout = ReturnType<typeof measure>;
@@ -182,10 +250,83 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     engine.fade = 1 - p;
   };
   const shouldRun = () => motion && visible && !document.hidden && scrollP < 0.999;
+
+  /* ---------- opening, hand-off, refit ---------- */
+  // "idle" before boot, "playing" while the burst runs, "aborted" if it was paused mid-way (it
+  // never replays), "done" once the field is settled.
+  let opening: "idle" | "playing" | "aborted" | "done" = "idle";
+  let targets: Targets | null = null;
+  let openedAt = 0;
+  let handed = false;
+  let wantHandoff = false;
+  let refitting = false;
+  /** Frame count after which a refit may reveal; Infinity until the new targets are in. */
+  let revealFrom = Infinity;
+  let revealAt = 0;
+  let xfadeTimer = 0;
+  let watchTick = 0;
+
+  const handoff = () => {
+    wantHandoff = false;
+    handed = true;
+    hero.dataset.fx = "on";
+    if (debug.phase === "form" || debug.phase === "burst") debug.phase = "settled";
+  };
+
+  /** Park the field at its targets in calm drift: the resume path, never a second opening. */
+  const settleNow = () => {
+    clearTimers();
+    opening = "done";
+    stage0 = motion ? "calm" : "still";
+    debug.phase = stage0;
+    governor.locked = false;
+    apply(true);
+    if (targets) engine.seed(settledSeed(targets));
+  };
+
+  const reveal = () => {
+    refitting = false;
+    revealFrom = Infinity;
+    delete stage.dataset.refit;
+    stage.dataset.xfade = "";
+    clearTimeout(xfadeTimer);
+    xfadeTimer = window.setTimeout(() => delete stage.dataset.xfade, 600);
+    handoff();
+  };
+
+  /** Called after every rendered frame (motion tiers): measured gates for hand-off and reveal. */
+  const watch = () => {
+    if (!wantHandoff && !refitting) return;
+    if (++watchTick % 4) return;
+    const c = engine.convergence();
+    debug.conv = c ?? -1;
+    const now = performance.now();
+    const close = c !== null && (c < CONV_PX || scrollP > 0);
+    if (refitting) {
+      if (engine.frames > revealFrom && (close || now - revealAt > REFIT_MAX)) reveal();
+      return;
+    }
+    if (close || now - openedAt > T_HANDOFF_MAX) handoff();
+  };
+
   const sync = () => {
     if (dead) return;
-    if (shouldRun()) engine.start();
-    else engine.stop();
+    if (shouldRun()) {
+      if (opening === "aborted") {
+        // Parameters snap to the current scroll state here, at resume, not when it was paused.
+        settleNow();
+        openedAt = performance.now();
+        wantHandoff = !handed && !refitting;
+      }
+      engine.start();
+    } else {
+      engine.stop();
+      if (opening === "playing") {
+        // Paused mid-opening (scrolled away, tab hidden): drop it; it resumes settled, never replays.
+        clearTimers();
+        opening = "aborted";
+      }
+    }
   };
 
   /* ---------- boot ---------- */
@@ -199,19 +340,21 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       (fit.ink.x + fit.ink.w / 2 - fit.cw / 2) * worldPerPx(fit.ch),
       -(fit.ink.y + fit.ink.h / 2 - fit.ch / 2) * worldPerPx(fit.ch),
     ] as const;
-    const [targets, burst] = await Promise.all([
+    const [t0, burst] = await Promise.all([
       targetsFor(fit),
       motion
         ? client.burst({ N: engine.N, origin, speed: fit.ink.w * worldPerPx(fit.ch) * 0.55 })
         : Promise.resolve(null),
     ]);
     if (dead) return;
-    engine.setTargets(targets, pointCss(fit.fs));
-    engine.seed(burst ?? settledSeed(targets));
+    targets = t0;
+    engine.setTargets(t0, pointCss(fit.fs));
+    engine.seed(burst ?? settledSeed(t0));
     debug.phase = motion ? "burst" : "still";
 
     engine.onFrame = (raw, now) => {
       if (!stage.dataset.ready) stage.dataset.ready = "";
+      watch();
       const v = governor.sample(raw, now);
       if (!v) return;
       if ("kill" in v) goOff(`probe: ${v.reason}`);
@@ -220,13 +363,26 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
 
     if (!motion) {
       apply(true);
+      opening = "done";
       engine.settle(40, () => {
-        hero.dataset.fx = "on";
+        handoff();
         debug.phase = "still";
       });
       return;
     }
 
+    // The opening needs an audience: on screen, tab visible, page at the top.
+    const r = stage.getBoundingClientRect();
+    const onScreen = r.bottom > 0 && r.top < window.innerHeight && !document.hidden && scrollP < 0.05;
+    openedAt = performance.now();
+    if (!onScreen) {
+      // No opening without an audience: the field parks settled when it is first seen.
+      opening = "aborted";
+      sync();
+      return;
+    }
+
+    opening = "playing";
     stage0 = "burst";
     apply(true);
     sync();
@@ -236,10 +392,10 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       apply();
     });
     later(T_SETTLED, () => {
-      hero.dataset.fx = "on";
-      debug.phase = "settled";
+      wantHandoff = !handed && !refitting;
     });
     later(T_CALM, () => {
+      opening = "done";
       stage0 = "calm";
       debug.phase = "calm";
       governor.locked = false;
@@ -332,36 +488,61 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
 
   let resizeTimer = 0;
   let resizeSeq = 0;
-  const ro = new ResizeObserver(() => {
-    clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(async () => {
-      const next = measure();
-      if (sameLayout(next, layout)) return;
-      layout = next;
-      const seq = ++resizeSeq;
-      try {
-        const t = await targetsFor(next);
-        if (dead || seq !== resizeSeq) return;
-        engine.setTargets(t, pointCss(next.fs));
-        if (!motion) {
-          engine.seed(settledSeed(t));
-          engine.settle(20);
+  const refit = async () => {
+    const next = measure();
+    layout = next;
+    const seq = ++resizeSeq;
+    try {
+      const t = await targetsFor(next);
+      if (dead || seq !== resizeSeq) return;
+      targets = t;
+      engine.setTargets(t, pointCss(next.fs));
+      settleNow();
+      revealFrom = engine.frames;
+      revealAt = performance.now();
+      if (!motion) {
+        engine.settle(20, () => {
+          if (seq === resizeSeq) reveal();
+        });
+      } else {
+        sync();
+        if (!engine.isRunning) {
+          // Off screen or scrolled out: draw once at the new size so nothing stale waits there.
+          engine.redraw();
+          if (seq === resizeSeq) reveal();
         }
-      } catch {
-        /* keep the previous targets */
       }
-    }, 150);
+    } catch {
+      /* keep the canvas hidden: the DOM wordmark stays */
+    }
+  };
+  const ro = new ResizeObserver(() => {
+    if (!targets) return;
+    const next = measure();
+    if (sameLayout(next, layout) && !refitting) return;
+    // Same task as the layout change, before paint: the old-scale frame never shows.
+    refitting = true;
+    revealFrom = Infinity;
+    wantHandoff = false;
+    stage.dataset.refit = "";
+    delete stage.dataset.xfade;
+    delete hero.dataset.fx;
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(refit, 150);
   });
   ro.observe(stage);
   ro.observe(wordmark);
   cleanups.push(() => {
     ro.disconnect();
     clearTimeout(resizeTimer);
+    clearTimeout(xfadeTimer);
   });
 
   return () => {
     teardown();
     delete hero.dataset.fx;
     delete stage.dataset.ready;
+    delete stage.dataset.refit;
+    delete stage.dataset.xfade;
   };
 }

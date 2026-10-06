@@ -128,6 +128,18 @@ export class ParticleEngine {
   private ro: ResizeObserver | null = null;
   private cap: FrameCap;
   private hasTargets = false;
+  private targetPos: Float32Array | null = null;
+  private readback: Float32Array | null = null;
+  // Paper ink (light theme only), tuned against filmstrips: landed-ink gain and its blur radius
+  // (in point sizes, so small wordmarks stay crisp), airborne-dust gain and its coverage cap.
+  /** A glyph particle prints as ink within this many CSS px of its target; farther, it is dust. */
+  landPx = 3;
+  inkK = 40;
+  inkR = 1.24;
+  airK = 5;
+  airMax = 0.4;
+  /** Frames rendered so far (the stage waits on this after a refit). */
+  frames = 0;
   private framesLeft = -1;
   private onSettled: (() => void) | null = null;
   private frame = (now: number) => this.tick(now);
@@ -173,7 +185,7 @@ export class ParticleEngine {
     };
     const progs = {
       sim: make(quadVS, simFS, ["uPos", "uVel", "uTarget"]),
-      point: make(pointVS, pointFS, ["uPos", "uVel", "uCol"]),
+      point: make(pointVS, pointFS, ["uPos", "uVel", "uCol", "uTarget"]),
       down: make(quadVS, downFS, ["uTex"]),
       blur: make(quadVS, blurFS, ["uTex"]),
       comp: make(quadVS, compFS, ["uScene", "uBloomA", "uBloomB"]),
@@ -272,7 +284,40 @@ export class ParticleEngine {
     gl.bindTexture(gl.TEXTURE_2D, sim.col);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, this.side, this.side, 0, gl.RGBA, gl.UNSIGNED_BYTE, t.col);
     this.layout = { pointCss, glyphs: Math.max(1, t.glyphs), glyphArea: Math.max(1, t.glyphArea) };
+    this.targetPos = t.pos;
     this.hasTargets = true;
+  }
+
+  /**
+   * Measured convergence: mean distance (CSS px, z ignored) between glyph particles and their
+   * targets over the first `rows` texture rows (always simulated, a random sample since targets
+   * are drawn at random). One small synchronous readback; call it a few times a second at most.
+   * Returns null when it cannot be measured.
+   */
+  convergence(rows = 2): number | null {
+    const gl = this.gl,
+      sim = this.sim,
+      scr = this.scr,
+      tp = this.targetPos;
+    if (!sim || !scr || !tp || gl.isContextLost()) return null;
+    const n = this.side * Math.min(rows, this.side);
+    if (!this.readback || this.readback.length !== n * 4) this.readback = new Float32Array(n * 4);
+    const buf = this.readback;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, sim.fbo[sim.cur]);
+    gl.readBuffer(gl.COLOR_ATTACHMENT0);
+    gl.readPixels(0, 0, this.side, Math.min(rows, this.side), gl.RGBA, gl.FLOAT, buf);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if (gl.getError() !== gl.NO_ERROR) return null;
+    let sum = 0,
+      cnt = 0;
+    for (let i = 0; i < n; i++) {
+      const o = i * 4;
+      if (tp[o + 3] < 0.5) continue;
+      sum += Math.hypot(buf[o] - tp[o], buf[o + 1] - tp[o + 1]);
+      cnt++;
+    }
+    if (!cnt || !Number.isFinite(sum)) return null;
+    return sum / cnt / worldPerPx(scr.ch);
   }
 
   /** Reset particle state (a burst, or positions already at the target). */
@@ -486,6 +531,7 @@ export class ParticleEngine {
     this.time += dt;
     if (dt > 0) this.step(dt);
     this.draw();
+    this.frames++;
   }
 
   private rows(): number {
@@ -558,7 +604,8 @@ export class ParticleEngine {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, scr.sceneFbo);
     gl.viewport(0, 0, scr.w, scr.h);
-    gl.clearColor(0, 0, 0, 1);
+    // Alpha carries airborne ink density on paper; it must start at zero there.
+    gl.clearColor(0, 0, 0, this.palette.mode ? 0 : 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE);
@@ -566,12 +613,15 @@ export class ParticleEngine {
     this.bind(0, sim.pos[sim.cur]);
     this.bind(1, sim.vel[sim.cur]);
     this.bind(2, sim.col);
+    this.bind(3, sim.target);
     const u = pr.point.u;
     gl.uniformMatrix4fv(u.uVP, false, this.VP);
     gl.uniform1f(u.uSide, this.side);
     gl.uniform1f(u.uPointPx, ps);
     gl.uniform1f(u.uIntensity, intensity);
     gl.uniform3fv(u.uHot, this.palette.hot);
+    gl.uniform1f(u.uLight, this.palette.mode);
+    gl.uniform1f(u.uLand, this.landPx * worldPerPx(scr.ch));
     gl.drawArrays(gl.POINTS, 0, drawn);
     gl.disable(gl.BLEND);
 
@@ -605,7 +655,10 @@ export class ParticleEngine {
     gl.uniform1f(cu.uFade, this.fade);
     gl.uniform1f(cu.uBloomMix, pal.mode ? 0.35 : 0.6);
     gl.uniform1f(cu.uMode, pal.mode);
-    gl.uniform1f(cu.uInkGain, 9);
+    gl.uniform1f(cu.uInkK, this.inkK);
+    gl.uniform1f(cu.uInkR, Math.max(0.8, this.inkR * this.layout.pointCss) * scr.dpr);
+    gl.uniform1f(cu.uAirK, this.airK);
+    gl.uniform1f(cu.uAirMax, this.airMax);
     gl.uniform3fv(cu.uGround, pal.ground);
     gl.uniform3fv(cu.uInk, pal.ink);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

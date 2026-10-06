@@ -40,4 +40,49 @@ test.describe("hero fx", () => {
       await expect(page.locator(".fx-stage[data-ready]")).toHaveCount(1, { timeout: 10_000 });
     }
   });
+
+  test("a resize never shows a stale frame: the canvas hides at once, then the field refits", async ({ page }) => {
+    await page.goto("/");
+    const hero = page.locator("[data-hero]");
+    await expect(hero).toHaveAttribute("data-fx-tier", /^(off|still|lite|full)$/, { timeout: 10_000 });
+    test.skip((await hero.getAttribute("data-fx-tier")) === "off", "field is off on this renderer");
+    await expect(hero).toHaveAttribute("data-fx", "on", { timeout: 10_000 });
+    const size = page.viewportSize()!;
+    await page.setViewportSize({ width: size.height, height: size.width });
+    const right = await page.evaluate(() => ({
+      canvas: getComputedStyle(document.querySelector(".fx-canvas")!).opacity,
+      wordmark: getComputedStyle(document.querySelector("[data-hero-wordmark]")!).opacity,
+    }));
+    expect(right).toEqual({ canvas: "0", wordmark: "1" });
+    await expect(page.locator(".fx-stage[data-refit]")).toHaveCount(0, { timeout: 5_000 });
+    await expect(hero).toHaveAttribute("data-fx", "on");
+  });
+});
+
+test.describe("masthead", () => {
+  const mark = "[data-masthead-mark]";
+
+  test("switches state with the hero wordmark, never scrubbed", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator(mark)).toHaveCSS("opacity", "0");
+    await page.evaluate(() => window.scrollTo(0, 900));
+    await expect(page.locator("html")).toHaveAttribute("data-hero-passed", "");
+    await expect(page.locator(mark)).toHaveCSS("opacity", "1");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(page.locator("html")).not.toHaveAttribute("data-hero-passed", "");
+    await expect(page.locator(mark)).toHaveCSS("opacity", "0");
+  });
+
+  test("is simply visible under reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator(mark)).toHaveCSS("opacity", "1");
+  });
+
+  test("is visible on pages without a hero", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/cv");
+    await expect(page.locator(mark)).toHaveCSS("opacity", "1");
+  });
 });

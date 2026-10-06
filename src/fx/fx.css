@@ -28,8 +28,17 @@
 .fx-stage[data-ready] .fx-canvas {
   opacity: 1;
 }
+/* Refit after a resize: the old-scale frame is never shown. The canvas goes at once and the DOM
+   wordmark is back at once; when the field has refit, the canvas cross-fades in over it. */
+.fx-stage[data-refit] .fx-canvas {
+  opacity: 0;
+  transition: none;
+}
+.fx-stage[data-xfade] .fx-canvas {
+  transition: opacity var(--dur-3) var(--ease-out);
+}
 
-/* The server-rendered wordmark hands over to the particles once they have settled under it.
+/* The server-rendered wordmark hands over to the particles once they have converged under it.
    It stays in the DOM (and stays the LCP element); only its opacity changes. */
 [data-hero-wordmark] {
   transition: opacity var(--dur-4) var(--ease-out);
@@ -37,54 +46,38 @@
 [data-hero][data-fx="on"] [data-hero-wordmark] {
   opacity: 0;
 }
+[data-hero]:has(.fx-stage[data-refit]) [data-hero-wordmark] {
+  transition: none;
+}
 
 /* ------------------------------------------------------------------
    Masthead hand-off. On the home page the header's KINZEN mark is the
    resting place of the name: while the hero wordmark is on screen the mark
-   waits, scaled up and transparent; as the wordmark leaves under the header
-   the mark compresses into the strip. Scroll-driven, never scroll-jacked;
-   without support (or with reduced motion) the mark simply sits there.
+   and name are out; once the wordmark has gone under the header
+   (html[data-hero-passed], set by MastheadSync) they come in. A state
+   switch, never scrubbed, so there is no in-between resting state. Without
+   scripting, or with reduced motion, the mark simply sits there.
    ------------------------------------------------------------------ */
-@supports (animation-timeline: view()) and (timeline-scope: --a) {
-  @media (prefers-reduced-motion: no-preference) {
-    html:has([data-hero-wordmark]) {
-      timeline-scope: --kz-hero;
-    }
-    [data-hero-wordmark] {
-      view-timeline: --kz-hero block;
-      view-timeline-inset: var(--header-h) 0;
-    }
-    html:has([data-hero-wordmark]) [data-masthead-mark] {
-      display: inline-block;
-      transform-origin: 0 75%;
-      animation: kz-masthead linear both;
-      animation-timeline: --kz-hero;
-      animation-range: exit 35% exit 100%;
-    }
-    html:has([data-hero-wordmark]) [data-masthead-name] {
-      animation: kz-masthead-name linear both;
-      animation-timeline: --kz-hero;
-      animation-range: exit 70% exit 100%;
-    }
+@media (prefers-reduced-motion: no-preference) {
+  [data-masthead-mark],
+  [data-masthead-name] {
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
   }
 }
-
-@keyframes kz-masthead {
-  from {
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  html:has([data-hero-wordmark]):not([data-hero-passed]) :is([data-masthead-mark], [data-masthead-name]) {
     opacity: 0;
-    transform: translateY(0.5em) scale(1.9);
+    transform: translateY(0.35em);
+    /* Exits faster than entrances. */
+    transition-duration: var(--dur-1);
   }
-  to {
+  /* A keyboard user on the home link always sees what it is. */
+  html:has([data-hero-wordmark]):not([data-hero-passed])
+    a:focus-visible
+    :is([data-masthead-mark], [data-masthead-name]) {
     opacity: 1;
     transform: none;
-  }
-}
-
-@keyframes kz-masthead-name {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
