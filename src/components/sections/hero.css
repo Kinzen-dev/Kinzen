@@ -1,0 +1,199 @@
+/* ------------------------------------------------------------------
+   Hero v3 (ticket v3-03): kinetic line, pill CTAs, glass fact chips and
+   the scale-down exit. The scene itself is data-scene="dark" (both themes).
+   ------------------------------------------------------------------ */
+
+/* Scale-down exit (hero-scale.tsx): GSAP scrubs `scale` and --hero-r. Registered and not
+   inherited, so a scroll frame restyles the hero box alone, never its subtree. */
+@property --hero-r {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+[data-hero] {
+  transform-origin: 50% 100%;
+  border-radius: calc(var(--radius-card) * var(--hero-r));
+}
+
+/* While motion is on, the scene is its own layer from the start: the scale-down only moves a
+   finished texture (no re-raster per frame, no half-updated tiles at the edges). */
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  [data-hero] {
+    will-change: transform;
+  }
+}
+
+/* ---------- name + kinetic line ---------- */
+.hero-title {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.75rem;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+.hero-kinetic {
+  margin-top: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
+  font-size: clamp(2.125rem, 1.1rem + 3.7vw, 4.625rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+:lang(th) .hero-kinetic {
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+}
+.hero-kinetic-lead {
+  color: var(--ink-2);
+}
+.hero-kinetic-phrase {
+  --u-gap: 0.2em;
+  position: relative;
+  display: inline-block;
+  padding-bottom: var(--u-gap);
+  color: var(--ink);
+}
+/* Placed and stretched by hero-kinetic.tsx (transforms only) under the visible phrase's last line. */
+.hero-underline {
+  position: absolute;
+  left: 0;
+  top: calc(100% - var(--u-gap) - 0.36em);
+  width: 10em;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+.hero-underline .draw-path {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* ---------- CTAs: pills, 44px, symmetric --inset-btn ---------- */
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+.hero-cta:focus-visible {
+  border-radius: 999px;
+}
+.hero-cta-primary {
+  background: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 600;
+}
+.hero-cta-primary:hover {
+  background: color-mix(in oklab, var(--gold) 86%, white);
+}
+/* The beam orbits just outside the pill (gold on gold would be invisible on its own edge). */
+.hero-cta-primary.beam::before {
+  inset: -5px;
+}
+.hero-cta-primary:focus-visible {
+  outline-offset: 8px;
+}
+.hero-cta-primary svg {
+  transition: translate var(--dur-2) var(--ease-out);
+}
+.hero-cta-primary:hover svg {
+  translate: 3px 0;
+}
+.hero-cta-ghost {
+  border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
+  background: color-mix(in oklab, var(--ink) 5%, transparent);
+  color: var(--ink);
+}
+.hero-cta-ghost:hover {
+  border-color: color-mix(in oklab, var(--ink) 40%, transparent);
+  background: color-mix(in oklab, var(--ink) 11%, transparent);
+}
+
+/* ---------- glass fact chips ---------- */
+.hero-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+@media (min-width: 48rem) {
+  .hero-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.hero-chip {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: var(--inset-card);
+  border-radius: var(--radius-card);
+  border: 1px solid color-mix(in oklab, var(--ink) 12%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--ink) 9%, transparent),
+    color-mix(in oklab, var(--ink) 2.5%, transparent)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--ink) 12%, transparent),
+    0 16px 32px -24px oklch(0 0 0 / 0.7);
+}
+.hero-chip dt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hero-chip dd {
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+/* Live state (gold's job): the Bangkok clock is running. */
+.hero-live {
+  position: relative;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 999px;
+  background: var(--gold);
+  flex: none;
+}
+.hero-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--gold);
+  animation: hero-live 2.4s var(--ease-out) infinite;
+}
+@keyframes hero-live {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-live::after {
+    animation: none;
+    opacity: 0;
+  }
+  [data-hero] {
+    transform: none !important;
+  }
+}
