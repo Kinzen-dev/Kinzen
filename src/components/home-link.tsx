@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { neutralPath } from "@/lib/site-url";
 
@@ -18,6 +18,7 @@ export function HomeLink({
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "/";
+  const router = useRouter();
   return (
     <Link
       href={href}
@@ -28,7 +29,8 @@ export function HomeLink({
         e.preventDefault();
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
-        if (window.location.hash) window.history.pushState(null, "", href);
+        // Through the router so the history entry stays restorable by Back.
+        if (window.location.hash) router.push(href, { scroll: false });
         document.getElementById("main")?.focus({ preventScroll: true });
       }}
     >

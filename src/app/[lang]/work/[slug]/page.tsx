@@ -79,7 +79,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
   return (
     <article className="shell pt-8 md:pt-14">
       <p>
-        <Link href={`${home === "/" ? "" : home}/#work`} className="link text-sm text-ink-2">
+        <Link href={home === "/" ? "/#work" : `${home}#work`} className="link text-sm text-ink-2">
           <span aria-hidden="true">← </span>
           {dict.project.back}
         </Link>

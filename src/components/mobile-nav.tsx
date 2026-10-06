@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { plain } from "@/lib/thai";
 
@@ -79,13 +80,15 @@ export function MobileNav({
           <ul>
             {items.map((item) => (
               <li key={item.href} className="border-b border-rule">
-                <a
+                {/* next/link, not <a>: a native hash navigation adds a history entry the router
+                    cannot restore, so Back from a project page would leave the old page on screen. */}
+                <Link
                   href={item.href}
                   onClick={() => ref.current?.close()}
                   className="mobile-nav-link block py-4 text-2xl font-semibold tracking-[-0.03em]"
                 >
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

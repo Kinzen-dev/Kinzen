@@ -136,8 +136,14 @@ export function CommandPalette({ data }: { data: PaletteData }) {
         // trigger), then jump; the hashchange moves focus to the section.
         skipReturnRef.current = true;
         close();
-        if (window.location.hash === url.hash) window.dispatchEvent(new HashChangeEvent("hashchange"));
-        window.location.assign(url.hash);
+        // Through the router (not location.assign): native hash entries break Back later.
+        router.push(cmd.href);
+        window.setTimeout(() => {
+          const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+          if (!target) return;
+          if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+          target.focus({ preventScroll: true });
+        }, 80);
         return;
       }
       // Nothing to come back to after navigating: land focus on the page, not the old spot.

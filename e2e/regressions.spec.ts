@@ -55,3 +55,26 @@ test("switching language keeps the reading position", async ({ page, isMobile })
   await expect(page).toHaveURL(/\/th\/cv$/);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(400);
 });
+
+test("Back from a project page restores home after a section jump", async ({ page, isMobile }) => {
+  await page.goto("/");
+  if (isMobile) {
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await page.getByRole("dialog", { name: "Main" }).getByRole("link", { name: "Experience" }).click();
+  } else {
+    await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Experience" }).click();
+  }
+  await expect(page).toHaveURL(/#experience$/);
+  await page.locator("#work").scrollIntoViewIfNeeded();
+  await page.getByRole("button", { name: "Helm" }).first().click();
+  await page
+    .getByRole("link", { name: /Open project page/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/work\/helm$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/#experience$/);
+  // The home page is back on screen, not the project page under a home URL.
+  await expect(page.locator("#work")).toBeAttached();
+  await expect(page.getByRole("heading", { level: 1 })).not.toHaveText("Helm");
+});
