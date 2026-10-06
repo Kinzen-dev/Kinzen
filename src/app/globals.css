@@ -1,0 +1,292 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Tokens. One accent (gold) with one job: live state and the primary
+   action. Everything else is ink on ground. Light and dark come from
+   light-dark(); <html data-theme> pins a choice, otherwise the system wins.
+   ------------------------------------------------------------------ */
+:root {
+  color-scheme: light dark;
+
+  --ground: light-dark(oklch(0.965 0.009 85), oklch(0.165 0.006 70));
+  --surface: light-dark(oklch(0.985 0.006 85), oklch(0.2 0.006 70));
+  --ink: light-dark(oklch(0.2 0.012 65), oklch(0.94 0.012 85));
+  --ink-2: light-dark(oklch(0.42 0.012 65), oklch(0.74 0.012 80));
+  --ink-3: light-dark(oklch(0.5 0.01 70), oklch(0.66 0.01 75));
+  --rule: light-dark(oklch(0.84 0.01 80), oklch(0.3 0.008 70));
+  --rule-strong: light-dark(oklch(0.25 0.012 65), oklch(0.86 0.012 85));
+  --gold: light-dark(oklch(0.52 0.1 72), oklch(0.76 0.115 80));
+  --gold-ink: light-dark(oklch(0.985 0.006 85), oklch(0.17 0.01 70));
+  --invert-ground: var(--ink);
+  --invert-ink: var(--ground);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --dur-1: 120ms;
+  --dur-2: 240ms;
+  --dur-3: 480ms;
+  --dur-4: 700ms;
+
+  --gutter: clamp(1rem, 0.6rem + 1.8vw, 2.5rem);
+  --measure: 66ch;
+  --header-h: 3.5rem;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+
+  --font-sans: var(--font-geist), var(--font-thai), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), var(--font-thai), ui-monospace, "SF Mono", Menlo, monospace;
+
+  --ease-out-expo: var(--ease-out);
+
+  /* Type scale: text sizes stay calm, display sizes jump. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.45;
+  --text-xl: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+  --text-xl--line-height: 1.15;
+  --text-2xl: clamp(2.25rem, 1.4rem + 3.6vw, 4.5rem);
+  --text-2xl--line-height: 1.02;
+  --text-display: clamp(4.5rem, 1rem + 17vw, 20rem);
+  --text-display--line-height: 0.82;
+}
+
+@layer base {
+  html {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    scrollbar-color: var(--ink-3) var(--ground);
+    hanging-punctuation: first last;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    font-feature-settings: "ss01", "cv11";
+    overflow-x: clip;
+  }
+
+  /* Anchor targets clear the sticky header. Done per target, NOT with html scroll-padding:
+     scroll-padding makes Chrome scroll a focused sticky header control "into view", which
+     jumped the page ~460px every time anything in the header was clicked. */
+  [id] {
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  :lang(th) body {
+    line-height: 1.75;
+    /* Safety net only: a word wider than its whole container may break rather than push
+       the layout sideways. (break-word, not anywhere: anywhere also lowers min-content and
+       let tables and grids squeeze Thai words into mid-word breaks.) */
+    overflow-wrap: break-word;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    font-weight: 600;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--gold);
+    color: var(--gold-ink);
+  }
+
+  /* Sections receive focus programmatically after anchor jumps; no ring around a whole section. */
+  section[id]:focus,
+  main:focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+  }
+
+  input,
+  textarea {
+    caret-color: var(--gold);
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 96rem;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .rule-t {
+    border-top: 1px solid var(--rule);
+  }
+  .rule-b {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* Thai pages: readouts use the text face (Geist + Noto Sans Thai) with tabular figures.
+     A monospace face has no Thai, so Thai dates and labels inside it came out letter-spaced
+     ("เ ม . ย ."); one consistent face on Thai pages reads better than mixed fallbacks. */
+  :lang(th) .readout {
+    font-family: var(--font-sans);
+  }
+
+  /* Machine output only: timestamps, stack lists, readouts. */
+  .readout {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: 1.4;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+
+  .link {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-color: var(--rule);
+    transition:
+      text-decoration-color var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .link:hover {
+    text-decoration-color: var(--gold);
+  }
+
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Any open modal (phone menu, command palette) locks the page behind it. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Route transitions (View Transitions API). Exits are faster than entrances. */
+::view-transition-old(root) {
+  animation: 160ms var(--ease-out) both vt-fade-out;
+}
+/* The header is the same on both pages: keep it still instead of cross-fading it. */
+[data-site-header] {
+  view-transition-name: site-header;
+}
+::view-transition-group(site-header) {
+  animation: none;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+::view-transition-new(root) {
+  /* Starts after the shared title (480 ms morph) is mostly home, so it never flies over body copy. */
+  animation: 280ms var(--ease-out) 240ms both vt-fade-in;
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+  }
+  html {
+    background: #fff;
+    color: #000;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Hero wordmark: fills the shell width edge to edge. Six capitals of
+   Geist 600 at -0.06em tracking measure about 3.2em wide.
+   ------------------------------------------------------------------ */
+/* Phones in landscape: cap the wordmark so the name and actions share the first screen. */
+@media (orientation: landscape) and (max-height: 32rem) {
+  .hero-wordmark {
+    font-size: min(calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24), 34svh) !important;
+  }
+}
+
+.hero-wordmark {
+  /* Never wraps, even while a fallback font with wider glyphs is showing. */
+  white-space: nowrap;
+  font-size: calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24);
+  line-height: 0.76;
+  letter-spacing: -0.06em;
+  font-feature-settings: "ss01";
+  padding-bottom: 0.06em;
+}
+
+/* Known Thai compounds stay on one line (lib/thai-nodes.ts). */
+.nobr {
+  white-space: nowrap;
+}

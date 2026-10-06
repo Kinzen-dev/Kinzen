@@ -1,0 +1,50 @@
+/* ------------------------------------------------------------------
+   The site's one entrance: "proof pull". Opacity and a 2px blur clear
+   together, 240ms, 80ms stagger inside a group, played once.
+
+   Opt in with:
+     data-reveal        the element itself enters
+     data-reveal-group  its direct children enter in sequence
+
+   Content is visible by default. Hiding only happens once the motion layer
+   has run (html[data-reveal-ready]), only for elements still below the fold,
+   and never under reduced motion. Never used on the hero.
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-reveal-ready] [data-reveal]:not([data-revealed]),
+  :root[data-reveal-ready] [data-reveal-group]:not([data-revealed]) > * {
+    opacity: 0;
+    filter: blur(2px);
+  }
+
+  [data-reveal][data-revealed],
+  [data-reveal-group][data-revealed] > * {
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      filter var(--dur-2) var(--ease-out);
+  }
+
+  [data-reveal-group][data-revealed] > :nth-child(2) {
+    transition-delay: 80ms;
+  }
+  [data-reveal-group][data-revealed] > :nth-child(3) {
+    transition-delay: 160ms;
+  }
+  [data-reveal-group][data-revealed] > :nth-child(4) {
+    transition-delay: 240ms;
+  }
+  [data-reveal-group][data-revealed] > :nth-child(5) {
+    transition-delay: 320ms;
+  }
+  [data-reveal-group][data-revealed] > :nth-child(n + 6) {
+    transition-delay: 400ms;
+  }
+}
+
+@media print {
+  [data-reveal],
+  [data-reveal-group] > * {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+}

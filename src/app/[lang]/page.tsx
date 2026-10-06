@@ -1,0 +1,53 @@
+import type { Locale } from "@/content/schema";
+import { getDictionary } from "@/i18n/dictionaries";
+import { Hero } from "@/components/sections/hero";
+import { Work } from "@/components/sections/work";
+import { Experience } from "@/components/sections/experience";
+import { Practice } from "@/components/sections/practice";
+import { Skills } from "@/components/sections/skills";
+import { About } from "@/components/sections/about";
+import { Contact } from "@/components/sections/contact";
+import { JsonLd, profilePageJsonLd } from "@/lib/json-ld";
+import { HeroFx } from "@/fx/react/hero-fx";
+import { Doodle, projectDoodle } from "@/components/doodles/doodle";
+import { AgentDemo } from "@/components/agent-demo/agent-demo";
+
+const practiceIcons = {
+  "ai-teams": <Doodle name="robot-team" className="size-full" />,
+  "ai-evidence": <Doodle name="checklist-merge" className="size-full" />,
+  "ai-guards": <Doodle name="shield-braces" className="size-full" />,
+};
+
+const offClockArt = (
+  <>
+    <Doodle name="football" className="h-14" />
+    <Doodle name="car" className="h-14" />
+    <Doodle name="gamepad" className="h-14" />
+  </>
+);
+
+export default async function Home({ params }: PageProps<"/[lang]">) {
+  const { lang } = await params;
+  const locale = lang as Locale;
+  const dict = getDictionary(locale);
+
+  return (
+    <>
+      <Hero locale={locale} dict={dict} fx={<HeroFx />} />
+      <Work
+        locale={locale}
+        dict={dict}
+        renderIcon={(id) => {
+          const name = projectDoodle(id);
+          return name ? <Doodle name={name} className="size-full" /> : null;
+        }}
+      />
+      <Experience locale={locale} dict={dict} />
+      <Practice locale={locale} dict={dict} icons={practiceIcons} demo={<AgentDemo copy={dict.demo} />} />
+      <Skills locale={locale} dict={dict} />
+      <About locale={locale} dict={dict} offClockArt={offClockArt} />
+      <Contact locale={locale} dict={dict} art={<Doodle name="envelope" className="size-full" />} />
+      <JsonLd data={profilePageJsonLd(locale, dict.meta.title)} />
+    </>
+  );
+}

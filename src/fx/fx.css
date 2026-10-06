@@ -1,0 +1,115 @@
+/* ------------------------------------------------------------------
+   Hero particle field. The stage box covers the wordmark band of the hero
+   (the wordmark is about 0.82em of its own font size tall, plus its top
+   padding); the extra room below is where the dust halo and the burst live.
+   The font-size term mirrors .hero-wordmark in globals.css. If that changes,
+   only the clip area drifts: targets are always measured from the DOM.
+   ------------------------------------------------------------------ */
+.fx-stage {
+  --fx-fs: calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24);
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: max(16rem, calc(clamp(1.5rem, 5vh, 4rem) + 1.05 * var(--fx-fs)));
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Opaque and ground-coloured once drawn; hidden until the stage shows it so it never flashes. */
+.fx-host {
+  position: absolute;
+  inset: 0;
+}
+/* Who draws the name is one attribute on html, data-fx:
+     (none)   no scripting, or no field for this visit: the DOM wordmark, as served.
+     pending  set before first paint by the theme script when the field is going to run: the DOM
+              wordmark is never shown, so the dust condenses out of nothing. Safety net: it is
+              revealed after 1.8 s anyway unless the field reports a drawn frame (a failed chunk,
+              a stalled boot, a script error all end here).
+     on       the field is drawing the name; the DOM wordmark stays hidden.
+     off      the field gave up or stepped aside (light theme, resize refit): the DOM wordmark.
+   The wordmark stays in the DOM in every state. Every change is an opacity transition whose
+   length the field sets per change in --fx-xfade on the hero (200 ms when it gives up, 240 ms on
+   a theme switch, 200 ms around a refit, 0 when nothing visible changes). data-show on the stage
+   shows the canvas. */
+.fx-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity var(--fx-xfade, 0ms) var(--ease-out);
+}
+.fx-stage[data-show] .fx-canvas {
+  opacity: 1;
+  /* Set by the stage only when it takes over from a visible DOM wordmark. */
+  transition-delay: var(--fx-in-delay, 0ms);
+}
+[data-hero-wordmark] {
+  transition: opacity var(--fx-xfade, 0ms) var(--ease-out);
+}
+html[data-fx="pending"] [data-hero-wordmark] {
+  opacity: 0;
+  animation: fx-safety-net 200ms var(--ease-out) 1.8s both;
+}
+html[data-fx="on"] [data-hero-wordmark] {
+  opacity: 0;
+}
+@keyframes fx-safety-net {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Reduced motion switched on before the field could answer: the static wordmark at once. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx="pending"] [data-hero-wordmark] {
+    opacity: 1;
+    animation: none;
+  }
+}
+@media print {
+  html[data-fx] [data-hero-wordmark] {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Masthead hand-off. On the home page the header's KINZEN mark is the
+   resting place of the name: while the hero wordmark is on screen the mark
+   and name are out; once the wordmark has gone under the header
+   (html[data-hero-passed], set by MastheadSync) they come in. A state
+   switch, never scrubbed, so there is no in-between resting state. Without
+   scripting the mark simply sits there; with reduced motion the switch is
+   instant (no travel, no transition).
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: no-preference) {
+  [data-masthead-mark],
+  [data-masthead-name] {
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+  }
+}
+/* The state itself holds under reduced motion too (the small KINZEN never sits next to the big
+   one at the top); only the travel and the transition are motion, so only they are dropped. */
+@media (scripting: enabled) {
+  html:has([data-hero-wordmark]):not([data-hero-passed]) :is([data-masthead-mark], [data-masthead-name]) {
+    opacity: 0;
+  }
+  /* A keyboard user on the home link always sees what it is. */
+  html:has([data-hero-wordmark]):not([data-hero-passed])
+    a:focus-visible
+    :is([data-masthead-mark], [data-masthead-name]) {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  html:has([data-hero-wordmark]):not([data-hero-passed]) :is([data-masthead-mark], [data-masthead-name]) {
+    transform: translateY(0.35em);
+    /* Exits faster than entrances. */
+    transition-duration: var(--dur-1);
+  }
+}

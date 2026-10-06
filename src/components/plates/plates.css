@@ -1,0 +1,137 @@
+/* Architecture plates: one line weight, hairline, drawn in on first view. */
+
+.plate-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-3) transparent;
+}
+
+.plate-svg {
+  display: block;
+  width: 100%;
+  /* Below this width notes would drop under ~11px: scroll inside the figure instead. */
+  min-width: 60rem;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.plate-line {
+  fill: none;
+  stroke: var(--ink-2);
+  /* One device pixel at any render size: --plate-px = viewBox units per CSS px (set by PlateDraw).
+     Not vector-effect: non-scaling-stroke, which breaks pathLength-based draw-in. */
+  stroke-width: var(--plate-px, 1);
+}
+.plate-dash {
+  stroke-dasharray: 6 5;
+}
+.plate-leader {
+  stroke: var(--ink-3);
+  stroke-dasharray: 2 4;
+}
+.plate-dot {
+  fill: var(--ground);
+}
+
+.plate-label {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  fill: var(--ink);
+}
+.plate-sub {
+  font-size: 14px;
+  fill: var(--ink-2);
+}
+.plate-note {
+  font-size: 14.5px;
+  fill: var(--ink);
+}
+.plate-muted {
+  fill: var(--ink-2);
+}
+.plate-tiny {
+  font-size: 10.5px;
+  fill: var(--ink-3);
+}
+.plate-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.plate-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin-top: 0.75rem;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  color: var(--ink-2);
+}
+.plate-hint {
+  display: none;
+  color: var(--ink-3);
+}
+.plate:has(.plate-scroll[data-scrolls]) .plate-hint {
+  display: inline;
+}
+
+/* Draw-in. Server HTML has no data-state: the finished drawing. */
+.plate-scroll[data-state="armed"] [data-draw] {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+}
+.plate-scroll[data-state="armed"] [data-fade] {
+  opacity: 0;
+}
+.plate-scroll[data-state="drawn"] [data-draw] {
+  stroke-dasharray: 1 1;
+  animation: plate-draw var(--dur-4) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 26ms);
+}
+.plate-scroll[data-state="drawn"] [data-fade] {
+  animation: plate-fade var(--dur-3) var(--ease-out) both;
+  animation-delay: calc(var(--i, 20) * 26ms);
+}
+
+@keyframes plate-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes plate-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate-scroll[data-state] [data-draw],
+  .plate-scroll[data-state] [data-fade] {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Narrow screens: the drawing scrolls inside its frame. Say so ABOVE it, and fade the
+   right edge so it is obvious there is more to the right. */
+.plate:has(.plate-scroll[data-scrolls]) {
+  display: flex;
+  flex-direction: column;
+}
+.plate:has(.plate-scroll[data-scrolls]) .plate-caption {
+  order: -1;
+  margin: 0 0 0.75rem;
+}
+.plate-scroll[data-scrolls] {
+  mask-image: linear-gradient(to right, #000 82%, transparent);
+}
+.plate-scroll[data-scrolls][data-at-end] {
+  mask-image: none;
+}

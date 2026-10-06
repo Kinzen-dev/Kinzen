@@ -1,0 +1,110 @@
+/* ------------------------------------------------------------------
+   Era timeline. A rule-coloured rail (pure CSS, present without JS) with
+   hollow era nodes; the gold thread (SVG, measured from the nodes) is
+   revealed over it by scroll. The reveal line sits at 60% of the viewport:
+   the thread tip and each node light at the same moment.
+   The thread runs just inside the content edge at every width (never in the page
+   margin); era rules still span the full grid, era content is indented past it.
+   ------------------------------------------------------------------ */
+.era-timeline {
+  --thread-pad: 0px;
+  --thread-x: 0.625rem;
+  position: relative;
+}
+/* Indent past the thread without shifting the era's grid off the page columns:
+   phones indent the whole row, wider screens only the left (date and company) column. */
+.era-timeline [data-era] {
+  padding-left: 1.75rem;
+}
+@media (min-width: 48rem) {
+  .era-timeline [data-era] {
+    padding-left: 0;
+  }
+  .era-timeline [data-era] > :not(.era-node):first-of-type {
+    padding-left: 1.75rem;
+  }
+}
+
+/* The rail: always there, so the static and no-JS states read as a timeline. */
+.era-timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--thread-pad) + var(--thread-x) - 0.5px);
+  width: 1px;
+  background: var(--rule);
+}
+
+/* Each era's start node, aligned with the centre of its date readout. */
+.era-node {
+  position: absolute;
+  top: calc(2.5rem + 5.5px);
+  left: calc(var(--thread-x) - 3.5px);
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--ink-3);
+  border-radius: 50%;
+  background: var(--ground);
+}
+
+@media (min-width: 48rem) {
+  .era-node {
+    top: calc(3.5rem + 5.5px);
+  }
+}
+
+.era-thread {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--thread-pad) + var(--thread-x) - 1rem);
+  right: 0;
+  width: auto;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.era-thread-line {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.era-thread-node {
+  fill: var(--gold);
+}
+
+/* Scroll-drawn only where scroll timelines exist and motion is welcome.
+   clip-path only: nothing about layout moves on scroll. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .era-thread {
+      animation: era-thread-draw linear both;
+      animation-timeline: view(block 60% 40%);
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes era-thread-draw {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media print {
+  .era-thread,
+  .era-timeline::before,
+  .era-node {
+    display: none;
+  }
+  .era-timeline {
+    padding-left: 0;
+  }
+}
