@@ -47,6 +47,8 @@ export function CommandPalette({ data }: { data: PaletteData }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  /** Set when a command moves focus itself (same-page section jump). */
+  const skipReturnRef = useRef(false);
 
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -104,6 +106,10 @@ export function CommandPalette({ data }: { data: PaletteData }) {
     const dialog = dialogRef.current;
     if (!dialog) return;
     function onClose() {
+      if (skipReturnRef.current) {
+        skipReturnRef.current = false;
+        return;
+      }
       const target = returnFocusRef.current ?? triggerRef.current;
       if (target?.isConnected) target.focus({ preventScroll: true });
       else triggerRef.current?.focus({ preventScroll: true });
@@ -124,6 +130,16 @@ export function CommandPalette({ data }: { data: PaletteData }) {
     const here = neutralPath(pathname);
 
     if (cmd.href) {
+      const url = new URL(cmd.href, window.location.href);
+      if (url.pathname === window.location.pathname && url.hash) {
+        // Same page: close first (the dialog would otherwise hand focus back to the
+        // trigger), then jump; the hashchange moves focus to the section.
+        skipReturnRef.current = true;
+        close();
+        if (window.location.hash === url.hash) window.dispatchEvent(new HashChangeEvent("hashchange"));
+        window.location.assign(url.hash);
+        return;
+      }
       // Nothing to come back to after navigating: land focus on the page, not the old spot.
       returnFocusRef.current = triggerRef.current;
       close();

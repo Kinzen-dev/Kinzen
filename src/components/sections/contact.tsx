@@ -29,7 +29,14 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
                 {email.label}
               </a>
               <div className="flex flex-wrap items-center gap-3">
-                <CopyEmail email={email.label} labels={{ copy: dict.contact.copyEmail, copied: dict.contact.copied }} />
+                <CopyEmail
+                  email={email.label}
+                  labels={{
+                    copy: dict.contact.copyEmail,
+                    copied: dict.contact.copied,
+                    failed: dict.contact.copyFailed,
+                  }}
+                />
                 {others.map((l) => (
                   <a
                     key={l.href}

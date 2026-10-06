@@ -3,16 +3,25 @@
 import { useState } from "react";
 import { plain } from "@/lib/thai";
 
-export function CopyEmail({ email, labels }: { email: string; labels: { copy: string; copied: string } }) {
-  const [copied, setCopied] = useState(false);
+export function CopyEmail({
+  email,
+  labels,
+}: {
+  email: string;
+  labels: { copy: string; copied: string; failed: string };
+}) {
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  const copied = state === "copied";
 
   async function copy() {
     try {
       await navigator.clipboard.writeText(email);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2400);
+      setState("copied");
+      window.setTimeout(() => setState("idle"), 2400);
     } catch {
-      window.location.href = `mailto:${email}`;
+      // In-app browsers (LINE, Facebook) often block the clipboard: say so, keep the address visible.
+      setState("failed");
+      window.setTimeout(() => setState("idle"), 5000);
     }
   }
 
@@ -33,9 +42,9 @@ export function CopyEmail({ email, labels }: { email: string; labels: { copy: st
       >
         {copied ? <path d="m4.5 10.5 3.5 3.5 7.5-8" /> : <path d="M7 7V4.5h8.5V13H13M4.5 7H13v8.5H4.5Z" />}
       </svg>
-      <span aria-hidden="true">{copied ? labels.copied : labels.copy}</span>
+      <span aria-hidden="true">{copied ? labels.copied : state === "failed" ? labels.failed : labels.copy}</span>
       <span role="status" aria-live="polite" className="sr-only">
-        {copied ? labels.copied : ""}
+        {copied ? labels.copied : state === "failed" ? labels.failed : ""}
       </span>
     </button>
   );

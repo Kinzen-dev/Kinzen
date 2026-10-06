@@ -8,6 +8,7 @@ import { CommandPalette } from "./palette/command-palette";
 import { paletteData } from "./palette/palette-data";
 import { RevealLayer } from "./motion/reveal-layer";
 import { MobileNav } from "./mobile-nav";
+import { HomeLink } from "./home-link";
 import { AnchorFocus } from "./anchor-focus";
 import { PlainCopy } from "./plain-copy";
 import { plain } from "@/lib/thai";
@@ -35,10 +36,10 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
       className="sticky top-0 z-40 border-b border-rule bg-ground/85 backdrop-blur-md supports-[not(backdrop-filter:blur(1px))]:bg-ground"
     >
       <div className="shell flex h-[var(--header-h)] items-center gap-6">
-        <Link
+        <HomeLink
           href={localePath(locale, "/")}
           className="mr-auto flex items-baseline gap-2 font-semibold tracking-[-0.02em]"
-          aria-label={plain(dict.a11y.home)}
+          label={plain(dict.a11y.home)}
         >
           <span data-masthead-mark className="text-[1.0625rem]">
             KINZEN
@@ -46,7 +47,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           <span data-masthead-name className="hidden text-sm font-normal text-ink-3 sm:inline">
             Kittipong Khonthong
           </span>
-        </Link>
+        </HomeLink>
 
         <nav aria-label={plain(dict.a11y.mainNav)} className="hidden lg:block">
           <ul className="flex items-center gap-6 text-sm">

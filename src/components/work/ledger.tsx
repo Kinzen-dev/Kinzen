@@ -27,7 +27,7 @@ function sortRows(rows: LedgerRow[], sort: Sort) {
   if (!sort) return rows;
   const sign = sort.dir === "asc" ? 1 : -1;
   return [...rows].sort((a, b) => {
-    const primary = sort.key === "name" ? a.name.localeCompare(b.name, "en") : a.start.localeCompare(b.start);
+    const primary = sort.key === "name" ? a.name.localeCompare(b.name, "en") : a.recency.localeCompare(b.recency);
     return primary * sign || a.name.localeCompare(b.name, "en");
   });
 }

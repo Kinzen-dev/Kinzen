@@ -18,6 +18,8 @@ export interface LedgerRow {
   year: string;
   /** YYYY-MM of the start, for sorting. */
   start: string;
+  /** Recency key for "Year" sorting: ongoing work first, then by end, then by start. */
+  recency: string;
   status: Project["status"];
   statusLabel: string;
   live: boolean;
@@ -74,6 +76,7 @@ export function ledgerRows(locale: Locale, dict: Dictionary): LedgerRow[] {
     stack: p.stack,
     year: yearLabel(p, dict),
     start: p.period.start,
+    recency: `${p.period.end === "present" ? "9999-12" : (p.period.end ?? p.period.start)}|${p.period.start}`,
     status: p.status,
     statusLabel: dict.status[p.status],
     live: isLive(p.status),
