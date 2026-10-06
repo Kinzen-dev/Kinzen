@@ -9,7 +9,7 @@ import { About } from "@/components/sections/about";
 import { Contact } from "@/components/sections/contact";
 import { JsonLd, profilePageJsonLd } from "@/lib/json-ld";
 import { HeroFx } from "@/fx/react/hero-fx";
-import { Doodle } from "@/components/doodles/doodle";
+import { Doodle, projectDoodle } from "@/components/doodles/doodle";
 import { AgentDemo } from "@/components/agent-demo/agent-demo";
 
 const practiceIcons = {
@@ -34,7 +34,14 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   return (
     <>
       <Hero locale={locale} dict={dict} fx={<HeroFx />} />
-      <Work locale={locale} dict={dict} />
+      <Work
+        locale={locale}
+        dict={dict}
+        renderIcon={(id) => {
+          const name = projectDoodle(id);
+          return name ? <Doodle name={name} className="size-full" /> : null;
+        }}
+      />
       <Experience locale={locale} dict={dict} />
       <Practice locale={locale} dict={dict} icons={practiceIcons} demo={<AgentDemo copy={dict.demo} />} />
       <Skills locale={locale} dict={dict} />
