@@ -1,46 +1,46 @@
 {
-  "name": "kinzen-monorepo",
-  "version": "1.0.0",
+  "name": "kinzen-dev",
+  "version": "0.1.0",
   "private": true,
-  "description": "Kinzen - Personal website showcasing work, car collection, stocks, Manchester United, and more",
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run start:dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build",
-    "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "cd backend && npm run test",
-    "test:frontend": "cd frontend && npm run test",
-    "lint": "npm run lint:backend && npm run lint:frontend",
-    "lint:backend": "cd backend && npm run lint",
-    "lint:frontend": "cd frontend && npm run lint",
-    "format": "npm run format:backend && npm run format:frontend",
-    "format:backend": "cd backend && npm run format",
-    "format:frontend": "cd frontend && npm run format",
-    "type-check": "cd frontend && npm run type-check",
-    "pre-commit": "npm run lint && npm run type-check && npm run test",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
-    "prepare": "husky"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "check:output": "tsx scripts/check-output.ts",
+    "e2e": "playwright test",
+    "format": "prettier --write .",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:output"
   },
-  "keywords": [
-    "nestjs",
-    "nextjs",
-    "typescript",
-    "clean-architecture",
-    "ddd",
-    "docker",
-    "kubernetes"
-  ],
-  "author": "Your Name",
-  "license": "MIT",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "next": "16.3.8",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
+  },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "husky": "^9.0.11"
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "1.60.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.8",
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.3"
   },
-  "workspaces": [
-    "backend",
-    "frontend"
-  ]
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=24"
+  }
 }

@@ -1,0 +1,231 @@
+import type { Locale } from "@/content/schema";
+
+/**
+ * Interface strings. Content (claims, bios, projects) lives in src/content.
+ * `th` must satisfy the exact shape of `en`, so a missing Thai key fails the typecheck.
+ */
+const en = {
+  meta: {
+    title: "Kittipong Khonthong (King) | Senior Full-Stack Engineer",
+    description:
+      "Senior full-stack engineer and founder of Vesperwerk. Seven years shipping production TypeScript systems, from Shopify commerce platforms to AI voice and LINE products.",
+  },
+  a11y: {
+    skipToContent: "Skip to content",
+    mainNav: "Main",
+    themeToggle: "Switch colour theme",
+    themeLight: "Light theme",
+    themeDark: "Dark theme",
+    languageSwitch: "Language",
+    openPalette: "Open command palette",
+  },
+  nav: {
+    work: "Work",
+    experience: "Experience",
+    practice: "Practice",
+    about: "About",
+    contact: "Contact",
+    cv: "CV",
+  },
+  language: { en: "English", th: "ไทย" },
+  hero: {
+    eyebrowRole: "Senior Full-Stack Engineer",
+    basedIn: "Based in",
+    remote: "working remotely",
+  },
+  facts: {
+    bangkokTime: "Bangkok",
+    yearsInProduction: "Years in production",
+    systems: "Systems in this index",
+    founder: "Studio",
+    aheadOfYou: "ahead of you",
+    behindYou: "behind you",
+    sameAsYou: "same time as you",
+    hours: "h",
+  },
+  sections: {
+    work: "Selected systems",
+    workIntro: "The things I have built and still stand behind. Open a row for outcomes, stack and links.",
+    experience: "Experience",
+    practice: "How I work",
+    practiceIntro: "I run AI coding agents like a team. The rules that matter live in code and tests, not in prompts.",
+    skills: "Tools I reach for",
+    about: "About",
+    offTheClock: "Off the clock",
+    education: "Education",
+    languages: "Languages",
+    contact: "Contact",
+  },
+  ledger: {
+    caption: "Systems I have built, sortable by name and year",
+    name: "System",
+    area: "Area",
+    stack: "Stack",
+    year: "Year",
+    status: "Status",
+    sortBy: "Sort by",
+    filterAll: "All",
+    open: "Open details",
+    close: "Close details",
+    openProject: "Open project page",
+    outcomes: "Outcomes",
+    role: "Role",
+    links: "Links",
+    present: "present",
+  },
+  areas: { ai: "AI products", commerce: "Commerce", tools: "Developer tools", games: "Games" },
+  status: {
+    live: "Live",
+    internal: "Internal tool",
+    "in-production": "In production",
+    archived: "Archived",
+  },
+  experience: { present: "Present", stack: "Stack" },
+  contact: {
+    heading: "Have a system that has to work?",
+    body: "Email is the fastest way to reach me. I read everything and reply myself.",
+    copyEmail: "Copy email",
+    copied: "Email copied",
+    emailMe: "Email me",
+    localTime: "My local time",
+  },
+  colophon: {
+    weighs: "This page weighs",
+    built: "Built",
+    from: "from commit",
+    fonts: "Set in Geist and Noto Sans Thai.",
+    measuring: "measuring",
+  },
+  project: {
+    back: "All work",
+    period: "Period",
+    stack: "Stack",
+    role: "Role",
+    outcomes: "Outcomes",
+    links: "Links",
+    next: "Next project",
+  },
+  notFound: {
+    title: "This page wandered off",
+    body: "The link may be old, or the page moved when this site was rebuilt.",
+    home: "Back to the start",
+  },
+  footer: { rights: "Kittipong Khonthong", updated: "Content updated" },
+};
+
+export type Dictionary = typeof en;
+
+const th: Dictionary = {
+  meta: {
+    title: "กฤติพงษ์ ก้อนทอง (คิง) | วิศวกรซอฟต์แวร์ Full-Stack",
+    description:
+      "วิศวกรซอฟต์แวร์ full-stack และผู้ก่อตั้ง Vesperwerk ทำระบบ TypeScript ที่ใช้งานจริงมาเจ็ดปี ตั้งแต่แพลตฟอร์มอีคอมเมิร์ซบน Shopify ไปจนถึงผลิตภัณฑ์ AI ด้านเสียงและ LINE",
+  },
+  a11y: {
+    skipToContent: "ข้ามไปที่เนื้อหา",
+    mainNav: "เมนูหลัก",
+    themeToggle: "สลับธีมสี",
+    themeLight: "ธีมสว่าง",
+    themeDark: "ธีมมืด",
+    languageSwitch: "ภาษา",
+    openPalette: "เปิดเมนูคำสั่ง",
+  },
+  nav: {
+    work: "ผลงาน",
+    experience: "ประสบการณ์",
+    practice: "วิธีทำงาน",
+    about: "เกี่ยวกับผม",
+    contact: "ติดต่อ",
+    cv: "CV",
+  },
+  language: { en: "English", th: "ไทย" },
+  hero: {
+    eyebrowRole: "วิศวกรซอฟต์แวร์ Full-Stack",
+    basedIn: "อยู่ที่",
+    remote: "ทำงานทางไกล",
+  },
+  facts: {
+    bangkokTime: "กรุงเทพฯ",
+    yearsInProduction: "ปีที่ทำระบบจริง",
+    systems: "ระบบในหน้านี้",
+    founder: "สตูดิโอ",
+    aheadOfYou: "เร็วกว่าคุณ",
+    behindYou: "ช้ากว่าคุณ",
+    sameAsYou: "เวลาเดียวกับคุณ",
+    hours: "ชม.",
+  },
+  sections: {
+    work: "ระบบที่เลือกมา",
+    workIntro: "งานที่ผมสร้างและยังยืนยันได้เต็มปาก กดแต่ละแถวเพื่อดูผลลัพธ์ stack และลิงก์",
+    experience: "ประสบการณ์",
+    practice: "วิธีทำงานของผม",
+    practiceIntro: "ผมให้ AI agent ทำงานเป็นทีม กฎที่สำคัญอยู่ในโค้ดและเทสต์ ไม่ได้อยู่ใน prompt",
+    skills: "เครื่องมือที่ใช้ประจำ",
+    about: "เกี่ยวกับผม",
+    offTheClock: "นอกเวลางาน",
+    education: "การศึกษา",
+    languages: "ภาษา",
+    contact: "ติดต่อ",
+  },
+  ledger: {
+    caption: "ระบบที่ผมสร้าง เรียงตามชื่อหรือปีได้",
+    name: "ระบบ",
+    area: "ด้าน",
+    stack: "Stack",
+    year: "ปี",
+    status: "สถานะ",
+    sortBy: "เรียงตาม",
+    filterAll: "ทั้งหมด",
+    open: "ดูรายละเอียด",
+    close: "ปิดรายละเอียด",
+    openProject: "เปิดหน้าโปรเจกต์",
+    outcomes: "ผลลัพธ์",
+    role: "บทบาท",
+    links: "ลิงก์",
+    present: "ปัจจุบัน",
+  },
+  areas: { ai: "ผลิตภัณฑ์ AI", commerce: "อีคอมเมิร์ซ", tools: "เครื่องมือนักพัฒนา", games: "เกม" },
+  status: {
+    live: "เปิดใช้งาน",
+    internal: "เครื่องมือภายใน",
+    "in-production": "ใช้งานจริง",
+    archived: "เก็บถาวร",
+  },
+  experience: { present: "ปัจจุบัน", stack: "Stack" },
+  contact: {
+    heading: "มีระบบที่ต้องทำงานได้จริงไหมครับ",
+    body: "ส่งอีเมลมาเร็วที่สุด ผมอ่านเองทุกฉบับและตอบเอง",
+    copyEmail: "คัดลอกอีเมล",
+    copied: "คัดลอกอีเมลแล้ว",
+    emailMe: "ส่งอีเมล",
+    localTime: "เวลาที่ผมอยู่",
+  },
+  colophon: {
+    weighs: "หน้านี้หนัก",
+    built: "build เมื่อ",
+    from: "จาก commit",
+    fonts: "ใช้ฟอนต์ Geist และ Noto Sans Thai",
+    measuring: "กำลังวัด",
+  },
+  project: {
+    back: "ผลงานทั้งหมด",
+    period: "ช่วงเวลา",
+    stack: "Stack",
+    role: "บทบาท",
+    outcomes: "ผลลัพธ์",
+    links: "ลิงก์",
+    next: "โปรเจกต์ถัดไป",
+  },
+  notFound: {
+    title: "หน้านี้หลงทางไปแล้ว",
+    body: "ลิงก์อาจเก่า หรือหน้าถูกย้ายตอนทำเว็บใหม่",
+    home: "กลับหน้าแรก",
+  },
+  footer: { rights: "กฤติพงษ์ ก้อนทอง", updated: "อัปเดตเนื้อหา" },
+};
+
+const dictionaries: Record<Locale, Dictionary> = { en, th };
+
+export function getDictionary(locale: Locale): Dictionary {
+  return dictionaries[locale];
+}

@@ -1,0 +1,516 @@
+import "server-only";
+import { siteContent, type SiteContent } from "./schema";
+
+/**
+ * Every public claim below is cleared in the private claims ledger
+ * (kittipong-resume/content/CLAIMS.md, resume v1.5). Do not add a number,
+ * client name or outcome here without a ledger row; `provenance` points at it.
+ */
+const content: SiteContent = {
+  meta: { updated: "2026-10", claimsLedger: "kittipong-resume/content/CLAIMS.md (v1.5)" },
+
+  profile: {
+    name: "Kittipong Khonthong",
+    displayName: { en: "Kittipong Khonthong", th: "กฤติพงษ์ ก้อนทอง" },
+    preferredName: "King",
+    handle: "Kinzen",
+    role: { en: "Senior Full-Stack Engineer", th: "วิศวกรซอฟต์แวร์ full-stack" },
+    heroLine: {
+      en: "I build production software end to end: TypeScript backends, Shopify platforms, and AI voice and LINE products with guardrails written in code.",
+      th: "ผมสร้างซอฟต์แวร์ที่ใช้งานจริงครบทั้งระบบ ตั้งแต่ระบบหลังบ้าน TypeScript แพลตฟอร์ม Shopify ไปจนถึง AI รับสายและตอบแชท LINE ที่มีกฎความปลอดภัยเขียนเป็นโค้ด",
+    },
+    oneLiner: {
+      en: "Senior full-stack engineer and founder of Vesperwerk. Seven years shipping production TypeScript systems, from Shopify commerce platforms to AI voice and LINE products.",
+      th: "วิศวกรซอฟต์แวร์ full-stack และผู้ก่อตั้ง Vesperwerk ทำระบบ TypeScript ที่ใช้งานจริงมาเจ็ดปี ตั้งแต่แพลตฟอร์มอีคอมเมิร์ซบน Shopify ไปจนถึงผลิตภัณฑ์ AI ด้านเสียงและ LINE",
+    },
+    bioShort: {
+      en: "I'm King, a senior full-stack engineer in Bangkok. I spent four years as Tech Lead for AnyMind Group's EC Platform, building Shopify storefronts, apps and headless builds. Today I run Vesperwerk, a small software studio, where I build AI voice and LINE products with deterministic guardrails.",
+      th: "ผมชื่อกฤติพงษ์ ก้อนทอง เรียกผมว่าคิงก็ได้ เป็นวิศวกรซอฟต์แวร์ full-stack อยู่กรุงเทพฯ สี่ปีที่ผ่านมาผมเป็น Tech Lead ดูแล EC Platform ที่ AnyMind Group (หน้าร้าน แอป และระบบ headless บน Shopify) ตอนนี้ผมทำ Vesperwerk สตูดิโอซอฟต์แวร์เล็ก ๆ ของตัวเอง สร้างผลิตภัณฑ์ AI ด้านเสียงและ LINE ที่มีชุดตรวจคำตอบเขียนเป็นโค้ด",
+    },
+    bioLong: {
+      en: [
+        "I'm Kittipong Khonthong, King to most people: a senior full-stack engineer with seven years in production across e-commerce, backend platforms and AI products.",
+        "From 2022 to 2026 I was Tech Lead for AnyMind Group's EC Platform: Shopify storefronts, apps and headless builds for brands such as Mizuno Thailand, built on the Admin GraphQL and Storefront APIs, Liquid, metafields and app proxies. Before that I was a full-stack developer at ZyGen, shipping React, Next.js, Angular and NestJS applications on Docker and GKE.",
+        "Since April 2026 I run Vesperwerk, a small software studio. Its first product, Yimwhan AI, is a phone and LINE receptionist for dental clinics, with a deterministic safety guard that blocks diagnoses, dosing advice and cure claims in every patient-facing reply. I also built Helm, a macOS workspace where Claude Code, Codex, Kimi and Cursor agents work side by side.",
+      ],
+      th: [
+        "ผมทำงานกับระบบที่ใช้งานจริงมาเจ็ดปี เริ่มจากนักพัฒนา full-stack ที่ ZyGen (React, Next.js, NestJS บน Docker และ GKE) แล้วเป็น Tech Lead ดูแล EC Platform ที่ AnyMind Group ตั้งแต่ปี 2022 ถึง 2026 ทำหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์อย่าง Mizuno Thailand",
+        "ตั้งแต่เมษายน 2026 ผมเปิด Vesperwerk ผลงานแรกคือ Yimwhan AI ผู้ช่วยรับสายโทรศัพท์และตอบแชท LINE ให้คลินิกทันตกรรม มีชุดตรวจที่กันไม่ให้ AI วินิจฉัยโรค แนะนำยา หรืออ้างผลการรักษา ทุกคำตอบที่ถึงคนไข้ต้องผ่านชุดนี้ก่อน",
+        "ผมยังสร้าง Helm แอป macOS ที่ให้ agent อย่าง Claude Code, Codex, Kimi และ Cursor ทำงานเคียงข้างกัน",
+      ],
+    },
+    location: {
+      city: { en: "Bangkok", th: "กรุงเทพฯ" },
+      country: { en: "Thailand", th: "ประเทศไทย" },
+      timezone: "Asia/Bangkok",
+      remote: true,
+    },
+    careerStart: "2019-10",
+    availability: {
+      visibility: "hidden",
+      employment: {
+        en: "Open to senior and lead engineering roles on product teams. Remote first; Bangkok on-site for the right team.",
+      },
+      studio: {
+        en: "Selected builds through Vesperwerk: AI voice and LINE assistants with guardrails in code; Shopify storefronts, apps and API migrations; TypeScript backends and integrations.",
+      },
+    },
+  },
+
+  practices: [
+    {
+      id: "ai-teams",
+      title: { en: "Agent teams", th: "ทีม agent" },
+      text: {
+        en: "AI coding agents run as a team: Claude Code and Codex with written roles, handoffs and one accountable lead.",
+        th: "ให้ AI agent ทำงานเป็นทีม Claude Code กับ Codex มีหน้าที่เขียนไว้ชัด ส่งงานต่อกันเป็นระบบ และมีคนรับผิดชอบหนึ่งคน",
+      },
+      provenance: { claimId: "ai-teams", source: "CLAIMS", confidence: "APPROVED" },
+    },
+    {
+      id: "ai-evidence",
+      title: { en: "Evidence before merge", th: "มีหลักฐานก่อน merge" },
+      text: {
+        en: "Nothing merges without the full test suite on the exact commit, an independent review and UI screenshot QA.",
+        th: "ไม่มีโค้ดไหนเข้า main ถ้ายังไม่ผ่านเทสต์ทั้งชุดบน commit นั้นจริง ไม่ผ่านการตรวจจากอีกคน และไม่ผ่านการตรวจหน้าจอ",
+      },
+      provenance: { claimId: "ai-evidence", source: "CLAIMS", confidence: "APPROVED" },
+    },
+    {
+      id: "ai-guards",
+      title: { en: "Code over prompts", th: "กฎอยู่ในโค้ด ไม่ใช่ใน prompt" },
+      text: {
+        en: "Validators and state machines enforce output rules. Prompts stay thin; the rules that matter live in code and tests.",
+        th: "ใช้ validator และ state machine บังคับกฎของคำตอบ prompt สั้นไว้ กฎที่สำคัญอยู่ในโค้ดและเทสต์",
+      },
+      provenance: { claimId: "ai-guards", source: "CLAIMS", confidence: "APPROVED" },
+    },
+  ],
+
+  experience: [
+    {
+      id: "exp-founder",
+      org: { name: "Vesperwerk Co., Ltd." },
+      title: { en: "Founder and Software Engineer", th: "ผู้ก่อตั้งและวิศวกรซอฟต์แวร์" },
+      type: "founder",
+      start: "2026-04",
+      end: "present",
+      location: { en: "Bangkok", th: "กรุงเทพฯ" },
+      summary: {
+        en: "A small software studio building AI voice and LINE products with the rules written in code.",
+        th: "สตูดิโอซอฟต์แวร์เล็ก ๆ ที่สร้างผลิตภัณฑ์ AI ด้านเสียงและ LINE โดยเขียนกฎไว้ในโค้ด",
+      },
+      stack: ["TypeScript", "Fastify", "Twilio", "LINE Messaging API", "Tauri", "Rust", "Fly.io"],
+      visibility: "public",
+      highlights: [
+        {
+          text: {
+            en: "Built Yimwhan AI, a phone and LINE receptionist for dental clinics, with a staff back office using Fastify, Twilio and the LINE Messaging API.",
+            th: "สร้าง Yimwhan AI ผู้ช่วยรับสายโทรศัพท์และตอบแชท LINE ให้คลินิกทันตกรรม พร้อมระบบหลังบ้านสำหรับพนักงาน ใช้ Fastify, Twilio และ LINE Messaging API",
+          },
+          provenance: { claimId: "exp-founder.bullet-1", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
+            en: "Built deterministic guards for patient-facing replies; a replay of 500 real customer messages passed all checks after code filters rescued 37 raw model violations.",
+            th: "สร้างชุดตรวจแบบ deterministic สำหรับคำตอบที่ถึงคนไข้ ทดสอบย้อนกับข้อความจริง 500 ข้อความ ผ่านทุกข้อ โดยตัวกรองในโค้ดดักคำตอบที่ผิดกฎจากโมเดลได้ 37 ครั้ง",
+          },
+          provenance: { claimId: "exp-founder.bullet-2", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
+            en: "Traced stalled Thai calls to carrier silence suppression and restored audio processing with server-side silence-frame injection; Twilio support confirmed the cause.",
+            th: "ไล่หาสาเหตุสายภาษาไทยที่ค้างจนเจอว่าเป็นการตัดช่วงเงียบของเครือข่ายมือถือ แล้วแก้ด้วยการเติมเฟรมเงียบฝั่งเซิร์ฟเวอร์ ทีม Twilio ยืนยันสาเหตุเดียวกัน",
+          },
+          provenance: { claimId: "exp-founder.bullet-3", source: "CLAIMS", confidence: "STATED" },
+        },
+        {
+          text: {
+            en: "Built Helm in Tauri 2, Rust and TypeScript: a macOS agent workspace used daily as the primary development environment.",
+            th: "สร้าง Helm ด้วย Tauri 2, Rust และ TypeScript เป็นพื้นที่ทำงานของ agent บน macOS ที่ใช้เป็นเครื่องมือพัฒนาหลักทุกวัน",
+          },
+          provenance: { claimId: "exp-founder.bullet-5", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+      ],
+    },
+    {
+      id: "exp-anymind",
+      org: { name: "AnyMind Group" },
+      title: { en: "Tech Lead, EC Platform", th: "Tech Lead, EC Platform" },
+      type: "full-time",
+      start: "2022-01",
+      end: "2026-03",
+      location: { en: "Remote", th: "ทำงานทางไกล" },
+      summary: {
+        en: "Led engineering for the EC Platform: Shopify storefronts, apps and headless commerce for brands.",
+        th: "ดูแลงานวิศวกรรมของ EC Platform ทั้งหน้าร้าน แอป และระบบ headless commerce บน Shopify ให้แบรนด์ต่าง ๆ",
+      },
+      stack: ["Shopify", "GraphQL", "Liquid", "Next.js", "TypeScript"],
+      visibility: "public",
+      highlights: [
+        {
+          text: {
+            en: "Led EC Platform engineering: Shopify storefronts, apps and headless builds, including Mizuno Thailand.",
+            th: "นำทีมวิศวกรรม EC Platform ทำหน้าร้าน แอป และระบบ headless บน Shopify รวมถึง Mizuno Thailand",
+          },
+          provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
+            en: "Delivered Shopify integrations using the Admin GraphQL and Storefront APIs, Liquid, metafields and app proxies, alongside Next.js services.",
+            th: "ส่งมอบงานเชื่อมต่อ Shopify ด้วย Admin GraphQL API, Storefront API, Liquid, metafields และ app proxy ควบคู่กับบริการที่เขียนด้วย Next.js",
+          },
+          provenance: { claimId: "exp-anymind.bullet-2", source: "CLAIMS", confidence: "STATED" },
+        },
+        {
+          text: {
+            en: "Migrated legacy apps to the Shopify Dev Dashboard and upgraded to the January 2026 Admin API.",
+            th: "ย้ายแอปเก่าไปที่ Shopify Dev Dashboard และอัปเกรดไปใช้ Admin API รุ่นมกราคม 2026",
+          },
+          provenance: { claimId: "exp-anymind.bullet-3", source: "CLAIMS", confidence: "STATED" },
+        },
+        {
+          text: {
+            en: "Reviewed code, ran performance tests and coordinated releases across cross-functional teams.",
+            th: "ตรวจโค้ด ทำ performance test และประสานการ release กับทีมจากหลายฝ่าย",
+          },
+          provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "STATED" },
+        },
+      ],
+    },
+    {
+      id: "exp-zygen",
+      org: { name: "ZyGen Co., Ltd." },
+      title: { en: "Full Stack Developer", th: "นักพัฒนา Full Stack" },
+      type: "full-time",
+      start: "2019-10",
+      end: "2022-01",
+      location: { en: "Bangkok", th: "กรุงเทพฯ" },
+      summary: {
+        en: "Full-stack delivery across web apps, data platforms and the infrastructure under them.",
+        th: "ทำงาน full-stack ครบทั้งเว็บแอป ระบบข้อมูล และโครงสร้างพื้นฐานที่อยู่ข้างใต้",
+      },
+      stack: ["React", "Next.js", "Angular", "NestJS", "GraphQL", "MongoDB", "Docker", "GKE"],
+      visibility: "public",
+      highlights: [
+        {
+          text: {
+            en: "Delivered React, Next.js, Angular and NestJS applications with GraphQL, MongoDB, SQL Server and Redis, including a LINE LIFF app.",
+            th: "ส่งมอบแอปด้วย React, Next.js, Angular และ NestJS ร่วมกับ GraphQL, MongoDB, SQL Server และ Redis รวมถึงแอป LINE LIFF",
+          },
+          provenance: { claimId: "exp-zygen", source: "CLAIMS", confidence: "STATED" },
+        },
+        {
+          text: {
+            en: "Ran delivery infrastructure on Docker, GKE, GitLab CI/CD, Argo Workflows and Azure App Service.",
+            th: "ดูแลโครงสร้างการ deploy บน Docker, GKE, GitLab CI/CD, Argo Workflows และ Azure App Service",
+          },
+          provenance: { claimId: "exp-zygen", source: "CLAIMS", confidence: "STATED" },
+        },
+        {
+          text: {
+            en: "Technical lead for the Unique Influencer web platform (React, NestJS queues and cron jobs, MariaDB); earlier, Python NLP classifiers and SAP ABAP.",
+            th: "เป็น technical lead ของแพลตฟอร์ม Unique Influencer (React, NestJS queue และ cron job, MariaDB) ก่อนหน้านั้นทำตัวจำแนกข้อความ NLP ด้วย Python และงาน SAP ABAP",
+          },
+          provenance: { claimId: "exp-zygen", source: "CLAIMS", confidence: "STATED" },
+        },
+      ],
+    },
+    {
+      id: "exp-contract",
+      org: { name: "Confidential client", confidential: true },
+      title: { en: "Senior Full-Stack Developer" },
+      type: "part-time-contract",
+      start: "2022-04",
+      end: "present",
+      location: { en: "Remote" },
+      summary: { en: "Part-time contract (kept private)." },
+      stack: ["TypeScript"],
+      visibility: "hidden",
+      highlights: [],
+    },
+  ],
+
+  projects: [
+    {
+      id: "proj-yimwhan",
+      slug: "yimwhan-ai",
+      name: "Yimwhan AI",
+      tagline: {
+        en: "A phone and LINE receptionist for dental clinics, with clinical-safety guards in code.",
+        th: "ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมกฎความปลอดภัยทางคลินิกที่เขียนเป็นโค้ด",
+      },
+      kind: "product",
+      status: "in-production",
+      period: { start: "2026-05", end: "present" },
+      role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
+      stack: [
+        "TypeScript",
+        "Fastify",
+        "Twilio",
+        "LINE Messaging API",
+        "Gemini on Vertex AI",
+        "Claude",
+        "SQLite",
+        "Litestream",
+        "Fly.io",
+      ],
+      experienceId: "exp-founder",
+      confidentiality: "C2-bounded",
+      featured: true,
+      visibility: "public",
+      links: [],
+      outcomes: [
+        {
+          text: {
+            en: "A deterministic safety guard blocks diagnoses, dosing advice and cure claims in every patient-facing reply, across voice, LINE and outbound recall.",
+            th: "ชุดตรวจแบบ deterministic กันการวินิจฉัย การแนะนำยา และการอ้างผลการรักษา ในทุกคำตอบที่ถึงคนไข้ ทั้งทางเสียง LINE และการโทรติดตาม",
+          },
+          provenance: { claimId: "exp-founder (clinical-safety-invariant)", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
+            en: "A replay of 500 real customer messages passed all checks after code filters rescued 37 raw model violations.",
+            th: "ทดสอบย้อนกับข้อความจริง 500 ข้อความ ผ่านทุกข้อ โดยตัวกรองในโค้ดดักคำตอบที่ผิดกฎจากโมเดลได้ 37 ครั้ง",
+          },
+          provenance: { claimId: "exp-founder.bullet-2", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
+            en: "Production has run on a dedicated phone number since July 2026, with gated releases and one-step rollback.",
+            th: "ระบบ production รันบนเบอร์โทรเฉพาะมาตั้งแต่กรกฎาคม 2026 ทุก release ต้องผ่านด่านตรวจ และย้อนกลับได้ในขั้นตอนเดียว",
+          },
+          provenance: { claimId: "exp-founder.bullet-4", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+      ],
+      caseStudy: {
+        problem: {
+          en: "An AI receptionist for a dental clinic has to answer fast in Thai, by phone and on LINE, and must never give clinical advice.",
+          th: "AI รับสายของคลินิกทันตกรรมต้องตอบภาษาไทยได้เร็ว ทั้งทางโทรศัพท์และ LINE และต้องไม่ให้คำแนะนำทางคลินิกเด็ดขาด",
+        },
+        approach: {
+          en: [
+            "Kept prompts thin and moved the rules into code: validators and one shared clinical-safety check run on every patient-facing reply.",
+            "Hardened the check against Unicode format-character tricks that slip past naive string matching.",
+            "Replayed real conversations through the production pipeline before release, and shipped through gated releases with one-step rollback.",
+          ],
+          th: [
+            "ทำ prompt ให้สั้น แล้วย้ายกฎไปไว้ในโค้ด มี validator และชุดตรวจความปลอดภัยทางคลินิกชุดเดียวที่ทุกคำตอบถึงคนไข้ต้องผ่าน",
+            "ทำให้ชุดตรวจทนต่อการเลี่ยงด้วยอักขระ Unicode ที่มองไม่เห็น ซึ่งการเทียบข้อความแบบธรรมดาจับไม่ได้",
+            "ทดสอบย้อนกับบทสนทนาจริงผ่านระบบ production ก่อนทุก release และ release ผ่านด่านตรวจที่ย้อนกลับได้ในขั้นตอนเดียว",
+          ],
+        },
+        result: {
+          en: "On a replay of 500 real customer messages, the code filters rescued all 37 raw model violations and every message passed.",
+          th: "ทดสอบย้อนกับข้อความจริง 500 ข้อความ ตัวกรองในโค้ดดักคำตอบที่ผิดกฎได้ครบทั้ง 37 ครั้ง และทุกข้อความผ่าน",
+        },
+        limits: {
+          en: "A bounded replay, not a promise about every future conversation.",
+          th: "เป็นการทดสอบในขอบเขตที่กำหนด ไม่ใช่การรับประกันทุกบทสนทนาในอนาคต",
+        },
+      },
+    },
+    {
+      id: "proj-helm",
+      slug: "helm",
+      name: "Helm",
+      tagline: {
+        en: "A macOS workspace where Claude Code, Codex, Kimi and Cursor agents work side by side.",
+        th: "พื้นที่ทำงานบน macOS ที่ให้ agent อย่าง Claude Code, Codex, Kimi และ Cursor ทำงานเคียงข้างกัน",
+      },
+      kind: "internal-tool",
+      status: "internal",
+      period: { start: "2026-07", end: "present" },
+      role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
+      stack: ["Tauri 2", "Rust", "TypeScript"],
+      experienceId: "exp-founder",
+      confidentiality: "C1-description-only",
+      featured: true,
+      visibility: "public",
+      links: [],
+      outcomes: [
+        {
+          text: {
+            en: "In daily use as my primary development environment.",
+            th: "ใช้เป็นเครื่องมือพัฒนาหลักของผมทุกวัน",
+          },
+          provenance: { claimId: "exp-founder.bullet-5", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+      ],
+    },
+    {
+      id: "proj-ronglen",
+      slug: "ronglen",
+      name: "Ronglen",
+      tagline: {
+        en: "Thai-first spoken party games for 2 to 8 players, on one device or in online voice rooms.",
+        th: "โรงเล่น: เกมปาร์ตี้แบบใช้เสียง เล่นได้ 2 ถึง 8 คน ทั้งบนเครื่องเดียวหรือในห้องออนไลน์",
+      },
+      kind: "side-project",
+      status: "live",
+      period: { start: "2026-08", end: "2026-08" },
+      role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
+      stack: ["React 19", "Vite", "LiveKit", "Vercel Functions"],
+      confidentiality: "C0-public-artifact",
+      featured: true,
+      visibility: "public",
+      links: [{ kind: "live", label: "ronglen.vercel.app", href: "https://ronglen.vercel.app", visibility: "public" }],
+      outcomes: [
+        {
+          text: {
+            en: "Online rooms run on LiveKit (WebRTC audio), with Vercel Functions creating game-bound rooms and issuing scoped participant tokens.",
+            th: "ห้องออนไลน์ใช้ LiveKit (เสียงผ่าน WebRTC) โดยมี Vercel Functions สร้างห้องผูกกับเกมและออก token ที่จำกัดสิทธิ์ให้ผู้เล่นแต่ละคน",
+          },
+          provenance: { claimId: "proj-ronglen.bullet-1", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+      ],
+    },
+    {
+      id: "proj-visual-qa",
+      slug: "visual-qa-harness",
+      name: "Visual QA harness",
+      tagline: {
+        en: "Playwright-based UI verification with geometry checks, interaction crawling and independent AI review.",
+        th: "ระบบตรวจ UI ด้วย Playwright ตรวจทั้งตำแหน่งองค์ประกอบ ไล่กดทุกปุ่ม และให้ AI ที่ไม่เห็นงานมาก่อนช่วยตรวจซ้ำ",
+      },
+      kind: "internal-tool",
+      status: "internal",
+      period: { start: "2026-07" },
+      role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
+      stack: ["Node.js", "Playwright", "Claude Code"],
+      confidentiality: "C1-description-only",
+      featured: false,
+      visibility: "public",
+      links: [],
+      outcomes: [
+        {
+          text: {
+            en: "Caught 35 of 38 seeded bugs on its benchmark app; the blind reviewers found two bugs (a search race and a pagination off-by-one) that no deterministic layer could.",
+            th: "จับบั๊กที่ฝังไว้ได้ 35 จาก 38 ตัวบนแอปทดสอบ และ AI ที่ตรวจแบบไม่เห็นงานมาก่อนเจอบั๊กอีก 2 ตัว (race ตอนค้นหา และ pagination เพี้ยนไปหนึ่ง) ที่ชั้นตรวจแบบ deterministic จับไม่ได้",
+          },
+          provenance: { claimId: "proj-visual-qa", source: "CLAIMS", confidence: "STATED" },
+        },
+      ],
+    },
+    {
+      id: "proj-cadence",
+      slug: "cadence",
+      name: "Cadence",
+      tagline: {
+        en: "macOS voice dictation: a native menu-bar shell over a compiled real-time speech engine.",
+        th: "แอปพิมพ์ด้วยเสียงบน macOS: หน้าตา native บนแถบเมนู ทำงานบนเอนจินแปลงเสียงเป็นข้อความแบบเรียลไทม์",
+      },
+      kind: "internal-tool",
+      status: "internal",
+      period: { start: "2026-07", end: "2026-08" },
+      role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
+      stack: ["Swift", "TypeScript", "Bun", "Soniox"],
+      experienceId: "exp-founder",
+      confidentiality: "C1-description-only",
+      featured: false,
+      visibility: "public",
+      links: [],
+      outcomes: [
+        {
+          text: {
+            en: "Supervised engine with crash backoff, prompt-free permission checks and verified signed builds.",
+            th: "เอนจินมีตัวคุมที่รีสตาร์ตเองเมื่อล่ม ตรวจสิทธิ์โดยไม่เด้งถามผู้ใช้ และทุก build ผ่านการ sign และตรวจสอบแล้ว",
+          },
+          provenance: { claimId: "proj-cadence", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+      ],
+    },
+  ],
+
+  skills: [
+    {
+      id: "backend",
+      label: { en: "Backend", th: "ระบบหลังบ้าน" },
+      items: [
+        "TypeScript",
+        "Node.js",
+        "NestJS",
+        "Fastify",
+        "GraphQL",
+        "Kafka",
+        "Python",
+        "Hexagonal and event-driven design",
+      ],
+    },
+    {
+      id: "frontend",
+      label: { en: "Frontend and apps", th: "หน้าบ้านและแอป" },
+      items: ["React", "Next.js", "Vite", "Tailwind CSS", "Tauri"],
+    },
+    {
+      id: "data-cloud",
+      label: { en: "Data and cloud", th: "ข้อมูลและคลาวด์" },
+      items: [
+        "MongoDB",
+        "PostgreSQL",
+        "Redis",
+        "SQLite",
+        "Docker",
+        "Kubernetes (GKE)",
+        "Fly.io",
+        "Cloudflare",
+        "Azure",
+      ],
+    },
+    {
+      id: "testing",
+      label: { en: "Testing and delivery", th: "การทดสอบและส่งมอบ" },
+      items: ["Playwright", "Vitest", "Jest", "GitHub Actions", "GitLab CI/CD"],
+    },
+    {
+      id: "integrations",
+      label: { en: "Integrations", th: "การเชื่อมต่อระบบ" },
+      items: ["Shopify Admin and Storefront APIs", "Liquid", "LINE Messaging API", "LIFF", "Twilio Media Streams"],
+    },
+    {
+      id: "ai",
+      label: { en: "AI engineering", th: "วิศวกรรม AI" },
+      items: ["Claude Code", "Codex", "Gemini on Vertex AI", "Anthropic API", "Real-time speech-to-text", "LLM evals"],
+    },
+  ],
+
+  education: [
+    {
+      school: {
+        en: "King Mongkut's Institute of Technology Ladkrabang",
+        th: "สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง",
+      },
+      degree: { en: "B.Eng., Computer Engineering", th: "วิศวกรรมศาสตรบัณฑิต สาขาวิศวกรรมคอมพิวเตอร์" },
+      start: "2015",
+      end: "2019",
+    },
+  ],
+
+  languages: [
+    { name: { en: "Thai", th: "ไทย" }, level: { en: "Native", th: "ภาษาแม่" } },
+    { name: { en: "English", th: "อังกฤษ" }, level: { en: "Professional working proficiency", th: "ใช้ทำงานได้" } },
+  ],
+
+  links: [
+    { kind: "email", label: "ktpz.dev@gmail.com", href: "mailto:ktpz.dev@gmail.com", visibility: "public" },
+    {
+      kind: "linkedin",
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/kittipong-khonthong-161021213",
+      visibility: "public",
+    },
+    { kind: "github", label: "GitHub", href: "https://github.com/Kinzen-dev", visibility: "hidden" },
+  ],
+
+  personal: {
+    visibility: "public",
+    lines: [
+      {
+        en: "Off the clock: Manchester United, cars built for both looks and pace, and a long queue of games.",
+        th: "นอกเวลางาน: แมนเชสเตอร์ ยูไนเต็ด รถที่ทั้งสวยและแรง และเกมที่รอคิวเล่นอีกยาว",
+      },
+    ],
+  },
+};
+
+export const site: SiteContent = siteContent.parse(content);
