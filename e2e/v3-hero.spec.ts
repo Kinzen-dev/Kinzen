@@ -1,0 +1,249 @@
+import { expect, test, type Page } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+// Ticket v3-03: the hero (kinetic line, pill CTAs, glass chips, scale-down exit) and the numbers
+// strip. The particle field itself is covered by hero-fx.spec.ts.
+
+const hero = (page: Page) => page.locator("[data-hero]");
+const scaleOf = (page: Page) =>
+  hero(page).evaluate((el) => {
+    const m = getComputedStyle(el).transform;
+    return m === "none" ? 1 : new DOMMatrixReadOnly(m).a;
+  });
+const scrollTo = (page: Page, y: number) => page.evaluate((y) => window.scrollTo(0, y), y);
+/** Where the hero's exit is fully played: its bottom edge at 40% of the viewport, plus margin. */
+const pastHero = (page: Page) =>
+  hero(page).evaluate((el: HTMLElement) => el.offsetTop + el.offsetHeight - 0.4 * window.innerHeight + 40);
+
+test.describe("hero v3", () => {
+  test("kinetic line: every phrase is real text once for screen readers; the visible one cycles", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    const line = page.locator("[data-hero-kinetic]");
+    await expect(line).toContainText("I build");
+    for (const phrase of ["AI phone and LINE assistants", "Shopify platforms", "agent workspaces", "developer tools"]) {
+      await expect(line.locator(".sr-only")).toContainText(phrase);
+    }
+    await expect(line.locator(".cycler-stack")).toHaveAttribute("aria-hidden", "true");
+    await expect(line.locator(".hero-underline")).toHaveAttribute("aria-hidden", "true");
+    const on = () => line.locator(".cycler-item[data-on]").textContent();
+    const first = await on();
+    await expect.poll(on, { timeout: 6_000 }).not.toBe(first);
+    // The underline redraws under the new phrase.
+    await expect(line.locator(".hero-underline .draw-path[data-on]")).toHaveCount(1);
+  });
+
+  test("the underline sits under the visible phrase: same left edge, its width, just under the baseline", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const g = await page.locator("[data-hero-kinetic]").evaluate((p) => {
+      const on = p.querySelector(".cycler-item[data-on]")!;
+      const r = document.createRange();
+      r.selectNodeContents(on);
+      // The phrase may wrap (phones): the underline belongs to its last line.
+      const rects = [...r.getClientRects()].filter((x) => x.width > 0);
+      const tb = Math.max(...rects.map((x) => x.bottom));
+      const last = rects.filter((x) => x.bottom > tb - 4);
+      const tl = Math.min(...last.map((x) => x.left));
+      const tw = Math.max(...last.map((x) => x.right)) - tl;
+      const u = p.querySelector(".hero-underline path")!.getBoundingClientRect();
+      return { tl, tw, tb, ul: u.left, uw: u.width, ut: u.top, fs: parseFloat(getComputedStyle(p).fontSize) };
+    });
+    expect(Math.abs(g.ul - g.tl)).toBeLessThan(0.25 * g.fs);
+    expect(Math.abs(g.uw - g.tw)).toBeLessThan(0.1 * g.tw);
+    // The stroke crosses the descender zone: within half an em of the text's bottom.
+    expect(Math.abs(g.ut - g.tb)).toBeLessThan(0.5 * g.fs);
+  });
+
+  test("reduced motion: first phrase held, underline drawn, no scale on scroll", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const line = page.locator("[data-hero-kinetic]");
+    const first = await line.locator(".cycler-item[data-on]").textContent();
+    await expect(line.locator(".hero-underline .draw-path[data-on]")).toHaveCount(1);
+    await page.waitForTimeout(3_500);
+    expect(await line.locator(".cycler-item[data-on]").textContent()).toBe(first);
+    await scrollTo(page, await pastHero(page));
+    await page.waitForTimeout(600);
+    expect(await scaleOf(page)).toBe(1);
+  });
+
+  test("CTAs: pills in the Contact order (email, CV, LinkedIn), 44px, the email one with the beam", async ({ page }) => {
+    await page.goto("/");
+    const ctas = hero(page).locator(".hero-cta");
+    await expect(ctas).toHaveCount(3);
+    expect(await ctas.nth(0).getAttribute("href")).toMatch(/^mailto:/);
+    expect(await ctas.nth(1).getAttribute("href")).toMatch(/\/cv$/);
+    expect(await ctas.nth(2).getAttribute("href")).toMatch(/linkedin\.com/);
+    await expect(ctas.nth(0)).toHaveClass(/\bbeam\b/);
+    for (let i = 0; i < 3; i++) {
+      const box = await ctas.nth(i).evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { h: el.getBoundingClientRect().height, pl: cs.paddingLeft, pr: cs.paddingRight, r: parseFloat(cs.borderTopLeftRadius) };
+      });
+      expect(box.h).toBeGreaterThanOrEqual(44);
+      expect(box.pl).toBe(box.pr);
+      expect(box.r).toBeGreaterThanOrEqual(22);
+    }
+  });
+
+  test("fact chips are rounded glass boxes with symmetric insets", async ({ page }) => {
+    await page.goto("/");
+    const chips = hero(page).locator(".hero-chip");
+    await expect(chips).toHaveCount(4);
+    for (let i = 0; i < 4; i++) {
+      const c = await chips.nth(i).evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft, parseFloat(cs.borderTopLeftRadius)] as const;
+      });
+      expect(new Set(c.slice(0, 4)).size).toBe(1);
+      expect(c[4]).toBeGreaterThan(8);
+    }
+  });
+
+  test("scale-down: the hero shrinks into a rounded card as it leaves, and is whole again at the top", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    expect(await scaleOf(page)).toBe(1);
+    await scrollTo(page, await pastHero(page));
+    await expect.poll(() => scaleOf(page)).toBeLessThan(0.96);
+    expect(await scaleOf(page)).toBeGreaterThanOrEqual(0.9);
+    const radius = await hero(page).evaluate((el) => parseFloat(getComputedStyle(el).borderTopLeftRadius));
+    expect(radius).toBeGreaterThan(10);
+    // The masthead switch still happens with the scaled hero.
+    await expect(page.locator("html")).toHaveAttribute("data-hero-passed", "");
+    await scrollTo(page, 0);
+    await expect.poll(() => scaleOf(page)).toBe(1);
+    await expect(page.locator("html")).not.toHaveAttribute("data-hero-passed", "");
+  });
+
+  test("Back to home mid-page: the scale matches the restored scroll, then returns to 1 at the top", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    const y = await pastHero(page);
+    await scrollTo(page, y);
+    await expect.poll(() => scaleOf(page)).toBeLessThan(0.96);
+    await page.goto("/cv");
+    await page.goBack();
+    await expect(hero(page)).toBeVisible();
+    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5_000 }).toBeGreaterThan(y - 60);
+    await expect.poll(() => scaleOf(page)).toBeLessThan(0.96);
+    await scrollTo(page, 0);
+    await expect.poll(() => scaleOf(page)).toBe(1);
+  });
+
+  test("a resize while the hero is scaled refits the field onto the same layout box as at the top", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(hero(page)).toHaveAttribute("data-fx-tier", /^(off|still|lite|full)$/, { timeout: 10_000 });
+    test.skip((await hero(page).getAttribute("data-fx-tier")) === "off", "field is off on this renderer");
+    await expect(page.locator("html")).toHaveAttribute("data-fx", "on", { timeout: 10_000 });
+    type Ink = { x: number; y: number; w: number; h: number; src: string };
+    const ink = () => page.evaluate(() => (window as Window & { __kzFx?: { ink: Ink | null } }).__kzFx?.ink ?? null);
+    const refitDone = () => expect(page.locator(".fx-stage[data-refit]")).toHaveCount(0, { timeout: 5_000 });
+    const size = page.viewportSize()!;
+    const b = { width: size.width - 40, height: size.height };
+
+    // Scaled (mid exit), then resize: the field measures while the hero is transformed.
+    await scrollTo(page, Math.round((await pastHero(page)) * 0.6));
+    await expect.poll(() => scaleOf(page)).toBeLessThan(0.99);
+    await page.setViewportSize(b);
+    await page.waitForTimeout(400);
+    await refitDone();
+    const scaled = await ink();
+
+    // The same size at the top (scale 1).
+    await scrollTo(page, 0);
+    await expect.poll(() => scaleOf(page)).toBe(1);
+    await page.setViewportSize(size);
+    await page.waitForTimeout(400);
+    await refitDone();
+    await page.setViewportSize(b);
+    await page.waitForTimeout(400);
+    await refitDone();
+    const top = await ink();
+
+    expect(scaled?.src).toBe(top?.src);
+    for (const k of ["x", "y", "w", "h"] as const) expect(Math.abs(scaled![k] - top![k])).toBeLessThan(1);
+    await expect(page.locator("html")).toHaveAttribute("data-fx", "on");
+  });
+
+  test("no layout shift on load or while the phrases cycle", async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as Window & { __cls?: number };
+      w.__cls = 0;
+      new PerformanceObserver((l) => {
+        for (const e of l.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
+          if (!e.hadRecentInput) w.__cls! += e.value;
+        }
+      }).observe({ type: "layout-shift", buffered: true });
+    });
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await page.waitForTimeout(6_500);
+    expect(await page.evaluate(() => (window as Window & { __cls?: number }).__cls)).toBe(0);
+  });
+
+  for (const width of [360, 390, 768, 1024, 1440, 1920]) {
+    test(`no horizontal overflow at ${width}px (EN and TH)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      for (const path of ["/", "/th"]) {
+        await page.goto(path);
+        const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        expect(over, path).toBeLessThanOrEqual(0);
+      }
+    });
+  }
+
+  for (const theme of ["light", "dark"] as const) {
+    test(`hero and numbers are axe clean (${theme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+      await page.goto("/");
+      const results = await new AxeBuilder({ page })
+        .include("[data-hero]")
+        .include("[data-numbers]")
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+        .analyze();
+      const bad = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+      expect(bad.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+    });
+  }
+});
+
+test.describe("numbers strip", () => {
+  test("four pastel cards, figures from content, symmetric insets; the odometer rolls into view", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    const cards = page.locator("[data-numbers] .numbers-card");
+    await expect(cards).toHaveCount(4);
+    const values = await cards.locator(".odometer > .sr-only").allTextContents();
+    expect(values).toEqual(["7", "4", "500", "37"]);
+    for (let i = 0; i < 4; i++) {
+      const c = await cards.nth(i).evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { pad: new Set([cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft]).size, bg: cs.backgroundColor };
+      });
+      expect(c.pad).toBe(1);
+      expect(c.bg).not.toBe("rgba(0, 0, 0, 0)");
+    }
+    await page.locator("[data-numbers]").scrollIntoViewIfNeeded();
+    await expect(cards.first().locator(".odometer[data-rolled]")).toHaveCount(1);
+  });
+
+  test("Thai labels render (no joiners), the figures stay the same", async ({ page }) => {
+    await page.goto("/th");
+    const strip = page.locator("[data-numbers]");
+    await expect(strip.locator(".numbers-card")).toHaveCount(4);
+    expect(await strip.locator(".odometer > .sr-only").allTextContents()).toEqual(["7", "4", "500", "37"]);
+    const text = (await strip.textContent()) ?? "";
+    expect(text).toContain("ปีที่ทำระบบใช้งานจริง");
+    expect(text).not.toMatch(/⁠|—|–/);
+  });
+});
