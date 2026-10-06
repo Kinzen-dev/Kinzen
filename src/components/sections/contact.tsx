@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
-import { links } from "@/content";
+import { availability, links, t } from "@/content";
 import { localePath } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { BangkokTime, OffsetFromVisitor } from "../clock";
@@ -19,6 +19,27 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
             {dict.contact.heading}
           </h2>
           <p className="mt-5 max-w-[46ch] text-lg text-ink-2">{dict.contact.body}</p>
+
+          {availability && (availability.employment || availability.studio) ? (
+            <dl className="mt-10 grid border-t border-l border-rule sm:grid-cols-2">
+              {availability.employment ? (
+                <div className="border-r border-b border-rule p-5">
+                  <dt className="readout">
+                    {dict.contact.openTo}: {dict.contact.employment}
+                  </dt>
+                  <dd className="mt-2 text-ink-2">{t(availability.employment, locale)}</dd>
+                </div>
+              ) : null}
+              {availability.studio ? (
+                <div className="border-r border-b border-rule p-5">
+                  <dt className="readout">
+                    {dict.contact.openTo}: {dict.contact.studio}
+                  </dt>
+                  <dd className="mt-2 text-ink-2">{t(availability.studio, locale)}</dd>
+                </div>
+              ) : null}
+            </dl>
+          ) : null}
 
           {email ? (
             <div className="mt-10 grid gap-5">

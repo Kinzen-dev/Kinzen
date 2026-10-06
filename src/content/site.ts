@@ -47,12 +47,14 @@ const content: SiteContentInput = {
     },
     careerStart: "2019-10",
     availability: {
-      visibility: "hidden",
+      visibility: "public",
       employment: {
-        en: "Open to senior and lead engineering roles on product teams. Remote first; Bangkok on-site for the right team.",
+        en: "Senior and lead engineering roles on product teams. Remote first; Bangkok on-site for the right team.",
+        th: "ตำแหน่ง senior หรือ lead ในทีมที่ทำผลิตภัณฑ์ ทำงานทางไกลเป็นหลัก หรือเข้าออฟฟิศในกรุงเทพฯ ถ้าทีมเหมาะกัน",
       },
       studio: {
-        en: "Selected builds through Vesperwerk: AI voice and LINE assistants with guardrails in code; Shopify storefronts, apps and API migrations; TypeScript backends and integrations.",
+        en: "Project work through Vesperwerk: AI voice and LINE assistants with guardrails in code, Shopify storefronts, apps and API migrations, and TypeScript backends and integrations.",
+        th: "งานโปรเจกต์ผ่าน Vesperwerk: ผู้ช่วย AI ทางเสียงและ LINE ที่มีกฎเขียนเป็นโค้ด หน้าร้าน แอป และการย้าย API บน Shopify รวมถึงระบบหลังบ้านและการเชื่อมต่อด้วย TypeScript",
       },
     },
   },

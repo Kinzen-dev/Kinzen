@@ -12,7 +12,6 @@ const ROOT = join(process.cwd(), ".next", "server", "app");
 const HIDDEN_MARKERS: { pattern: RegExp; reason: string }[] = [
   { pattern: /Confidential client/, reason: "hidden part-time contract leaked" },
   { pattern: /part-time-contract/, reason: "hidden part-time contract leaked" },
-  { pattern: /Open to senior and lead engineering roles/, reason: "hidden availability copy leaked" },
   { pattern: /github\.com\/Kinzen-dev"/, reason: "GitHub profile link is hidden until cleanup" },
   { pattern: /CLAIMS\.md|claimId|provenance/, reason: "provenance must never render" },
   // Thai line-break joiners belong in visible text only, never in metadata or attributes.
