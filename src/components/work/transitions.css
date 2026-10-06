@@ -1,0 +1,25 @@
+/* Shared-element morph between a ledger row title and the project page h1. */
+::view-transition-group(.morph) {
+  animation-duration: var(--dur-3);
+  animation-timing-function: var(--ease-out);
+}
+/* One object moving, not two crossfading: the old title drops out fast, the new one scales. */
+::view-transition-old(.morph) {
+  animation: var(--dur-1) var(--ease-out) both vt-morph-out;
+}
+::view-transition-new(.morph) {
+  animation: none;
+}
+@keyframes vt-morph-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
