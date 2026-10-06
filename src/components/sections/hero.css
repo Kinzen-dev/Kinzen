@@ -35,7 +35,8 @@
 }
 .hero-kinetic {
   margin-top: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
-  font-size: clamp(2.125rem, 1.1rem + 3.7vw, 4.625rem);
+  /* 30px on a 390 phone (every phrase in two lines at most), 72px at 1440. */
+  font-size: clamp(1.75rem, 0.9rem + 4vw, 4.625rem);
   font-weight: 600;
   line-height: 1.06;
   letter-spacing: -0.035em;
@@ -189,6 +190,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  /* A still ring 5px out would read as a focus ring: the filled pill is enough on its own. */
+  .hero-cta-primary.beam::before {
+    display: none;
+  }
   .hero-live::after {
     animation: none;
     opacity: 0;

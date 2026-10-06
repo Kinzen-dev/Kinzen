@@ -10,7 +10,9 @@ import { loadMotion, motionAllowed } from "@/motion/gsap";
  * Scrubbed by ScrollTrigger, transform and corner radius only. The scroll range is given in
  * numbers from layout boxes (offsetTop/offsetHeight ignore transforms), so animating the trigger
  * never feeds back into its own measurement. Reduced motion: nothing is registered (matchMedia
- * reverts it if the setting changes mid-visit). Renders nothing.
+ * reverts it if the setting changes mid-visit). GSAP is fetched once the browser is idle or on the
+ * first scroll, whichever comes first (at once when the page opens mid-scroll, as on Back), so it
+ * never competes with the first paint and the field's boot. Renders nothing.
  */
 export function HeroScale() {
   useEffect(() => {
@@ -18,15 +20,28 @@ export function HeroScale() {
     if (!hero || !motionAllowed()) return;
     let revert: (() => void) | null = null;
     let cancelled = false;
-    void loadMotion().then(({ gsap }) => {
+    let started = false;
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    let idle = 0;
+    const start = () => {
+      if (started || cancelled) return;
+      started = true;
+      window.removeEventListener("scroll", start);
+      if (idle) w.cancelIdleCallback?.(idle);
+      void loadMotion().then(run);
+    };
+    const run = ({ gsap }: Awaited<ReturnType<typeof loadMotion>>) => {
       if (cancelled) return;
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const target = () => {
           const shell = hero.querySelector<HTMLElement>(".shell");
           const g = (shell && parseFloat(getComputedStyle(shell).paddingLeft)) || 16;
-          const w = hero.offsetWidth || window.innerWidth;
-          return Math.min(0.95, Math.max(0.9, 1 - (2 * g) / w));
+          const width = hero.offsetWidth || window.innerWidth;
+          return Math.min(0.95, Math.max(0.9, 1 - (2 * g) / width));
         };
         gsap.fromTo(
           hero,
@@ -48,9 +63,17 @@ export function HeroScale() {
         );
       });
       revert = () => mm.revert();
-    });
+    };
+    if (window.scrollY > 0) start();
+    else {
+      window.addEventListener("scroll", start, { passive: true });
+      if (w.requestIdleCallback) idle = w.requestIdleCallback(start, { timeout: 2500 });
+      else idle = window.setTimeout(start, 1200);
+    }
     return () => {
       cancelled = true;
+      window.removeEventListener("scroll", start);
+      if (idle) (w.cancelIdleCallback ?? window.clearTimeout)(idle);
       revert?.();
     };
   }, []);
