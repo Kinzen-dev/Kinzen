@@ -52,8 +52,8 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
   };
   const place =
     locale === "th"
-      ? `${nobr(t(profile.location.city, locale))} ${nobr(t(profile.location.country, locale))}`
-      : `${nobr(t(profile.location.city, locale))}, ${nobr(t(profile.location.country, locale))}`;
+      ? `${t(profile.location.city, locale)} ${t(profile.location.country, locale)}`
+      : `${t(profile.location.city, locale)}, ${t(profile.location.country, locale)}`;
 
   return (
     <article data-cv className="cv shell">
@@ -70,7 +70,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         <ul className="cv-contact" aria-label={plain(dict.cv.contact)}>
           <li>
             {place}
-            {profile.location.remote ? ` (${nobr(dict.cv.remote)})` : null}
+            {profile.location.remote ? ` (${dict.cv.remote})` : null}
           </li>
           {email ? (
             <li>

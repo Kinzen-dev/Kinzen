@@ -7,7 +7,8 @@ const THAI = /[฀-๿]/;
  * Visible text with known Thai compounds kept on one line: each compound becomes a
  * `<span class="nobr">` (white-space: nowrap). Adds no characters, so copy, search and the
  * browser's own Thai dictionary see the original text. Non-strings and text without Thai pass
- * through untouched. Safe in server and client components (no hooks).
+ * through untouched. Safe in server and client components (no hooks). Never use the result in a
+ * string (template literal, join): it is a React node.
  */
 export function nobr(text: unknown): ReactNode {
   if (typeof text !== "string" || !THAI.test(text)) return text as ReactNode;
@@ -27,5 +28,8 @@ export function nobr(text: unknown): ReactNode {
     }
   }
   if (plain) out.push(plain);
-  return out.length === 1 && typeof out[0] === "string" ? out[0] : out;
+  if (out.length === 1 && typeof out[0] === "string") return out[0];
+  // One wrapper, so a flex or grid parent sees a single item, exactly as it saw the plain
+  // string (several items would get the parent's gap between the parts of a sentence).
+  return createElement("span", null, ...out);
 }

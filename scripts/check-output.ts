@@ -14,11 +14,10 @@ const HIDDEN_MARKERS: { pattern: RegExp; reason: string }[] = [
   { pattern: /part-time-contract/, reason: "hidden part-time contract leaked" },
   { pattern: /github\.com\/Kinzen-dev"/, reason: "GitHub profile link is hidden until cleanup" },
   { pattern: /CLAIMS\.md|claimId|provenance/, reason: "provenance must never render" },
-  // Thai line-break joiners belong in visible text only, never in metadata or attributes.
-  {
-    pattern: /(?:<title>[^<]*|(?:content|aria-label|alt|title)="[^"]*)\u2060/,
-    reason: "word joiner leaked into metadata or an attribute",
-  },
+  // No joiners anywhere: visible Thai uses nowrap spans (lib/thai-nodes.ts) since review round 5.
+  { pattern: /\u2060/, reason: "word joiner in output (use nobr spans, never joiners)" },
+  // A React node pushed through a string (template literal, join) renders as this.
+  { pattern: /\[object Object\]|>undefined<|>NaN</, reason: "a value rendered as [object Object], undefined or NaN" },
 ];
 
 function walk(dir: string): string[] {

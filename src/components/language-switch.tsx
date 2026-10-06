@@ -24,7 +24,7 @@ export function LanguageSwitch({
       {locales.map((target, i) => (
         <span key={target} className="flex items-center">
           {i > 0 && (
-            <span aria-hidden="true" className="px-1.5 text-ink-3">
+            <span aria-hidden="true" className="px-0.5 text-ink-3">
               /
             </span>
           )}
@@ -39,7 +39,7 @@ export function LanguageSwitch({
             hrefLang={target}
             lang={target}
             aria-current={target === locale ? "true" : undefined}
-            className={target === locale ? "text-ink" : "text-ink-3 transition-colors duration-200 hover:text-ink"}
+            className={`relative inline-grid min-h-6 min-w-6 place-items-center ${target === locale ? "text-ink" : "text-ink-3 transition-colors duration-200 hover:text-ink"}`}
           >
             {target === "en" ? "EN" : "TH"}
             <span className="sr-only"> {labels[target]}</span>

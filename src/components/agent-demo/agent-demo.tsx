@@ -269,7 +269,9 @@ export function AgentDemo({ copy }: { copy: Copy }) {
           <button
             type="button"
             onClick={() => {
-              if (paused) {
+              // After a pick auto-play is off too: the button then offers to resume, never claims
+              // to pause something that is not running.
+              if (paused || !autoplay) {
                 setPaused(false);
                 setAutoplay(true);
               } else {
@@ -279,7 +281,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
             }}
             className="inline-flex h-10 w-fit items-center border border-rule px-4 text-sm text-ink-2 transition-colors duration-200 hover:border-rule-strong hover:text-ink"
           >
-            {paused ? copy.play : copy.pause}
+            {paused || !autoplay ? copy.play : copy.pause}
           </button>
         ) : null}
       </div>

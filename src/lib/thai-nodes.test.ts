@@ -17,10 +17,12 @@ describe("nobr", () => {
 
   it("wraps known compounds in nowrap spans without changing the text", () => {
     const text = "ระบบถอดเสียงแบบเรียลไทม์ให้คลินิกทันตกรรม";
-    const out = nobr(text) as unknown[];
-    expect(Array.isArray(out)).toBe(true);
+    const wrapper = nobr(text) as ReactElement<{ children: unknown[] }>;
+    // A single wrapper element, so flex/grid parents see one item.
+    expect(isValidElement(wrapper)).toBe(true);
+    const out = wrapper.props.children;
     const spans = out.filter(isValidElement) as ReactElement<{ className: string; children: string }>[];
-    expect(spans.map((s) => s.props.children)).toEqual(expect.arrayContaining(["เรียลไทม์", "คลินิก", "ทันตกรรม"]));
+    expect(spans.map((s) => s.props.children)).toEqual(expect.arrayContaining(["เรียลไทม์", "คลินิกทันตกรรม"]));
     expect(spans.every((s) => s.props.className === "nobr")).toBe(true);
     expect(textOf(out)).toBe(text);
   });

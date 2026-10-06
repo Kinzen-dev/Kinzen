@@ -31,10 +31,11 @@
   animation: agent-demo-veil 450ms linear forwards;
   pointer-events: none;
 }
-/* Hold, then clear quickly: a long linear fade showed both threads half-visible at once. */
+/* Hold, then clear fast: any visible overlap of the two threads reads as garbled text
+   (review rounds 6 and 7), so the dissolve is under 100 ms. */
 @keyframes agent-demo-veil {
   0%,
-  45% {
+  80% {
     opacity: 1;
   }
   to {
@@ -68,6 +69,8 @@
 
 .agent-demo-bubble {
   margin: 0;
+  /* No one-word last line ("ดีคะ" alone) in short chat bubbles. */
+  text-wrap: pretty;
   padding: 0.625rem 0.875rem;
   border-radius: 2px;
 }

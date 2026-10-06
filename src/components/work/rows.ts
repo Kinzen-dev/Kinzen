@@ -58,14 +58,16 @@ export function yearLabel(p: Project, dict: Dictionary, locale: Locale = "en") {
       month: "short",
       ...(withYear ? { year: "numeric" } : {}),
       timeZone: "UTC",
-    }).format(Date.UTC(y, m - 1, 1));
+    })
+      .format(Date.UTC(y, m - 1, 1))
+      .replace(" ", "\u00a0"); // month and year never split across lines
   };
   const { start, end } = p.period;
   if (!end) return fmt(start);
-  if (end === "present") return `${fmt(start)} → ${dict.ledger.present}`;
+  if (end === "present") return `${fmt(start)}\u00a0→ ${dict.ledger.present}`;
   if (end === start) return fmt(start);
-  if (end.slice(0, 4) === start.slice(0, 4)) return `${fmt(start, false)} → ${fmt(end)}`;
-  return `${fmt(start)} → ${fmt(end)}`;
+  if (end.slice(0, 4) === start.slice(0, 4)) return `${fmt(start, false)}\u00a0→ ${fmt(end)}`;
+  return `${fmt(start)}\u00a0→ ${fmt(end)}`;
 }
 
 export const isLive = (status: Project["status"]) => status === "live" || status === "in-production";
