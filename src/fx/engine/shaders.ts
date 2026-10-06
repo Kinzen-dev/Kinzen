@@ -118,11 +118,12 @@ void main(){
 
 export const pointVS = `#version 300 es
 precision highp float;
-uniform highp sampler2D uPos, uVel, uCol;
+uniform highp sampler2D uPos, uVel, uCol, uTarget;
 uniform mat4 uVP;
-uniform float uSide, uPointPx, uIntensity;
+uniform float uSide, uPointPx, uIntensity, uLight, uLand;
 uniform vec3 uHot;
 out vec3 vCol;
+out float vAir;
 void main(){
   int side = int(uSide);
   int id = gl_VertexID;
@@ -134,17 +135,30 @@ void main(){
   vec3 col = texelFetch(uCol, tc, 0).rgb;
   col = mix(col, uHot, clamp(V.w * 0.05, 0.0, 0.5));
   vCol = col * uIntensity;
+  vAir = 1.0;
+  // Paper only: ink prints where it lands. A glyph particle on (within uLand of) its letter
+  // writes "landed" density (rgb); anything still in the air, and the dust halo, writes "airborne"
+  // density (alpha), which the composite keeps translucent. The burst reads as gold dust in the
+  // air, never a stain; the settled letters print as solid ink.
+  if (uLight > 0.5) {
+    vec4 T = texelFetch(uTarget, tc, 0);
+    float land = T.w * (1.0 - smoothstep(0.35 * uLand, uLand, length(P.xy - T.xy)));
+    vAir = (1.0 - land) * dot(vCol, vec3(0.2126, 0.7152, 0.0722));
+    vCol *= land;
+  }
 }`;
 
 export const pointFS = `#version 300 es
 precision highp float;
 in vec3 vCol;
+in float vAir;
 out vec4 o;
 void main(){
   vec2 d = gl_PointCoord - 0.5;
   float r2 = dot(d, d);
   if (r2 > 0.25) discard;
-  o = vec4(vCol * exp(-r2 * 14.0), 1.0);
+  float g = exp(-r2 * 14.0);
+  o = vec4(vCol * g, vAir * g);
 }`;
 
 export const downFS = `#version 300 es
@@ -188,7 +202,7 @@ export const compFS = `#version 300 es
 precision highp float;
 uniform sampler2D uScene, uBloomA, uBloomB;
 uniform vec2 uRes;
-uniform float uTime, uExposure, uAber, uFade, uBloomMix, uMode, uInkGain;
+uniform float uTime, uExposure, uAber, uFade, uBloomMix, uMode, uInkK, uInkR, uAirK, uAirMax;
 uniform vec3 uGround, uInk;
 in vec2 vUv;
 out vec4 o;
@@ -217,21 +231,30 @@ void main(){
   c = mix(tc, hc, 0.7);
   float a = clamp(dot(c, vec3(0.2126, 0.7152, 0.0722)), 0.0, 1.0);
   vec3 dark = c + uGround * (1.0 - c);
-  // Paper: sparse particles leave ground-coloured pinholes inside the letters, which read as
-  // dirt on a light page. Close them with a small dilation of the scene density (light theme
-  // only, 8 taps), so letters print as solid ink with grain left at the edges.
+  // Paper. Landed density (rgb) prints: a small tent blur (9 taps) closes the pinholes between
+  // particles inside a stroke without stair steps, then an exponential-of-square curve makes
+  // letter density solid ink while a lone speck stays soft. Airborne density (alpha) is dust in
+  // the air: an exponential curve capped well below opaque, so the burst is a gold haze.
   float cov = 0.0;
   if (uMode > 0.5) {
-    vec2 px = 1.6 / uRes;
-    float m = 0.0;
+    vec2 px = uInkR / uRes;
+    vec4 m = vec4(0.0);
     for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) {
-      m = max(m, dot(texture(uScene, uv + vec2(float(i), float(j)) * px).rgb, vec3(0.2126, 0.7152, 0.0722)));
+      float w = (2.0 - abs(float(i))) * (2.0 - abs(float(j)));
+      m += w * texture(uScene, uv + vec2(float(i), float(j)) * px);
     }
-    cov = smoothstep(0.0, 1.0, max(a, m * uExposure * uFade * 0.85) * uInkGain);
+    m *= uExposure * uFade / 16.0;
+    float land = dot(m.rgb, vec3(0.2126, 0.7152, 0.0722)) * uInkK;
+    float landCov = 1.0 - exp(-land * land);
+    float air = texture(uScene, uv).a * uExposure * uFade;
+    float airCov = uAirMax * (1.0 - exp(-air * uAirK));
+    cov = 1.0 - (1.0 - landCov) * (1.0 - airCov);
   } else {
-    cov = smoothstep(0.0, 1.0, a * uInkGain);
+    cov = smoothstep(0.0, 1.0, a * 9.0);
   }
-  vec3 light = mix(uGround, uInk, cov);
+  // Subtractive, like ink on paper: partial coverage filters the paper toward the ink colour
+  // (geometric blend) instead of greying it, so thin dust reads gold, not taupe.
+  vec3 light = uGround * pow(max(uInk, vec3(1e-4)) / max(uGround, vec3(1e-4)), vec3(cov));
   light *= mix(1.0, 0.82, smoothstep(0.5, 1.0, a));
   vec3 outc = mix(dark, light, uMode);
   outc = pow(outc, vec3(1.0 / 2.2));

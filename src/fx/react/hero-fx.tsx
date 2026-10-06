@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import "../fx.css";
+import { MastheadSync } from "./masthead-sync";
 
 // Everything heavy (engine, shaders, worker, baked mask) lives behind this dynamic import.
 const HeroField = dynamic(() => import("./hero-field"), { ssr: false });
@@ -59,6 +60,7 @@ export function HeroFx() {
   return (
     <div ref={ref} className="fx-stage" aria-hidden="true">
       {mount && !off && <HeroField onOff={() => setOff(true)} />}
+      <MastheadSync />
     </div>
   );
 }
