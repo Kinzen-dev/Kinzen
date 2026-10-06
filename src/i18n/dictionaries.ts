@@ -111,6 +111,27 @@ const en = {
     home: "Back to the start",
   },
   footer: { rights: "Kittipong Khonthong", updated: "Content updated" },
+  work: {
+    filterLabel: "Filter by area",
+    showing: "Showing {shown} of {total} systems",
+    details: "Details",
+    architecture: "Architecture",
+    plateRegion: "Architecture drawing, scrolls sideways",
+    plateHint: "Scroll sideways for the whole drawing",
+    plateFlow: "Flow",
+    plateConstraints: "Constraints",
+    plateTo: "to",
+    titleBlock: {
+      drawing: "Drawing",
+      scale: "Scale",
+      notToScale: "Not to scale",
+      revision: "Revision",
+      drawnBy: "Drawn by",
+    },
+    caseStudy: { heading: "Case study", problem: "Problem", approach: "Approach", result: "Result", limits: "Limits" },
+    ogAlt: "{name}, a system built by Kittipong Khonthong",
+    ogAltHome: "KINZEN: Kittipong Khonthong, Senior Full-Stack Engineer",
+  },
 };
 
 export type Dictionary = typeof en;
@@ -222,6 +243,33 @@ const th: Dictionary = {
     home: "กลับหน้าแรก",
   },
   footer: { rights: "กฤติพงษ์ ก้อนทอง", updated: "อัปเดตเนื้อหา" },
+  work: {
+    filterLabel: "กรองตามด้าน",
+    showing: "แสดง {shown} จาก {total} ระบบ",
+    details: "รายละเอียด",
+    architecture: "สถาปัตยกรรมระบบ",
+    plateRegion: "ภาพสถาปัตยกรรม เลื่อนไปด้านข้างได้",
+    plateHint: "เลื่อนไปด้านข้างเพื่อดูภาพเต็ม",
+    plateFlow: "ลำดับการทำงาน",
+    plateConstraints: "ข้อกำหนด",
+    plateTo: "ไปยัง",
+    titleBlock: {
+      drawing: "แบบเลขที่",
+      scale: "มาตราส่วน",
+      notToScale: "ไม่ตามมาตราส่วน",
+      revision: "ปรับปรุง",
+      drawnBy: "เขียนโดย",
+    },
+    caseStudy: {
+      heading: "กรณีศึกษา",
+      problem: "โจทย์",
+      approach: "วิธีที่ใช้",
+      result: "ผลลัพธ์",
+      limits: "ข้อจำกัด",
+    },
+    ogAlt: "{name} ระบบที่กฤติพงษ์ ก้อนทอง สร้าง",
+    ogAltHome: "KINZEN: กฤติพงษ์ ก้อนทอง วิศวกรซอฟต์แวร์ full-stack",
+  },
 };
 
 const dictionaries: Record<Locale, Dictionary> = { en, th };
