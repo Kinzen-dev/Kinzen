@@ -50,3 +50,13 @@
     line-height: 1.45;
   }
 }
+/* Until the odometer rolls (it waits to be well inside the viewport), its columns sit at 0: never
+   show a resting "0" or "000" as if it were the fact. The figure fades in as it starts rolling. */
+@media (scripting: enabled) {
+  .numbers-value .odometer-digits {
+    transition: opacity 500ms var(--ease-out);
+  }
+  .numbers-value .odometer:not([data-rolled]) .odometer-digits {
+    opacity: 0;
+  }
+}
