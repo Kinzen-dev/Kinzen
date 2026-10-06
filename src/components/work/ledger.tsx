@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Fragment,
   ViewTransition,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -83,6 +84,39 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
   const [openId, setOpenId] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement>());
+
+  // Coming Back from a project page should look exactly as the visitor left it:
+  // keep the open row, filter and sort for this tab (session storage, never sent anywhere).
+  const restored = useRef(false);
+  useEffect(() => {
+    const key = `kz-ledger:${window.location.pathname}`;
+    if (!restored.current) {
+      restored.current = true;
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(key) ?? "null") as {
+          sort: Sort;
+          filter: LedgerRow["area"] | "all";
+          openId: string | null;
+        } | null;
+        if (saved) {
+          // Restoring persisted UI state after hydration is a sync from an external store.
+          /* eslint-disable react-hooks/set-state-in-effect */
+          setSort(saved.sort);
+          setFilter(saved.filter);
+          setOpenId(saved.openId && rows.some((r) => r.id === saved.openId) ? saved.openId : null);
+          /* eslint-enable react-hooks/set-state-in-effect */
+          return;
+        }
+      } catch {
+        /* storage blocked or malformed: start fresh */
+      }
+    }
+    try {
+      sessionStorage.setItem(key, JSON.stringify({ sort, filter, openId }));
+    } catch {
+      /* storage blocked: state just is not remembered */
+    }
+  }, [sort, filter, openId, rows]);
 
   const sorted = useMemo(() => sortRows(rows, sort), [rows, sort]);
   const shownIds = sorted.filter((r) => filter === "all" || r.area === filter).map((r) => r.id);

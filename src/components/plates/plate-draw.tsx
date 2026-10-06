@@ -62,11 +62,29 @@ export function PlateDraw({ label, children }: { label: string; children: ReactN
       };
     }
 
+    // A drawing the visitor has already watched draw itself stays drawn (e.g. after Back).
+    const drawnKey = `kz-plate:${window.location.pathname}:${label}`;
+    try {
+      if (sessionStorage.getItem(drawnKey) === "1") {
+        return () => {
+          ro.disconnect();
+          cleanupScroll();
+        };
+      }
+    } catch {
+      /* storage blocked: draw as usual */
+    }
+
     el.dataset.state = "armed";
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
           el.dataset.state = "drawn";
+          try {
+            sessionStorage.setItem(drawnKey, "1");
+          } catch {
+            /* storage blocked */
+          }
           io.disconnect();
         }
       },
@@ -78,7 +96,7 @@ export function PlateDraw({ label, children }: { label: string; children: ReactN
       ro.disconnect();
       cleanupScroll();
     };
-  }, []);
+  }, [label]);
 
   return (
     <div
