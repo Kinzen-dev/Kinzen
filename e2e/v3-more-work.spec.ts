@@ -50,7 +50,8 @@ test.describe("more work on home", () => {
     await grid.scrollIntoViewIfNeeded();
     await page.evaluate(() => {
       const g = document.querySelector("#work .mw-grid")!.getBoundingClientRect();
-      window.scrollBy(0, g.bottom - innerHeight + 40);
+      // Whole grid past its settle line (each card settles when its centre reaches 70% of the view).
+      window.scrollBy(0, g.bottom - innerHeight * 0.6);
     });
     // Scrubbed: give the scrub a moment to catch up, then every card is at rest in its slot.
     await expect

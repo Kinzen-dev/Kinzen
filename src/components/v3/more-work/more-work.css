@@ -154,8 +154,13 @@
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--gold) 28%, transparent);
 }
 .mw-year {
-  margin-inline-start: auto;
   white-space: nowrap;
+}
+/* From tablet up the year sits at the far end of the line; on phones it wraps in line. */
+@media (min-width: 48rem) {
+  .mw-year {
+    margin-inline-start: auto;
+  }
 }
 
 .mw-name {

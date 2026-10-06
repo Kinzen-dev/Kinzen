@@ -66,7 +66,7 @@ export function CardDeck({
               rotation: 0,
               scale: 1,
               ease: "none",
-              scrollTrigger: { trigger: slot, start: "top bottom", end: "center 62%", scrub: 0.6 },
+              scrollTrigger: { trigger: slot, start: "top bottom", end: "center 70%", scrub: 0.6 },
             },
           );
         });
