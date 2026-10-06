@@ -63,7 +63,6 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
 
   const index = projects.findIndex((p) => p.id === project.id);
   const next = projects[(index + 1) % projects.length];
-  const home = localePath(locale, "/");
   const links = project.links.filter((l) => l.visibility === "public");
   const caseStudy = project.caseStudyVisibility === "public" ? project.caseStudy : undefined;
 
@@ -80,7 +79,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
   return (
     <article className="shell pt-8 md:pt-14">
       <p>
-        <Link href={home === "/" ? "/#work" : `${home}#work`} className="link text-sm text-ink-2">
+        <Link href={localePath(locale, "/work")} className="link text-sm text-ink-2">
           <span aria-hidden="true">← </span>
           {nobr(dict.project.back)}
         </Link>
