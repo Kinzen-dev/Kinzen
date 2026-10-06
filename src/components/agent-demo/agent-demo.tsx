@@ -45,6 +45,8 @@ export function AgentDemo({ copy }: { copy: Copy }) {
   const [stage, setStage] = useState<number>(FINAL);
   const [veil, setVeil] = useState<{ key: number; scenario: number; stage: number } | null>(null);
   const [autoplay, setAutoplay] = useState(true);
+  // Pause freezes everything, including a run that is mid-way (WCAG 2.2.2).
+  const [paused, setPaused] = useState(false);
   const [inView, setInView] = useState(false);
   const [tabVisible, setTabVisible] = useState(true);
   const [reduced, setReduced] = useState(false);
@@ -79,6 +81,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
   const choose = useCallback(
     (next: number) => {
       setAutoplay(false); // the visitor took the wheel
+      setPaused(false);
       started.current = true; // and the first-view replay must never override their pick
       play(next);
     },
@@ -139,7 +142,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
 
   // Advance the script, one stage at a time, only while active.
   useEffect(() => {
-    if (!active || !started.current) return;
+    if (!active || paused || !started.current) return;
     if (stage < FINAL) {
       const id = window.setTimeout(() => setStage((s) => Math.min(s + 1, FINAL)), STAGES[stage + 1].hold);
       return () => window.clearTimeout(id);
@@ -148,7 +151,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       const id = window.setTimeout(() => play((state.current.scenario + 1) % copy.scenarios.length), REST_MS);
       return () => window.clearTimeout(id);
     }
-  }, [active, stage, autoplay, play, copy.scenarios.length]);
+  }, [active, paused, stage, autoplay, play, copy.scenarios.length]);
 
   // Clear the veil after its cross-fade (CSS runs the fade; this only removes the node).
   useEffect(() => {
@@ -250,10 +253,18 @@ export function AgentDemo({ copy }: { copy: Copy }) {
         {!reduced ? (
           <button
             type="button"
-            onClick={() => setAutoplay((a) => !a)}
+            onClick={() => {
+              if (paused) {
+                setPaused(false);
+                setAutoplay(true);
+              } else {
+                setPaused(true);
+                setAutoplay(false);
+              }
+            }}
             className="link min-h-11 w-fit text-sm text-ink-2"
           >
-            {autoplay ? copy.pause : copy.play}
+            {paused ? copy.play : copy.pause}
           </button>
         ) : null}
       </div>

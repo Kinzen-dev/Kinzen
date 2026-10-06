@@ -5,7 +5,7 @@ import { inlineList } from "@/lib/text";
 
 export function Skills({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
-    <section aria-labelledby="skills-title" className="shell pt-20 md:pt-28">
+    <section id="skills" aria-labelledby="skills-title" className="shell pt-20 md:pt-28">
       <h2 id="skills-title" className="border-t border-rule-strong pt-5 pb-8 text-xl tracking-[-0.035em]">
         {dict.sections.skills}
       </h2>

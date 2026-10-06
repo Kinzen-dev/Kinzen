@@ -14,7 +14,8 @@ import { plain } from "@/lib/thai";
 
 export function navItems(locale: Locale, dict: Dictionary) {
   const home = localePath(locale, "/");
-  const anchor = (id: string) => `${home === "/" ? "" : home}/#${id}`;
+  // "/#work" and "/th#work": no trailing slash on /th, which would 308 and reload the page.
+  const anchor = (id: string) => (home === "/" ? `/#${id}` : `${home}#${id}`);
   return [
     { href: anchor("work"), label: dict.nav.work },
     { href: anchor("experience"), label: dict.nav.experience },

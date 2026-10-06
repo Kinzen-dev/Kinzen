@@ -1,4 +1,4 @@
-import { links, projects, t } from "@/content";
+import { experience, links, projects, skillItems, skills, t } from "@/content";
 import type { Locale } from "@/content/schema";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import { localePath } from "@/lib/site-url";
@@ -32,17 +32,33 @@ export function paletteData(locale: Locale, dict: Dictionary): PaletteData {
   const en = getDictionary("en");
   const th = getDictionary("th");
   const home = localePath(locale, "/");
-  const anchor = (id: string) => `${home === "/" ? "" : home}/#${id}`;
+  const anchor = (id: string) => (home === "/" ? `/#${id}` : `${home}#${id}`);
   const email = links.find((l) => l.kind === "email")?.href.replace(/^mailto:/, "") ?? null;
   const both = (pick: (d: Dictionary) => string) => `${pick(en)} ${pick(th)}`;
 
+  // Searching a stack name ("NestJS", "Kafka") must land somewhere real: index the
+  // experience eras and the tools under their sections.
+  const extra: Partial<Record<(typeof SECTIONS)[number], string>> = {
+    experience: experience
+      .map((e) => `${e.org.name} ${e.title.en} ${e.stack.join(" ")} ${e.highlights.map((h) => h.text.en).join(" ")}`)
+      .join(" "),
+  };
   const sections: PaletteCommand[] = SECTIONS.map((id) => ({
     id: `section-${id}`,
     group: "sections",
     label: dict.nav[id],
-    keywords: `${both((d) => d.nav[id])} ${id}`,
+    keywords: `${both((d) => d.nav[id])} ${id} ${extra[id] ?? ""}`,
     href: anchor(id),
   }));
+  sections.push({
+    id: "section-skills",
+    group: "sections",
+    label: dict.sections.skills,
+    keywords: `${both((d) => d.sections.skills)} skills stack tools ${skills
+      .flatMap((g) => [...skillItems(g, "en"), ...skillItems(g, "th")])
+      .join(" ")}`,
+    href: anchor("skills"),
+  });
 
   const work: PaletteCommand[] = projects.map((p) => ({
     id: `project-${p.slug}`,

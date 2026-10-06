@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useLayoutEffect, useSyncExternalStore } from "react";
 import { plain } from "@/lib/thai";
 
 type Theme = "light" | "dark";
@@ -24,6 +24,19 @@ function currentTheme(): Theme {
 
 export function ThemeToggle({ labels }: { labels: { toggle: string; light: string; dark: string } }) {
   const theme = useSyncExternalStore<Theme | null>(subscribe, currentTheme, () => null);
+
+  // Switching language swaps the root layout on the client, which rebuilds <html> without
+  // re-running the pre-paint theme script: re-apply the stored choice before paint.
+  useLayoutEffect(() => {
+    try {
+      const stored = localStorage.getItem("theme");
+      if ((stored === "light" || stored === "dark") && document.documentElement.dataset.theme !== stored) {
+        document.documentElement.dataset.theme = stored;
+      }
+    } catch {
+      /* storage blocked: follow the system */
+    }
+  }, []);
 
   function toggle() {
     const next: Theme = currentTheme() === "dark" ? "light" : "dark";
