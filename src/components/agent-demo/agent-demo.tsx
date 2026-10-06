@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@/i18n/dictionaries";
 import "./agent-demo.css";
+import { nobr } from "@/lib/thai-nodes";
 
 type Copy = Dictionary["demo"];
 type Scenario = Copy["scenarios"][number];
@@ -205,8 +206,8 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       className="agent-demo grid gap-8 border-t border-rule pt-8 md:grid-cols-12 md:grid-rows-[auto_1fr] md:gap-x-6"
     >
       <div className="order-1 grid content-start gap-3 md:order-none md:col-span-4 md:row-start-1">
-        <h3 className="text-xl tracking-[-0.03em]">{copy.title}</h3>
-        <p className="max-w-[44ch] text-ink-2">{copy.intro}</p>
+        <h3 className="text-xl tracking-[-0.03em]">{nobr(copy.title)}</h3>
+        <p className="max-w-[44ch] text-ink-2">{nobr(copy.intro)}</p>
       </div>
 
       <figure
@@ -215,9 +216,9 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       >
         <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-rule px-4 py-3">
           <span id="agent-demo-title" className="text-sm font-semibold whitespace-nowrap">
-            {copy.windowTitle}
+            {nobr(copy.windowTitle)}
           </span>
-          <span className="text-xs text-ink-2">{copy.label}</span>
+          <span className="text-xs text-ink-2">{nobr(copy.label)}</span>
         </figcaption>
 
         <div className="agent-demo-stack p-4 md:p-6">
@@ -242,9 +243,9 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       <div className="order-2 grid content-start gap-5 md:order-none md:col-span-4 md:row-start-2">
         <div role="group" aria-labelledby="agent-demo-choose" className="grid gap-2">
           <p id="agent-demo-choose" className="flex items-baseline justify-between gap-4 text-sm text-ink-2">
-            <span>{copy.choose}</span>
+            <span>{nobr(copy.choose)}</span>
             <span className="agent-demo-keyhint text-xs text-ink-3" aria-hidden="true">
-              {copy.keyHint}
+              {nobr(copy.keyHint)}
             </span>
           </p>
           {copy.scenarios.map((s, i) => (
@@ -295,8 +296,8 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
   return (
     <ol className={`agent-demo-transcript grid content-start gap-4 ${still ? "is-still" : ""}`}>
       <li className="agent-demo-msg agent-demo-patient">
-        <span className="agent-demo-who">{copy.patient}</span>
-        <p className="agent-demo-bubble border border-rule">{s.patient}</p>
+        <span className="agent-demo-who">{nobr(copy.patient)}</span>
+        <p className="agent-demo-bubble border border-rule">{nobr(s.patient)}</p>
       </li>
 
       {at(stage, "typing") && !at(stage, "draft") ? <Typing label={copy.typing} /> : null}
@@ -304,27 +305,27 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
       {at(stage, "draft") ? (
         <li className="agent-demo-msg agent-demo-draft" data-blocked={blocked || undefined}>
           <span className="agent-demo-who">
-            {copy.draft} <span className="text-ink-3">({copy.draftNote})</span>
+            {nobr(copy.draft)} <span className="text-ink-3">({nobr(copy.draftNote)})</span>
           </span>
           <p className="agent-demo-bubble border border-dashed border-rule-strong">
-            {s.draftBefore}
+            {nobr(s.draftBefore)}
             {blocked ? (
-              <del className="agent-demo-flag">{s.draftFlagged}</del>
+              <del className="agent-demo-flag">{nobr(s.draftFlagged)}</del>
             ) : (
-              <span className={at(stage, "checking") ? "agent-demo-scan" : undefined}>{s.draftFlagged}</span>
+              <span className={at(stage, "checking") ? "agent-demo-scan" : undefined}>{nobr(s.draftFlagged)}</span>
             )}
-            {s.draftAfter}
+            {nobr(s.draftAfter)}
           </p>
           {at(stage, "checking") ? (
             <p className="agent-demo-guard" data-state={blocked ? "blocked" : "checking"}>
               <span className="agent-demo-dot" aria-hidden="true" />
               {blocked ? (
                 <span>
-                  <strong className="font-semibold">{copy.blocked}:</strong> {s.ruleLabel}{" "}
+                  <strong className="font-semibold">{nobr(copy.blocked)}:</strong> {s.ruleLabel}{" "}
                   <code className="readout">{s.rule}</code>
                 </span>
               ) : (
-                <span>{copy.checking}</span>
+                <span>{nobr(copy.checking)}</span>
               )}
             </p>
           ) : null}
@@ -335,20 +336,20 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
 
       {at(stage, "sent") ? (
         <li className="agent-demo-msg agent-demo-reply">
-          <span className="agent-demo-who">{copy.sent}</span>
-          <p className="agent-demo-bubble bg-ink text-ground">{s.reply}</p>
+          <span className="agent-demo-who">{nobr(copy.sent)}</span>
+          <p className="agent-demo-bubble bg-ink text-ground">{nobr(s.reply)}</p>
         </li>
       ) : null}
 
       {/* What is still to come, drawn faintly so the reserved space reads as a pipeline, not a gap. */}
       {!still && !at(stage, "checking") ? (
         <li className="agent-demo-ghost" aria-hidden="true">
-          {copy.ghostGuard}
+          {nobr(copy.ghostGuard)}
         </li>
       ) : null}
       {!still && !at(stage, "typing-reply") ? (
         <li className="agent-demo-ghost agent-demo-reply" aria-hidden="true">
-          {copy.ghostReply}
+          {nobr(copy.ghostReply)}
         </li>
       ) : null}
     </ol>

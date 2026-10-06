@@ -59,6 +59,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
 
 export const viewport: Viewport = {
   themeColor: [
+    // Keep in sync with THEME_COLOR (theme-toggle.tsx), which repaints these for a chosen theme.
     { media: "(prefers-color-scheme: dark)", color: "#14120f" },
     { media: "(prefers-color-scheme: light)", color: "#f5f1ea" },
   ],

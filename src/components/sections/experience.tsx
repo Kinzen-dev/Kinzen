@@ -6,6 +6,7 @@ import { monthYear } from "../timeline/format";
 import { SectionHeader } from "./section-header";
 import { inlineList } from "@/lib/text";
 import { plain } from "@/lib/thai";
+import { nobr } from "@/lib/thai-nodes";
 
 export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
@@ -28,10 +29,10 @@ export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary 
                     {monthYear(era.start, locale)} → {end}
                   </p>
                   <h3 className="mt-3 text-xl tracking-[-0.035em]">{era.org.name}</h3>
-                  <p className="mt-1 text-ink-2">{t(era.title, locale)}</p>
+                  <p className="mt-1 text-ink-2">{nobr(t(era.title, locale))}</p>
                 </div>
                 <div className="md:col-span-6 md:col-start-7">
-                  <p className="max-w-[52ch] text-lg">{t(era.summary, locale)}</p>
+                  <p className="max-w-[52ch] text-lg">{nobr(t(era.summary, locale))}</p>
                   <ul className="mt-6 grid gap-3">
                     {era.highlights.map((h) => (
                       <li
@@ -39,12 +40,12 @@ export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary 
                         className="flex max-w-[64ch] gap-3 text-ink-2"
                       >
                         <span aria-hidden="true" className="mt-[0.7em] h-px w-3 shrink-0 bg-ink-3" />
-                        <span>{t(h.text, locale)}</span>
+                        <span>{nobr(t(h.text, locale))}</span>
                       </li>
                     ))}
                   </ul>
                   <p className="readout mt-6">
-                    <span className="sr-only">{dict.experience.stack}: </span>
+                    <span className="sr-only">{nobr(dict.experience.stack)}: </span>
                     {inlineList(era.stack)}
                   </p>
                 </div>

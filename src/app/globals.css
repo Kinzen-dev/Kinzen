@@ -285,3 +285,8 @@ html:has(dialog[open]) {
   font-feature-settings: "ss01";
   padding-bottom: 0.06em;
 }
+
+/* Known Thai compounds stay on one line (lib/thai-nodes.ts). */
+.nobr {
+  white-space: nowrap;
+}

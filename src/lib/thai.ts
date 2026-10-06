@@ -10,18 +10,19 @@
  * Gluing whole phrases was tried and rejected: a phrase wider than its line forced
  * emergency breaks in the middle of words (review round 3).
  * Then:
- * - `thaiGlue` (HTML) puts U+2060 WORD JOINER inside known compounds only, which every
- *   engine honours as "no break here"; ordinary words are left to the browser's dictionary;
+ * - HTML: `nobr` (thai-nodes.ts) wraps known compounds in white-space:nowrap spans. No
+ *   characters are added, so the browser's dictionary still sees the whole sentence and
+ *   neighbouring words break normally (proven on a fixture in Chromium and WebKit, 2026-10-07;
+ *   U+2060 joiners in the text did the opposite and broke neighbours mid-syllable);
  * - `thaiBreaks` (OG images, where satori has no Thai dictionary) puts U+200B between
  *   atoms, so the card wraps only where the page would.
- * Use `thaiGlue` only for VISIBLE text. Metadata, aria values and images get plain text.
  */
 const WJ = "\u2060";
 const ZWSP = "\u200b";
 const THAI_RUN = /[\u0E00-\u0E7F]+/g;
 
 /** Compounds the dictionary splits; extend when a break shows up in QA. */
-const COMPOUNDS = [
+export const COMPOUNDS = [
   "ทันตกรรม",
   "ทุกข้อ",
   "หน้าร้าน",
@@ -70,6 +71,27 @@ const COMPOUNDS = [
   "ทันที",
   "ข้อความ",
   "ระบบ",
+  "อัปเกรด",
+  "เท่าไหร่",
+  "เชื่อมต่อ",
+  "ผลงาน",
+  "หลักฐาน",
+  "ต่างๆ",
+  "จัดฟัน",
+  "ราคา",
+  "ปัจจุบัน",
+  "ตั้งแต่",
+  "ติดตาม",
+  "จนถึง",
+  "ทำงาน",
+  "ข้อมูล",
+  "โปรเจกต์",
+  "ออกแบบ",
+  "สถาปัตยกรรม",
+  "ลูกค้า",
+  "ภาษา",
+  "มาตรฐาน",
+  "อัตโนมัติ",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });

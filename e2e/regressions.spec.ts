@@ -78,3 +78,44 @@ test("Back from a project page restores home after a section jump", async ({ pag
   await expect(page.locator("#work")).toBeAttached();
   await expect(page.getByRole("heading", { level: 1 })).not.toHaveText("Helm");
 });
+
+test("opening a works row never squeezes the name column (tablet and landscape widths)", async ({ page, isMobile }) => {
+  test.skip(isMobile, "sets its own viewport");
+  // Start each width from a closed ledger (the open row is otherwise restored for Back).
+  await page.addInitScript(() => sessionStorage.clear());
+  for (const width of [844, 1024]) {
+    await page.setViewportSize({ width, height: 600 });
+    await page.goto("/");
+    const name = page.locator("#work tbody th").first();
+    await name.scrollIntoViewIfNeeded();
+    const before = (await name.boundingBox())!.width;
+    await page.getByRole("button", { name: "Helm" }).first().click();
+    await expect(page.locator('#work [aria-expanded="true"]')).toHaveCount(1);
+    expect(Math.abs((await name.boundingBox())!.width - before)).toBeLessThan(2);
+  }
+});
+
+test("Back to an earlier section entry shows that section even after a row opened above it", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "uses the desktop header");
+  const nav = page.getByRole("navigation", { name: "Main" });
+  await page.goto("/");
+  await nav.getByRole("link", { name: "Experience", exact: true }).click();
+  await expect(page).toHaveURL(/#experience$/);
+  await nav.getByRole("link", { name: "Work", exact: true }).click();
+  await expect(page).toHaveURL(/#work$/);
+  await page.getByRole("button", { name: "Helm" }).first().click();
+  await expect(page.locator('#work [aria-expanded="true"]')).toHaveCount(1);
+  await page.goBack();
+  await expect(page).toHaveURL(/#experience$/);
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const r = document.getElementById("experience")!.getBoundingClientRect();
+        return r.bottom > 100 && r.top < innerHeight - 48;
+      }),
+    )
+    .toBe(true);
+});

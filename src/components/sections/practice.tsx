@@ -4,6 +4,7 @@ import { practices, t } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { SectionHeader } from "./section-header";
 import { plain } from "@/lib/thai";
+import { nobr } from "@/lib/thai-nodes";
 
 /** How King works with AI agents. `demo` is the interactive guard illustration. */
 export function Practice({
@@ -25,8 +26,8 @@ export function Practice({
         {practices.map((p) => (
           <li key={p.id} className="grid content-start gap-3 border-r border-b border-rule p-6 md:p-8">
             {icons?.[p.id] ? <div className="mb-2 size-16 text-ink">{icons[p.id]}</div> : null}
-            <h3 className="text-lg tracking-[-0.02em]">{t(p.title, locale)}</h3>
-            <p className="text-ink-2">{t(p.text, locale)}</p>
+            <h3 className="text-lg tracking-[-0.02em]">{nobr(t(p.title, locale))}</h3>
+            <p className="text-ink-2">{nobr(t(p.text, locale))}</p>
           </li>
         ))}
       </ul>

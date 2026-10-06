@@ -20,6 +20,15 @@ import "./transitions.css";
 import { inlineList } from "@/lib/text";
 import { plain } from "@/lib/thai";
 
+/** When the last Back/Forward happened (restore the ledger's scroll only on history traversal). */
+let poppedAt = -Infinity;
+if (typeof window !== "undefined") {
+  window.addEventListener("popstate", () => {
+    poppedAt = performance.now();
+  });
+}
+import { nobr } from "@/lib/thai-nodes";
+
 type SortKey = "name" | "year";
 type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
 
@@ -61,7 +70,7 @@ function Status({ row }: { row: LedgerRow }) {
         aria-hidden="true"
         className={row.live ? "size-1.5 rounded-full bg-gold" : "ledger-ring size-1.5 rounded-full border border-ink-3"}
       />
-      {row.statusLabel}
+      {nobr(row.statusLabel)}
     </span>
   );
 }
@@ -85,7 +94,8 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
   const [, setFocusId] = useState<string | null>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement>());
 
-  // Coming Back from a project page should look exactly as the visitor left it:
+  // Coming Back from a project page should look exactly as the visitor left it, scroll included
+  // (engines differ: Chromium lands on the #work heading, WebKit replays a pre-restore offset).
   // keep the open row, filter and sort for this tab (session storage, never sent anywhere).
   const restored = useRef(false);
   useEffect(() => {
@@ -110,6 +120,11 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
           if (reopen) {
             window.requestAnimationFrame(() => buttons.current.get(reopen)?.focus({ preventScroll: true }));
           }
+          const y = Number(sessionStorage.getItem(`${key}:y`));
+          if (performance.now() - poppedAt < 1500 && y > 0) {
+            // After the reopened row has laid out, and after the router's own hash scroll.
+            window.setTimeout(() => window.scrollTo(0, y), 120);
+          }
           return;
         }
       } catch {
@@ -122,6 +137,14 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
       /* storage blocked: state just is not remembered */
     }
   }, [sort, filter, openId, rows]);
+
+  const rememberScroll = () => {
+    try {
+      sessionStorage.setItem(`kz-ledger:${window.location.pathname}:y`, String(Math.round(window.scrollY)));
+    } catch {
+      /* storage blocked */
+    }
+  };
 
   const sorted = useMemo(() => sortRows(rows, sort), [rows, sort]);
   const shownIds = sorted.filter((r) => filter === "all" || r.area === filter).map((r) => r.id);
@@ -181,7 +204,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
     const dir = sort?.key === key ? sort.dir : null;
     return (
       <button type="button" className={`ledger-sort ${className}`} onClick={() => setSort((s) => nextSort(s, key))}>
-        <span className="sr-only">{labels.sortBy} </span>
+        <span className="sr-only">{nobr(labels.sortBy)} </span>
         {text}
         <SortGlyph dir={dir} />
       </button>
@@ -215,7 +238,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
         </div>
         {/* Phones have no column headers to sort by: the same sort lives on its own line. */}
         <div className="ledger-sortbar" role="group" aria-label={plain(labels.sortBy)}>
-          <span aria-hidden="true">{labels.sortBy}</span>
+          <span aria-hidden="true">{nobr(labels.sortBy)}</span>
           {sortButton("name", labels.name, "ledger-pill")}
           {sortButton("year", labels.year, "ledger-pill")}
         </div>
@@ -225,28 +248,28 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
       </div>
 
       <table className="ledger-table">
-        <caption className="sr-only">{labels.caption}</caption>
+        <caption className="sr-only">{nobr(labels.caption)}</caption>
         <thead>
           <tr>
             <th scope="col" aria-sort={ariaSort("name")}>
               {/* Phones sort from the pill row above; one control per job at every width. */}
-              <span className="md:hidden">{labels.name}</span>
+              <span className="md:hidden">{nobr(labels.name)}</span>
               {sortButton("name", labels.name, "hidden md:inline-flex")}
             </th>
             <th scope="col" className="hidden md:table-cell">
-              {labels.area}
+              {nobr(labels.area)}
             </th>
-            <th scope="col" className="hidden lg:table-cell">
-              {labels.stack}
+            <th scope="col" className="ledger-stack-col">
+              {nobr(labels.stack)}
             </th>
             <th scope="col" className="hidden md:table-cell" aria-sort={ariaSort("year")}>
               {sortButton("year", labels.year)}
             </th>
             <th scope="col" className="hidden md:table-cell">
-              {labels.status}
+              {nobr(labels.status)}
             </th>
             <th scope="col" className="ledger-toggle-col">
-              <span className="sr-only">{labels.details}</span>
+              <span className="sr-only">{nobr(labels.details)}</span>
             </th>
           </tr>
         </thead>
@@ -292,21 +315,21 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                             share={{ "nav-forward": "morph", default: "none" }}
                             default="none"
                           >
-                            <span className="inline-block">{row.name}</span>
+                            <span className="inline-block">{nobr(row.name)}</span>
                           </ViewTransition>
                         </button>
-                        <span className="mt-1 block max-w-[52ch] text-sm text-ink-2">{row.tagline}</span>
+                        <span className="mt-1 block max-w-[52ch] text-sm text-ink-2">{nobr(row.tagline)}</span>
                         <span className="ledger-meta md:hidden">
                           <Status row={row} />
-                          <span className="readout">{row.year}</span>
-                          <span className="text-ink-2">{row.areaLabel}</span>
+                          <span className="readout">{nobr(row.year)}</span>
+                          <span className="text-ink-2">{nobr(row.areaLabel)}</span>
                         </span>
                       </div>
                     </div>
                   </th>
-                  <td className="hidden text-sm text-ink-2 md:table-cell">{row.areaLabel}</td>
-                  <td className="readout hidden max-w-[28ch] lg:table-cell">{inlineList(row.stack.slice(0, 4))}</td>
-                  <td className="readout hidden md:table-cell">{row.year}</td>
+                  <td className="hidden text-sm text-ink-2 md:table-cell">{nobr(row.areaLabel)}</td>
+                  <td className="readout ledger-stack-col max-w-[28ch]">{inlineList(row.stack.slice(0, 4))}</td>
+                  <td className="readout hidden md:table-cell">{nobr(row.year)}</td>
                   <td className="hidden text-sm md:table-cell">
                     <Status row={row} />
                   </td>
@@ -327,12 +350,12 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                         }}
                       >
                         <div className="md:col-span-7">
-                          <h3 className="ledger-panel-label">{labels.outcomes}</h3>
+                          <h3 className="ledger-panel-label">{nobr(labels.outcomes)}</h3>
                           <ul className="mt-3 grid gap-3">
                             {row.outcomes.map((o) => (
                               <li key={o} className="flex max-w-[64ch] gap-3">
                                 <span aria-hidden="true" className="mt-[0.8em] h-px w-3 shrink-0 bg-ink-3" />
-                                <span>{o}</span>
+                                <span>{nobr(o)}</span>
                               </li>
                             ))}
                           </ul>
@@ -341,31 +364,36 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                           {/* Near the top, so the row title is still on screen when this is clicked:
                               the shared-title morph only pairs elements inside the viewport. */}
                           <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-                            <Link href={row.href} className="ledger-cta" transitionTypes={["nav-forward"]}>
-                              {labels.openProject}
+                            <Link
+                              href={row.href}
+                              className="ledger-cta"
+                              transitionTypes={["nav-forward"]}
+                              onClick={rememberScroll}
+                            >
+                              {nobr(labels.openProject)}
                               <span aria-hidden="true"> →</span>
                             </Link>
                             <button type="button" className="ledger-close" onClick={() => close(row.id)}>
-                              {labels.close}
+                              {nobr(labels.close)}
                             </button>
                           </div>
                           <dl className="grid content-start gap-5">
                             <div>
-                              <dt className="ledger-panel-label">{labels.role}</dt>
-                              <dd className="mt-1">{row.role}</dd>
+                              <dt className="ledger-panel-label">{nobr(labels.role)}</dt>
+                              <dd className="mt-1">{nobr(row.role)}</dd>
                             </div>
                             <div>
-                              <dt className="ledger-panel-label">{labels.stack}</dt>
+                              <dt className="ledger-panel-label">{nobr(labels.stack)}</dt>
                               <dd className="readout mt-1">{inlineList(row.stack)}</dd>
                             </div>
                             {row.links.length > 0 && (
                               <div>
-                                <dt className="ledger-panel-label">{labels.links}</dt>
+                                <dt className="ledger-panel-label">{nobr(labels.links)}</dt>
                                 <dd className="mt-1 grid gap-1">
                                   {row.links.map((l) => (
                                     <a key={l.href} href={l.href} className="link" rel="noopener" target="_blank">
                                       {l.label}
-                                      <span className="sr-only"> {labels.newTab}</span>
+                                      <span className="sr-only"> {nobr(labels.newTab)}</span>
                                     </a>
                                   ))}
                                 </dd>

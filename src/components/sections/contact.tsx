@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { availability, links, t } from "@/content";
@@ -5,6 +6,7 @@ import { localePath } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { BangkokTime, OffsetFromVisitor } from "../clock";
 import { CopyEmail } from "../copy-email";
+import { nobr } from "@/lib/thai-nodes";
 
 export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionary; art?: ReactNode }) {
   const email = links.find((l) => l.kind === "email");
@@ -22,9 +24,9 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
         <div className="md:col-span-6">
           {art ? <div className="mb-6 size-20 text-ink">{art}</div> : null}
           <h2 id="contact-title" className="max-w-[18ch] text-2xl tracking-[-0.045em]">
-            {dict.contact.heading}
+            {nobr(dict.contact.heading)}
           </h2>
-          <p className="mt-5 max-w-[46ch] text-lg text-ink-2">{dict.contact.body}</p>
+          <p className="mt-5 max-w-[46ch] text-lg text-ink-2">{nobr(dict.contact.body)}</p>
 
           {email ? (
             <div className="mt-10 grid gap-5">
@@ -43,12 +45,12 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
                     failed: dict.contact.copyFailed,
                   }}
                 />
-                <a
+                <Link
                   href={localePath(locale, "/cv")}
                   className="inline-flex h-11 items-center border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
                 >
-                  {dict.hero.ctaCv}
-                </a>
+                  {nobr(dict.hero.ctaCv)}
+                </Link>
                 {others.map((l) => (
                   <a
                     key={l.href}
@@ -58,7 +60,7 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
                     className="inline-flex h-11 items-center border border-rule px-4 text-sm font-medium transition-colors duration-200 hover:border-rule-strong"
                   >
                     {l.label}
-                    <span className="sr-only"> {dict.a11y.newTab}</span>
+                    <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
                   </a>
                 ))}
               </div>
@@ -73,16 +75,16 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
               {doors.map((d) => (
                 <div key={d.key} className="border-r border-b border-rule p-5">
                   <dt className="readout">
-                    {dict.contact.openTo}: {d.label}
+                    {nobr(dict.contact.openTo)}: {d.label}
                   </dt>
-                  <dd className="mt-2 text-ink-2">{t(d.text!, locale)}</dd>
+                  <dd className="mt-2 text-ink-2">{nobr(t(d.text!, locale))}</dd>
                 </div>
               ))}
             </dl>
           ) : null}
 
           <dl>
-            <dt className="readout">{dict.contact.localTime}</dt>
+            <dt className="readout">{nobr(dict.contact.localTime)}</dt>
             <dd className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
               <BangkokTime locale={locale} />
             </dd>

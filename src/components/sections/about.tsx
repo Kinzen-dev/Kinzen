@@ -4,6 +4,7 @@ import { education, languages, personal, profile, t, tList } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { SectionHeader } from "./section-header";
 import { plain } from "@/lib/thai";
+import { nobr } from "@/lib/thai-nodes";
 
 export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dictionary; offClockArt?: ReactNode }) {
   return (
@@ -14,18 +15,18 @@ export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dic
         <div className="grid gap-5 md:col-span-6">
           {tList(profile.bioLong, locale).map((para) => (
             <p key={para.slice(0, 24)} className="max-w-[60ch] text-lg">
-              {para}
+              {nobr(para)}
             </p>
           ))}
         </div>
 
         <div className="grid content-start gap-8 md:col-span-5 md:col-start-7">
           <div>
-            <h3 className="readout">{dict.sections.education}</h3>
+            <h3 className="readout">{nobr(dict.sections.education)}</h3>
             {education.map((e) => (
               <p key={e.school.en} className="mt-2">
-                {t(e.degree, locale)}
-                <span className="block text-ink-2">{t(e.school, locale)}</span>
+                {nobr(t(e.degree, locale))}
+                <span className="block text-ink-2">{nobr(t(e.school, locale))}</span>
                 <span className="readout block">
                   {e.start} → {e.end}
                 </span>
@@ -33,22 +34,22 @@ export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dic
             ))}
           </div>
           <div>
-            <h3 className="readout">{dict.sections.languages}</h3>
+            <h3 className="readout">{nobr(dict.sections.languages)}</h3>
             <ul className="mt-2">
               {languages.map((l) => (
                 <li key={l.name.en}>
-                  {t(l.name, locale)} <span className="text-ink-2">({t(l.level, locale)})</span>
+                  {nobr(t(l.name, locale))} <span className="text-ink-2">({nobr(t(l.level, locale))})</span>
                 </li>
               ))}
             </ul>
           </div>
           {personal.length > 0 ? (
             <div>
-              <h3 className="readout">{dict.sections.offTheClock}</h3>
+              <h3 className="readout">{nobr(dict.sections.offTheClock)}</h3>
               {offClockArt ? <div className="mt-3 flex gap-4 text-ink">{offClockArt}</div> : null}
               {personal.map((line) => (
                 <p key={line.en} className="mt-2 text-ink-2">
-                  {t(line, locale)}
+                  {nobr(t(line, locale))}
                 </p>
               ))}
             </div>

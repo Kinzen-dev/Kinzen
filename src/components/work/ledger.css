@@ -339,3 +339,25 @@
     width: 14%;
   }
 }
+
+/* Stack column. Phones: gone. Tablet (48 to 64rem): present but zero-width, so every row keeps
+   six columns; with display:none there, an opened row's colSpan=6 panel made the fixed layout
+   invent a sixth column and halved the name column. Desktop: a real column. */
+.ledger-stack-col {
+  display: none;
+}
+@media (min-width: 48rem) {
+  .ledger-table .ledger-stack-col {
+    display: table-cell;
+  }
+}
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  .ledger-table .ledger-stack-col {
+    width: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    visibility: hidden;
+    font-size: 0;
+  }
+}

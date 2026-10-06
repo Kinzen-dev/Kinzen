@@ -13,6 +13,7 @@ import { periodLabel } from "@/components/work/format";
 import { workTitleTransition } from "@/components/work/transition";
 import "@/components/work/transitions.css";
 import { plain } from "@/lib/thai";
+import { nobr } from "@/lib/thai-nodes";
 
 export const dynamicParams = false;
 
@@ -81,7 +82,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
       <p>
         <Link href={home === "/" ? "/#work" : `${home}#work`} className="link text-sm text-ink-2">
           <span aria-hidden="true">← </span>
-          {dict.project.back}
+          {nobr(dict.project.back)}
         </Link>
       </p>
 
@@ -98,7 +99,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
             <span className="inline-block">{project.name}</span>
           </ViewTransition>
         </h1>
-        <p className="max-w-[44ch] text-lg text-ink-2 md:col-span-7">{t(project.tagline, locale)}</p>
+        <p className="max-w-[44ch] text-lg text-ink-2 md:col-span-7">{nobr(t(project.tagline, locale))}</p>
       </header>
 
       <dl className="mt-10 grid grid-cols-2 border-t border-l border-rule md:grid-cols-4">
@@ -112,13 +113,13 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
 
       <section aria-labelledby="outcomes-title" className="mt-16 grid gap-6 md:mt-24 md:grid-cols-12">
         <h2 id="outcomes-title" className="text-xl tracking-[-0.035em] md:col-span-4">
-          {dict.project.outcomes}
+          {nobr(dict.project.outcomes)}
         </h2>
         <ul className="grid gap-4 md:col-span-7 md:col-start-6">
           {project.outcomes.map((o) => (
             <li key={o.text.en} className="flex max-w-[64ch] gap-3 text-lg">
               <span aria-hidden="true" className="mt-[0.8em] h-px w-3 shrink-0 bg-ink-3" />
-              <span>{t(o.text, locale)}</span>
+              <span>{nobr(t(o.text, locale))}</span>
             </li>
           ))}
         </ul>
@@ -126,7 +127,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
 
       <section aria-labelledby="stack-title" className="mt-16 grid gap-6 border-t border-rule pt-6 md:grid-cols-12">
         <h2 id="stack-title" className="text-xl tracking-[-0.035em] md:col-span-4">
-          {dict.project.stack}
+          {nobr(dict.project.stack)}
         </h2>
         <ul className="readout flex flex-wrap gap-x-5 gap-y-2 text-sm md:col-span-7 md:col-start-6">
           {project.stack.map((s) => (
@@ -138,14 +139,14 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
       {links.length > 0 && (
         <section aria-labelledby="links-title" className="mt-16 grid gap-6 border-t border-rule pt-6 md:grid-cols-12">
           <h2 id="links-title" className="text-xl tracking-[-0.035em] md:col-span-4">
-            {dict.project.links}
+            {nobr(dict.project.links)}
           </h2>
           <ul className="grid gap-2 md:col-span-7 md:col-start-6">
             {links.map((l) => (
               <li key={l.href}>
                 <a href={l.href} className="link text-lg" rel="noopener" target="_blank">
                   {l.label}
-                  <span className="sr-only"> {dict.a11y.newTab}</span>
+                  <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
                 </a>
               </li>
             ))}
@@ -162,15 +163,15 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
           className="mt-16 grid gap-6 border-t border-rule pt-6 md:grid-cols-12"
         >
           <h2 id="case-title" className="text-xl tracking-[-0.035em] md:col-span-4">
-            {dict.work.caseStudy.heading}
+            {nobr(dict.work.caseStudy.heading)}
           </h2>
           <div className="grid gap-8 md:col-span-7 md:col-start-6">
             <div>
-              <h3 className="text-sm font-normal text-ink-3">{dict.work.caseStudy.problem}</h3>
-              <p className="mt-2 text-lg">{t(caseStudy.problem, locale)}</p>
+              <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.problem)}</h3>
+              <p className="mt-2 text-lg">{nobr(t(caseStudy.problem, locale))}</p>
             </div>
             <div>
-              <h3 className="text-sm font-normal text-ink-3">{dict.work.caseStudy.approach}</h3>
+              <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.approach)}</h3>
               <ul className="mt-2 grid gap-3">
                 {(locale === "th" && caseStudy.approach.th ? caseStudy.approach.th : caseStudy.approach.en).map((a) => (
                   <li key={a} className="flex gap-3">
@@ -181,12 +182,12 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
               </ul>
             </div>
             <div>
-              <h3 className="text-sm font-normal text-ink-3">{dict.work.caseStudy.result}</h3>
-              <p className="mt-2">{t(caseStudy.result, locale)}</p>
+              <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.result)}</h3>
+              <p className="mt-2">{nobr(t(caseStudy.result, locale))}</p>
             </div>
             <div>
-              <h3 className="text-sm font-normal text-ink-3">{dict.work.caseStudy.limits}</h3>
-              <p className="mt-2 text-ink-2">{t(caseStudy.limits, locale)}</p>
+              <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.limits)}</h3>
+              <p className="mt-2 text-ink-2">{nobr(t(caseStudy.limits, locale))}</p>
             </div>
           </div>
         </section>
@@ -194,12 +195,12 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
 
       {next.id !== project.id && (
         <nav aria-label={plain(dict.project.next)} className="mt-24 border-t border-rule-strong pt-6">
-          <p className="text-sm text-ink-3">{dict.project.next}</p>
+          <p className="text-sm text-ink-3">{nobr(dict.project.next)}</p>
           <Link href={localePath(locale, `/work/${next.slug}`)} className="group mt-2 block">
             <span className="block text-2xl font-semibold tracking-[-0.045em] transition-colors duration-200 group-hover:text-gold">
               {next.name}
             </span>
-            <span className="mt-2 block max-w-[52ch] text-ink-2">{t(next.tagline, locale)}</span>
+            <span className="mt-2 block max-w-[52ch] text-ink-2">{nobr(t(next.tagline, locale))}</span>
           </Link>
         </nav>
       )}
@@ -215,7 +216,7 @@ function PlateSection({ projectId, projectName, locale }: { projectId: string; p
   return (
     <section aria-labelledby="architecture-title" className="mt-16 border-t border-rule pt-6 md:mt-24">
       <h2 id="architecture-title" className="text-xl tracking-[-0.035em]">
-        {dict.work.architecture}
+        {nobr(dict.work.architecture)}
       </h2>
       <div className="mt-8">
         <ProjectPlate

@@ -16,6 +16,14 @@ function subscribe(onChange: () => void) {
   };
 }
 
+/** Browser chrome (address bar) colour must follow a chosen theme, not only the system one. */
+export const THEME_COLOR = { dark: "#14120f", light: "#f5f1ea" } as const;
+function paintThemeColor(theme: Theme) {
+  document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => {
+    m.content = THEME_COLOR[theme];
+  });
+}
+
 function currentTheme(): Theme {
   const pinned = document.documentElement.dataset.theme;
   if (pinned === "light" || pinned === "dark") return pinned;
@@ -33,6 +41,7 @@ export function ThemeToggle({ labels }: { labels: { toggle: string; light: strin
       if ((stored === "light" || stored === "dark") && document.documentElement.dataset.theme !== stored) {
         document.documentElement.dataset.theme = stored;
       }
+      if (stored === "light" || stored === "dark") paintThemeColor(stored);
     } catch {
       /* storage blocked: follow the system */
     }
@@ -41,6 +50,7 @@ export function ThemeToggle({ labels }: { labels: { toggle: string; light: strin
   function toggle() {
     const next: Theme = currentTheme() === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
+    paintThemeColor(next);
     try {
       localStorage.setItem("theme", next);
     } catch {

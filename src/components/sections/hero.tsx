@@ -1,9 +1,11 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { links, profile, projects, t, yearsInProduction } from "@/content";
 import { localePath } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { BangkokTime } from "../clock";
+import { nobr } from "@/lib/thai-nodes";
 
 /**
  * The first screen. The wordmark is real server-rendered text; the particle field (when the
@@ -44,25 +46,25 @@ export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; f
         <div className="grid gap-10 border-t border-rule-strong pt-6 pb-6 md:grid-cols-12 md:gap-6 md:pb-10">
           <div className="md:col-span-6">
             <h1 id="hero-title" className="text-xl tracking-[-0.03em]">
-              <span className="block">{t(profile.displayName, locale)}</span>
-              <span className="block text-ink-2">{t(profile.role, locale)}</span>
+              <span className="block">{nobr(t(profile.displayName, locale))}</span>
+              <span className="block text-ink-2">{nobr(t(profile.role, locale))}</span>
             </h1>
-            <p className="mt-6 max-w-[44ch] text-lg text-ink-2">{t(profile.heroLine, locale)}</p>
+            <p className="mt-6 max-w-[44ch] text-lg text-ink-2">{nobr(t(profile.heroLine, locale))}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               {email ? (
                 <a
                   href={email.href}
                   className="inline-flex h-11 items-center bg-gold px-5 text-sm font-semibold text-gold-ink transition-opacity duration-200 hover:opacity-90"
                 >
-                  {dict.hero.ctaEmail}
+                  {nobr(dict.hero.ctaEmail)}
                 </a>
               ) : null}
-              <a
+              <Link
                 href={localePath(locale, "/cv")}
                 className="inline-flex h-11 items-center border border-rule-strong px-5 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
               >
-                {dict.hero.ctaCv}
-              </a>
+                {nobr(dict.hero.ctaCv)}
+              </Link>
               {linkedin ? (
                 <a
                   href={linkedin.href}
@@ -71,7 +73,7 @@ export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; f
                   className="inline-flex h-11 items-center border border-rule px-5 text-sm font-medium transition-colors duration-200 hover:border-rule-strong"
                 >
                   {linkedin.label}
-                  <span className="sr-only"> {dict.a11y.newTab}</span>
+                  <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
                 </a>
               ) : null}
             </div>

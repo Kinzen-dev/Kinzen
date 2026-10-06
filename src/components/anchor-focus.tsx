@@ -5,6 +5,9 @@ import { useEffect } from "react";
 /**
  * After an in-page jump (#work, a palette "Go to", the skip link), move keyboard focus to
  * the target section so the next Tab continues from there instead of from the header.
+ * Also after Back/Forward: browsers replay the saved pixel offset, so if the page above changed
+ * height since (a works row opened), the screen no longer shows the section the URL names. Then
+ * jump to it. When it is on screen, the replayed position is kept.
  * Renders nothing.
  */
 export function AnchorFocus() {
@@ -29,10 +32,27 @@ export function AnchorFocus() {
       window.setTimeout(() => focusTarget(url.hash), 60);
     };
     const onHash = () => focusTarget();
+    let settle = 0;
+    const onPop = () => {
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        const id = decodeURIComponent(window.location.hash.slice(1));
+        const el = id ? document.getElementById(id) : null;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const header = document.querySelector("[data-site-header]")?.getBoundingClientRect().height ?? 56;
+        if (r.bottom > header + 48 && r.top < window.innerHeight - 48) return;
+        el.scrollIntoView({ block: "start" });
+        focusTarget();
+      }, 350);
+    };
     window.addEventListener("hashchange", onHash);
+    window.addEventListener("popstate", onPop);
     document.addEventListener("click", onClick);
     return () => {
       window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("popstate", onPop);
+      window.clearTimeout(settle);
       document.removeEventListener("click", onClick);
     };
   }, []);

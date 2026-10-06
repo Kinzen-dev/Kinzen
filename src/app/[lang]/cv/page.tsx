@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
@@ -9,6 +10,7 @@ import { PrintButton } from "./print-button";
 import "./cv.css";
 import { inlineList } from "@/lib/text";
 import { plain } from "@/lib/thai";
+import { nobr } from "@/lib/thai-nodes";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/cv">): Promise<Metadata> {
   const { lang } = await params;
@@ -50,25 +52,25 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
   };
   const place =
     locale === "th"
-      ? `${t(profile.location.city, locale)} ${t(profile.location.country, locale)}`
-      : `${t(profile.location.city, locale)}, ${t(profile.location.country, locale)}`;
+      ? `${nobr(t(profile.location.city, locale))} ${nobr(t(profile.location.country, locale))}`
+      : `${nobr(t(profile.location.city, locale))}, ${nobr(t(profile.location.country, locale))}`;
 
   return (
     <article data-cv className="cv shell">
       <header className="cv-head">
         <div className="cv-id">
-          <h1 className="cv-name">{t(profile.displayName, locale)}</h1>
+          <h1 className="cv-name">{nobr(t(profile.displayName, locale))}</h1>
           {locale === "th" ? <p className="cv-alt-name">{profile.name}</p> : null}
-          <p className="cv-role">{t(profile.role, locale)}</p>
+          <p className="cv-role">{nobr(t(profile.role, locale))}</p>
         </div>
         <div className="cv-print-action">
           <PrintButton label={dict.cv.print} />
         </div>
-        <p className="cv-lede">{t(profile.oneLiner, locale)}</p>
+        <p className="cv-lede">{nobr(t(profile.oneLiner, locale))}</p>
         <ul className="cv-contact" aria-label={plain(dict.cv.contact)}>
           <li>
             {place}
-            {profile.location.remote ? ` (${dict.cv.remote})` : null}
+            {profile.location.remote ? ` (${nobr(dict.cv.remote)})` : null}
           </li>
           {email ? (
             <li>
@@ -97,21 +99,21 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
           {experience.map((era) => (
             <li key={era.id} className="cv-entry">
               <div className="cv-entry-head">
-                <h3 className="cv-entry-title">{t(era.title, locale)}</h3>
+                <h3 className="cv-entry-title">{nobr(t(era.title, locale))}</h3>
                 <p className="cv-dates readout">{range(era.start, era.end)}</p>
               </div>
               <p className="cv-meta">
                 {era.org.name}
                 <span className="text-ink-3"> / </span>
-                {t(era.location, locale)}
+                {nobr(t(era.location, locale))}
               </p>
               <ul className="cv-points">
                 {era.highlights.map((h) => (
-                  <li key={h.text.en.slice(0, 24)}>{t(h.text, locale)}</li>
+                  <li key={h.text.en.slice(0, 24)}>{nobr(t(h.text, locale))}</li>
                 ))}
               </ul>
               <p className="cv-stack readout">
-                <span className="sr-only">{dict.cv.stack}: </span>
+                <span className="sr-only">{nobr(dict.cv.stack)}: </span>
                 {inlineList(era.stack)}
               </p>
             </li>
@@ -125,15 +127,15 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
             <li key={p.id} className="cv-entry">
               <div className="cv-entry-head">
                 <h3 className="cv-entry-title">
-                  <a href={localePath(locale, `/work/${p.slug}`)} className="cv-project-link">
+                  <Link href={localePath(locale, `/work/${p.slug}`)} className="cv-project-link">
                     {p.name}
-                  </a>
+                  </Link>
                 </h3>
                 <p className="cv-dates readout">{range(p.period.start, p.period.end)}</p>
               </div>
-              <p className="cv-text">{t(p.tagline, locale)}</p>
+              <p className="cv-text">{nobr(t(p.tagline, locale))}</p>
               <p className="cv-stack readout">
-                <span className="sr-only">{dict.cv.stack}: </span>
+                <span className="sr-only">{nobr(dict.cv.stack)}: </span>
                 {inlineList(p.stack)}
               </p>
             </li>
@@ -145,7 +147,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         <dl className="cv-skills">
           {skills.map((group) => (
             <div key={group.id} className="cv-skill-row">
-              <dt>{t(group.label, locale)}</dt>
+              <dt>{nobr(t(group.label, locale))}</dt>
               <dd>{inlineList(skillItems(group, locale))}</dd>
             </div>
           ))}
@@ -156,8 +158,8 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         {education.map((e) => (
           <div key={e.school.en} className="cv-entry-head">
             <p>
-              <span className="cv-entry-title">{t(e.degree, locale)}</span>
-              <span className="cv-meta block">{t(e.school, locale)}</span>
+              <span className="cv-entry-title">{nobr(t(e.degree, locale))}</span>
+              <span className="cv-meta block">{nobr(t(e.school, locale))}</span>
             </p>
             <p className="cv-dates readout">
               {e.start} → {e.end}
@@ -170,7 +172,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         <ul className="cv-langs">
           {languages.map((l) => (
             <li key={l.name.en}>
-              {t(l.name, locale)} <span className="cv-meta">({t(l.level, locale)})</span>
+              {nobr(t(l.name, locale))} <span className="cv-meta">({nobr(t(l.level, locale))})</span>
             </li>
           ))}
         </ul>
