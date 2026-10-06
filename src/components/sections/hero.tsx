@@ -42,7 +42,7 @@ export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; f
         </p>
 
         <div className="grid gap-10 border-t border-rule-strong pt-6 pb-6 md:grid-cols-12 md:gap-6 md:pb-10">
-          <div className="md:col-span-7">
+          <div className="md:col-span-6">
             <h1 id="hero-title" className="text-xl tracking-[-0.03em]">
               <span className="block">{t(profile.displayName, locale)}</span>
               <span className="block text-ink-2">{t(profile.role, locale)}</span>
@@ -77,7 +77,7 @@ export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; f
             </div>
           </div>
 
-          <dl className="grid grid-cols-2 self-end border-t border-l border-rule md:col-span-5">
+          <dl className="grid grid-cols-2 self-end border-t border-l border-rule md:col-span-6 md:col-start-7">
             {facts.map((fact) => (
               <div key={fact.label} className="flex flex-col justify-between gap-2 border-r border-b border-rule p-4">
                 <dt className="readout">{fact.label}</dt>

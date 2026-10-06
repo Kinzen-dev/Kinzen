@@ -263,7 +263,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
                 setAutoplay(false);
               }
             }}
-            className="link min-h-11 w-fit text-sm text-ink-2"
+            className="inline-flex h-10 w-fit items-center border border-rule px-4 text-sm text-ink-2 transition-colors duration-200 hover:border-rule-strong hover:text-ink"
           >
             {paused ? copy.play : copy.pause}
           </button>

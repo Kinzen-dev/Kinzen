@@ -13,7 +13,7 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
   return (
     <section id="contact" aria-labelledby="contact-title" className="shell pt-24 md:pt-32">
       <div className="grid gap-10 border-t border-rule-strong pt-8 md:grid-cols-12 md:gap-6">
-        <div className="md:col-span-8">
+        <div className="md:col-span-6">
           {art ? <div className="mb-6 size-20 text-ink">{art}</div> : null}
           <h2 id="contact-title" className="max-w-[18ch] text-2xl tracking-[-0.045em]">
             {dict.contact.heading}
@@ -72,7 +72,7 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
                 ))}
                 <a
                   href={localePath(locale, "/cv")}
-                  className="inline-flex h-11 items-center border border-rule px-4 text-sm font-medium transition-colors duration-200 hover:border-rule-strong"
+                  className="inline-flex h-11 items-center border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
                 >
                   {dict.hero.ctaCv}
                 </a>
@@ -81,7 +81,7 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
           ) : null}
         </div>
 
-        <dl className="self-end md:col-span-4 md:col-start-9">
+        <dl className="self-end md:col-span-6 md:col-start-7">
           <dt className="readout">{dict.contact.localTime}</dt>
           <dd className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
             <BangkokTime locale={locale} />

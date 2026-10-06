@@ -31,11 +31,14 @@ export function LanguageSwitch({
           <Link
             href={localePath(target, path)}
             onClick={(e) => {
-              // Keep the reader's place: carry the section hash across languages.
-              const hash = window.location.hash;
-              if (!hash) return;
+              // Keep the reader's place: land on the section they are reading now (not a
+              // stale #hash from an earlier jump, and not the top of the page).
+              const sections = Array.from(document.querySelectorAll<HTMLElement>("main section[id]"));
+              const line = window.innerHeight * 0.35;
+              const current = sections.filter((el) => el.getBoundingClientRect().top <= line).pop();
+              if (!current || window.scrollY < 80) return;
               e.preventDefault();
-              router.push(localePath(target, path) + hash);
+              router.push(`${localePath(target, path)}#${current.id}`);
             }}
             hrefLang={target}
             lang={target}

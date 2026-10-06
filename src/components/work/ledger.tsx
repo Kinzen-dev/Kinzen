@@ -209,8 +209,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                   e.currentTarget.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
                 }}
               >
-                {a.label}
-                <span className="tabular ledger-pill-count">{a.count}</span>
+                {a.label} <span className="tabular ledger-pill-count">{a.count}</span>
               </button>
             ))}
           </div>

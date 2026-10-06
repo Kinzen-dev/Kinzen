@@ -11,7 +11,7 @@ export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dic
       <SectionHeader id="about" title={plain(dict.sections.about)} />
 
       <div className="grid gap-12 md:grid-cols-12 md:gap-6">
-        <div className="grid gap-5 md:col-span-7">
+        <div className="grid gap-5 md:col-span-6">
           {tList(profile.bioLong, locale).map((para) => (
             <p key={para.slice(0, 24)} className="max-w-[60ch] text-lg">
               {para}
@@ -19,7 +19,7 @@ export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dic
           ))}
         </div>
 
-        <aside className="grid content-start gap-8 md:col-span-4 md:col-start-9">
+        <aside className="grid content-start gap-8 md:col-span-5 md:col-start-7">
           <div>
             <h3 className="readout">{dict.sections.education}</h3>
             {education.map((e) => (

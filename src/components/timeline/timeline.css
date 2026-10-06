@@ -11,8 +11,18 @@
   --thread-x: 0.625rem;
   position: relative;
 }
+/* Indent past the thread without shifting the era's grid off the page columns:
+   phones indent the whole row, wider screens only the left (date and company) column. */
 .era-timeline [data-era] {
   padding-left: 1.75rem;
+}
+@media (min-width: 48rem) {
+  .era-timeline [data-era] {
+    padding-left: 0;
+  }
+  .era-timeline [data-era] > :not(.era-node):first-of-type {
+    padding-left: 1.75rem;
+  }
 }
 
 /* The rail: always there, so the static and no-JS states read as a timeline. */

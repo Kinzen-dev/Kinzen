@@ -19,7 +19,8 @@ export function AnchorFocus() {
     // next/link moves between hashes with pushState, which fires no hashchange: catch
     // same-page anchor clicks too and focus once the scroll has happened.
     const onClick = (e: MouseEvent) => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      // next/link has already called preventDefault on its own clicks, so do not bail on that.
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as Element | null)?.closest?.("a[href]");
       if (!(a instanceof HTMLAnchorElement)) return;
       const url = new URL(a.href, window.location.href);

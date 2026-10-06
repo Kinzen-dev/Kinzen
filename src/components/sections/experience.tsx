@@ -10,7 +10,7 @@ import { plain } from "@/lib/thai";
 export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <section id="experience" aria-labelledby="experience-title" className="shell pt-24 md:pt-32">
-      <SectionHeader id="experience" title={plain(dict.sections.experience)} />
+      <SectionHeader id="experience" title={plain(dict.sections.experience)} intro={dict.sections.experienceIntro} />
 
       <div data-era-timeline className="era-timeline">
         <ol data-era-list>

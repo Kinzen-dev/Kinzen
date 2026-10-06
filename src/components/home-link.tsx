@@ -28,7 +28,7 @@ export function HomeLink({
         e.preventDefault();
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
-        if (window.location.hash) window.history.replaceState(null, "", href);
+        if (window.location.hash) window.history.pushState(null, "", href);
         document.getElementById("main")?.focus({ preventScroll: true });
       }}
     >

@@ -171,7 +171,7 @@
   /* Thai inside a readout: use the Thai text face, not a monospaced system fallback
      (which spaced the letters out, e.g. "เ ม . ย ."). */
   :lang(th) .readout {
-    font-family: var(--font-thai), var(--font-geist-mono), ui-monospace, monospace;
+    font-family: var(--font-geist-mono), var(--font-thai), ui-monospace, monospace;
   }
 
   /* Machine output only: timestamps, stack lists, readouts. */
