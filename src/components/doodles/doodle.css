@@ -1,0 +1,47 @@
+/* Hand-drawn doodles: sized by the caller, ink from currentColor. */
+.doodle {
+  display: inline-block;
+  flex: none;
+  line-height: 0;
+  color: inherit;
+}
+
+.doodle > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: 50% 60%;
+}
+
+/* Hover wiggle: four held poses, like hand-drawn in-betweens (step timing, not easing). */
+@keyframes doodle-wiggle {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .doodle:hover > svg,
+  :is(li, tr, a, [data-doodle-host]):hover .doodle > svg {
+    animation: doodle-wiggle var(--dur-3) step-end 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doodle g {
+    filter: none !important;
+  }
+}
