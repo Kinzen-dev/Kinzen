@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { site } from "./site";
 import { experience, getProject, links, projects, t, yearsInProduction } from "./index";
 import { FORBIDDEN } from "./forbidden";
+import { stripJoiners } from "@/lib/thai";
 
 const allText = JSON.stringify(site);
 
@@ -24,7 +25,7 @@ describe("site content", () => {
 
   it("falls back to English when a translation is missing", () => {
     expect(t({ en: "Hello" }, "th")).toBe("Hello");
-    expect(t({ en: "Hello", th: "สวัสดี" }, "th")).toBe("สวัสดี");
+    expect(stripJoiners(t({ en: "Hello", th: "สวัสดี" }, "th"))).toBe("สวัสดี");
   });
 
   it("finds projects by slug", () => {

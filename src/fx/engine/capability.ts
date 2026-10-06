@@ -29,9 +29,36 @@ export type TierConfig = {
 };
 
 export const TIER_CONFIG: Record<Exclude<Tier, "off">, TierConfig> = {
-  full: { side: 512, maxDpr: 2, pxBudget: 2_600_000, fps: 120, bloomLevels: 2, aberration: 0, pointer: true, maxShift: 2 },
-  lite: { side: 384, maxDpr: 1.5, pxBudget: 1_400_000, fps: 60, bloomLevels: 1, aberration: 0, pointer: false, maxShift: 2 },
-  still: { side: 512, maxDpr: 2, pxBudget: 2_600_000, fps: 60, bloomLevels: 2, aberration: 0, pointer: false, maxShift: 0 },
+  full: {
+    side: 512,
+    maxDpr: 2,
+    pxBudget: 2_600_000,
+    fps: 120,
+    bloomLevels: 2,
+    aberration: 0,
+    pointer: true,
+    maxShift: 2,
+  },
+  lite: {
+    side: 384,
+    maxDpr: 1.5,
+    pxBudget: 1_400_000,
+    fps: 60,
+    bloomLevels: 1,
+    aberration: 0,
+    pointer: false,
+    maxShift: 2,
+  },
+  still: {
+    side: 512,
+    maxDpr: 2,
+    pxBudget: 2_600_000,
+    fps: 60,
+    bloomLevels: 2,
+    aberration: 0,
+    pointer: false,
+    maxShift: 0,
+  },
 };
 
 const SOFTWARE = /swiftshader|llvmpipe|softpipe|software|basic render|microsoft basic|mesa offscreen/i;
@@ -69,7 +96,10 @@ export function hasFloatTargets(gl: WebGL2RenderingContext): boolean {
   return !!gl.getExtension("EXT_color_buffer_float") || !!gl.getExtension("EXT_color_buffer_half_float");
 }
 
-export function pickTier(env: Env, gl: WebGL2RenderingContext | null): { tier: Tier; reason: string; renderer: string } {
+export function pickTier(
+  env: Env,
+  gl: WebGL2RenderingContext | null,
+): { tier: Tier; reason: string; renderer: string } {
   const forced = preTier(env);
   if (forced) return { tier: forced, reason: env.fx === "off" ? "fx=off" : "save-data", renderer: "" };
   if (!gl) return { tier: "off", reason: "no webgl2", renderer: "" };

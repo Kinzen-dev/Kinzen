@@ -43,21 +43,55 @@ export function worldPerPx(ch: number): number {
 }
 
 type Prog = { p: WebGLProgram; u: Record<string, WebGLUniformLocation | null>; samplers: string[] };
-type Sim = { pos: WebGLTexture[]; vel: WebGLTexture[]; target: WebGLTexture; col: WebGLTexture; fbo: WebGLFramebuffer[]; cur: number };
+type Sim = {
+  pos: WebGLTexture[];
+  vel: WebGLTexture[];
+  target: WebGLTexture;
+  col: WebGLTexture;
+  fbo: WebGLFramebuffer[];
+  cur: number;
+};
 type Screen = {
-  w: number; h: number; dpr: number; cw: number; ch: number;
-  qw: number; qh: number; ew: number; eh: number;
-  scene: WebGLTexture; sceneFbo: WebGLFramebuffer;
-  texA: WebGLTexture[]; fboA: WebGLFramebuffer[];
-  texB: WebGLTexture[]; fboB: WebGLFramebuffer[];
+  w: number;
+  h: number;
+  dpr: number;
+  cw: number;
+  ch: number;
+  qw: number;
+  qh: number;
+  ew: number;
+  eh: number;
+  scene: WebGLTexture;
+  sceneFbo: WebGLFramebuffer;
+  texA: WebGLTexture[];
+  fboA: WebGLFramebuffer[];
+  texB: WebGLTexture[];
+  fboB: WebGLFramebuffer[];
 };
 
-const lin = (c: Rgb): [number, number, number] => [Math.pow(c[0] / 255, 2.2), Math.pow(c[1] / 255, 2.2), Math.pow(c[2] / 255, 2.2)];
+const lin = (c: Rgb): [number, number, number] => [
+  Math.pow(c[0] / 255, 2.2),
+  Math.pow(c[1] / 255, 2.2),
+  Math.pow(c[2] / 255, 2.2),
+];
 
 export class ParticleEngine {
   readonly side: number;
   readonly N: number;
-  P: Params = { spring: 0, damp: 0.94, turb: 2, tscale: 0.22, tspeed: 0.12, drift: 0, mouseR: 1.7, mouseF: 30, dustSpring: 0.55, dustTurb: 1.4, glyphPointer: 0.08, gain: 1 };
+  P: Params = {
+    spring: 0,
+    damp: 0.94,
+    turb: 2,
+    tscale: 0.22,
+    tspeed: 0.12,
+    drift: 0,
+    mouseR: 1.7,
+    mouseF: 30,
+    dustSpring: 0.55,
+    dustTurb: 1.4,
+    glyphPointer: 0.08,
+    gain: 1,
+  };
   PT: Params = { ...this.P };
   /** Overall fade (scroll-out), 0..1. */
   fade = 1;
@@ -76,7 +110,12 @@ export class ParticleEngine {
   private zero: WebGLTexture | null = null;
   private level: Level = { scale: 1, shift: 0 };
   private layout = { pointCss: 1.6, glyphs: 1, glyphArea: 1 };
-  private palette = { mode: 0, ground: [0, 0, 0] as number[], ink: [0.3, 0.2, 0.05] as number[], hot: [0.9, 0.75, 0.4] as number[] };
+  private palette = {
+    mode: 0,
+    ground: [0, 0, 0] as number[],
+    ink: [0.3, 0.2, 0.05] as number[],
+    hot: [0.9, 0.75, 0.4] as number[],
+  };
   private VP = new Float32Array(16);
   private pulses = new Float32Array(16);
   private pulsesP = new Float32Array(16);
@@ -120,7 +159,10 @@ export class ParticleEngine {
     const par = gl.getExtension("KHR_parallel_shader_compile");
     const make = (vs: string, fs: string, samplers: string[]): Prog => {
       const p = gl.createProgram()!;
-      for (const [type, src] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]] as const) {
+      for (const [type, src] of [
+        [gl.VERTEX_SHADER, vs],
+        [gl.FRAGMENT_SHADER, fs],
+      ] as const) {
         const s = gl.createShader(type)!;
         gl.shaderSource(s, src);
         gl.compileShader(s);
@@ -277,7 +319,15 @@ export class ParticleEngine {
 
   /* ---------- GL helpers ---------- */
 
-  private tex(w: number, h: number, ifmt: number, fmt: number, type: number, data: ArrayBufferView | null, filter: number): WebGLTexture {
+  private tex(
+    w: number,
+    h: number,
+    ifmt: number,
+    fmt: number,
+    type: number,
+    data: ArrayBufferView | null,
+    filter: number,
+  ): WebGLTexture {
     const gl = this.gl;
     const t = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, t);
@@ -346,18 +396,31 @@ export class ParticleEngine {
     c.width = w;
     c.height = h;
     this.freeScreen();
-    const qw = Math.max(1, w >> 2), qh = Math.max(1, h >> 2);
+    const qw = Math.max(1, w >> 2),
+      qh = Math.max(1, h >> 2);
     const two = this.cfg.bloomLevels === 2;
-    const ew = two ? Math.max(1, w >> 3) : 1, eh = two ? Math.max(1, h >> 3) : 1;
+    const ew = two ? Math.max(1, w >> 3) : 1,
+      eh = two ? Math.max(1, h >> 3) : 1;
     const half = (W: number, H: number) => this.tex(W, H, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, null, gl.LINEAR);
     const scene = half(w, h);
     const texA = [half(qw, qh), half(qw, qh)];
     const texB = [half(ew, eh), half(ew, eh)];
     this.scr = {
-      w, h, dpr, cw, ch, qw, qh, ew, eh,
-      scene, sceneFbo: this.fbo([scene]),
-      texA, fboA: texA.map((t) => this.fbo([t])),
-      texB, fboB: texB.map((t) => this.fbo([t])),
+      w,
+      h,
+      dpr,
+      cw,
+      ch,
+      qw,
+      qh,
+      ew,
+      eh,
+      scene,
+      sceneFbo: this.fbo([scene]),
+      texA,
+      fboA: texA.map((t) => this.fbo([t])),
+      texB,
+      fboB: texB.map((t) => this.fbo([t])),
     };
     if (!two) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.scr.fboB[0]);
@@ -370,7 +433,10 @@ export class ParticleEngine {
 
   /** Fixed planar camera on +z looking at the origin. */
   private camera(aspect: number): void {
-    const f = 1 / TANH, near = 0.1, far = 200, nf = 1 / (near - far);
+    const f = 1 / TANH,
+      near = 0.1,
+      far = 200,
+      nf = 1 / (near - far);
     // proj * view, with view = translate(0, 0, -DIST).
     const m = this.VP;
     m.fill(0);
@@ -412,7 +478,8 @@ export class ParticleEngine {
       this.buildScreen();
     }
     const k = Math.min(1, dt * 2.2);
-    const P = this.P, PT = this.PT;
+    const P = this.P,
+      PT = this.PT;
     (Object.keys(PT) as (keyof Params)[]).forEach((key) => {
       P[key] += (PT[key] - P[key]) * k;
     });
@@ -426,7 +493,11 @@ export class ParticleEngine {
   }
 
   private step(dt: number): void {
-    const gl = this.gl, sim = this.sim!, pr = this.progs!.sim, u = pr.u, P = this.P;
+    const gl = this.gl,
+      sim = this.sim!,
+      pr = this.progs!.sim,
+      u = pr.u,
+      P = this.P;
     gl.disable(gl.BLEND);
     gl.bindFramebuffer(gl.FRAMEBUFFER, sim.fbo[1 - sim.cur]);
     gl.viewport(0, 0, this.side, this.rows());
@@ -455,7 +526,14 @@ export class ParticleEngine {
     sim.cur = 1 - sim.cur;
   }
 
-  private pass(prog: Prog, src: WebGLTexture, dst: WebGLFramebuffer, w: number, h: number, setU: (u: Prog["u"]) => void): void {
+  private pass(
+    prog: Prog,
+    src: WebGLTexture,
+    dst: WebGLFramebuffer,
+    w: number,
+    h: number,
+    setU: (u: Prog["u"]) => void,
+  ): void {
     const gl = this.gl;
     gl.bindFramebuffer(gl.FRAMEBUFFER, dst);
     gl.viewport(0, 0, w, h);
@@ -466,7 +544,10 @@ export class ParticleEngine {
   }
 
   private draw(): void {
-    const gl = this.gl, sim = this.sim!, scr = this.scr!, pr = this.progs!;
+    const gl = this.gl,
+      sim = this.sim!,
+      scr = this.scr!,
+      pr = this.progs!;
     const drawn = this.side * this.rows();
     // Density normalisation: expected overlap of gaussian points on a glyph pixel.
     // On paper, gaps between points read as bare paper (sandpaper); larger points close them.

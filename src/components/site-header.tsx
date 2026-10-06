@@ -7,6 +7,8 @@ import { LanguageSwitch } from "./language-switch";
 import { CommandPalette } from "./palette/command-palette";
 import { paletteData } from "./palette/palette-data";
 import { RevealLayer } from "./motion/reveal-layer";
+import { MobileNav } from "./mobile-nav";
+import { AnchorFocus } from "./anchor-focus";
 
 export function navItems(locale: Locale, dict: Dictionary) {
   const home = localePath(locale, "/");
@@ -63,63 +65,12 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           <CommandPalette data={paletteData(locale, dict)} />
           {/* Site-wide entrance motion; renders nothing. Lives here so every page gets it. */}
           <RevealLayer />
-          <button
-            type="button"
-            popoverTarget="mobile-nav"
-            className="grid size-9 place-items-center text-ink-2 hover:text-ink lg:hidden"
-            aria-label={dict.a11y.mainNav}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="size-5"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path d="M4 8h16M4 16h16" />
-            </svg>
-          </button>
+          <AnchorFocus />
+          <MobileNav
+            items={items}
+            labels={{ open: dict.a11y.openMenu, close: dict.a11y.close, nav: dict.a11y.mainNav }}
+          />
         </div>
-      </div>
-
-      <div
-        id="mobile-nav"
-        popover="auto"
-        className="mobile-nav m-0 h-dvh max-h-none w-full max-w-none border-0 bg-ground p-0 text-ink lg:hidden"
-      >
-        <div className="shell flex h-[var(--header-h)] items-center justify-between border-b border-rule">
-          <span className="font-semibold tracking-[-0.02em]">KINZEN</span>
-          <button
-            type="button"
-            popoverTarget="mobile-nav"
-            popoverTargetAction="hide"
-            className="grid size-9 place-items-center text-ink-2 hover:text-ink"
-            aria-label={dict.a11y.close}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="size-5"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path d="M6 6l12 12M18 6 6 18" />
-            </svg>
-          </button>
-        </div>
-        <nav aria-label={dict.a11y.mainNav} className="shell">
-          <ul>
-            {items.map((item) => (
-              <li key={item.href} className="border-b border-rule">
-                <a href={item.href} className="mobile-nav-link block py-4 text-2xl font-semibold tracking-[-0.03em]">
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
       </div>
     </header>
   );

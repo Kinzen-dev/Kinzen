@@ -21,14 +21,14 @@ export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary 
                 className="relative grid gap-6 border-t border-rule py-10 md:grid-cols-12 md:gap-6 md:py-14"
               >
                 <span data-era-node aria-hidden="true" className="era-node" />
-                <div className="md:sticky md:top-[calc(var(--header-h)+1.5rem)] md:col-span-4 md:self-start">
+                <div className="md:sticky md:top-[calc(var(--header-h)+1.5rem)] md:col-span-5 md:self-start">
                   <p className="readout">
                     {monthYear(era.start, locale)} → {end}
                   </p>
                   <h3 className="mt-3 text-xl tracking-[-0.035em]">{era.org.name}</h3>
                   <p className="mt-1 text-ink-2">{t(era.title, locale)}</p>
                 </div>
-                <div className="md:col-span-7 md:col-start-6">
+                <div className="md:col-span-6 md:col-start-7">
                   <p className="max-w-[52ch] text-lg">{t(era.summary, locale)}</p>
                   <ul className="mt-6 grid gap-3">
                     {era.highlights.map((h) => (

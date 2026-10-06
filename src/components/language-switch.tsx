@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { locales, type Locale } from "@/content/schema";
 import { localePath, neutralPath } from "@/lib/site-url";
 
@@ -15,6 +15,7 @@ export function LanguageSwitch({
   label: string;
 }) {
   const pathname = usePathname() ?? "/";
+  const router = useRouter();
   const path = neutralPath(pathname);
 
   return (
@@ -28,6 +29,13 @@ export function LanguageSwitch({
           )}
           <Link
             href={localePath(target, path)}
+            onClick={(e) => {
+              // Keep the reader's place: carry the section hash across languages.
+              const hash = window.location.hash;
+              if (!hash) return;
+              e.preventDefault();
+              router.push(localePath(target, path) + hash);
+            }}
             hrefLang={target}
             lang={target}
             aria-current={target === locale ? "true" : undefined}

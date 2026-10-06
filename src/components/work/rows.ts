@@ -28,6 +28,7 @@ export interface LedgerRow {
 }
 
 export interface LedgerLabels {
+  newTab: string;
   caption: string;
   name: string;
   area: string;
@@ -86,6 +87,7 @@ export function ledgerRows(locale: Locale, dict: Dictionary): LedgerRow[] {
 export function ledgerLabels(dict: Dictionary): LedgerLabels {
   const l = dict.ledger;
   return {
+    newTab: dict.a11y.newTab,
     caption: l.caption,
     name: l.name,
     area: l.area,

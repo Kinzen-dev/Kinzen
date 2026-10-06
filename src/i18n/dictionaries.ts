@@ -1,4 +1,5 @@
 import type { Locale } from "@/content/schema";
+import { thaiGlue } from "@/lib/thai";
 
 /**
  * Interface strings. Content (claims, bios, projects) lives in src/content.
@@ -18,6 +19,8 @@ const en = {
     themeDark: "Dark theme",
     languageSwitch: "Language",
     openPalette: "Open command palette",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
     home: "Kinzen, home",
     close: "Close",
     newTab: "(opens in a new tab)",
@@ -32,6 +35,8 @@ const en = {
   },
   language: { en: "English", th: "ไทย" },
   hero: {
+    ctaEmail: "Email me",
+    ctaCv: "View CV",
     eyebrowRole: "Senior Full-Stack Engineer",
     basedIn: "Based in",
     remote: "working remotely",
@@ -81,9 +86,10 @@ const en = {
     live: "Live",
     internal: "Internal tool",
     "in-production": "In production",
+    delivered: "Delivered",
     archived: "Archived",
   },
-  experience: { present: "Present", stack: "Stack" },
+  experience: { present: "present", stack: "Stack" },
   contact: {
     heading: "Have a system that has to work?",
     body: "Email is the fastest way to reach me. I read everything and reply myself.",
@@ -136,7 +142,7 @@ const en = {
     ogAltHome: "KINZEN: Kittipong Khonthong, Senior Full-Stack Engineer",
   },
   cv: {
-    title: "CV",
+    title: "Kittipong Khonthong CV",
     description:
       "CV of Kittipong Khonthong, senior full-stack engineer in Bangkok: experience, selected systems, skills, education and languages. Prints to A4.",
     print: "Print or save as PDF",
@@ -146,7 +152,7 @@ const en = {
     skills: "Skills",
     education: "Education",
     languages: "Languages",
-    present: "Present",
+    present: "present",
     remote: "remote",
     stack: "Stack",
   },
@@ -165,12 +171,15 @@ const en = {
     switchLanguage: "Read this page in Thai",
     empty: "No matching commands",
     results: "{count} results",
+    resultsOne: "1 result",
     hintMove: "move",
     hintRun: "run",
     hintClose: "close",
   },
   demo: {
-    title: "Code over prompts",
+    title: "Watch the guard work",
+    ghostGuard: "Guard check",
+    ghostReply: "Reply to the patient",
     intro:
       "Pick a patient message. The model writes a draft, a guard in code checks it against the clinic's rules, and only a safe reply reaches the patient.",
     label: "Scripted illustration. Not live patient data.",
@@ -242,6 +251,8 @@ const th: Dictionary = {
     themeDark: "ธีมมืด",
     languageSwitch: "ภาษา",
     openPalette: "เปิดเมนูคำสั่ง",
+    openMenu: "เปิดเมนู",
+    closeMenu: "ปิดเมนู",
     home: "Kinzen หน้าแรก",
     close: "ปิด",
     newTab: "(เปิดในแท็บใหม่)",
@@ -256,6 +267,8 @@ const th: Dictionary = {
   },
   language: { en: "English", th: "ไทย" },
   hero: {
+    ctaEmail: "ส่งอีเมลหาผม",
+    ctaCv: "ดู CV",
     eyebrowRole: "วิศวกร full-stack ระดับ senior",
     basedIn: "อยู่ที่",
     remote: "ทำงานทางไกล",
@@ -305,6 +318,7 @@ const th: Dictionary = {
     live: "เปิดใช้งานแล้ว",
     internal: "เครื่องมือภายใน",
     "in-production": "ใช้งานจริง",
+    delivered: "ส่งมอบแล้ว",
     archived: "เก็บถาวร",
   },
   experience: { present: "ปัจจุบัน", stack: "Stack" },
@@ -366,7 +380,7 @@ const th: Dictionary = {
     ogAltHome: "KINZEN: กฤติพงษ์ ก้อนทอง วิศวกร full-stack ระดับ senior",
   },
   cv: {
-    title: "CV",
+    title: "CV กฤติพงษ์ ก้อนทอง",
     description:
       "CV ของกฤติพงษ์ ก้อนทอง วิศวกร full-stack ระดับ senior ที่กรุงเทพฯ รวมประสบการณ์ ระบบที่คัดมา ทักษะ การศึกษา และภาษา พิมพ์เป็น A4 ได้",
     print: "พิมพ์หรือบันทึกเป็น PDF",
@@ -395,12 +409,15 @@ const th: Dictionary = {
     switchLanguage: "อ่านหน้านี้เป็นภาษาอังกฤษ",
     empty: "ไม่เจอคำสั่งที่ตรงกัน",
     results: "{count} รายการ",
+    resultsOne: "1 รายการ",
     hintMove: "เลื่อน",
     hintRun: "เลือก",
     hintClose: "ปิด",
   },
   demo: {
-    title: "กฎอยู่ในโค้ด ไม่ใช่ใน prompt",
+    title: "ลองดูชุดตรวจทำงานจริง",
+    ghostGuard: "ชุดตรวจ",
+    ghostReply: "คำตอบถึงคนไข้",
     intro:
       "เลือกข้อความจากคนไข้ดู โมเดลจะร่างคำตอบ ชุดตรวจในโค้ดเช็คร่างกับกฎของคลินิก และมีแค่คำตอบที่ปลอดภัยเท่านั้นที่ส่งถึงคนไข้",
     label: "ตัวอย่างจำลอง ไม่ใช่ข้อมูลคนไข้จริง",
@@ -454,7 +471,17 @@ const th: Dictionary = {
   },
 };
 
-const dictionaries: Record<Locale, Dictionary> = { en, th };
+/** Apply Thai line-break glue to every string in the Thai dictionary, once. */
+function glueDeep<T>(value: T): T {
+  if (typeof value === "string") return thaiGlue(value) as T;
+  if (Array.isArray(value)) return value.map(glueDeep) as T;
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, glueDeep(v)])) as T;
+  }
+  return value;
+}
+
+const dictionaries: Record<Locale, Dictionary> = { en, th: glueDeep(th) };
 
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale];

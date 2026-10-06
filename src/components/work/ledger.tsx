@@ -32,8 +32,10 @@ function sortRows(rows: LedgerRow[], sort: Sort) {
 function nextSort(current: Sort, key: SortKey): Sort {
   // Names start A to Z; years start newest first.
   const first = key === "name" ? "asc" : "desc";
+  // Third press returns to the curated order.
   if (!current || current.key !== key) return { key, dir: first };
-  return { key, dir: current.dir === "asc" ? "desc" : "asc" };
+  if (current.dir === first) return { key, dir: first === "asc" ? "desc" : "asc" };
+  return null;
 }
 
 function SortGlyph({ dir }: { dir: "asc" | "desc" | null }) {
@@ -167,12 +169,12 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
               </button>
             ))}
           </div>
-          {/* Phones have no column headers to sort by: the same sort lives here. */}
-          <div className="ledger-group md:hidden" role="group" aria-label={labels.sortBy}>
-            <span aria-hidden="true" className="ledger-pill-rule" />
-            {sortButton("name", labels.name, "ledger-pill")}
-            {sortButton("year", labels.year, "ledger-pill")}
-          </div>
+        </div>
+        {/* Phones have no column headers to sort by: the same sort lives on its own line. */}
+        <div className="ledger-sortbar" role="group" aria-label={labels.sortBy}>
+          <span aria-hidden="true">{labels.sortBy}</span>
+          {sortButton("name", labels.name, "ledger-pill")}
+          {sortButton("year", labels.year, "ledger-pill")}
         </div>
         <p className="readout ledger-count" aria-live="polite">
           {showing}
@@ -221,7 +223,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                   onClick={shown ? (e) => onRowClick(e, row.id) : undefined}
                 >
                   <th scope="row" className="ledger-name-cell">
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-4">
                       {icon ? (
                         <span className="ledger-icon" aria-hidden="true">
                           {icon}
@@ -316,6 +318,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                                   {row.links.map((l) => (
                                     <a key={l.href} href={l.href} className="link" rel="noopener" target="_blank">
                                       {l.label}
+                                      <span className="sr-only"> {labels.newTab}</span>
                                     </a>
                                   ))}
                                 </dd>

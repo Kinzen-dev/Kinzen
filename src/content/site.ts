@@ -236,6 +236,7 @@ const content: SiteContentInput = {
       id: "proj-yimwhan",
       slug: "yimwhan-ai",
       name: "Yimwhan AI",
+      aliases: ["ยิ้มหวาน"],
       tagline: {
         en: "A phone and LINE receptionist for dental clinics, with clinical-safety guards in code.",
         th: "ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมชุดตรวจความปลอดภัยทางคลินิกที่เขียนเป็นโค้ด",
@@ -312,6 +313,58 @@ const content: SiteContentInput = {
       },
     },
     {
+      id: "proj-anymind-ec",
+      slug: "anymind-ec-platform",
+      name: "AnyMind EC Platform",
+      aliases: ["AnyMind", "Mizuno", "Shopify"],
+      tagline: {
+        en: "Shopify storefronts, apps and headless builds for brands, led as Tech Lead for four years.",
+        th: "หน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์ต่าง ๆ ดูแลในฐานะ Tech Lead สี่ปี",
+      },
+      kind: "platform",
+      area: "commerce",
+      status: "delivered",
+      period: { start: "2022-01", end: "2026-03" },
+      role: { en: "Tech Lead", th: "Tech Lead" },
+      stack: [
+        "Shopify Admin GraphQL API",
+        "Storefront API",
+        "Liquid",
+        "Metafields",
+        "App proxies",
+        "Next.js",
+        "TypeScript",
+      ],
+      experienceId: "exp-anymind",
+      confidentiality: "C2-bounded",
+      featured: true,
+      visibility: "public",
+      links: [],
+      outcomes: [
+        {
+          text: {
+            en: "Led EC Platform engineering: Shopify storefronts, apps and headless builds, including Mizuno Thailand.",
+            th: "นำทีมวิศวกรรม EC Platform ทำหน้าร้าน แอป และระบบ headless บน Shopify รวมถึง Mizuno Thailand",
+          },
+          provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
+            en: "Delivered Shopify integrations using the Admin GraphQL and Storefront APIs, Liquid, metafields and app proxies, alongside Next.js services.",
+            th: "ส่งมอบงานเชื่อมต่อ Shopify ด้วย Admin GraphQL API, Storefront API, Liquid, metafields และ app proxy ควบคู่กับบริการที่เขียนด้วย Next.js",
+          },
+          provenance: { claimId: "exp-anymind.bullet-2", source: "CLAIMS", confidence: "STATED" },
+        },
+        {
+          text: {
+            en: "Migrated legacy apps to the Shopify Dev Dashboard and upgraded to the January 2026 Admin API.",
+            th: "ย้ายแอปเก่าไปที่ Shopify Dev Dashboard และอัปเกรดไปใช้ Admin API รุ่นมกราคม 2026",
+          },
+          provenance: { claimId: "exp-anymind.bullet-3", source: "CLAIMS", confidence: "STATED" },
+        },
+      ],
+    },
+    {
       id: "proj-helm",
       slug: "helm",
       name: "Helm",
@@ -344,6 +397,7 @@ const content: SiteContentInput = {
       id: "proj-ronglen",
       slug: "ronglen",
       name: "Ronglen",
+      aliases: ["โรงเล่น"],
       tagline: {
         en: "Thai-first spoken party games for 2 to 8 players, on one device or in online voice rooms.",
         th: "โรงเล่น: เกมปาร์ตี้ภาษาไทยที่เล่นด้วยการพูด สำหรับ 2 ถึง 8 คน เล่นบนเครื่องเดียวหรือในห้องเสียงออนไลน์ก็ได้",

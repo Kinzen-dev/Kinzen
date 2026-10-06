@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { thai } from "./thai";
 
 const LABEL = {
   "/": "Scripted illustration. Not live patient data.",
@@ -11,7 +12,7 @@ test.describe("agent demo", () => {
       await page.goto(route);
       const demo = page.locator(".agent-demo");
       await demo.scrollIntoViewIfNeeded();
-      await expect(demo.getByText(LABEL[route], { exact: true })).toBeVisible();
+      await expect(demo.getByText(thai(LABEL[route]))).toBeVisible();
     });
   }
 
@@ -49,7 +50,7 @@ test.describe("agent demo", () => {
     await choices.nth(2).focus();
     await page.keyboard.press("Enter");
     await expect(choices.nth(2)).toHaveAttribute("aria-pressed", "true");
-    await expect(page.locator(".agent-demo-live del")).toHaveText("ที่นี่รับประกันฟันขาวถาวรตลอดชีวิต", {
+    await expect(page.locator(".agent-demo-live del")).toHaveText(thai("ที่นี่รับประกันฟันขาวถาวรตลอดชีวิต"), {
       timeout: 15_000,
     });
   });

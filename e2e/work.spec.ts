@@ -1,3 +1,4 @@
+import { thai } from "./thai";
 import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
@@ -64,7 +65,7 @@ test.describe("works ledger", () => {
     expect(byYear).toBe(before.length);
   });
 
-  test("area filters leave ruled empty rows instead of reflowing", async ({ page }) => {
+  test("area filters remove filtered rows from view and restore them", async ({ page }) => {
     const table = page.locator("#work table");
     const height = (await table.boundingBox())!.height;
     const total = await page.locator("#work tbody tr.ledger-row").count();
@@ -76,7 +77,11 @@ test.describe("works ledger", () => {
     const shown = await rowButtons(page).count();
     expect(shown).toBeLessThan(total);
     await expect(page.locator("#work tbody tr.ledger-row[data-filtered]")).toHaveCount(total - shown);
-    expect((await table.boundingBox())!.height).toBeCloseTo(height, 0);
+    // Filtered rows leave the layout entirely: no blank gaps where they were.
+    expect((await table.boundingBox())!.height).toBeLessThan(height);
+    for (const row of await page.locator("#work tbody tr.ledger-row[data-filtered]").all()) {
+      await expect(row).toBeHidden();
+    }
 
     await page.getByRole("button", { name: /^All/ }).click();
     await expect(rowButtons(page)).toHaveCount(total);
@@ -125,7 +130,7 @@ test.describe("project pages", () => {
 
       await page.goto(route);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
-      await expect(page.getByRole("heading", { name: marker })).toBeVisible();
+      await expect(page.getByRole("heading", { name: thai(marker) })).toBeVisible();
       // The long-form case study stays hidden until its visibility flag is flipped.
       await expect(page.locator("[data-case-study]")).toHaveCount(0);
       expect(await seriousViolations(page)).toEqual([]);

@@ -4,11 +4,14 @@
  * whole-substring hits score higher. Whitespace in the query is ignored, so
  * "printcv" and "print cv" both find "Print CV".
  */
+/** Lowercase and drop Thai word joiners (U+2060) so glued Thai text still matches. */
+const norm = (value: string) => value.replace(/\u2060/g, "").toLowerCase();
+
 export function fuzzyScore(query: string, text: string): number | null {
-  const q = query.toLowerCase().replace(/\s+/g, "");
+  const q = norm(query).replace(/\s+/g, "");
   if (!q) return 0;
-  const s = text.toLowerCase();
-  const whole = query.toLowerCase().trim();
+  const s = norm(text);
+  const whole = norm(query).trim();
 
   // A plain substring hit beats any scattered match; word-start hits beat mid-word ones.
   const at = s.indexOf(whole);
@@ -32,8 +35,8 @@ export function fuzzyScore(query: string, text: string): number | null {
 }
 
 function keywordScore(query: string, keywords: string): number | null {
-  const q = query.toLowerCase().trim();
-  if (q && keywords.toLowerCase().includes(q)) return fuzzyScore(query, keywords);
+  const q = norm(query).trim();
+  if (q && norm(keywords).includes(q)) return fuzzyScore(query, keywords);
   let best: number | null = null;
   for (const word of keywords.split(/\s+/)) {
     const s = fuzzyScore(query, word);

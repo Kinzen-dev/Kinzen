@@ -42,6 +42,10 @@ describe("fuzzy palette matcher", () => {
   });
 
   it("prefers a direct label hit", () => {
-    expect(rank(items, "cv").slice(0, 2).map((i) => i.label)).toEqual(["Open CV", "Print CV"]);
+    expect(
+      rank(items, "cv")
+        .slice(0, 2)
+        .map((i) => i.label),
+    ).toEqual(["Open CV", "Print CV"]);
   });
 });

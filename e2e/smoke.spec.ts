@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { stripJoiners } from "./thai";
 import AxeBuilder from "@axe-core/playwright";
 
 const ROUTES = ["/", "/th"];
@@ -19,7 +20,6 @@ test.describe("shell", () => {
       const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
       expect(serious.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
     });
-
   }
 
   test("hreflang alternates are correct on the Thai home", async ({ request }) => {
@@ -54,7 +54,7 @@ test.describe("shell", () => {
     expect(res.status()).toBe(404);
     const html = await res.text();
     expect(html).toContain("This page wandered off");
-    expect(html).toContain("หน้านี้หลงทางไปแล้ว");
+    expect(stripJoiners(html)).toContain("หน้านี้หลงทางไปแล้ว");
   });
 
   test("language switch keeps the current page", async ({ page, isMobile }) => {

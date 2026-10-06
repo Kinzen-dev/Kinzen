@@ -59,7 +59,7 @@ export function Work({
   }
 
   return (
-    <section id="work" aria-labelledby="work-title" className="shell pt-20 md:pt-28">
+    <section id="work" aria-labelledby="work-title" className="shell pt-16 md:pt-20">
       <SectionHeader id="work" title={dict.sections.work} intro={dict.sections.workIntro} />
       <Ledger rows={rows} labels={ledgerLabels(dict)} areas={areas} plates={plates} icons={icons} />
     </section>

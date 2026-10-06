@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { links } from "@/content";
+import { localePath } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { BangkokTime, OffsetFromVisitor } from "../clock";
 import { CopyEmail } from "../copy-email";
@@ -41,12 +42,18 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
                     <span className="sr-only"> {dict.a11y.newTab}</span>
                   </a>
                 ))}
+                <a
+                  href={localePath(locale, "/cv")}
+                  className="inline-flex h-11 items-center border border-rule px-4 text-sm font-medium transition-colors duration-200 hover:border-rule-strong"
+                >
+                  {dict.hero.ctaCv}
+                </a>
               </div>
             </div>
           ) : null}
         </div>
 
-        <dl className="self-end md:col-span-3 md:col-start-10">
+        <dl className="self-end md:col-span-4 md:col-start-9">
           <dt className="readout">{dict.contact.localTime}</dt>
           <dd className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
             <BangkokTime locale={locale} />

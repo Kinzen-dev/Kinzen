@@ -66,7 +66,8 @@ export class TargetClient {
       import("./mask"),
       import("./sample-mask"),
     ]);
-    if (req.kind === "targets") return { id: req.id, kind: "targets", targets: s.sampleWordmark(indexMask(WORDMARK), req.job) };
+    if (req.kind === "targets")
+      return { id: req.id, kind: "targets", targets: s.sampleWordmark(indexMask(WORDMARK), req.job) };
     return { id: req.id, kind: "burst", burst: s.burstSeed(req.job) };
   }
 }

@@ -39,10 +39,27 @@ export function PlateDraw({ label, children }: { label: string; children: ReactN
     const ro = new ResizeObserver(measure);
     ro.observe(el);
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return () => ro.disconnect();
+    // Drop the right-edge fade once the reader has scrolled to the end of the drawing.
+    const onScroll = () => {
+      el.toggleAttribute("data-at-end", el.scrollLeft + el.clientWidth >= el.scrollWidth - 2);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    const cleanupScroll = () => el.removeEventListener("scroll", onScroll);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return () => {
+        ro.disconnect();
+        cleanupScroll();
+      };
+    }
     const rect = el.getBoundingClientRect();
     const onScreen = rect.top < window.innerHeight && rect.bottom > 0;
-    if (onScreen && !clientMounted.current) return () => ro.disconnect();
+    if (onScreen && !clientMounted.current) {
+      return () => {
+        ro.disconnect();
+        cleanupScroll();
+      };
+    }
 
     el.dataset.state = "armed";
     const io = new IntersectionObserver(
@@ -58,6 +75,7 @@ export function PlateDraw({ label, children }: { label: string; children: ReactN
     return () => {
       io.disconnect();
       ro.disconnect();
+      cleanupScroll();
     };
   }, []);
 

@@ -70,6 +70,21 @@
     display: none;
   }
 
+  /* Phones: sort sits on its own line under the filters, always visible. */
+  .ledger-sortbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+  @media (min-width: 48rem) {
+    .ledger-sortbar {
+      display: none;
+    }
+  }
+
   @media (min-width: 48rem) {
     .ledger-pills {
       flex-wrap: wrap;
@@ -87,8 +102,7 @@
   }
 
   .ledger-table {
-    width: calc(100% + 1.5rem);
-    margin-inline: -0.75rem;
+    width: 100%;
     border-collapse: collapse;
     text-align: left;
   }
@@ -141,16 +155,10 @@
     background: var(--surface);
   }
 
-  /* Filtered out: the row keeps its height and rule, the content goes. No reflow. */
+  /* Filtered out: the row leaves the table. (Keeping it as an empty ruled row left
+     tall blank gaps that read as broken content.) */
   .ledger-row[data-filtered] {
-    cursor: default;
-    pointer-events: none;
-  }
-  .ledger-row[data-filtered] > * {
-    color: transparent;
-  }
-  .ledger-row[data-filtered] * {
-    visibility: hidden;
+    display: none;
   }
 
   .ledger-name {
@@ -277,4 +285,12 @@
   .ledger-row:not([data-filtered]):hover .ledger-ring {
     border-color: var(--ground);
   }
+}
+
+/* Cells keep their inner padding but the first and last sit on the page grid lines. */
+.ledger-table :is(th, td):first-child {
+  padding-inline-start: 0;
+}
+.ledger-table :is(th, td):last-child {
+  padding-inline-end: 0;
 }

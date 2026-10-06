@@ -155,3 +155,18 @@
 .agent-demo[data-active="false"] :is(.agent-demo-dots i, .agent-demo-dot) {
   animation-play-state: paused;
 }
+
+/* Placeholders for the stages still to come. */
+.agent-demo-ghost {
+  display: flex;
+  align-items: center;
+  min-height: 3.25rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px dashed var(--rule);
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+.agent-demo-ghost.agent-demo-reply {
+  justify-self: end;
+  width: min(100%, 22rem);
+}

@@ -282,3 +282,13 @@
     grid-template-columns: 36mm 1fr;
   }
 }
+
+/* Applicant tracking systems read the PDF text layer: tight display tracking makes
+   extractors glue words together ("KittipongKhonthong"), so print with normal spacing
+   and without hyphenation. */
+@media print {
+  .cv * {
+    letter-spacing: 0 !important;
+    hyphens: manual !important;
+  }
+}

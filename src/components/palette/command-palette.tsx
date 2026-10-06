@@ -67,8 +67,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
     const dialog = dialogRef.current;
     if (!dialog || dialog.open) return;
     const focused = document.activeElement;
-    returnFocusRef.current =
-      focused instanceof HTMLElement && focused !== document.body ? focused : triggerRef.current;
+    returnFocusRef.current = focused instanceof HTMLElement && focused !== document.body ? focused : triggerRef.current;
     setQuery("");
     setActive(0);
     setTheme(currentTheme());
@@ -305,7 +304,11 @@ export function CommandPalette({ data }: { data: PaletteData }) {
           {results.length === 0 ? <p className="palette-empty">{labels.empty}</p> : null}
 
           <p role="status" className="sr-only">
-            {searching ? labels.results.replace("{count}", String(results.length)) : ""}
+            {searching
+              ? results.length === 1
+                ? labels.resultsOne
+                : labels.results.replace("{count}", String(results.length))
+              : ""}
           </p>
 
           <p aria-hidden="true" className="palette-foot readout">

@@ -118,3 +118,20 @@
     opacity: 1;
   }
 }
+
+/* Narrow screens: the drawing scrolls inside its frame. Say so ABOVE it, and fade the
+   right edge so it is obvious there is more to the right. */
+.plate:has(.plate-scroll[data-scrolls]) {
+  display: flex;
+  flex-direction: column;
+}
+.plate:has(.plate-scroll[data-scrolls]) .plate-caption {
+  order: -1;
+  margin: 0 0 0.75rem;
+}
+.plate-scroll[data-scrolls] {
+  mask-image: linear-gradient(to right, #000 82%, transparent);
+}
+.plate-scroll[data-scrolls][data-at-end] {
+  mask-image: none;
+}

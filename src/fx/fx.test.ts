@@ -30,7 +30,16 @@ describe("target sampling", () => {
   const mask = indexMask(WORDMARK);
   const ink = { x: 20, y: 60, w: 1300, h: 300 };
   const k = 0.02;
-  const t = sampleWordmark(mask, { N: 4096, cw: 1440, ch: 600, ink, k, gold: [214, 168, 90], dustShare: 0.1, edgeShare: 0.3 });
+  const t = sampleWordmark(mask, {
+    N: 4096,
+    cw: 1440,
+    ch: 600,
+    ink,
+    k,
+    gold: [214, 168, 90],
+    dustShare: 0.1,
+    edgeShare: 0.3,
+  });
 
   it("puts glyph particles inside the ink box and tags roles", () => {
     let glyphs = 0;

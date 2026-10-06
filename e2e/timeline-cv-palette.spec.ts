@@ -1,11 +1,14 @@
+import { thai } from "./thai";
 import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 const PHONE = /\+66|0\d{2}[- ]?\d{3}[- ]?\d{4}/;
 
 async function openPalette(page: Page) {
-  await page.getByRole("button", { name: /^(Open command palette|เปิดเมนูคำสั่ง)$/ }).click();
-  const dialog = page.getByRole("dialog", { name: /^(Command palette|เมนูคำสั่ง)$/ });
+  await page
+    .getByRole("button", { name: new RegExp(`^Open command palette$|${thai("เปิดเมนูคำสั่ง").source}`) })
+    .click();
+  const dialog = page.getByRole("dialog", { name: new RegExp(`^Command palette$|${thai("เมนูคำสั่ง").source}`) });
   await expect(dialog).toBeVisible();
   return dialog;
 }
@@ -108,7 +111,7 @@ test.describe("cv", () => {
       const res = await page.goto(route);
       expect(res?.status()).toBe(200);
       await expect(page.locator("html")).toHaveAttribute("lang", lang);
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText(name);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(thai(name));
       await expect(page.locator('a[href^="mailto:"]').first()).toBeVisible();
       await expect(page.locator('a[href*="linkedin.com"]').first()).toBeVisible();
       const text = await page.locator("body").innerText();

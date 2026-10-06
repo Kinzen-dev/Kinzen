@@ -43,10 +43,8 @@ export function Colophon({ locale, dict }: { locale: Locale; dict: Dictionary })
   return (
     <p className="readout max-w-prose">
       {dict.colophon.weighs}{" "}
-      <span className="text-ink" aria-live="polite">
-        {weight === null ? dict.colophon.measuring : `${formatKB(weight, locale)} KB`}
-      </span>
-      . {dict.colophon.built} {builtLabel} {dict.colophon.from}{" "}
+      <span className="text-ink">{weight === null ? dict.colophon.measuring : `${formatKB(weight, locale)} KB`}</span>.{" "}
+      {dict.colophon.built} {builtLabel} {dict.colophon.from}{" "}
       <a className="link" href={`https://github.com/Kinzen-dev/Kinzen/commit/${commit}`}>
         {commit}
       </a>

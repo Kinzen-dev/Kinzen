@@ -138,6 +138,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
               <li key={l.href}>
                 <a href={l.href} className="link text-lg" rel="noopener" target="_blank">
                   {l.label}
+                  <span className="sr-only"> {dict.a11y.newTab}</span>
                 </a>
               </li>
             ))}

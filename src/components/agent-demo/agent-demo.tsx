@@ -314,6 +314,18 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
           <p className="agent-demo-bubble bg-ink text-ground">{s.reply}</p>
         </li>
       ) : null}
+
+      {/* What is still to come, drawn faintly so the reserved space reads as a pipeline, not a gap. */}
+      {!still && !at(stage, "checking") ? (
+        <li className="agent-demo-ghost" aria-hidden="true">
+          {copy.ghostGuard}
+        </li>
+      ) : null}
+      {!still && !at(stage, "typing-reply") ? (
+        <li className="agent-demo-ghost agent-demo-reply" aria-hidden="true">
+          {copy.ghostReply}
+        </li>
+      ) : null}
     </ol>
   );
 }

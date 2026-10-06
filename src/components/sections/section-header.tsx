@@ -6,7 +6,7 @@ export function SectionHeader({ id, title, intro }: { id: string; title: string;
       <h2 id={`${id}-title`} className="text-2xl tracking-[-0.045em] md:col-span-6">
         {title}
       </h2>
-      {intro ? <p className="max-w-[46ch] text-ink-2 md:col-span-5 md:col-start-8 md:self-end">{intro}</p> : null}
+      {intro ? <p className="max-w-[46ch] text-ink-2 md:col-span-6 md:col-start-7 md:self-end">{intro}</p> : null}
     </header>
   );
 }

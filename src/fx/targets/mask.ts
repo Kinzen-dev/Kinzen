@@ -55,7 +55,16 @@ export function indexMask(src: MaskSource): MaskIndex {
       const i = y * w + x;
       if (!bits[i]) continue;
       ink[ni++] = i;
-      if (x === 0 || y === 0 || x === w - 1 || y === h - 1 || !bits[i - 1] || !bits[i + 1] || !bits[i - w] || !bits[i + w]) {
+      if (
+        x === 0 ||
+        y === 0 ||
+        x === w - 1 ||
+        y === h - 1 ||
+        !bits[i - 1] ||
+        !bits[i + 1] ||
+        !bits[i - w] ||
+        !bits[i + w]
+      ) {
         edgeTmp[ne++] = i;
       }
     }

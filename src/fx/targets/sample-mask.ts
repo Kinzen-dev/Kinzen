@@ -10,7 +10,9 @@ function gauss(): number {
     spare = null;
     return v;
   }
-  let u = 0, v = 0, s = 0;
+  let u = 0,
+    v = 0,
+    s = 0;
   do {
     u = Math.random() * 2 - 1;
     v = Math.random() * 2 - 1;
@@ -93,7 +95,9 @@ export function burstSeed(job: BurstJob): Burst {
     const a = Math.random() * Math.PI * 2;
     const rr = Math.sqrt(1 - z * z);
     // Flatten the sphere so the burst reads as a planar bloom across the wordmark band.
-    const d0 = rr * Math.cos(a), d1 = z * 0.55, d2 = rr * Math.sin(a) * 0.4;
+    const d0 = rr * Math.cos(a),
+      d1 = z * 0.55,
+      d2 = rr * Math.sin(a) * 0.4;
     const r = Math.random() * 0.25;
     const s = speed * (0.35 + Math.random());
     pos[o] = origin[0] + d0 * r;

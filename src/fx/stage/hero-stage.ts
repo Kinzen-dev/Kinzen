@@ -37,7 +37,14 @@ export type StageEls = {
   wordmark: HTMLElement;
 };
 
-type Debug = { tier: Tier; reason: string; renderer: string; engine: ParticleEngine | null; governor: Governor | null; phase: string };
+type Debug = {
+  tier: Tier;
+  reason: string;
+  renderer: string;
+  engine: ParticleEngine | null;
+  governor: Governor | null;
+  phase: string;
+};
 
 export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   const { hero, stage, canvas, wordmark } = els;
@@ -70,15 +77,18 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     onOff();
   };
 
-  const gl = env.fx === "off" || env.saveData ? null : canvas.getContext("webgl2", {
-    antialias: false,
-    alpha: false,
-    depth: false,
-    stencil: false,
-    premultipliedAlpha: false,
-    powerPreference: "high-performance",
-    preserveDrawingBuffer: false,
-  });
+  const gl =
+    env.fx === "off" || env.saveData
+      ? null
+      : canvas.getContext("webgl2", {
+          antialias: false,
+          alpha: false,
+          depth: false,
+          stencil: false,
+          premultipliedAlpha: false,
+          powerPreference: "high-performance",
+          preserveDrawingBuffer: false,
+        });
   const picked = pickTier(env, gl);
   debug.renderer = picked.renderer;
   if (picked.tier === "off" || !gl) {
@@ -124,7 +134,11 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   };
   type Layout = ReturnType<typeof measure>;
   const sameLayout = (a: Layout, b: Layout) =>
-    Math.abs(a.cw - b.cw) < 0.5 && Math.abs(a.ch - b.ch) < 0.5 && Math.abs(a.ink.x - b.ink.x) < 0.5 && Math.abs(a.ink.y - b.ink.y) < 0.5 && Math.abs(a.fs - b.fs) < 0.05;
+    Math.abs(a.cw - b.cw) < 0.5 &&
+    Math.abs(a.ch - b.ch) < 0.5 &&
+    Math.abs(a.ink.x - b.ink.x) < 0.5 &&
+    Math.abs(a.ink.y - b.ink.y) < 0.5 &&
+    Math.abs(a.fs - b.fs) < 0.05;
 
   const pointCss = (fs: number) => Math.min(2.1, Math.max(1, fs * 0.0052));
   let palette = readPalette(hero);
@@ -187,7 +201,9 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     ] as const;
     const [targets, burst] = await Promise.all([
       targetsFor(fit),
-      motion ? client.burst({ N: engine.N, origin, speed: fit.ink.w * worldPerPx(fit.ch) * 0.55 }) : Promise.resolve(null),
+      motion
+        ? client.burst({ N: engine.N, origin, speed: fit.ink.w * worldPerPx(fit.ch) * 0.55 })
+        : Promise.resolve(null),
     ]);
     if (dead) return;
     engine.setTargets(targets, pointCss(fit.fs));

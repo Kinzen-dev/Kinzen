@@ -19,6 +19,23 @@ export function RevealLayer() {
     if (!("IntersectionObserver" in window)) return;
 
     const root = document.documentElement;
+
+    // The entrance plays once per page per visit. Coming back (browser Back, a link home)
+    // shows everything at once, so returning never looks like a slow reload.
+    const key = `kz-revealed:${pathname}`;
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem(key) === "1";
+      sessionStorage.setItem(key, "1");
+    } catch {
+      /* storage blocked: fall back to playing the entrance */
+    }
+    if (seen) {
+      document.querySelectorAll<HTMLElement>(SELECTOR).forEach((el) => (el.dataset.revealed = ""));
+      root.dataset.revealReady = "";
+      return;
+    }
+
     const pending = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR)).filter((el) => {
       if (el.getBoundingClientRect().top < window.innerHeight) {
         el.dataset.revealed = "";

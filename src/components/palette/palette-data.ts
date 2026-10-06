@@ -49,7 +49,7 @@ export function paletteData(locale: Locale, dict: Dictionary): PaletteData {
     group: "projects",
     label: p.name,
     hint: dict.palette.projectHint,
-    keywords: `${p.slug} ${t(p.tagline, locale)} ${p.tagline.en} ${both((d) => d.palette.groups.projects)}`,
+    keywords: `${p.slug} ${p.aliases.join(" ")} ${p.stack.join(" ")} ${t(p.tagline, locale)} ${p.tagline.en} ${both((d) => d.palette.groups.projects)}`,
     href: localePath(locale, `/work/${p.slug}`),
   }));
 

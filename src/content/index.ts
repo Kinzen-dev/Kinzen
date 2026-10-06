@@ -1,4 +1,5 @@
 import { site } from "./site";
+import { thaiGlue } from "@/lib/thai";
 import type { Locale, Localized, LocalizedList, Project, SkillGroup } from "./schema";
 
 export type { Locale, Localized, LocalizedList } from "./schema";
@@ -6,11 +7,11 @@ export { locales, defaultLocale } from "./schema";
 
 /** Resolve a localized field, falling back to English when a translation is missing. */
 export function t(value: Localized, locale: Locale): string {
-  return (locale === "th" && value.th) || value.en;
+  return locale === "th" && value.th ? thaiGlue(value.th) : value.en;
 }
 
 export function tList(value: LocalizedList, locale: Locale): string[] {
-  return (locale === "th" && value.th) || value.en;
+  return locale === "th" && value.th ? value.th.map(thaiGlue) : value.en;
 }
 
 /** Skill items are plain names (same in every language) or localized phrases. */
