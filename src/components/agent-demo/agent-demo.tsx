@@ -189,6 +189,10 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       if (!Number.isInteger(n) || n < 1 || n > copy.scenarios.length) return;
       e.preventDefault();
       choose(n - 1);
+      // Keep focus and the pressed state on the same control.
+      if (rootRef.current?.contains(document.activeElement)) {
+        rootRef.current.querySelectorAll<HTMLButtonElement>(".agent-demo-choice")[n - 1]?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

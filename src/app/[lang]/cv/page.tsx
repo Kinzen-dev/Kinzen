@@ -124,7 +124,11 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
           {projects.map((p) => (
             <li key={p.id} className="cv-entry">
               <div className="cv-entry-head">
-                <h3 className="cv-entry-title">{p.name}</h3>
+                <h3 className="cv-entry-title">
+                  <a href={localePath(locale, `/work/${p.slug}`)} className="cv-project-link">
+                    {p.name}
+                  </a>
+                </h3>
                 <p className="cv-dates readout">{range(p.period.start, p.period.end)}</p>
               </div>
               <p className="cv-text">{t(p.tagline, locale)}</p>

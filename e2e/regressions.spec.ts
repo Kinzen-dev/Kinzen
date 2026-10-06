@@ -32,3 +32,26 @@ test("the phone menu is modal and Esc returns focus to its button", async ({ pag
   await expect(page.getByRole("dialog", { name: "Main" })).toBeHidden();
   await expect(trigger).toBeFocused();
 });
+
+test("a header section link moves keyboard focus into that section", async ({ page, isMobile }) => {
+  test.skip(isMobile, "the desktop header nav is hidden on phones");
+  await page.goto("/");
+  const link = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Contact" });
+  await link.focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#contact$/);
+  await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe("contact");
+  // The next Tab continues inside Contact instead of jumping back to the top of the page.
+  await page.keyboard.press("Tab");
+  expect(await page.evaluate(() => !!document.activeElement?.closest("#contact"))).toBe(true);
+});
+
+test("switching language keeps the reading position", async ({ page, isMobile }) => {
+  test.skip(isMobile, "uses the header switch");
+  await page.goto("/cv");
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await page.waitForTimeout(200);
+  await page.getByRole("link", { name: /TH/ }).first().click();
+  await expect(page).toHaveURL(/\/th\/cv$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(400);
+});

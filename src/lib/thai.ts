@@ -19,8 +19,6 @@
 const WJ = "\u2060";
 const ZWSP = "\u200b";
 const THAI_RUN = /[\u0E00-\u0E7F]+/g;
-/** Marks that belong to the character before them (incl. SARA AM): never put a joiner before these. */
-const COMBINING = /[\u0E31\u0E33-\u0E3A\u0E47-\u0E4E]/;
 
 /** Compounds the dictionary splits; extend when a break shows up in QA. */
 const COMPOUNDS = [
@@ -101,25 +99,18 @@ function atoms(run: string): string[] {
   return out;
 }
 
-function joinInside(atom: string): string {
-  let out = "";
-  for (const ch of atom) out += out && !COMBINING.test(ch) ? WJ + ch : ch;
-  return out;
-}
-
 /**
- * Visible HTML text: joiners ONLY inside known compounds. Everything else is left to the
- * browser's own Thai dictionary: joiners inside ordinary words hide them from that dictionary,
- * leaving too few break points (review round 4: mid-word breaks on every Thai route).
+ * Visible HTML text: returned unchanged, on purpose. Every attempt to steer the browser's Thai
+ * line breaking with U+2060 joiners (whole phrases, then words, then only compounds) made it
+ * worse: any joiner hides the surrounding text from the browser's own Thai dictionary, so it
+ * breaks NEIGHBOURING words mid-syllable ("ขอ|งองค์ประกอบ"), separates SARA AM in fallback fonts,
+ * and leaks into copied text. Native dictionary breaking (what every Thai site gets) is the
+ * best result; an occasional compound split at a line end ("ทันต|กรรม") is the accepted cost.
+ * Kept as a single seam so a future engine feature (e.g. phrase-level breaking for Thai) can
+ * be adopted in one place.
  */
 export function thaiGlue(text: string): string {
-  return text.replace(THAI_RUN, (run) => {
-    let out = run;
-    for (const word of COMPOUNDS) {
-      if (out.includes(word)) out = out.split(word).join(joinInside(word));
-    }
-    return out;
-  });
+  return text;
 }
 
 /** Image text (satori): explicit break opportunities between atoms only. */

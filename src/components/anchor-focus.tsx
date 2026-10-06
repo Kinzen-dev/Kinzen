@@ -9,8 +9,8 @@ import { useEffect } from "react";
  */
 export function AnchorFocus() {
   useEffect(() => {
-    const focusTarget = () => {
-      const id = decodeURIComponent(window.location.hash.slice(1));
+    const focusTarget = (hash: string = window.location.hash) => {
+      const id = decodeURIComponent(hash.slice(1));
       const el = id ? document.getElementById(id) : null;
       if (!el) return;
       if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
@@ -25,12 +25,14 @@ export function AnchorFocus() {
       if (!(a instanceof HTMLAnchorElement)) return;
       const url = new URL(a.href, window.location.href);
       if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || !url.hash) return;
-      window.setTimeout(focusTarget, 0);
+      // Use the link's own hash: next/link updates the URL after this handler runs.
+      window.setTimeout(() => focusTarget(url.hash), 60);
     };
-    window.addEventListener("hashchange", focusTarget);
+    const onHash = () => focusTarget();
+    window.addEventListener("hashchange", onHash);
     document.addEventListener("click", onClick);
     return () => {
-      window.removeEventListener("hashchange", focusTarget);
+      window.removeEventListener("hashchange", onHash);
       document.removeEventListener("click", onClick);
     };
   }, []);
