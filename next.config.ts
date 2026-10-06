@@ -50,7 +50,10 @@ const nextConfig: NextConfig = {
       // every path that is not already Thai is served by the English tree.
       afterFiles: [
         { source: "/", destination: "/en" },
-        { source: "/:path((?!th(?:/|$)|en(?:/|$)|_next/|_vercel/).+)", destination: "/en/:path" },
+        // On Vercel a segment prefetch of "/" is first mapped to /index.segments/...; without this
+        // rule the generic one below sent it to /en/index... (404, home fell back to full loads).
+        { source: "/index", destination: "/en" },
+        { source: "/:path((?!th(?:/|$)|en(?:/|$)|index(?:/|$)|_next/|_vercel/).+)", destination: "/en/:path" },
       ],
       fallback: [],
     };
