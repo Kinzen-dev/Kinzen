@@ -1,0 +1,165 @@
+/* ------------------------------------------------------------------
+   Glass pill navbar (v3). The header is a fixed, click-through strip;
+   only the pill takes input. Symmetric insets: the pill's inline padding
+   equals its block padding, every item is a 36px rounded target.
+   ------------------------------------------------------------------ */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  padding-top: 0.75rem;
+  pointer-events: none;
+}
+.nav-pill {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.375rem;
+  border: 1px solid color-mix(in oklab, var(--rule) 70%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ground) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: var(--shadow-soft);
+  transition:
+    padding var(--dur-3) var(--ease-out),
+    background-color var(--dur-3) var(--ease-out);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .nav-pill {
+    background: var(--ground);
+  }
+}
+/* Over the dark hero (home, before the wordmark passes) the pill is dark glass; it turns light
+   with the page. The header re-declares the tokens (data-scene), so color-scheme flips them. */
+@media (scripting: enabled) {
+  html:has([data-hero-wordmark]):not([data-hero-passed]) .site-header {
+    color-scheme: dark;
+  }
+}
+[data-scene="auto"] {
+  transition: color var(--dur-3) var(--ease-out);
+}
+
+/* The brand slot morphs open (grid 0fr -> 1fr): no empty gap while it is closed. */
+.nav-brand {
+  display: grid;
+  grid-template-columns: 1fr;
+  transition: grid-template-columns var(--dur-3) var(--ease-out);
+}
+.nav-brand > * {
+  min-width: 0;
+  overflow: clip;
+}
+.nav-brand-link {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  padding-inline: 0.875rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  padding-inline: 0.875rem;
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  transition:
+    color var(--dur-2) var(--ease-out),
+    background-color var(--dur-2) var(--ease-out);
+}
+.nav-link:hover {
+  color: var(--ink);
+  background: color-mix(in oklab, var(--ink) 7%, transparent);
+}
+.nav-link[aria-current="page"] {
+  color: var(--ink);
+  background: color-mix(in oklab, var(--gold) 18%, transparent);
+}
+.nav-sep {
+  width: 1px;
+  height: 1.25rem;
+  margin-inline: 0.25rem;
+  background: var(--rule);
+}
+/* Header icon buttons share the pill's 36px round target. */
+.nav-pill :is(button, a).nav-icon {
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+}
+.nav-pill :is(button, a).nav-icon:hover {
+  background: color-mix(in oklab, var(--ink) 7%, transparent);
+}
+
+/* Content starts below the floating pill; the home hero slides up under it instead. */
+main {
+  padding-top: var(--header-h);
+}
+main > [data-hero]:first-child {
+  margin-top: calc(-1 * var(--header-h));
+  padding-top: var(--header-h);
+}
+@media print {
+  .site-header {
+    display: none;
+  }
+  main {
+    padding-top: 0;
+  }
+}
+
+/* ---------- phone menu: bottom sheet ---------- */
+.mobile-nav {
+  margin: auto 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 85dvh;
+  padding: 0;
+  border: 0;
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: var(--ground);
+  color: var(--ink);
+  box-shadow: var(--shadow-lift);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.mobile-nav::backdrop {
+  background: oklch(0.15 0.02 266 / 0.45);
+  backdrop-filter: blur(2px);
+}
+.mobile-nav-handle {
+  display: block;
+  width: 2.5rem;
+  height: 0.3125rem;
+  margin: 0.625rem auto 0;
+  border-radius: 999px;
+  background: var(--rule);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-nav[open] {
+    transition:
+      translate var(--dur-3) var(--ease-out),
+      display var(--dur-3) allow-discrete,
+      overlay var(--dur-3) allow-discrete;
+    translate: 0 0;
+  }
+  @starting-style {
+    .mobile-nav[open] {
+      translate: 0 100%;
+    }
+  }
+  .mobile-nav::backdrop {
+    transition: opacity var(--dur-3) var(--ease-out);
+  }
+  @starting-style {
+    .mobile-nav[open]::backdrop {
+      opacity: 0;
+    }
+  }
+}

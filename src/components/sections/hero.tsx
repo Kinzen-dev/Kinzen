@@ -32,7 +32,13 @@ export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; f
   ];
 
   return (
-    <section id="top" aria-labelledby="hero-title" className="relative isolate overflow-clip" data-hero>
+    <section
+      id="top"
+      aria-labelledby="hero-title"
+      className="relative isolate overflow-clip"
+      data-hero
+      data-scene="dark"
+    >
       {fx}
       <div className="shell relative">
         <p

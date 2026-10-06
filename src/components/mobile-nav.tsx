@@ -35,7 +35,7 @@ export function MobileNav({
           setOpen(true);
         }}
         aria-expanded={open}
-        className="grid size-9 place-items-center text-ink-2 hover:text-ink lg:hidden"
+        className="nav-icon grid text-ink-2 hover:text-ink lg:hidden"
         aria-label={plain(labels.open)}
         aria-haspopup="dialog"
       >
@@ -51,17 +51,15 @@ export function MobileNav({
         </svg>
       </button>
 
-      <dialog
-        ref={ref}
-        aria-label={plain(labels.nav)}
-        className="mobile-nav m-0 h-dvh max-h-none w-full max-w-none border-0 bg-ground p-0 text-ink backdrop:bg-transparent lg:hidden"
-      >
-        <div className="shell flex h-[var(--header-h)] items-center justify-between border-b border-rule">
+      <dialog ref={ref} aria-label={plain(labels.nav)} className="mobile-nav lg:hidden" data-scene="page">
+        {/* Bottom sheet (v3): grab handle, title row, big tap targets, safe-area aware. */}
+        <span aria-hidden="true" className="mobile-nav-handle" />
+        <div className="flex items-center justify-between px-[var(--inset-card)] pt-2 pb-3">
           <span className="font-semibold tracking-[-0.02em]">KINZEN</span>
           <button
             type="button"
             onClick={() => ref.current?.close()}
-            className="grid size-9 place-items-center text-ink-2 hover:text-ink"
+            className="grid size-11 place-items-center rounded-full text-ink-2 hover:text-ink"
             aria-label={plain(labels.close)}
           >
             <svg
@@ -76,7 +74,10 @@ export function MobileNav({
             </svg>
           </button>
         </div>
-        <nav aria-label={plain(labels.nav)} className="shell">
+        <nav
+          aria-label={plain(labels.nav)}
+          className="px-[var(--inset-card)] pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+        >
           <ul>
             {items.map((item) => (
               <li key={item.href} className="border-b border-rule">

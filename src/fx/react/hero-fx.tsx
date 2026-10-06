@@ -26,8 +26,14 @@ type IdleWindow = Window & {
   __kzFxGate?: () => boolean;
 };
 
-/** The theme the page shows: a pinned html[data-theme], otherwise the system scheme. */
+/**
+ * Is the hero on a dark ground? Since v3 the hero is a dark scene (data-scene="dark") in both
+ * themes, so this is true whenever that scene is in place; the check stays so a light hero would
+ * still keep the crisp DOM wordmark.
+ */
 function isDark(): boolean {
+  const hero = document.querySelector("[data-hero]");
+  if (hero?.closest('[data-scene="dark"]')) return true;
   const pinned = document.documentElement.dataset.theme;
   if (pinned === "light" || pinned === "dark") return pinned === "dark";
   return matchMedia("(prefers-color-scheme: dark)").matches;

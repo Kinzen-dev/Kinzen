@@ -12,6 +12,7 @@ import { HomeLink } from "./home-link";
 import { AnchorFocus } from "./anchor-focus";
 import { PlainCopy } from "./plain-copy";
 import { plain } from "@/lib/thai";
+import "./site-header.css";
 
 export function navItems(locale: Locale, dict: Dictionary) {
   const home = localePath(locale, "/");
@@ -31,50 +32,54 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
   const items = navItems(locale, dict);
 
   return (
-    <header data-site-header className="sticky top-0 z-40 border-b border-rule bg-ground">
-      <div className="shell flex h-[var(--header-h)] items-center gap-6">
-        <HomeLink
-          href={localePath(locale, "/")}
-          className="mr-auto flex items-baseline gap-2 font-semibold tracking-[-0.02em]"
-          label={plain(dict.a11y.home)}
-        >
-          <span data-masthead-mark className="text-[1.0625rem]">
-            KINZEN
-          </span>
-          <span data-masthead-name className="hidden text-sm font-normal text-ink-3 sm:inline">
-            Kittipong Khonthong
-          </span>
-        </HomeLink>
+    <header data-site-header data-scene="auto" className="site-header">
+      <div className="shell flex justify-center">
+        {/* Glass pill (v3): floats over every scene, morphs when the brand slides in. */}
+        <div className="nav-pill">
+          <div className="nav-brand">
+            {/* The grid item is this padding-free wrapper, so a closed slot is truly 0px wide. */}
+            <div>
+              <HomeLink
+                href={localePath(locale, "/")}
+                className="nav-brand-link font-semibold tracking-[-0.02em]"
+                label={plain(dict.a11y.home)}
+              >
+                <span data-masthead-mark className="text-[1.0625rem]">
+                  KINZEN
+                </span>
+              </HomeLink>
+            </div>
+          </div>
 
-        <nav aria-label={plain(dict.a11y.mainNav)} className="hidden lg:block">
-          <ul className="flex items-center gap-6 text-sm">
-            {items.map((item) => (
-              <li key={item.href}>
-                <NavLink
-                  href={item.href}
-                  className="text-ink-2 transition-colors duration-200 hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-gold aria-[current=page]:underline-offset-[0.4em]"
-                >
-                  {item.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
+          <nav aria-label={plain(dict.a11y.mainNav)} className="hidden lg:block">
+            <ul className="flex items-center">
+              {items.map((item) => (
+                <li key={item.href}>
+                  <NavLink href={item.href} className="nav-link">
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        <div className="flex items-center gap-2">
-          <LanguageSwitch locale={locale} labels={dict.language} label={dict.a11y.languageSwitch} />
-          <ThemeToggle
-            labels={{ toggle: dict.a11y.themeToggle, light: dict.a11y.themeLight, dark: dict.a11y.themeDark }}
-          />
-          <CommandPalette data={paletteData(locale, dict)} />
-          {/* Site-wide entrance motion; renders nothing. Lives here so every page gets it. */}
-          <RevealLayer />
-          <AnchorFocus />
-          <PlainCopy />
-          <MobileNav
-            items={items}
-            labels={{ open: dict.a11y.openMenu, close: dict.a11y.close, nav: dict.a11y.mainNav }}
-          />
+          <span aria-hidden="true" className="nav-sep hidden lg:block" />
+
+          <div className="flex items-center gap-1">
+            <LanguageSwitch locale={locale} labels={dict.language} label={dict.a11y.languageSwitch} />
+            <ThemeToggle
+              labels={{ toggle: dict.a11y.themeToggle, light: dict.a11y.themeLight, dark: dict.a11y.themeDark }}
+            />
+            <CommandPalette data={paletteData(locale, dict)} />
+            {/* Site-wide entrance motion; renders nothing. Lives here so every page gets it. */}
+            <RevealLayer />
+            <AnchorFocus />
+            <PlainCopy />
+            <MobileNav
+              items={items}
+              labels={{ open: dict.a11y.openMenu, close: dict.a11y.close, nav: dict.a11y.mainNav }}
+            />
+          </div>
         </div>
       </div>
     </header>

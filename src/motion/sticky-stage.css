@@ -1,0 +1,31 @@
+/* Track length = steps x vh viewport heights; the stage sticks for all of it. Reduced motion =
+   normal flow, full height, every step visible. */
+.sticky-track {
+  position: relative;
+  height: calc(var(--steps) * var(--vh) * 1svh);
+}
+.sticky-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: clip;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sticky-track {
+    height: auto;
+  }
+  .sticky-track > .sticky-stage {
+    position: relative;
+    height: auto;
+    overflow: visible;
+  }
+}
+@media print {
+  .sticky-track {
+    height: auto !important;
+  }
+  .sticky-stage {
+    position: relative !important;
+    height: auto !important;
+  }
+}
