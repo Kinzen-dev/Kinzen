@@ -21,18 +21,34 @@ export function MastheadSync() {
     const root = document.documentElement;
     const header = document.querySelector<HTMLElement>("[data-site-header]");
     const top = Math.round(header?.getBoundingClientRect().height ?? 56);
+    const apply = (passed: boolean) => {
+      if (passed) root.dataset.heroPassed = "";
+      else delete root.dataset.heroPassed;
+    };
     const io = new IntersectionObserver(
       ([en]) => {
         if (!en) return;
-        const passed = !en.isIntersecting || en.intersectionRatio < HANDOFF_RATIO;
-        if (passed) root.dataset.heroPassed = "";
-        else delete root.dataset.heroPassed;
+        apply(!en.isIntersecting || en.intersectionRatio < HANDOFF_RATIO);
       },
       { rootMargin: `-${top}px 0px 0px 0px`, threshold: [0, HANDOFF_RATIO] },
     );
     io.observe(el);
+    // Backstop: re-measure after scrolling settles. Under heavy load an observer callback can
+    // arrive late or be coalesced; the state must still end up right.
+    let settle = 0;
+    const onScroll = () => {
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        const r = el.getBoundingClientRect();
+        const visible = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, top));
+        apply(r.height === 0 || visible / r.height < HANDOFF_RATIO);
+      }, 120);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(settle);
       delete root.dataset.heroPassed;
     };
   }, []);
