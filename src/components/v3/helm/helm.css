@@ -616,7 +616,7 @@
 }
 /* Sable lights up when the note lands. */
 .helm-stage[data-step="3"] .hw-pane[data-pane="sable"] {
-  animation: hw-ring 1.4s var(--hw-ease) 1.35s 2 both;
+  animation: hw-ring 1.4s var(--hw-ease) 2.3s 2 both;
 }
 .helm-stage[data-step="4"] .hw-pane {
   border-color: color-mix(in oklch, var(--hw-green) 45%, var(--hw-line));
@@ -832,7 +832,7 @@
   rotate: -4deg;
 }
 .helm-stage[data-step="3"] .hw-note {
-  animation: hw-fly 1.5s var(--hw-ease) 0.15s both;
+  animation: hw-fly 1.5s var(--hw-ease) 0.95s both;
 }
 .hw-note-route {
   font-family: var(--font-mono);

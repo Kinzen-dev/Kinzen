@@ -74,9 +74,13 @@ const PANES: Pane[] = [
   },
 ];
 
-/** Lines of one step type one after another inside a pane; each step starts its own clock. */
+/**
+ * Lines of one step type one after another inside a pane; each step starts its own clock. Step 3
+ * is the hand-off: Atlas types its note first, the note flies (helm.css hw-fly, 0.95s + 1.5s), and
+ * Sable prints it once it lands.
+ */
 function timeLines(pane: Pane, index: number) {
-  const clock: Record<number, number> = { 2: 260 + index * 180, 3: 1500, 4: 120 + index * 140 };
+  const clock: Record<number, number> = { 2: 260 + index * 180, 3: index === 0 ? 120 : 2500, 4: 120 + index * 140 };
   return pane.lines.map((line) => {
     const chars = [...line.text].length;
     const dur = chars * pane.pace;

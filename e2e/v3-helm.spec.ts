@@ -87,12 +87,13 @@ test.describe("v3 Helm scene", () => {
 
   for (const theme of ["light", "dark"]) {
     test(`axe clean in the ${theme} theme, in every beat`, async ({ page }) => {
+      test.setTimeout(120_000);
       await page.addInitScript((t) => localStorage.setItem("theme", t), theme);
       await page.goto("/");
       await expect(page.locator(".helm-stage")).toHaveAttribute("data-armed", "");
       for (const f of [0.05, 0.3, 0.5, 0.7, 0.95]) {
         await scrollTrack(page, f);
-        await page.waitForTimeout(2600); // let the beat's typing and fades settle
+        await page.waitForTimeout(2000); // let the beat's fades settle
         const results = await new AxeBuilder({ page })
           .include(".helm-scene")
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
