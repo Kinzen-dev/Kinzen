@@ -50,13 +50,22 @@ export interface LedgerLabels {
   details: string;
 }
 
-export function yearLabel(p: Project, dict: Dictionary) {
-  const start = p.period.start.slice(0, 4);
-  const end = p.period.end;
-  if (!end) return start;
-  if (end === "present") return `${start} → ${dict.ledger.present}`;
-  const endYear = end.slice(0, 4);
-  return endYear === start ? start : `${start} → ${endYear}`;
+/** "May 2026 → present", "Jul → Aug 2026", "Jul 2026": months make the Year sort legible. */
+export function yearLabel(p: Project, dict: Dictionary, locale: Locale = "en") {
+  const fmt = (ym: string, withYear = true) => {
+    const [y, m] = ym.split("-").map(Number);
+    return new Intl.DateTimeFormat(locale === "th" ? "th-TH-u-ca-gregory" : "en-GB", {
+      month: "short",
+      ...(withYear ? { year: "numeric" } : {}),
+      timeZone: "UTC",
+    }).format(Date.UTC(y, m - 1, 1));
+  };
+  const { start, end } = p.period;
+  if (!end) return fmt(start);
+  if (end === "present") return `${fmt(start)} → ${dict.ledger.present}`;
+  if (end === start) return fmt(start);
+  if (end.slice(0, 4) === start.slice(0, 4)) return `${fmt(start, false)} → ${fmt(end)}`;
+  return `${fmt(start)} → ${fmt(end)}`;
 }
 
 export const isLive = (status: Project["status"]) => status === "live" || status === "in-production";
@@ -74,7 +83,7 @@ export function ledgerRows(locale: Locale, dict: Dictionary): LedgerRow[] {
     area: p.area,
     areaLabel: dict.areas[p.area],
     stack: p.stack,
-    year: yearLabel(p, dict),
+    year: yearLabel(p, dict, locale),
     start: p.period.start,
     recency: `${p.period.end === "present" ? "9999-12" : (p.period.end ?? p.period.start)}|${p.period.start}`,
     status: p.status,

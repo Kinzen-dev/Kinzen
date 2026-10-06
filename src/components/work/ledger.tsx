@@ -282,7 +282,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                           }}
                           type="button"
                           className="ledger-name"
-                          tabIndex={shown && row.id === activeId ? 0 : -1}
+                          tabIndex={shown ? 0 : -1}
                           aria-expanded={open}
                           aria-controls={open ? panelId : undefined}
                           onClick={() => toggle(row.id)}

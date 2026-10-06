@@ -23,8 +23,8 @@ test.describe("works ledger", () => {
     const count = await buttons.count();
     expect(count).toBeGreaterThan(2);
 
-    // Roving tabindex: exactly one row is in the tab order.
-    await expect(page.locator('#work tbody th button[tabindex="0"]')).toHaveCount(1);
+    // Every visible row is reachable with Tab (arrows are a shortcut, not the only way).
+    await expect(page.locator('#work tbody th button[tabindex="0"]')).toHaveCount(count);
 
     await buttons.first().focus();
     await page.keyboard.press("ArrowDown");

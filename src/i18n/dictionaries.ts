@@ -28,7 +28,7 @@ const en = {
   nav: {
     work: "Work",
     experience: "Experience",
-    practice: "Practice",
+    practice: "How I work",
     about: "About",
     contact: "Contact",
     cv: "CV",
@@ -53,7 +53,7 @@ const en = {
   },
   sections: {
     work: "Selected systems",
-    workIntro: "The things I have built and still stand behind. Open a row for outcomes, stack and links.",
+    workIntro: "The things I have built and still stand behind. Open a row for outcomes and stack.",
     experience: "Experience",
     practice: "How I work",
     practiceIntro: "I run AI coding agents like a team. The rules that matter live in code and tests, not in prompts.",
@@ -289,7 +289,7 @@ const th: Dictionary = {
   },
   sections: {
     work: "ระบบที่คัดมา",
-    workIntro: "งานที่ผมสร้างและยังยืนยันได้เต็มปาก กดเปิดแต่ละแถวเพื่อดูผลลัพธ์ stack และลิงก์",
+    workIntro: "งานที่ผมสร้างและยังยืนยันได้เต็มปาก กดเปิดแต่ละแถวเพื่อดูผลลัพธ์และ stack",
     experience: "ประสบการณ์",
     practice: "วิธีทำงานของผม",
     practiceIntro: "ผมให้ AI agent เขียนโค้ดทำงานกันเป็นทีม กฎที่สำคัญอยู่ในโค้ดและเทสต์ ไม่ใช่ใน prompt",

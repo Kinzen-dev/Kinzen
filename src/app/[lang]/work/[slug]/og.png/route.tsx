@@ -28,7 +28,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/[lang]/w
     path: localePath(locale, `/work/${project.slug}`),
     status: dict.status[project.status],
     live: isLive(project.status),
-    period: yearLabel(project, dict),
+    period: yearLabel(project, dict, locale),
     drawing: getPlateSpec(project.id)?.drawing,
   });
 }
