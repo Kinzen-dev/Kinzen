@@ -1,0 +1,223 @@
+/* ------------------------------------------------------------------
+   Contact (v3): the closing dark scene card.
+   ------------------------------------------------------------------ */
+.contact-card {
+  position: relative;
+  padding: clamp(1.5rem, 0.6rem + 4vw, 5rem);
+  /* A low gold glow in one corner, so the navy is not a flat slab. */
+  background:
+    radial-gradient(60% 70% at 100% 0%, color-mix(in oklch, var(--gold) 13%, transparent), transparent 70%),
+    radial-gradient(50% 60% at 0% 100%, color-mix(in oklch, var(--pastel-tools) 30%, transparent), transparent 70%),
+    var(--ground);
+}
+.contact-grid {
+  display: grid;
+  gap: clamp(2.5rem, 2rem + 2vw, 4rem);
+}
+@media (min-width: 64rem) {
+  .contact-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(2.5rem, 4vw, 5rem);
+    align-items: start;
+  }
+}
+
+.contact-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ink-2);
+}
+.contact-live {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--gold);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .contact-live {
+    animation: contact-live 2.4s var(--ease-out) infinite;
+  }
+}
+@keyframes contact-live {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--gold) 60%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 0.5rem color-mix(in oklch, var(--gold) 0%, transparent);
+  }
+}
+
+.contact-heading {
+  margin-top: 1.25rem;
+  max-width: 14ch;
+  font-size: clamp(2.5rem, 1.2rem + 4.6vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+:lang(th) .contact-heading {
+  max-width: 16ch;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.kin-unit {
+  display: inline-block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-reveal-ready] .kinetic:not([data-on]) .kin-unit {
+    opacity: 0;
+    filter: blur(12px);
+    translate: 0 0.35em;
+  }
+  .kinetic[data-on] .kin-unit {
+    transition:
+      opacity 760ms var(--ease-out) calc(var(--i) * 85ms),
+      filter 760ms var(--ease-out) calc(var(--i) * 85ms),
+      translate 760ms var(--ease-out) calc(var(--i) * 85ms);
+  }
+}
+
+.contact-email {
+  width: fit-content;
+  max-width: 100%;
+  font-size: clamp(1.375rem, 1rem + 1.6vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+  text-decoration-thickness: 2px;
+}
+
+/* Buttons: one inset (--inset-btn), 44px high, pill. */
+.contact-btn,
+.contact-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
+}
+.contact-btn {
+  border: 1px solid var(--rule);
+}
+.contact-btn:hover {
+  border-color: var(--rule-strong);
+}
+/* Primary: a gold pill with the beam running round it. */
+.contact-cta {
+  height: 3rem;
+  background: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 600;
+  box-shadow: 0 10px 30px -12px color-mix(in oklch, var(--gold) 70%, transparent);
+}
+.contact-cta.beam::before {
+  inset: -3px;
+  padding: 2px;
+  background: conic-gradient(from var(--beam), transparent 0 62%, var(--ink) 80%, transparent 100%);
+}
+.contact-cta:hover {
+  background: color-mix(in oklch, var(--gold) 88%, var(--ink));
+}
+.contact-cta svg {
+  transition: translate var(--dur-2) var(--ease-out);
+}
+.contact-cta:hover svg {
+  translate: 3px 0;
+}
+
+.contact-side {
+  display: grid;
+  gap: 0.75rem;
+}
+.contact-plane {
+  margin-bottom: 1rem;
+  color: var(--gold);
+}
+.contact-doors {
+  display: grid;
+  gap: 0.75rem;
+}
+@media (min-width: 48rem) {
+  .contact-doors {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64rem) {
+  .contact-doors {
+    grid-column: 1 / -1;
+    gap: 1rem;
+  }
+}
+.contact-door,
+.contact-clock {
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--surface) 70%, transparent);
+}
+.contact-clock-digits {
+  margin-top: 0.75rem;
+  font-size: clamp(3rem, 2.2rem + 3vw, 4.75rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.contact-clock-digits [data-pending] {
+  opacity: 0.35;
+}
+.odometer-sep {
+  padding-inline: 0.04em;
+  color: var(--gold);
+}
+
+/* The paper plane flies its dashed path as the card scrolls in: a soft-edged mask sweeps from
+   the envelope to the temple. Scroll-driven (no JS); without scroll timelines or with reduced
+   motion the whole drawing is simply there. */
+@property --plane {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .contact-plane {
+      --plane: 0;
+      mask-image: linear-gradient(
+        90deg,
+        #000 calc(var(--plane) * 130% - 30%),
+        transparent calc(var(--plane) * 130%)
+      );
+      animation: contact-plane linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 50%;
+    }
+  }
+}
+@keyframes contact-plane {
+  from {
+    --plane: 0;
+  }
+  to {
+    --plane: 1;
+  }
+}
+
+@media print {
+  .contact-card {
+    background: none;
+    padding: 0;
+  }
+  .contact-plane {
+    display: none;
+  }
+}
