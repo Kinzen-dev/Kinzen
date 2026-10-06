@@ -16,6 +16,9 @@ export function loadMotion(): Promise<Motion> {
     const gsap = g.gsap;
     const ScrollTrigger = st.ScrollTrigger;
     gsap.registerPlugin(ScrollTrigger);
+    // Phones: the address bar showing/hiding resizes the viewport; do not re-measure every scene
+    // for that (it jitters sticky stages). Real resizes and orientation changes still refresh.
+    ScrollTrigger.config({ ignoreMobileResize: true });
     // Fonts change line heights: measure again once they are in, so pinned/scrubbed scenes
     // start and end where the visitor sees them.
     if (typeof document !== "undefined" && document.fonts?.ready) {

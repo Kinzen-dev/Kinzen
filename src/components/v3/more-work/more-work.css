@@ -1,0 +1,368 @@
+/* v3 project cards (ticket v3-06): pastel cards, bento on desktop, carousel on phones. */
+
+/* ---------- layout ---------- */
+.mw-grid {
+  display: grid;
+  gap: clamp(1rem, 0.5rem + 1.2vw, 1.5rem);
+  list-style: none;
+}
+.mw-slot {
+  display: flex;
+  min-width: 0;
+}
+
+/* Phones: one row that scrolls sideways, bleeding to the screen edges; the next card peeks. */
+@media (max-width: 47.999rem) {
+  .mw-grid {
+    display: flex;
+    gap: 0.75rem;
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 0.25rem var(--gutter) 1.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .mw-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .mw-slot {
+    flex: 0 0 min(84%, 22rem);
+    scroll-snap-align: start;
+  }
+}
+@media (min-width: 48rem) {
+  .mw-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* Desktop: a staggered bento, rows alternate 7/5 and 5/7. */
+@media (min-width: 64rem) {
+  .mw-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .mw-slot {
+    grid-column: span 5;
+  }
+  .mw-slot[data-wide] {
+    grid-column: span 7;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .mw-deck[data-scatter] .mw-card {
+      will-change: transform;
+    }
+  }
+}
+
+/* ---------- card ---------- */
+.mw-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: var(--radius-card);
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  box-shadow: var(--shadow-soft);
+  transition:
+    translate var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .mw-card:hover {
+    translate: 0 -6px;
+    box-shadow: var(--shadow-lift);
+  }
+}
+/* The link covers the card; the ring goes round the whole card. */
+.mw-card:has(.mw-link:focus-visible) {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+.mw-link:focus-visible {
+  outline: none;
+}
+.mw-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* Art stage: the scene sits on a soft paper disc, same height in every card of a row. */
+.mw-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: clamp(10.5rem, 6rem + 10vw, 16rem);
+  margin: var(--inset-card) var(--inset-card) 0;
+  border-radius: calc(var(--radius-card) - 0.5rem);
+  /* Paper light behind the ink: lifts the pastel in the light theme, a faint glow in the dark. */
+  background: radial-gradient(
+    60% 70% at 50% 55%,
+    light-dark(oklch(1 0 0 / 0.55), oklch(1 0 0 / 0.07)),
+    transparent 72%
+  );
+}
+.mw-art-ink {
+  height: 88%;
+  max-width: 92%;
+  color: var(--pastel-ink);
+}
+
+.mw-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: var(--inset-card);
+}
+
+.mw-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+.mw-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding-inline: 0.75rem;
+  border: 1px solid color-mix(in oklch, var(--pastel-ink) 22%, transparent);
+  border-radius: 999px;
+}
+.mw-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+.mw-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+.mw-dot[data-live] {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--gold) 28%, transparent);
+}
+.mw-year {
+  white-space: nowrap;
+}
+/* From tablet up the year sits at the far end of the line; on phones it wraps in line. */
+@media (min-width: 48rem) {
+  .mw-year {
+    margin-inline-start: auto;
+  }
+}
+
+.mw-name {
+  margin-top: 0.25rem;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+:lang(th) .mw-name {
+  line-height: 1.3;
+}
+.mw-tagline {
+  max-width: 46ch;
+  font-size: var(--text-sm);
+  color: color-mix(in oklch, var(--pastel-ink) 80%, var(--pastel));
+}
+.mw-go {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in oklch, var(--pastel-ink) 30%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color var(--dur-2) var(--ease-out);
+}
+.mw-arrow {
+  display: inline-block;
+  margin-inline-start: 0.35em;
+  transition: translate var(--dur-2) var(--ease-out);
+}
+.mw-card:hover .mw-go {
+  text-decoration-color: var(--gold);
+}
+.mw-card:hover .mw-arrow {
+  translate: 4px 0;
+}
+
+/* ---------- carousel dots (phones only) ---------- */
+.mw-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+@media (min-width: 48rem) {
+  .mw-dots {
+    display: none;
+  }
+}
+.mw-dot-btn {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+/* Dot, or a gold pill for the card on screen (a hard swap: nothing to lay out mid-scroll). */
+.mw-dot-btn > span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--ink-3);
+}
+.mw-dot-btn[aria-current] > span {
+  width: 1.5rem;
+  background: var(--gold);
+}
+
+/* ---------- home sub-header ---------- */
+.mw-head {
+  display: grid;
+  gap: 1rem 1.5rem;
+  align-items: end;
+  padding-bottom: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+}
+@media (min-width: 48rem) {
+  .mw-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+.mw-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: var(--text-xl--line-height);
+  letter-spacing: -0.035em;
+}
+.mw-intro {
+  max-width: 46ch;
+  margin-top: 0.75rem;
+  color: var(--ink-2);
+}
+.mw-all-wrap {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+}
+@media (min-width: 48rem) {
+  .mw-all-wrap {
+    justify-items: end;
+    text-align: end;
+  }
+}
+.mw-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
+}
+.mw-all:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+.mw-all .mw-arrow {
+  margin-inline-start: 0;
+  color: var(--gold);
+}
+.mw-all:hover .mw-arrow {
+  translate: 4px 0;
+}
+
+/* ---------- /work index page header ---------- */
+.wi-head {
+  display: grid;
+  gap: 1.5rem;
+  padding-block: 1.25rem clamp(2rem, 1rem + 3vw, 3.5rem);
+  border-top: 1px solid var(--rule-strong);
+}
+@media (min-width: 48rem) {
+  .wi-head {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+  .wi-title-col {
+    grid-column: span 7;
+  }
+  .wi-intro {
+    grid-column: 8 / span 5;
+    align-self: end;
+  }
+}
+.wi-title {
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl--line-height);
+  letter-spacing: -0.045em;
+}
+:lang(th) .wi-title {
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+.wi-title-word {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.18em;
+}
+.wi-underline {
+  position: absolute;
+  inset: auto 0 -0.06em;
+  width: 100%;
+  height: 0.24em;
+  color: var(--gold);
+  overflow: visible;
+}
+.wi-areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  list-style: none;
+}
+.wi-area {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.4rem var(--inset-pill);
+  border-radius: 999px;
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.wi-area-count {
+  font-size: var(--text-xs);
+  opacity: 0.75;
+}
+.wi-intro {
+  max-width: 46ch;
+  color: var(--ink-2);
+}
