@@ -1,0 +1,90 @@
+/* ------------------------------------------------------------------
+   Hero particle field. The stage box covers the wordmark band of the hero
+   (the wordmark is about 0.82em of its own font size tall, plus its top
+   padding); the extra room below is where the dust halo and the burst live.
+   The font-size term mirrors .hero-wordmark in globals.css. If that changes,
+   only the clip area drifts: targets are always measured from the DOM.
+   ------------------------------------------------------------------ */
+.fx-stage {
+  --fx-fs: calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24);
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: max(16rem, calc(clamp(1.5rem, 5vh, 4rem) + 1.05 * var(--fx-fs)));
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Opaque and ground-coloured once drawn; hidden until the first frame so it never flashes black. */
+.fx-host {
+  position: absolute;
+  inset: 0;
+}
+.fx-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.fx-stage[data-ready] .fx-canvas {
+  opacity: 1;
+}
+
+/* The server-rendered wordmark hands over to the particles once they have settled under it.
+   It stays in the DOM (and stays the LCP element); only its opacity changes. */
+[data-hero-wordmark] {
+  transition: opacity var(--dur-4) var(--ease-out);
+}
+[data-hero][data-fx="on"] [data-hero-wordmark] {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------------
+   Masthead hand-off. On the home page the header's KINZEN mark is the
+   resting place of the name: while the hero wordmark is on screen the mark
+   waits, scaled up and transparent; as the wordmark leaves under the header
+   the mark compresses into the strip. Scroll-driven, never scroll-jacked;
+   without support (or with reduced motion) the mark simply sits there.
+   ------------------------------------------------------------------ */
+@supports (animation-timeline: view()) and (timeline-scope: --a) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:has([data-hero-wordmark]) {
+      timeline-scope: --kz-hero;
+    }
+    [data-hero-wordmark] {
+      view-timeline: --kz-hero block;
+      view-timeline-inset: var(--header-h) 0;
+    }
+    html:has([data-hero-wordmark]) [data-masthead-mark] {
+      display: inline-block;
+      transform-origin: 0 75%;
+      animation: kz-masthead linear both;
+      animation-timeline: --kz-hero;
+      animation-range: exit 35% exit 100%;
+    }
+    html:has([data-hero-wordmark]) [data-masthead-name] {
+      animation: kz-masthead-name linear both;
+      animation-timeline: --kz-hero;
+      animation-range: exit 70% exit 100%;
+    }
+  }
+}
+
+@keyframes kz-masthead {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em) scale(1.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes kz-masthead-name {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
