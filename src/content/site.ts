@@ -1,12 +1,12 @@
 import "server-only";
-import { siteContent, type SiteContent } from "./schema";
+import { siteContent, type SiteContent, type SiteContentInput } from "./schema";
 
 /**
  * Every public claim below is cleared in the private claims ledger
  * (kittipong-resume/content/CLAIMS.md, resume v1.5). Do not add a number,
  * client name or outcome here without a ledger row; `provenance` points at it.
  */
-const content: SiteContent = {
+const content: SiteContentInput = {
   meta: { updated: "2026-10", claimsLedger: "kittipong-resume/content/CLAIMS.md (v1.5)" },
 
   profile: {
@@ -241,6 +241,7 @@ const content: SiteContent = {
         th: "ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมกฎความปลอดภัยทางคลินิกที่เขียนเป็นโค้ด",
       },
       kind: "product",
+      area: "ai",
       status: "in-production",
       period: { start: "2026-05", end: "present" },
       role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
@@ -319,6 +320,7 @@ const content: SiteContent = {
         th: "พื้นที่ทำงานบน macOS ที่ให้ agent อย่าง Claude Code, Codex, Kimi และ Cursor ทำงานเคียงข้างกัน",
       },
       kind: "internal-tool",
+      area: "tools",
       status: "internal",
       period: { start: "2026-07", end: "present" },
       role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
@@ -347,6 +349,7 @@ const content: SiteContent = {
         th: "โรงเล่น: เกมปาร์ตี้แบบใช้เสียง เล่นได้ 2 ถึง 8 คน ทั้งบนเครื่องเดียวหรือในห้องออนไลน์",
       },
       kind: "side-project",
+      area: "games",
       status: "live",
       period: { start: "2026-08", end: "2026-08" },
       role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
@@ -374,6 +377,7 @@ const content: SiteContent = {
         th: "ระบบตรวจ UI ด้วย Playwright ตรวจทั้งตำแหน่งองค์ประกอบ ไล่กดทุกปุ่ม และให้ AI ที่ไม่เห็นงานมาก่อนช่วยตรวจซ้ำ",
       },
       kind: "internal-tool",
+      area: "tools",
       status: "internal",
       period: { start: "2026-07" },
       role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
@@ -401,6 +405,7 @@ const content: SiteContent = {
         th: "แอปพิมพ์ด้วยเสียงบน macOS: หน้าตา native บนแถบเมนู ทำงานบนเอนจินแปลงเสียงเป็นข้อความแบบเรียลไทม์",
       },
       kind: "internal-tool",
+      area: "tools",
       status: "internal",
       period: { start: "2026-07", end: "2026-08" },
       role: { en: "Solo build", th: "ทำคนเดียวทั้งระบบ" },
@@ -506,8 +511,8 @@ const content: SiteContent = {
     visibility: "public",
     lines: [
       {
-        en: "Off the clock: Manchester United, cars built for both looks and pace, and a long queue of games.",
-        th: "นอกเวลางาน: แมนเชสเตอร์ ยูไนเต็ด รถที่ทั้งสวยและแรง และเกมที่รอคิวเล่นอีกยาว",
+        en: "Manchester United, cars built for both looks and pace, and a long queue of games.",
+        th: "แมนเชสเตอร์ ยูไนเต็ด รถที่ทั้งสวยและแรง และเกมที่รอคิวเล่นอีกยาว",
       },
     ],
   },

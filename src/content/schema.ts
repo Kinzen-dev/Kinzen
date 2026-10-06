@@ -102,6 +102,7 @@ export const project = z.object({
   name: nonEmpty,
   tagline: localized,
   kind: z.enum(["product", "internal-tool", "side-project"]),
+  area: z.enum(["ai", "commerce", "tools", "games"]),
   status: z.enum(["live", "internal", "in-production", "archived"]),
   period: z.object({ start: yearMonth, end: z.union([yearMonth, z.literal("present")]).optional() }),
   role: localized,
@@ -111,7 +112,9 @@ export const project = z.object({
   experienceId: z.string().optional(),
   confidentiality: z.enum(["C0-public-artifact", "C1-description-only", "C2-bounded", "C3-private"]),
   featured: z.boolean(),
+  /** Long-form write-up; ships only when `caseStudyVisibility` is public. */
   caseStudy: caseStudy.optional(),
+  caseStudyVisibility: visibility.default("hidden"),
   visibility,
 });
 export type Project = z.infer<typeof project>;
@@ -165,3 +168,4 @@ export const siteContent = z
     }
   });
 export type SiteContent = z.infer<typeof siteContent>;
+export type SiteContentInput = z.input<typeof siteContent>;

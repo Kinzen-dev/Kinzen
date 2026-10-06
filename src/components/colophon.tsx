@@ -22,7 +22,7 @@ export function Colophon({ locale, dict }: { locale: Locale; dict: Dictionary })
   const [weight, setWeight] = useState<number | null>(null);
   const commit = process.env.NEXT_PUBLIC_BUILD_COMMIT ?? "local";
   const built = BUILT;
-  const builtLabel = new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-GB", {
+  const builtLabel = new Intl.DateTimeFormat(locale === "th" ? "th-TH-u-ca-gregory" : "en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
