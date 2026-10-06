@@ -306,7 +306,7 @@ const th: Dictionary = {
     caption: "ระบบที่ผมสร้าง เรียงตามชื่อหรือปีได้",
     name: "ระบบ",
     area: "ด้าน",
-    stack: "Stack",
+    stack: "เครื่องมือ",
     year: "ปี",
     status: "สถานะ",
     sortBy: "เรียงตาม",
@@ -327,7 +327,7 @@ const th: Dictionary = {
     delivered: "ส่งมอบแล้ว",
     archived: "เก็บถาวร",
   },
-  experience: { present: "ปัจจุบัน", stack: "Stack" },
+  experience: { present: "ปัจจุบัน", stack: "เครื่องมือที่ใช้" },
   contact: {
     heading: "มีระบบที่ต้องทำงานได้จริงไหม",
     body: "อีเมลคือทางที่ติดต่อผมได้เร็วที่สุด ผมอ่านทุกฉบับและตอบเอง",
@@ -350,7 +350,7 @@ const th: Dictionary = {
   project: {
     back: "ผลงานทั้งหมด",
     period: "ช่วงเวลา",
-    stack: "Stack",
+    stack: "เครื่องมือที่ใช้",
     role: "บทบาท",
     outcomes: "ผลลัพธ์",
     links: "ลิงก์",

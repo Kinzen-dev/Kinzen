@@ -82,7 +82,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
   const [sort, setSort] = useState<Sort>(null);
   const [filter, setFilter] = useState<LedgerRow["area"] | "all">("all");
   const [openId, setOpenId] = useState<string | null>(null);
-  const [focusId, setFocusId] = useState<string | null>(null);
+  const [, setFocusId] = useState<string | null>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement>());
 
   // Coming Back from a project page should look exactly as the visitor left it:
@@ -125,7 +125,6 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
 
   const sorted = useMemo(() => sortRows(rows, sort), [rows, sort]);
   const shownIds = sorted.filter((r) => filter === "all" || r.area === filter).map((r) => r.id);
-  const activeId = focusId && shownIds.includes(focusId) ? focusId : shownIds[0];
 
   const focusRow = (id: string | undefined) => {
     if (!id) return;

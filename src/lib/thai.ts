@@ -10,16 +10,17 @@
  * Gluing whole phrases was tried and rejected: a phrase wider than its line forced
  * emergency breaks in the middle of words (review round 3).
  * Then:
- * - `thaiGlue` (HTML) puts U+2060 WORD JOINER inside every atom, which every engine
- *   honours as "no break here";
+ * - `thaiGlue` (HTML) puts U+2060 WORD JOINER inside known compounds only, which every
+ *   engine honours as "no break here"; ordinary words are left to the browser's dictionary;
  * - `thaiBreaks` (OG images, where satori has no Thai dictionary) puts U+200B between
  *   atoms, so the card wraps only where the page would.
  * Use `thaiGlue` only for VISIBLE text. Metadata, aria values and images get plain text.
  */
-const WJ = "⁠";
-const ZWSP = "​";
-const THAI_RUN = /[฀-๿]+/g;
-const COMBINING = /[ัิ-ฺ็-๎]/;
+const WJ = "\u2060";
+const ZWSP = "\u200b";
+const THAI_RUN = /[\u0E00-\u0E7F]+/g;
+/** Marks that belong to the character before them (incl. SARA AM): never put a joiner before these. */
+const COMBINING = /[\u0E31\u0E33-\u0E3A\u0E47-\u0E4E]/;
 
 /** Compounds the dictionary splits; extend when a break shows up in QA. */
 const COMPOUNDS = [
@@ -106,9 +107,19 @@ function joinInside(atom: string): string {
   return out;
 }
 
-/** Visible HTML text: no line break inside any atom. */
+/**
+ * Visible HTML text: joiners ONLY inside known compounds. Everything else is left to the
+ * browser's own Thai dictionary: joiners inside ordinary words hide them from that dictionary,
+ * leaving too few break points (review round 4: mid-word breaks on every Thai route).
+ */
 export function thaiGlue(text: string): string {
-  return text.replace(THAI_RUN, (run) => atoms(run).map(joinInside).join(""));
+  return text.replace(THAI_RUN, (run) => {
+    let out = run;
+    for (const word of COMPOUNDS) {
+      if (out.includes(word)) out = out.split(word).join(joinInside(word));
+    }
+    return out;
+  });
 }
 
 /** Image text (satori): explicit break opportunities between atoms only. */

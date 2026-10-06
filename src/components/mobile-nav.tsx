@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { plain } from "@/lib/thai";
 
 /**
@@ -16,12 +16,24 @@ export function MobileNav({
   labels: { open: string; close: string; nav: string };
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    const onClose = () => setOpen(false);
+    dialog.addEventListener("close", onClose);
+    return () => dialog.removeEventListener("close", onClose);
+  }, []);
 
   return (
     <>
       <button
         type="button"
-        onClick={() => ref.current?.showModal()}
+        onClick={() => {
+          ref.current?.showModal();
+          setOpen(true);
+        }}
+        aria-expanded={open}
         className="grid size-9 place-items-center text-ink-2 hover:text-ink lg:hidden"
         aria-label={plain(labels.open)}
         aria-haspopup="dialog"

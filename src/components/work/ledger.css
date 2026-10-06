@@ -106,8 +106,7 @@
 
   .ledger-table {
     width: 100%;
-    /* Last-resort break inside an over-long word, so the table never grows past the page. */
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     border-collapse: collapse;
     text-align: left;
   }

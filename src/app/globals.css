@@ -102,10 +102,10 @@
 
   :lang(th) body {
     line-height: 1.75;
-    /* Safety net for glued Thai phrases (see src/lib/thai.ts): a phrase wider than its
-       container may break inside rather than push the layout wider than the screen.
-       Only used when a line has no other break opportunity. */
-    overflow-wrap: anywhere;
+    /* Safety net only: a word wider than its whole container may break rather than push
+       the layout sideways. (break-word, not anywhere: anywhere also lowers min-content and
+       let tables and grids squeeze Thai words into mid-word breaks.) */
+    overflow-wrap: break-word;
   }
 
   h1,
@@ -276,6 +276,8 @@ html:has(dialog[open]) {
 }
 
 .hero-wordmark {
+  /* Never wraps, even while a fallback font with wider glyphs is showing. */
+  white-space: nowrap;
   font-size: calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24);
   line-height: 0.76;
   letter-spacing: -0.06em;

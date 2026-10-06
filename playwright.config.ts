@@ -5,6 +5,8 @@ const PORT = Number(process.env.E2E_PORT ?? 4310);
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  // A single `next start` drops connections under many parallel workers on a laptop.
+  workers: process.env.CI ? undefined : 4,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["list"]] : "list",

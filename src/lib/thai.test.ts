@@ -26,6 +26,21 @@ describe("thaiGlue", () => {
     expect(glued.split(WJ)).toHaveLength(7);
   });
 
+  it("leaves ordinary words to the browser's dictionary (joiners only inside compounds)", () => {
+    // Review round 4: joiners inside ordinary words hid them from the browser's Thai
+    // dictionary and caused mid-word breaks everywhere.
+    expect(thaiGlue("รับสายและตอบแชท")).toBe("รับสายและตอบแชท");
+    const out = thaiGlue("ผู้ช่วยรับสาย");
+    expect(out.slice(out.lastIndexOf(WJ) + 1)).toContain("รับสาย");
+  });
+
+  it("never separates SARA AM from its consonant", () => {
+    // A joiner before ำ renders a dotted circle in fallback fonts.
+    for (const text of ["ทำงาน", "กำกับ", "ประจำ", "ใช้งานจำลอง"]) {
+      expect(thaiGlue(text)).not.toContain(`${WJ}\u0E33`);
+    }
+  });
+
   it("round-trips through stripJoiners", () => {
     const text = "นำทีมวิศวกรรม EC Platform ทำหน้าร้าน แอป และระบบ headless บน Shopify รวมถึง Mizuno Thailand";
     expect(stripJoiners(thaiGlue(text))).toBe(text);

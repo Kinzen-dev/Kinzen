@@ -84,6 +84,15 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       setPaused(false);
       started.current = true; // and the first-view replay must never override their pick
       play(next);
+      // Phones: the window sits under the choices; bring it into view so the run is seen.
+      const win = rootRef.current?.querySelector<HTMLElement>(".agent-demo-window");
+      if (win) {
+        const r = win.getBoundingClientRect();
+        if (r.top > window.innerHeight * 0.6 || r.bottom < 0) {
+          const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          win.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+        }
+      }
     },
     [play],
   );

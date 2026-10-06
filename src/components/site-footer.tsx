@@ -13,7 +13,10 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
       <div className="shell grid gap-4 py-8 text-sm text-ink-3 md:grid-cols-[1fr_auto] md:items-end">
         <Colophon locale={locale} dict={dict} />
         <p className="readout md:text-right">
-          © {year} {dict.footer.rights}. {dict.footer.updated} {lastUpdated}.
+          © {year} {dict.footer.rights}
+          {locale === "th" ? " " : ". "}
+          {dict.footer.updated} {lastUpdated}
+          {locale === "th" ? "" : "."}
         </p>
       </div>
     </footer>

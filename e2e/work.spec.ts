@@ -6,6 +6,14 @@ const rowButtons = (page: Page) => page.locator("#work tbody tr.ledger-row:not([
 const rowNames = (page: Page) => page.locator("#work tbody tr.ledger-row th button").allInnerTexts();
 
 async function seriousViolations(page: Page) {
+  // Entrance transitions fade text in; axe measuring a half-faded row reads low contrast.
+  await page
+    .waitForFunction(
+      () => document.getAnimations().every((a) => !(a instanceof CSSTransition) || a.playState !== "running"),
+      undefined,
+      { timeout: 3000 },
+    )
+    .catch(() => {});
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   return results.violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")

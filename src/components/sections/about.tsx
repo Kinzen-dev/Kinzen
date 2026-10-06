@@ -25,8 +25,9 @@ export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dic
             {education.map((e) => (
               <p key={e.school.en} className="mt-2">
                 {t(e.degree, locale)}
-                <span className="block text-ink-2">
-                  {t(e.school, locale)}, {e.start} → {e.end}
+                <span className="block text-ink-2">{t(e.school, locale)}</span>
+                <span className="readout block">
+                  {e.start} → {e.end}
                 </span>
               </p>
             ))}

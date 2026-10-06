@@ -21,6 +21,8 @@ function formatKB(bytes: number, locale: Locale) {
 export function Colophon({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const [weight, setWeight] = useState<number | null>(null);
   const commit = process.env.NEXT_PUBLIC_BUILD_COMMIT ?? "local";
+  // Thai separates sentences with a space, not a full stop.
+  const stop = locale === "th" ? " " : ". ";
   const built = BUILT;
   const builtLabel = new Intl.DateTimeFormat(locale === "th" ? "th-TH-u-ca-gregory" : "en-GB", {
     day: "numeric",
@@ -43,12 +45,14 @@ export function Colophon({ locale, dict }: { locale: Locale; dict: Dictionary })
   return (
     <p className="readout max-w-prose">
       {dict.colophon.weighs}{" "}
-      <span className="text-ink">{weight === null ? dict.colophon.measuring : `${formatKB(weight, locale)} KB`}</span>.{" "}
+      <span className="text-ink">{weight === null ? dict.colophon.measuring : `${formatKB(weight, locale)} KB`}</span>
+      {stop}
       {dict.colophon.built} {builtLabel} {dict.colophon.from}{" "}
       <a className="link" href={`https://github.com/Kinzen-dev/Kinzen/commit/${commit}`}>
         {commit}
       </a>
-      . {dict.colophon.fonts}
+      {stop}
+      {dict.colophon.fonts}
     </p>
   );
 }
