@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
     metadataBase: new URL(SITE_URL),
     title: { default: dict.meta.title, template: "%s | Kinzen" },
     description: dict.meta.description,
-    alternates: alternates(localePath(lang, "/")),
+    alternates: alternates("/", lang),
     applicationName: "Kinzen",
     authors: [{ name: "Kittipong Khonthong", url: SITE_URL }],
     creator: "Kittipong Khonthong",
