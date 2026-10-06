@@ -20,11 +20,6 @@ test.describe("shell", () => {
       expect(serious.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
     });
 
-    test(`${route} never scrolls sideways`, async ({ page }) => {
-      await page.goto(route);
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-      expect(overflow).toBeLessThanOrEqual(0);
-    });
   }
 
   test("hreflang alternates are correct on the Thai home", async ({ request }) => {
@@ -34,6 +29,19 @@ test.describe("shell", () => {
     expect(html).toContain('hrefLang="en" href="https://www.kinzen.dev"');
     expect(html).not.toContain("/th/th");
   });
+
+  // Mobile emulation grows the LAYOUT viewport to fit wide content, so comparing
+  // scrollWidth with innerWidth is blind there: compare with the real viewport width.
+  for (const path of ["/", "/th", "/cv", "/th/cv", "/work/yimwhan-ai", "/th/work/helm", "/missing-page"]) {
+    test(`${path} never widens the layout or scrolls sideways`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForTimeout(800);
+      const width = page.viewportSize()!.width;
+      const m = await page.evaluate(() => ({ inner: window.innerWidth, scroll: document.documentElement.scrollWidth }));
+      expect(m.inner).toBe(width);
+      expect(m.scroll).toBeLessThanOrEqual(width);
+    });
+  }
 
   test("English is canonical without a prefix", async ({ request }) => {
     const res = await request.get("/en", { maxRedirects: 0 });

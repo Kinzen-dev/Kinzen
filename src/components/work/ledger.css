@@ -11,6 +11,9 @@
 
   /* Phones: one horizontally scrolling row that bleeds to the screen edges. */
   .ledger-pills {
+    /* Containing block for the sr-only spans inside the pills: without it they are
+       positioned against the page, escape this scroller and widen the mobile layout. */
+    position: relative;
     display: flex;
     gap: 0.5rem;
     min-width: 0;
@@ -107,6 +110,7 @@
   }
 
   .ledger-sort {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;

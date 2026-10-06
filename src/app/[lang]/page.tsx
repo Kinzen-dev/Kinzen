@@ -13,9 +13,9 @@ import { Doodle, projectDoodle } from "@/components/doodles/doodle";
 import { AgentDemo } from "@/components/agent-demo/agent-demo";
 
 const practiceIcons = {
-  "ai-teams": <Doodle name="robot-team" className="h-full" />,
-  "ai-evidence": <Doodle name="checklist-merge" className="h-full" />,
-  "ai-guards": <Doodle name="shield-braces" className="h-full" />,
+  "ai-teams": <Doodle name="robot-team" className="size-full" />,
+  "ai-evidence": <Doodle name="checklist-merge" className="size-full" />,
+  "ai-guards": <Doodle name="shield-braces" className="size-full" />,
 };
 
 const offClockArt = (
@@ -46,7 +46,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <Practice locale={locale} dict={dict} icons={practiceIcons} demo={<AgentDemo copy={dict.demo} />} />
       <Skills locale={locale} dict={dict} />
       <About locale={locale} dict={dict} offClockArt={offClockArt} />
-      <Contact locale={locale} dict={dict} art={<Doodle name="envelope" className="h-full" />} />
+      <Contact locale={locale} dict={dict} art={<Doodle name="envelope" className="size-full" />} />
       <JsonLd data={profilePageJsonLd(locale, dict.meta.title)} />
     </>
   );
