@@ -84,8 +84,8 @@ test.describe("how I work notes", () => {
     // 32px, or less where the board edge stops it (phones: the note is nearly board-wide).
     expect(moved.x).toBeGreaterThan(0);
     expect(moved.x).toBeLessThanOrEqual(32);
-    // The arrows moved the note, not the page.
-    expect(await page.evaluate(() => scrollY)).toBe(y0);
+    // The arrows moved the note, not the page (an arrow scroll is 40px; allow late layout settling).
+    expect(Math.abs((await page.evaluate(() => scrollY)) - y0)).toBeLessThan(20);
     // Keyboard is never trapped: Tab goes to the next note.
     await page.keyboard.press("Tab");
     await expect(notes.nth(1)).toBeFocused();

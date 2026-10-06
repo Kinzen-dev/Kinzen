@@ -6,6 +6,7 @@ import { localePath } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getV3, type V3Copy } from "@/i18n/v3";
 import { Art } from "../art/art";
+import { doodleArt } from "../doodles/art.generated";
 import { BangkokClockDigits, OffsetFromVisitor } from "../clock";
 import { CopyEmail } from "../copy-email";
 import { KineticHeading } from "./kinetic-heading";
@@ -15,8 +16,8 @@ import "./contact.css";
 
 /**
  * Contact (v3): the closing dark scene. Kinetic heading, the address as a big link, a primary
- * CTA with the border beam, the paper plane flying its dashed path to Bangkok as the card
- * scrolls in, the two ways to work together and the Bangkok clock as odometer digits.
+ * CTA with the border beam, King's portrait throwing a paper plane whose dashed path draws
+ * itself to Bangkok as the card scrolls in, the two ways to work together and the Bangkok clock as odometer digits.
  * `art` is accepted and ignored (the plane scene replaced the envelope doodle).
  */
 export function Contact({
@@ -93,8 +94,21 @@ export function Contact({
           </div>
 
           <div className="contact-side">
+            {/* King throws the plane; its dashed flight draws itself on scroll to the temple (Bangkok). */}
             <div aria-hidden="true" className="contact-plane">
-              <Art name="scene-paper-plane" className="w-full" />
+              <Art name="portrait-paper-plane" className="contact-plane-figure" />
+              <svg viewBox="0 0 320 170" fill="none" focusable="false" className="contact-plane-trail">
+                <path
+                  d="M2 12C46 0 88 10 112 40c20 26 14 56-8 56s-24-30 0-40c36-14 86-4 124 36"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeDasharray="7 9"
+                  strokeLinecap="round"
+                />
+                <g transform="translate(236 80) scale(0.29)">
+                  <path fill="currentColor" d={doodleArt["temple-sun"].d} />
+                </g>
+              </svg>
             </div>
 
             <dl className="contact-clock">

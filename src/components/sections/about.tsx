@@ -8,11 +8,8 @@ import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
 import "./about.css";
 
-/**
- * The portrait slot (D7). Until King's portrait illustration arrives this is the workbench scene;
- * when the portrait-* art lands in the manifest, swap this one line to "portrait-wave".
- */
-const PORTRAIT: ArtName = "scene-workbench";
+/** The portrait slot (D7): King's hand-drawn portrait, waving. Never used on /cv. */
+const PORTRAIT: ArtName = "portrait-wave";
 
 export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dictionary; offClockArt?: ReactNode }) {
   return (

@@ -1,11 +1,13 @@
 /* About (v3): portrait on a pastel ground, bio, two soft cards. */
+/* The half-length portrait stands on the card's bottom edge, like a figure in a window: inset
+   on the top and sides, bleeding at the bottom where the drawing is cut. */
 .about-portrait {
   position: relative;
   display: grid;
-  place-items: center;
+  place-items: end center;
   align-self: start;
   aspect-ratio: 5 / 4;
-  padding: var(--inset-card);
+  padding: var(--inset-card) var(--inset-card) 0;
   border-radius: var(--radius-card);
   background: var(--pastel);
   color: var(--pastel-ink);
@@ -15,13 +17,14 @@
 .about-portrait::before {
   content: "";
   position: absolute;
-  inset: 14% 12% 6%;
+  inset: 12% 18% -20%;
   border-radius: 50%;
   background: color-mix(in oklch, var(--surface) 55%, transparent);
 }
 .about-portrait-art {
   position: relative;
-  width: 100%;
+  height: 100%;
+  max-width: 100%;
 }
 
 .about-card {
