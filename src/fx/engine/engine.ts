@@ -95,6 +95,13 @@ export class ParticleEngine {
   PT: Params = { ...this.P };
   /** Overall fade (scroll-out), 0..1. */
   fade = 1;
+  /**
+   * Brightness of glyph particles that have landed on (are within dimPx of) their letter, 0..1.
+   * The opening keeps landed letters dim under the DOM wordmark and the stage raises this in step
+   * with the DOM fade, so the hand-off is one wordmark changing colour, never two stacked.
+   */
+  glyphLevel = 1;
+  dimPx = 20;
   stats: Stats = { fps: 0, side: 0, drawn: 0, w: 0, h: 0, dpr: 1 };
   /** Called after every rendered frame with the raw ms since the previous one. */
   onFrame: ((raw: number, now: number) => void) | null = null;
@@ -220,6 +227,15 @@ export class ParticleEngine {
     this.buildSim();
     this.zero = this.tex(1, 1, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, null, gl.NEAREST);
     return true;
+  }
+
+  /** The frame cap in force (the stage drops it to 30 for the idle drift). */
+  get fps(): number {
+    return this.cap.fps;
+  }
+
+  setFps(fps: number): void {
+    this.cap.fps = fps;
   }
 
   start(): void {
@@ -356,9 +372,16 @@ export class ParticleEngine {
     this.pulsesP.set([strength, speed, width, 0], i * 4);
   }
 
-  /** Render a single frame now (theme change while stopped). */
+  /**
+   * Render a single frame now, synchronously (theme change or refit while stopped). The canvas
+   * size is checked here rather than waiting for the ResizeObserver, so a frame drawn in the same
+   * task as a layout change is already at the new size.
+   */
   redraw(): void {
     if (!this.progs || !this.hasTargets || this.running) return;
+    const scr = this.scr;
+    if (scr && (scr.cw !== Math.max(1, this.canvas.clientWidth) || scr.ch !== Math.max(1, this.canvas.clientHeight)))
+      this.needResize = true;
     this.renderFrame(0);
   }
 
@@ -622,6 +645,8 @@ export class ParticleEngine {
     gl.uniform3fv(u.uHot, this.palette.hot);
     gl.uniform1f(u.uLight, this.palette.mode);
     gl.uniform1f(u.uLand, this.landPx * worldPerPx(scr.ch));
+    gl.uniform1f(u.uGlyph, this.glyphLevel);
+    gl.uniform1f(u.uDimR, this.dimPx * worldPerPx(scr.ch));
     gl.drawArrays(gl.POINTS, 0, drawn);
     gl.disable(gl.BLEND);
 

@@ -5,7 +5,8 @@ import { decodeMask, indexMask } from "./targets/mask";
 import { burstSeed, sampleWordmark } from "./targets/sample-mask";
 import { FrameCap } from "./engine/frame-cap";
 import { Governor } from "./engine/governor";
-import { isSoftwareRenderer, pickTier, type Env } from "./engine/capability";
+import { isSoftwareRenderer, pickTier, TIER_CONFIG, type Env } from "./engine/capability";
+import { cubicBezier, easeOut } from "./engine/ease";
 
 describe("baked wordmark mask", () => {
   it("decodes to exactly the baked ink count and a plausible geometry", () => {
@@ -158,5 +159,49 @@ describe("capability tiers", () => {
     expect(pickTier(env, null).tier).toBe("off");
     expect(pickTier({ ...env, fx: "off" }, null).tier).toBe("off");
     expect(pickTier({ ...env, saveData: true }, null).tier).toBe("off");
+  });
+
+  it("never runs the field under reduced motion unless a tier is forced", () => {
+    const gpu = {
+      getExtension: (n: string) => (n === "EXT_color_buffer_float" ? {} : null),
+      getParameter: () => "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro)",
+      RENDERER: 0x1f01,
+    } as unknown as WebGL2RenderingContext;
+    const rm = { ...env, reducedMotion: true };
+    expect(pickTier(rm, gpu).tier).toBe("off");
+    expect(pickTier({ ...rm, fx: "still" }, gpu).tier).toBe("still");
+    expect(pickTier({ ...env, coarse: true }, gpu).tier).toBe("lite");
+  });
+
+  it("lite renders at DPR up to 2, like full", () => {
+    expect(TIER_CONFIG.lite.maxDpr).toBe(2);
+  });
+});
+
+describe("pacing", () => {
+  it("easeOut follows the CSS --ease-out curve: monotonic, pinned ends, front-loaded", () => {
+    expect(easeOut(0)).toBe(0);
+    expect(easeOut(1)).toBe(1);
+    let prev = 0;
+    for (let i = 1; i <= 100; i++) {
+      const v = easeOut(i / 100);
+      expect(v).toBeGreaterThanOrEqual(prev - 1e-9);
+      prev = v;
+    }
+    // cubic-bezier(.16,1,.3,1) is past 80% at a quarter of the duration.
+    expect(easeOut(0.25)).toBeGreaterThan(0.8);
+    expect(cubicBezier(0, 0, 1, 1)(0.37)).toBeCloseTo(0.37, 5);
+  });
+
+  it("a frame cap lowered mid-run (idle drift) takes effect at once", () => {
+    const cap = new FrameCap(120);
+    let fast = 0;
+    for (let t = 0; t < 1000; t += 1000 / 240) if (cap.accept(t) >= 0) fast++;
+    cap.fps = 30;
+    let slow = 0;
+    for (let t = 1000; t < 2000; t += 1000 / 240) if (cap.accept(t) >= 0) slow++;
+    expect(fast).toBeGreaterThan(110);
+    expect(slow).toBeGreaterThanOrEqual(29);
+    expect(slow).toBeLessThanOrEqual(31);
   });
 });

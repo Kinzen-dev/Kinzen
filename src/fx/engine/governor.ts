@@ -41,6 +41,16 @@ export class Governor {
     this.step = opts.step ?? 0.08;
   }
 
+  /**
+   * Start a fresh measurement window: call when the frame cap changes on purpose (the idle 30 fps
+   * drift), so a deliberately slow window is never read as a slow GPU.
+   */
+  rewindow(): void {
+    this.winFrames = 0;
+    this.winMs = 0;
+    this.good = 0;
+  }
+
   /** Feed one rendered frame. `raw` = ms since the previous rendered frame. */
   sample(raw: number, now: number): Verdict {
     if (raw <= 0) return null;

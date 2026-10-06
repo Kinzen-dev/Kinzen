@@ -7,6 +7,7 @@ export class FrameCap {
   private anchor = -1;
   private prev = -1;
 
+  /** Changing `fps` mid-run is fine: the next callback is judged against the new interval. */
   constructor(public fps: number) {}
 
   accept(now: number): number {
