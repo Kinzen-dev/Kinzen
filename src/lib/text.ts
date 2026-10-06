@@ -1,7 +1,8 @@
 /**
- * A comma-separated list whose items never break inside ("LINE Messaging API" stays on
- * one line); lines break only between items.
+ * A comma-separated list whose short items never break inside ("LINE Messaging API"
+ * stays on one line); lines break between items.
  */
 export function inlineList(items: readonly string[]): string {
-  return items.map((item) => item.replaceAll(" ", "\u00a0").replaceAll("-", "\u2011")).join(", ");
+  // Only short items are kept whole; a long phrase must still be able to wrap in a narrow cell.
+  return items.map((item) => (item.length <= 20 ? item.replaceAll(" ", "\u00a0") : item)).join(", ");
 }

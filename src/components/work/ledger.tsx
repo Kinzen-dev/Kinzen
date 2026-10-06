@@ -103,8 +103,13 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
           /* eslint-disable react-hooks/set-state-in-effect */
           setSort(saved.sort);
           setFilter(saved.filter);
-          setOpenId(saved.openId && rows.some((r) => r.id === saved.openId) ? saved.openId : null);
+          const reopen = saved.openId && rows.some((r) => r.id === saved.openId) ? saved.openId : null;
+          setOpenId(reopen);
           /* eslint-enable react-hooks/set-state-in-effect */
+          // Keyboard users come back to the row they left from, not to the top of the page.
+          if (reopen) {
+            window.requestAnimationFrame(() => buttons.current.get(reopen)?.focus({ preventScroll: true }));
+          }
           return;
         }
       } catch {
@@ -198,7 +203,11 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                 type="button"
                 className="ledger-pill"
                 aria-pressed={filter === a.id}
-                onClick={() => applyFilter(a.id)}
+                onClick={(e) => {
+                  applyFilter(a.id);
+                  // Keep the chosen chip clear of the scroller's fading edge on phones.
+                  e.currentTarget.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+                }}
               >
                 {a.label}
                 <span className="tabular ledger-pill-count">{a.count}</span>
@@ -293,9 +302,9 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                       </div>
                     </div>
                   </th>
-                  <td className="hidden text-sm whitespace-nowrap text-ink-2 md:table-cell">{row.areaLabel}</td>
+                  <td className="hidden text-sm text-ink-2 md:table-cell">{row.areaLabel}</td>
                   <td className="readout hidden max-w-[28ch] lg:table-cell">{inlineList(row.stack.slice(0, 4))}</td>
-                  <td className="readout hidden whitespace-nowrap md:table-cell">{row.year}</td>
+                  <td className="readout hidden md:table-cell">{row.year}</td>
                   <td className="hidden text-sm md:table-cell">
                     <Status row={row} />
                   </td>

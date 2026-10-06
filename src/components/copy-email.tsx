@@ -30,7 +30,7 @@ export function CopyEmail({
       type="button"
       onClick={copy}
       aria-label={plain(labels.copy)}
-      className="group inline-flex h-11 items-center gap-2 border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
+      className="group inline-flex h-11 min-w-[12.5rem] items-center justify-center gap-2 border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
     >
       <svg
         viewBox="0 0 20 20"

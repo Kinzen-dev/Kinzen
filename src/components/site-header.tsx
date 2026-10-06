@@ -33,7 +33,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
   return (
     <header
       data-site-header
-      className="sticky top-0 z-40 border-b border-rule bg-ground/85 backdrop-blur-md supports-[not(backdrop-filter:blur(1px))]:bg-ground"
+      className="sticky top-0 z-40 border-b border-rule bg-ground/95 backdrop-blur-md supports-[not(backdrop-filter:blur(1px))]:bg-ground"
     >
       <div className="shell flex h-[var(--header-h)] items-center gap-6">
         <HomeLink

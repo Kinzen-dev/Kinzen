@@ -106,9 +106,7 @@
 
   .ledger-table {
     width: 100%;
-    /* Fixed at every width, and a last-resort break inside long unbreakable runs (glued
-       Thai phrases), so the table can never grow wider than the page. */
-    table-layout: fixed;
+    /* Last-resort break inside an over-long word, so the table never grows past the page. */
     overflow-wrap: anywhere;
     border-collapse: collapse;
     text-align: left;
@@ -310,6 +308,25 @@
   .ledger-table .ledger-panel-row > td {
     padding-inline: 1.5rem;
   }
+  /* Fixed columns from tablet up: opening a row must never re-flow the columns sideways.
+     (Phones keep auto layout: only the name and toggle columns exist there.) */
+  .ledger-table {
+    table-layout: fixed;
+  }
+  .ledger-table thead th:nth-child(2) {
+    width: 20%;
+  }
+  .ledger-table thead th:nth-child(4) {
+    width: 17%;
+  }
+  .ledger-table thead th:nth-child(5) {
+    width: 18%;
+  }
+  .ledger-table thead th:nth-child(6) {
+    width: 2.75rem;
+  }
+}
+@media (min-width: 64rem) {
   .ledger-table thead th:nth-child(2) {
     width: 13%;
   }
@@ -317,17 +334,9 @@
     width: 22%;
   }
   .ledger-table thead th:nth-child(4) {
-    width: 13%;
+    width: 14%;
   }
   .ledger-table thead th:nth-child(5) {
     width: 14%;
   }
-  .ledger-table thead th:nth-child(6) {
-    width: 2.75rem;
-  }
-}
-
-/* Phones: only the name column and the toggle are shown. */
-.ledger-table thead th.ledger-toggle-col {
-  width: 2.75rem;
 }

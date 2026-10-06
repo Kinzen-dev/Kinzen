@@ -31,7 +31,12 @@
   animation: agent-demo-veil 450ms linear forwards;
   pointer-events: none;
 }
+/* Hold, then clear quickly: a long linear fade showed both threads half-visible at once. */
 @keyframes agent-demo-veil {
+  0%,
+  45% {
+    opacity: 1;
+  }
   to {
     opacity: 0;
   }
@@ -169,4 +174,9 @@
 .agent-demo-ghost.agent-demo-reply {
   justify-self: end;
   width: min(100%, 22rem);
+}
+
+/* "Writing the safe reply" and other typing labels must stay readable. */
+.agent-demo-typing .agent-demo-who {
+  color: var(--ink-2);
 }

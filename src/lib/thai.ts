@@ -5,9 +5,10 @@
  *
  * One model, two renderings. A Thai run (text between spaces) becomes a list of
  * unbreakable ATOMS:
- * - a run up to SHORT_RUN characters is one atom (Thai writers already put spaces
- *   between phrases, so lines break at those spaces);
- * - a longer run is split at dictionary word boundaries, except inside known compounds.
+ * - the run is split at dictionary word boundaries (Intl.Segmenter, the same ICU data
+ *   browsers use), except inside known compounds, which stay whole.
+ * Gluing whole phrases was tried and rejected: a phrase wider than its line forced
+ * emergency breaks in the middle of words (review round 3).
  * Then:
  * - `thaiGlue` (HTML) puts U+2060 WORD JOINER inside every atom, which every engine
  *   honours as "no break here";
@@ -19,9 +20,6 @@ const WJ = "⁠";
 const ZWSP = "​";
 const THAI_RUN = /[฀-๿]+/g;
 const COMBINING = /[ัิ-ฺ็-๎]/;
-
-/** Phrases up to this many characters never break inside. */
-const SHORT_RUN = 24;
 
 /** Compounds the dictionary splits; extend when a break shows up in QA. */
 const COMPOUNDS = [
@@ -67,14 +65,19 @@ const COMPOUNDS = [
   "ผู้ก่อตั้ง",
   "ผู้ใช้",
   "ปัจจุบัน",
+  "ออนไลน์",
+  "การเติม",
+  "ไบนารี",
+  "คนไข้",
+  "ทันที",
+  "ข้อความ",
+  "ระบบ",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });
 
 /** Split one Thai run into atoms that must not break inside. */
 function atoms(run: string): string[] {
-  if ([...run].length <= SHORT_RUN) return [run];
-
   // Character ranges covered by known compounds (longest first, no overlaps).
   const covered: [number, number][] = [];
   for (const word of COMPOUNDS) {

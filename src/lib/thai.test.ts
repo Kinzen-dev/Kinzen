@@ -8,8 +8,8 @@ describe("thaiGlue", () => {
     expect(thaiGlue("Shopify and LINE")).toBe("Shopify and LINE");
   });
 
-  it("keeps a short Thai phrase whole", () => {
-    // หน้าร้าน: 6 base letters + 2 combining marks, so 5 joiners and no other gap.
+  it("keeps a dictionary-split compound whole", () => {
+    // หน้าร้าน is a known compound: 6 base letters + 2 combining marks, so 5 joiners.
     const word = thaiGlue("หน้าร้าน แอป").split(" ")[0];
     expect(stripJoiners(word)).toBe("หน้าร้าน");
     expect(word.split(WJ)).toHaveLength(6);
