@@ -100,7 +100,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
               </div>
               <p className="cv-meta">
                 {era.org.name}
-                {locale === "th" ? " " : ", "}
+                <span className="text-ink-3"> / </span>
                 {t(era.location, locale)}
               </p>
               <ul className="cv-points">
