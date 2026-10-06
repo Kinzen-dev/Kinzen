@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import { getDictionary } from "@/i18n/dictionaries";
 import { ThemeScript } from "@/components/theme-script";
+import { Doodle } from "@/components/doodles/doodle";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
@@ -30,6 +31,7 @@ export default function GlobalNotFound() {
       </head>
       <body>
         <main className="shell grid min-h-dvh content-center gap-10 py-24">
+          <Doodle name="lost-robot" className="h-28 text-ink md:h-36" />
           <p className="readout">404</p>
           <div className="grid gap-4">
             <h1 className="max-w-[16ch] text-2xl tracking-[-0.035em]">{en.title}</h1>

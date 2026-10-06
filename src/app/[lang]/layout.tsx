@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { locales, type Locale } from "@/content/schema";
 import { getDictionary } from "@/i18n/dictionaries";
-import { SITE_URL, alternates, localePath } from "@/lib/site-url";
+import { SITE_URL, alternates } from "@/lib/site-url";
 import { ThemeScript } from "@/components/theme-script";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
