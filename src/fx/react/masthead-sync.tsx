@@ -9,7 +9,9 @@ const HANDOFF_RATIO = 0.35;
  * Masthead state switch for the home page. One IntersectionObserver on the hero wordmark sets
  * html[data-hero-passed] once the wordmark has gone under the sticky header, and clears it when
  * the wordmark is back. fx.css turns that into a short opacity + translate transition of the
- * header mark and name; there is no scroll scrubbing, so no half-faded resting state exists.
+ * header mark and name (instant under reduced motion, but the same states, so the small mark never
+ * sits next to the big wordmark at the top); there is no scroll scrubbing, so no half-faded
+ * resting state exists.
  * Renders nothing. Removes the attribute on unmount (client navigation away from home).
  */
 export function MastheadSync() {
