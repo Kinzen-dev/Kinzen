@@ -1,5 +1,5 @@
 import type { WorkerRequest, WorkerResponse } from "./protocol";
-import type { Burst, BurstJob, TargetJob, Targets } from "./types";
+import type { Burst, ScatterJob, TargetJob, Targets } from "./types";
 
 type Pending = { resolve: (r: WorkerResponse) => void; reject: (e: Error) => void };
 
@@ -34,9 +34,9 @@ export class TargetClient {
     return r.targets;
   }
 
-  async burst(job: BurstJob): Promise<Burst> {
-    const r = await this.send({ id: 0, kind: "burst", job });
-    if (r.kind !== "burst") throw new Error("fx: unexpected worker reply");
+  async scatter(job: ScatterJob): Promise<Burst> {
+    const r = await this.send({ id: 0, kind: "scatter", job });
+    if (r.kind !== "scatter") throw new Error("fx: unexpected worker reply");
     return r.burst;
   }
 
@@ -68,6 +68,6 @@ export class TargetClient {
     ]);
     if (req.kind === "targets")
       return { id: req.id, kind: "targets", targets: s.sampleWordmark(indexMask(WORDMARK), req.job) };
-    return { id: req.id, kind: "burst", burst: s.burstSeed(req.job) };
+    return { id: req.id, kind: "scatter", burst: s.scatterSeed(req.job) };
   }
 }

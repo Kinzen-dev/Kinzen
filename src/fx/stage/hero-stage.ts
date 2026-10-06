@@ -7,15 +7,21 @@ import { readPalette } from "../engine/palette";
 import { TargetClient } from "../targets/client";
 import { settledSeed } from "../targets/sample-mask";
 import type { Box, Targets } from "../targets/types";
+import { setFx } from "./fx-state";
 
 /**
- * The hero choreography, framework-free. One authored moment, then the material moving:
- *   burst (0 to 450 ms) -> the dust forms the wordmark under the DOM text, landed letters held dim
- *   -> once the glyph particles have measurably converged onto the DOM glyphs, one cross-fade:
- *   the DOM wordmark fades out (CSS, 600 ms, --ease-out) while the landed letters brighten on the
- *   same curve (data-fx="on") -> calm drift by 2.3 s.
+ * The hero choreography, framework-free. One authored moment, then the material moving.
+ * When the field runs, the DOM wordmark is never shown (html[data-fx="pending"] before paint, then
+ * "on" from the field's first frame; see fx.css), so there is only ever one name on screen:
+ *   0 to 0.4 s   a sparse, even dust fades up over the whole stage box (and a little past it);
+ *                nothing else is lit: no centre, no core, no cloud.
+ *   0.05 to 1.6 s each particle is released toward its letter at its own moment (most early, a
+ *                few trailing: an ease-out in density) and lights up over its last few px, so the
+ *                letters brighten exactly as they fill.
+ *   2.0 s        calm drift; anything still in the air fades back into the plain field.
  * The opening plays once per page load and only while it can be seen: if the hero is off screen
- * (or the tab hidden) when it would play, or leaves view mid-way, the field resumes settled.
+ * (or the tab hidden, or the DOM wordmark already revealed by the safety net) when it would play,
+ * or leaves view mid-way, the field comes in settled.
  * The gold dust is emissive light: it belongs to the dark theme only. In the light theme the
  * field fades out (240 ms) and stops, the DOM wordmark fades back; back in dark it returns settled.
  * Calm drift runs at 30 fps, and after 8 s without pointer or scroll the loop stops on the frame
@@ -24,28 +30,32 @@ import type { Box, Targets } from "../targets/types";
  * stale frame over misplaced text) while it cross-fades to the DOM wordmark; when the field has
  * refit it cross-fades back. Both ways 200 ms: a soft refresh, not a flash.
  * Scroll-out (SIAN scrollFade): the name loosens into dust over 1.5 viewports, then the loop
- * stops. Any failure: tier "off", the server-rendered wordmark simply stays.
+ * stops. Any failure: tier "off", data-fx="off", the DOM wordmark fades in (200 ms).
  */
 
-const STAGE: Record<"burst" | "form" | "calm" | "still", Partial<Params>> = {
-  burst: { spring: 0, damp: 0.95, turb: 2.2, tscale: 0.2, tspeed: 0.1, drift: 0, gain: 1.5, mouseF: 0 },
-  form: { spring: 26, damp: 0.86, turb: 0.4, tscale: 1.1, tspeed: 0.3, drift: 0, gain: 1.0, mouseF: 0 },
+const STAGE: Record<"form" | "calm" | "still", Partial<Params>> = {
+  // Stiff and well damped: a released particle closes most of its distance in about half a second
+  // and lands without overshoot; the slow part of the opening is the release stagger, not travel.
+  form: { spring: 80, damp: 0.75, turb: 0.8, tscale: 1.1, tspeed: 0.3, drift: 0, gain: 1.0, mouseF: 0 },
   calm: { spring: 30, damp: 0.86, turb: 0.05, tscale: 0.9, tspeed: 0.12, drift: 0, gain: 1.0, mouseF: 26 },
   still: { spring: 30, damp: 0.8, turb: 0, tscale: 0.6, tspeed: 0, drift: 0, gain: 1.0, mouseF: 0 },
 };
 
-const T_FORM = 450;
-/** Earliest DOM hand-off; it then waits for measured convergence. */
-const T_SETTLED = 1450;
-/** Hand off regardless after this (convergence cannot be measured, or never gets there). */
-const T_HANDOFF_MAX = 4000;
-const T_CALM = 2300;
-/** Mean glyph-particle distance to target (CSS px) under which the field reads as the DOM glyphs. */
-const CONV_PX = 1.5;
-/** Brightness of landed letters under the DOM wordmark before the hand-off. */
-const GLYPH_DIM = 0.22;
-/** Cross-fade durations (ms): opening hand-off, theme switch, refit. */
-const XF_HANDOFF = 600;
+/** Opening timeline (ms from the first drawn frame). */
+const T_DUST = 400;
+const T_CALM = 2000;
+/** After T_CALM, particles still in the air fade back into view over this long. */
+const T_OPEN = 300;
+/** Release window (s): particle i is let go at RELEASE_0 + RELEASE_SPAN * u^2. */
+const RELEASE_0 = 0.05;
+const RELEASE_SPAN = 0.75;
+/** The opening dust: one visible speck per this many CSS px^2 of stage, at this brightness. */
+const SPECK_AREA = 130;
+const SPECK_LVL = 1.1;
+/** Share of the stage size the dust spreads past each edge. */
+const SPREAD = 0.08;
+/** Cross-fade durations (ms): field gives up, theme switch, refit. */
+const XF_OFF = 200;
 const XF_THEME = 240;
 const XF_REFIT = 200;
 /** Calm drift frame cap, and how long interaction keeps the tier's full rate. */
@@ -71,8 +81,8 @@ type Debug = {
   engine: ParticleEngine | null;
   governor: Governor | null;
   phase: string;
-  /** Last measured convergence (CSS px), -1 when unmeasured. */
-  conv: number;
+  /** performance.now() of the opening's first drawn frame, 0 when it did not play. */
+  openedAt: number;
   ink: { x: number; y: number; w: number; h: number; src: string } | null;
   /** True while the loop is parked by the idle rule. */
   idle: boolean;
@@ -123,7 +133,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     engine: null,
     governor: null,
     phase: "boot",
-    conv: -1,
+    openedAt: 0,
     ink: null,
     idle: false,
   };
@@ -131,9 +141,6 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
 
   const cleanups: (() => void)[] = [];
   let dead = false;
-  const timers: number[] = [];
-  const later = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
-  const clearTimers = () => timers.splice(0).forEach((t) => clearTimeout(t));
 
   const setTier = (tier: Tier, reason: string) => {
     debug.tier = tier;
@@ -142,18 +149,18 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   };
 
   /* ---------- visibility of the field vs the DOM wordmark (fx.css) ---------- */
-  // data-show on the stage shows the canvas; data-fx="on" on the hero hides the DOM wordmark. Both
+  // data-show on the stage shows the canvas; html[data-fx] says who draws the name. Both
   // transition over --fx-xfade, set per change, so every swap is a cross-fade of a chosen length.
-  const xfade = (ms: number) => hero.style.setProperty("--fx-xfade", `${ms}ms`);
+  // setFx first: it may commit styles once (leaving "pending"), which must not catch the canvas.
   const conceal = (ms: number) => {
-    xfade(ms);
+    setFx(hero, "off", ms);
     delete stage.dataset.show;
-    delete hero.dataset.fx;
   };
+  /** Is the DOM wordmark on screen right now (no pending gate, or the safety net revealed it)? */
+  const wordmarkShown = () => parseFloat(getComputedStyle(wordmark).opacity) > 0.01;
 
   const teardown = () => {
     dead = true;
-    clearTimers();
     cleanups.splice(0).forEach((fn) => fn());
   };
 
@@ -161,7 +168,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     if (dead) return;
     teardown();
     setTier("off", reason);
-    conceal(0);
+    conceal(XF_OFF);
     onOff();
   };
 
@@ -182,6 +189,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   if (picked.tier === "off" || !gl) {
     gl?.getExtension("WEBGL_lose_context")?.loseContext();
     setTier("off", picked.reason);
+    setFx(hero, "off", XF_OFF);
     onOff();
     return () => {};
   }
@@ -237,9 +245,9 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     Math.abs(a.fs - b.fs) < 0.05;
 
   const pointCss = (fs: number) => Math.min(2.1, Math.max(1, fs * 0.0052));
-  // Glyph particles dim within a tenth of an em of their letter: dust settling onto a stroke
-  // never reads as a gold copy of the word offset from the DOM one.
-  const dimPx = (fs: number) => Math.max(20, fs * 0.1);
+  // A particle lights up over its last few px (about a twentieth of an em): letters sharpen as
+  // they brighten instead of glowing in as soft blobs.
+  const dimPx = (fs: number) => Math.max(8, fs * 0.05);
   let palette = readPalette(hero);
   let dark = palette.mode === "dark";
   let layout = measure();
@@ -259,7 +267,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   /* ---------- scroll-out ---------- */
   let scrollP = 0;
   let visible = true;
-  let stage0: keyof typeof STAGE = motion ? "burst" : "still";
+  let stage0: keyof typeof STAGE = motion ? "form" : "still";
   const apply = (now = false) => {
     const base = STAGE[stage0];
     if (!motion || scrollP <= 0) {
@@ -282,81 +290,69 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     engine.fade = 1 - p;
   };
 
-  /* ---------- opening, hand-off, refit, idle ---------- */
-  // "idle" before boot, "playing" while the burst runs, "aborted" if it was paused mid-way (it
+  /* ---------- opening, refit, idle ---------- */
+  // "idle" before boot, "playing" while the dust condenses, "aborted" if it was paused mid-way (it
   // never replays), "done" once the field is settled.
   let opening: "idle" | "playing" | "aborted" | "done" = "idle";
   let targets: Targets | null = null;
+  /** performance.now() of the opening's first drawn frame (0 until then). */
   let openedAt = 0;
-  let handed = false;
-  let wantHandoff = false;
+  /** Start of the fade that brings particles still in the air back into view after the opening. */
+  let openRamp = 0;
   /** Resize in progress: the last frame is frozen, the loop may not run until the field refits. */
   let frozen: Layout | null = null;
-  /** Glyph brightness ramp of the hand-off, driven per frame on the CSS curve. */
-  let ramp: { t0: number; from: number } | null = null;
   let parked = false;
   let lastActive = performance.now();
-  let watchTick = 0;
 
   const shouldRun = () => motion && dark && visible && !document.hidden && scrollP < 0.999 && !frozen && !parked;
 
-  /** The field takes over from the DOM wordmark, cross-fading over `ms` (dark theme only). */
+  /** The field draws the name, cross-fading over `ms` from whatever shows now (dark theme only). */
   const present = (ms: number) => {
     if (!dark || frozen) return;
     stage.dataset.ready = "";
-    xfade(ms);
+    setFx(hero, "on", ms);
     stage.dataset.show = "";
-    hero.dataset.fx = "on";
   };
 
-  /** Opening hand-off: the DOM fades out while the landed letters brighten on the same curve. */
-  const handoff = () => {
-    wantHandoff = false;
-    handed = true;
-    if (debug.phase === "form" || debug.phase === "burst") debug.phase = "settled";
-    if (engine.glyphLevel < 1) ramp = { t0: performance.now(), from: engine.glyphLevel };
-    present(XF_HANDOFF);
+  /** The plain field: every particle free, none hidden in the air. */
+  const plain = () => {
+    openRamp = 0;
+    engine.endGate();
+    engine.open = 1;
   };
 
   /** Park the field at its targets in calm drift: the resume path, never a second opening. */
   const settleNow = () => {
-    clearTimers();
     opening = "done";
     stage0 = motion ? "calm" : "still";
     debug.phase = stage0;
     governor.locked = false;
-    ramp = null;
-    engine.glyphLevel = 1;
+    plain();
     apply(true);
     if (targets) engine.seed(settledSeed(targets));
   };
 
-  /** Called after every rendered frame (motion tiers): the measured gate for the hand-off. */
-  const watch = () => {
-    if (!wantHandoff) return;
-    if (++watchTick % 4) return;
-    const c = engine.convergence();
-    debug.conv = c ?? -1;
-    const close = c !== null && (c < CONV_PX || scrollP > 0);
-    if (close || performance.now() - openedAt > T_HANDOFF_MAX) handoff();
+  /** The word has formed (or the visitor scrolled on): calm drift, stragglers fade back in. */
+  const finishOpening = (now: number) => {
+    opening = "done";
+    stage0 = "calm";
+    debug.phase = "calm";
+    governor.locked = false;
+    engine.endGate();
+    openRamp = now;
+    apply();
   };
 
   const sync = () => {
     if (dead) return;
     if (shouldRun()) {
-      if (opening === "aborted") {
-        // Parameters snap to the current scroll state here, at resume, not when it was paused.
-        settleNow();
-        engine.glyphLevel = handed ? 1 : GLYPH_DIM;
-        openedAt = performance.now();
-        wantHandoff = !handed;
-      }
+      // Parameters snap to the current scroll state here, at resume, not when it was paused.
+      if (opening === "aborted") settleNow();
       engine.start();
     } else {
       engine.stop();
       if (opening === "playing") {
         // Paused mid-opening (scrolled away, tab hidden, theme): drop it; it resumes settled.
-        clearTimers();
         opening = "aborted";
       }
     }
@@ -372,15 +368,25 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     }
   };
 
-  /** Per-frame pacing: the hand-off ramp, the 30 fps calm cap, the idle stop. */
+  /** Per-frame pacing: the opening timeline, the 30 fps calm cap, the idle stop. */
   const pace = (now: number) => {
-    if (ramp) {
-      const p = Math.min(1, (now - ramp.t0) / XF_HANDOFF);
-      engine.glyphLevel = ramp.from + (1 - ramp.from) * easeOut(p);
-      if (p >= 1) ramp = null;
-    }
     if (!motion) return;
-    const calm = opening === "done" && !ramp && !wantHandoff && governor.probe === "ok";
+    if (opening === "playing") {
+      // The clock starts on the first drawn frame, which was drawn with nothing lit.
+      if (!openedAt) {
+        openedAt = debug.openedAt = now;
+        engine.beginGate();
+      }
+      const t = now - openedAt;
+      engine.airLvl = SPECK_LVL * easeOut(Math.min(1, t / T_DUST));
+      if (t >= T_CALM || scrollP > 0.02) finishOpening(now);
+    }
+    if (openRamp) {
+      const p = Math.min(1, (now - openRamp) / T_OPEN);
+      engine.open = easeOut(p);
+      if (p >= 1) plain();
+    }
+    const calm = opening === "done" && !openRamp && governor.probe === "ok";
     const fps = calm && now - lastActive > ACTIVE_MS ? Math.min(IDLE_FPS, cfg.fps) : cfg.fps;
     if (engine.fps !== fps) {
       engine.setFps(fps);
@@ -402,31 +408,25 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     if (!ok) return goOff("shader compile");
     engine.setPalette(palette);
     const fit = layout;
-    const origin = [
-      (fit.ink.x + fit.ink.w / 2 - fit.cw / 2) * worldPerPx(fit.ch),
-      -(fit.ink.y + fit.ink.h / 2 - fit.ch / 2) * worldPerPx(fit.ch),
-    ] as const;
-    const [t0, burst] = await Promise.all([
+    const k = worldPerPx(fit.ch);
+    // The opening dust covers the whole stage box and a little past every edge (world units).
+    const hw = (fit.cw / 2) * (1 + 2 * SPREAD) * k,
+      hh = (fit.ch / 2) * (1 + 2 * SPREAD) * k;
+    const [t0, scatter] = await Promise.all([
       targetsFor(fit),
-      motion
-        ? client.burst({ N: engine.N, origin, speed: fit.ink.w * worldPerPx(fit.ch) * 0.55 })
-        : Promise.resolve(null),
+      motion ? client.scatter({ N: engine.N, box: { x0: -hw, y0: -hh, x1: hw, y1: hh } }) : Promise.resolve(null),
     ]);
     if (dead) return;
     targets = t0;
     engine.setTargets(t0, pointCss(fit.fs));
     engine.dimPx = dimPx(fit.fs);
-    engine.seed(burst ?? settledSeed(t0));
-    debug.phase = motion ? "burst" : "still";
 
     engine.onFrame = (raw, now) => {
       if (!stage.hasAttribute("data-ready")) stage.dataset.ready = "";
-      // The opening shows the canvas behind the DOM wordmark from its first frame.
-      if (dark && !frozen && !stage.hasAttribute("data-show")) {
-        xfade(0);
-        stage.dataset.show = "";
-      }
-      watch();
+      // First drawn frame: the field takes the name. Over a hidden wordmark (the opening, or a
+      // settled field while the gate still holds it) nothing visible changes, so no fade; over a
+      // visible one (light to dark, or the safety net already fired) a theme-length cross-fade.
+      if (dark && !frozen && !stage.hasAttribute("data-show")) present(wordmarkShown() ? XF_THEME : 0);
       pace(now);
       const v = governor.sample(raw, now);
       if (!v) return;
@@ -434,22 +434,27 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       else engine.setLevel(v.level);
     };
 
-    if (!motion) {
+    if (!motion || !scatter) {
+      engine.seed(settledSeed(t0));
+      plain();
       apply(true);
       opening = "done";
-      engine.settle(40, () => {
-        handoff();
-        debug.phase = "still";
-      });
+      debug.phase = "still";
+      engine.settle(40);
       return;
     }
 
-    // The opening needs an audience: on screen, tab visible, page at the top, dark ground.
+    // The opening needs an audience: on screen, tab visible, page at the top, dark ground, and the
+    // DOM wordmark still held back (never condense a second name over a visible one).
     const r = stage.getBoundingClientRect();
     const onScreen =
-      dark && r.bottom > 0 && r.top < window.innerHeight && !document.hidden && scrollP < 0.05 && !frozen;
-    openedAt = performance.now();
-    engine.glyphLevel = GLYPH_DIM;
+      dark &&
+      r.bottom > 0 &&
+      r.top < window.innerHeight &&
+      !document.hidden &&
+      scrollP < 0.05 &&
+      !frozen &&
+      !wordmarkShown();
     if (!onScreen) {
       // No opening without an audience: the field parks settled when it is first seen.
       opening = "aborted";
@@ -458,24 +463,17 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     }
 
     opening = "playing";
-    stage0 = "burst";
+    stage0 = "form";
+    debug.phase = "form";
+    engine.seed(scatter);
+    engine.open = 0;
+    engine.airLvl = 0;
+    engine.gate0 = RELEASE_0;
+    engine.gateSpan = RELEASE_SPAN;
+    // One visible speck per SPECK_AREA px^2, whatever the tier's particle count.
+    engine.speck = Math.min(0.05, (fit.cw * fit.ch) / SPECK_AREA / engine.N);
     apply(true);
     sync();
-    later(T_FORM, () => {
-      stage0 = "form";
-      debug.phase = "form";
-      apply();
-    });
-    later(T_SETTLED, () => {
-      wantHandoff = !handed && !frozen;
-    });
-    later(T_CALM, () => {
-      opening = "done";
-      stage0 = "calm";
-      debug.phase = "calm";
-      governor.locked = false;
-      apply();
-    });
   })().catch(() => goOff("boot error"));
 
   /* ---------- pauses ---------- */
@@ -573,16 +571,12 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       // Stop (an opening in progress is dropped), draw one frame on the paper ground so the
       // fading canvas never shows the dark ground, and hand back to the DOM wordmark.
       sync();
-      ramp = null;
-      engine.glyphLevel = 1;
       engine.redraw();
       conceal(XF_THEME);
       return;
     }
     if (!targets) return; // still booting: the boot path decides.
     if (opening !== "done") settleNow();
-    handed = true;
-    wantHandoff = false;
     engine.redraw();
     present(XF_THEME);
     poke();
@@ -631,8 +625,6 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       engine.setTargets(t, pointCss(next.fs));
       engine.dimPx = dimPx(next.fs);
       settleNow();
-      handed = true;
-      wantHandoff = false;
       engine.redraw();
       present(XF_REFIT);
       poke();
@@ -649,8 +641,6 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       // Same task as the layout change, before paint: freeze the last frame where the text is now.
       frozen = layout;
       stage.dataset.refit = "";
-      wantHandoff = false;
-      ramp = null;
       sync();
       if (stage.hasAttribute("data-show")) conceal(XF_REFIT);
     }
@@ -668,7 +658,6 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   return () => {
     teardown();
     unpin();
-    delete hero.dataset.fx;
     hero.style.removeProperty("--fx-xfade");
     delete stage.dataset.ready;
     delete stage.dataset.show;

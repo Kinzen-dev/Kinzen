@@ -18,6 +18,8 @@ precision highp float;
 uniform highp sampler2D uPos, uVel, uTarget;
 uniform float uDt, uTime, uSpring, uDamp, uTurb, uTurbScale, uTurbSpeed, uDrift;
 uniform float uDustSpring, uDustTurb, uGlyphPointer;
+// Opening clock (s) and each particle's release window; uGate < 0 = every particle free.
+uniform float uGate, uGate0, uGateSpan;
 uniform vec3 uMouse;
 uniform float uMouseOn, uMouseR, uMouseF;
 uniform vec4 uPulse[4];
@@ -89,7 +91,16 @@ void main(){
   vec3 v = V.xyz;
   float seed = P.w;
   float role = T.w;
-  vec3 acc = (T.xyz - p) * uSpring * mix(uDustSpring, 1.0, role);
+  // Staggered release: each particle feels its spring from its own moment in the opening (squared,
+  // so most go early and the last few trail in), ramped over 0.3 s so none of them jerks.
+  float gate = 1.0;
+  if (uGate >= 0.0) {
+    // Hashed from the texel, not the seed: a half-float sim texture would quantise the seed.
+    float u = fract(sin(dot(vec2(tc), vec2(12.9898, 78.233))) * 43758.5453);
+    float d = uGate0 + uGateSpan * u * u;
+    gate = smoothstep(d, d + 0.3, uGate);
+  }
+  vec3 acc = (T.xyz - p) * uSpring * mix(uDustSpring, 1.0, role) * gate;
   acc += curl(p * uTurbScale + vec3(0.0, uTime * uTurbSpeed, 0.0)) * uTurb * mix(uDustTurb, 1.0, role);
   acc += vec3(0.0, uDrift * (0.4 + seed), 0.0);
   if (uMouseOn > 0.5) {
@@ -120,7 +131,7 @@ export const pointVS = `#version 300 es
 precision highp float;
 uniform highp sampler2D uPos, uVel, uCol, uTarget;
 uniform mat4 uVP;
-uniform float uSide, uPointPx, uIntensity, uLight, uLand, uGlyph, uDimR;
+uniform float uSide, uPointPx, uIntensity, uLight, uLand, uOpen, uSpeck, uAirLvl, uDimR;
 uniform vec3 uHot;
 out vec3 vCol;
 out float vAir;
@@ -137,11 +148,14 @@ void main(){
   vCol = col * uIntensity;
   vAir = 1.0;
   vec4 T = texelFetch(uTarget, tc, 0);
-  // Hand-off: a glyph particle near its letter shines at uGlyph (dim under the DOM wordmark,
-  // raised in step with its fade); dust and anything still in the air keep full brightness.
-  if (uGlyph < 0.999) {
-    float near = T.w * (1.0 - smoothstep(0.3 * uDimR, uDimR, length(P.xy - T.xy)));
-    vCol *= mix(1.0, uGlyph, near);
+  // Opening: the name condenses out of nothing. In the air only a sparse share of the particles
+  // shows (uSpeck, at uAirLvl): a thin even dust, never a cloud. Every particle lights up over the
+  // last uDimR of its way in, so a letter brightens exactly as its density rises. uOpen -> 1 hands
+  // back to the plain field (scroll-out dust, pointer stirs) once the word has formed.
+  if (uOpen < 0.999) {
+    float near = 1.0 - smoothstep(0.25 * uDimR, uDimR, length(P.xy - T.xy));
+    float speck = step(fract(sin(dot(vec2(tc), vec2(39.3468, 11.1353))) * 24634.6345), uSpeck) * uAirLvl;
+    vCol *= mix(max(near, speck), 1.0, uOpen);
   }
   // Paper only: ink prints where it lands. A glyph particle on (within uLand of) its letter
   // writes "landed" density (rgb); anything still in the air, and the dust halo, writes "airborne"

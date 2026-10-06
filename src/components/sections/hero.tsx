@@ -6,8 +6,16 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { BangkokTime } from "../clock";
 
 /**
- * The first screen. The wordmark is real server-rendered text and the LCP element;
- * the particle field (when the device allows it) is layered in through `fx`.
+ * The first screen. The wordmark is real server-rendered text; the particle field (when the
+ * device allows it) is layered in through `fx`.
+ * When the field is going to run (dark theme, motion allowed, hardware WebGL2: decided before
+ * paint by ThemeScript, html[data-fx="pending"]) the wordmark is held at opacity 0 and the dust
+ * condenses into the name instead, so the LCP element is the hero line paragraph below the h1,
+ * painted with the first frame. Measured on the production build (M2, metal): 72 to 228 ms
+ * unthrottled, 208 to 292 ms at 4x CPU, desktop 1440 and phone 390. In the light theme, under
+ * reduced motion and on software GL the wordmark itself is the LCP (72 to 164 ms, 4x CPU 216 to
+ * 456 ms). Only if the field fails after the gate does the wordmark become a late LCP entry, when
+ * fx.css reveals it (at once on a failure the field reports, by 1.8 s at worst).
  */
 export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; fx?: ReactNode }) {
   const email = links.find((l) => l.kind === "email");
