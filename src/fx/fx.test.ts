@@ -1,0 +1,153 @@
+import { describe, expect, it } from "vitest";
+import { WORDMARK } from "./baked/wordmark";
+import { WORDMARK_EM } from "./baked/geometry";
+import { decodeMask, indexMask } from "./targets/mask";
+import { burstSeed, sampleWordmark } from "./targets/sample-mask";
+import { FrameCap } from "./engine/frame-cap";
+import { Governor } from "./engine/governor";
+import { isSoftwareRenderer, pickTier, type Env } from "./engine/capability";
+
+describe("baked wordmark mask", () => {
+  it("decodes to exactly the baked ink count and a plausible geometry", () => {
+    const bits = decodeMask(WORDMARK);
+    expect(bits.length).toBe(WORDMARK.w * WORDMARK.h);
+    expect(bits.reduce((a, b) => a + b, 0)).toBe(WORDMARK.ink);
+    // Six capitals: wide and short, cap height about 0.7em.
+    expect(WORDMARK_EM.w / WORDMARK_EM.h).toBeGreaterThan(3.5);
+    expect(WORDMARK_EM.h).toBeGreaterThan(0.6);
+    expect(WORDMARK_EM.h).toBeLessThan(0.8);
+  });
+
+  it("indexes edges as a minority subset of ink", () => {
+    const m = indexMask(WORDMARK);
+    expect(m.ink.length).toBe(WORDMARK.ink);
+    expect(m.edge.length).toBeGreaterThan(0);
+    expect(m.edge.length).toBeLessThan(m.ink.length * 0.2);
+  });
+});
+
+describe("target sampling", () => {
+  const mask = indexMask(WORDMARK);
+  const ink = { x: 20, y: 60, w: 1300, h: 300 };
+  const k = 0.02;
+  const t = sampleWordmark(mask, { N: 4096, cw: 1440, ch: 600, ink, k, gold: [214, 168, 90], dustShare: 0.1, edgeShare: 0.3 });
+
+  it("puts glyph particles inside the ink box and tags roles", () => {
+    let glyphs = 0;
+    for (let i = 0; i < 4096; i++) {
+      const o = i * 4;
+      const role = t.pos[o + 3];
+      expect(role === 0 || role === 1).toBe(true);
+      if (role !== 1) continue;
+      glyphs++;
+      const px = t.pos[o] / k + 720;
+      const py = -t.pos[o + 1] / k + 300;
+      expect(px).toBeGreaterThanOrEqual(ink.x - 1e-6);
+      expect(px).toBeLessThanOrEqual(ink.x + ink.w + 1e-6);
+      expect(py).toBeGreaterThanOrEqual(ink.y - 1e-6);
+      expect(py).toBeLessThanOrEqual(ink.y + ink.h + 1e-6);
+    }
+    expect(glyphs).toBe(t.glyphs);
+    expect(glyphs / 4096).toBeGreaterThan(0.85);
+    expect(t.glyphArea).toBeGreaterThan(0);
+  });
+
+  it("never emits white or black particles", () => {
+    for (let i = 0; i < 4096; i++) {
+      const [r, g, b] = [t.col[i * 4], t.col[i * 4 + 1], t.col[i * 4 + 2]];
+      expect(Math.min(r, g, b)).toBeLessThan(240);
+      expect(Math.max(r, g, b)).toBeGreaterThan(20);
+    }
+  });
+
+  it("bursts from the given origin", () => {
+    const b = burstSeed({ N: 512, origin: [3, -1], speed: 10 });
+    for (let i = 0; i < 512; i++) {
+      expect(Math.abs(b.pos[i * 4] - 3)).toBeLessThan(0.3);
+      expect(Math.abs(b.pos[i * 4 + 1] + 1)).toBeLessThan(0.3);
+    }
+  });
+});
+
+describe("frame cap", () => {
+  it("caps a 240 Hz stream to about 120 fps and reports raw deltas", () => {
+    const cap = new FrameCap(120);
+    let rendered = 0;
+    const raws: number[] = [];
+    for (let i = 0; i <= 240; i++) {
+      const raw = cap.accept(i * (1000 / 240));
+      if (raw >= 0) {
+        rendered++;
+        if (raw > 0) raws.push(raw);
+      }
+    }
+    expect(rendered).toBeGreaterThanOrEqual(119);
+    expect(rendered).toBeLessThanOrEqual(122);
+    expect(Math.max(...raws)).toBeLessThan(9);
+  });
+});
+
+describe("governor", () => {
+  const feed = (g: Governor, ms: number, frames: number, t0 = 0) => {
+    let now = t0;
+    let last: ReturnType<Governor["sample"]> = null;
+    const out: NonNullable<ReturnType<Governor["sample"]>>[] = [];
+    for (let i = 0; i < frames; i++) {
+      now += ms;
+      last = g.sample(ms, now);
+      if (last) out.push(last);
+    }
+    return { out, now };
+  };
+
+  it("kills the field when the first frames are slow (software GL)", () => {
+    const g = new Governor({ maxShift: 2 });
+    const { out } = feed(g, 60, 40);
+    expect(out.some((v) => "kill" in v)).toBe(true);
+  });
+
+  it("sees below 20 fps (raw deltas, not the clamped sim dt)", () => {
+    const g = new Governor({ maxShift: 2 });
+    feed(g, 8.33, 60);
+    g.locked = false;
+    const { out } = feed(g, 80, 60, 1000);
+    expect(g.fps).toBeLessThan(20);
+    expect(out.some((v) => "level" in v)).toBe(true);
+  });
+
+  it("degrades resolution first, then particle rows, then recovers", () => {
+    const g = new Governor({ maxShift: 2 });
+    let { now } = feed(g, 16.7, 60);
+    g.locked = false;
+    ({ now } = feed(g, 30, 600, now));
+    expect(g.level.scale).toBe(0.5);
+    expect(g.level.shift).toBeGreaterThan(0);
+    feed(g, 16.7, 3000, now);
+    expect(g.level).toEqual({ scale: 1, shift: 0 });
+  });
+
+  it("ignores one stall in the probe (someone else's long task)", () => {
+    const g = new Governor({ maxShift: 2 });
+    feed(g, 16.7, 5);
+    expect(g.sample(400, 500)).toBeNull();
+    const { out } = feed(g, 16.7, 40, 500);
+    expect(out.some((v) => "kill" in v)).toBe(false);
+    expect(g.probe).toBe("ok");
+  });
+});
+
+describe("capability tiers", () => {
+  const env: Env = { fx: null, saveData: false, reducedMotion: false, coarse: false, memory: 8, cores: 10 };
+
+  it("detects software renderers", () => {
+    expect(isSoftwareRenderer("ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)))")).toBe(true);
+    expect(isSoftwareRenderer("llvmpipe (LLVM 15.0.7, 256 bits)")).toBe(true);
+    expect(isSoftwareRenderer("ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro)")).toBe(false);
+  });
+
+  it("forces off without a GPU context, on fx=off and on Save-Data", () => {
+    expect(pickTier(env, null).tier).toBe("off");
+    expect(pickTier({ ...env, fx: "off" }, null).tier).toBe("off");
+    expect(pickTier({ ...env, saveData: true }, null).tier).toBe("off");
+  });
+});

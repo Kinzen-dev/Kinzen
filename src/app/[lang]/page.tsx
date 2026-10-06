@@ -7,6 +7,7 @@ import { Practice } from "@/components/sections/practice";
 import { Skills } from "@/components/sections/skills";
 import { About } from "@/components/sections/about";
 import { Contact } from "@/components/sections/contact";
+import { HeroFx } from "@/fx/react/hero-fx";
 import { Doodle } from "@/components/doodles/doodle";
 import { AgentDemo } from "@/components/agent-demo/agent-demo";
 
@@ -31,7 +32,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
   return (
     <>
-      <Hero locale={locale} dict={dict} />
+      <Hero locale={locale} dict={dict} fx={<HeroFx />} />
       <Work locale={locale} dict={dict} />
       <Experience locale={locale} dict={dict} />
       <Practice locale={locale} dict={dict} icons={practiceIcons} demo={<AgentDemo copy={dict.demo} />} />

@@ -38,7 +38,9 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           <span data-masthead-mark className="text-[1.0625rem]">
             KINZEN
           </span>
-          <span className="hidden text-sm font-normal text-ink-3 sm:inline">Kittipong Khonthong</span>
+          <span data-masthead-name className="hidden text-sm font-normal text-ink-3 sm:inline">
+            Kittipong Khonthong
+          </span>
         </Link>
 
         <nav aria-label={dict.a11y.mainNav} className="hidden lg:block">
