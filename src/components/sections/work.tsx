@@ -53,7 +53,7 @@ export function Work({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody data-reveal-group>
           {projects.map((p) => (
             <tr key={p.id} className="border-b border-rule align-top">
               <th scope="row" className="py-5 pr-4 font-normal">
