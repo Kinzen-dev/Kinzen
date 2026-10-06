@@ -1,0 +1,52 @@
+/* ------------------------------------------------------------------
+   Numbers strip (v3-03). Light scene; four pastel cards, symmetric
+   --inset-card padding, figures on a shared baseline row.
+   ------------------------------------------------------------------ */
+.numbers {
+  padding-top: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
+}
+.numbers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+@media (min-width: 64rem) {
+  .numbers-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+.numbers-card {
+  display: grid;
+  /* note / figure / label: the figures line up across a row whatever the label length. */
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+  gap: 0.5rem;
+  padding: var(--inset-card);
+  border-radius: var(--radius-card);
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  box-shadow: var(--shadow-soft);
+}
+.numbers-note {
+  color: color-mix(in oklab, var(--pastel-ink) 72%, transparent);
+}
+.numbers-value {
+  font-size: clamp(3.25rem, 1.6rem + 5.2vw, 7rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  margin-top: clamp(0.75rem, 0.25rem + 1.5vw, 2rem);
+}
+.numbers-label {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  align-self: end;
+  text-wrap: balance;
+}
+@media (min-width: 48rem) {
+  .numbers-label {
+    font-size: var(--text-base);
+    line-height: 1.45;
+  }
+}
