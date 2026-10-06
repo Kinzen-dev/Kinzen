@@ -1,5 +1,5 @@
 import type { MaskIndex } from "./mask";
-import type { Burst, BurstJob, Rgb, TargetJob, Targets } from "./types";
+import type { Burst, Rgb, ScatterJob, TargetJob, Targets } from "./types";
 
 // Pure samplers. They run in the worker (targets/worker.ts) and, as a fallback, on the main thread.
 
@@ -84,29 +84,26 @@ export function sampleWordmark(mask: MaskIndex, job: TargetJob): Targets {
   return { pos, col, glyphs, glyphArea: mask.ink.length * sx * sy };
 }
 
-/** A point burst: everything starts near the origin and flies out on random directions. */
-export function burstSeed(job: BurstJob): Burst {
-  const { N, origin, speed } = job;
+/**
+ * The opening seed: every particle starts somewhere in a wide, even dust field over the whole
+ * stage box and a little past its edges (`box`, world units), nearly at rest, with a shallow z
+ * spread. No point of origin, so no dense core can form: the stage only lets a sparse share of it
+ * show while it is in the air, and each particle lights up as it lands on its letter.
+ */
+export function scatterSeed(job: ScatterJob): Burst {
+  const { N, box } = job;
   const pos = new Float32Array(N * 4);
   const vel = new Float32Array(N * 4);
+  const w = box.x1 - box.x0,
+    h = box.y1 - box.y0;
   for (let i = 0; i < N; i++) {
     const o = i * 4;
-    const z = Math.random() * 2 - 1;
-    const a = Math.random() * Math.PI * 2;
-    const rr = Math.sqrt(1 - z * z);
-    // Flatten the sphere so the burst reads as a planar bloom across the wordmark band.
-    const d0 = rr * Math.cos(a),
-      d1 = z * 0.55,
-      d2 = rr * Math.sin(a) * 0.4;
-    const r = Math.random() * 0.25;
-    const s = speed * (0.35 + Math.random());
-    pos[o] = origin[0] + d0 * r;
-    pos[o + 1] = origin[1] + d1 * r;
-    pos[o + 2] = d2 * r;
+    pos[o] = box.x0 + Math.random() * w;
+    pos[o + 1] = box.y0 + Math.random() * h;
+    pos[o + 2] = gauss() * 0.3;
     pos[o + 3] = Math.random();
-    vel[o] = d0 * s;
-    vel[o + 1] = d1 * s;
-    vel[o + 2] = d2 * s;
+    vel[o] = gauss() * 0.04;
+    vel[o + 1] = gauss() * 0.04;
   }
   return { pos, vel };
 }

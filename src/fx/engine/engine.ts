@@ -96,12 +96,18 @@ export class ParticleEngine {
   /** Overall fade (scroll-out), 0..1. */
   fade = 1;
   /**
-   * Brightness of glyph particles that have landed on (are within dimPx of) their letter, 0..1.
-   * The opening keeps landed letters dim under the DOM wordmark and the stage raises this in step
-   * with the DOM fade, so the hand-off is one wordmark changing colour, never two stacked.
+   * The opening (the stage drives these per frame). While `open` < 1, a particle in the air is
+   * hidden unless it is one of the sparse `speck` share (shown at `airLvl`), and every particle
+   * lights up over the last `dimPx` CSS px of its way to its target. `open` = 1 is the plain field.
    */
-  glyphLevel = 1;
+  open = 1;
+  speck = 0;
+  airLvl = 0;
   dimPx = 20;
+  /** Staggered release, seconds: particle i feels its spring from gate0 + gateSpan * u_i^2. */
+  gate0 = 0.1;
+  gateSpan = 0.8;
+  private gateAt = -1;
   stats: Stats = { fps: 0, side: 0, drawn: 0, w: 0, h: 0, dpr: 1 };
   /** Called after every rendered frame with the raw ms since the previous one. */
   onFrame: ((raw: number, now: number) => void) | null = null;
@@ -135,8 +141,6 @@ export class ParticleEngine {
   private ro: ResizeObserver | null = null;
   private cap: FrameCap;
   private hasTargets = false;
-  private targetPos: Float32Array | null = null;
-  private readback: Float32Array | null = null;
   // Paper ink (light theme only), tuned against filmstrips: landed-ink gain and its blur radius
   // (in point sizes, so small wordmarks stay crisp), airborne-dust gain and its coverage cap.
   /** A glyph particle prints as ink within this many CSS px of its target; farther, it is dust. */
@@ -300,43 +304,20 @@ export class ParticleEngine {
     gl.bindTexture(gl.TEXTURE_2D, sim.col);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, this.side, this.side, 0, gl.RGBA, gl.UNSIGNED_BYTE, t.col);
     this.layout = { pointCss, glyphs: Math.max(1, t.glyphs), glyphArea: Math.max(1, t.glyphArea) };
-    this.targetPos = t.pos;
     this.hasTargets = true;
   }
 
-  /**
-   * Measured convergence: mean distance (CSS px, z ignored) between glyph particles and their
-   * targets over the first `rows` texture rows (always simulated, a random sample since targets
-   * are drawn at random). One small synchronous readback; call it a few times a second at most.
-   * Returns null when it cannot be measured.
-   */
-  convergence(rows = 2): number | null {
-    const gl = this.gl,
-      sim = this.sim,
-      scr = this.scr,
-      tp = this.targetPos;
-    if (!sim || !scr || !tp || gl.isContextLost()) return null;
-    const n = this.side * Math.min(rows, this.side);
-    if (!this.readback || this.readback.length !== n * 4) this.readback = new Float32Array(n * 4);
-    const buf = this.readback;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, sim.fbo[sim.cur]);
-    gl.readBuffer(gl.COLOR_ATTACHMENT0);
-    gl.readPixels(0, 0, this.side, Math.min(rows, this.side), gl.RGBA, gl.FLOAT, buf);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    if (gl.getError() !== gl.NO_ERROR) return null;
-    let sum = 0,
-      cnt = 0;
-    for (let i = 0; i < n; i++) {
-      const o = i * 4;
-      if (tp[o + 3] < 0.5) continue;
-      sum += Math.hypot(buf[o] - tp[o], buf[o + 1] - tp[o + 1]);
-      cnt++;
-    }
-    if (!cnt || !Number.isFinite(sum)) return null;
-    return sum / cnt / worldPerPx(scr.ch);
+  /** Start the staggered release now (the opening clock reads 0 on the next step). */
+  beginGate(): void {
+    this.gateAt = this.time;
   }
 
-  /** Reset particle state (a burst, or positions already at the target). */
+  /** Every particle free: the plain spring from here on. */
+  endGate(): void {
+    this.gateAt = -1;
+  }
+
+  /** Reset particle state (the opening scatter, or positions already at the target). */
   seed(b: Burst): void {
     const gl = this.gl;
     const sim = this.sim;
@@ -585,6 +566,9 @@ export class ParticleEngine {
     gl.uniform1f(u.uDustSpring, P.dustSpring);
     gl.uniform1f(u.uDustTurb, P.dustTurb);
     gl.uniform1f(u.uGlyphPointer, P.glyphPointer);
+    gl.uniform1f(u.uGate, this.gateAt < 0 ? -1 : this.time - this.gateAt);
+    gl.uniform1f(u.uGate0, this.gate0);
+    gl.uniform1f(u.uGateSpan, this.gateSpan);
     gl.uniform3fv(u.uMouse, this.mouse.world);
     gl.uniform1f(u.uMouseOn, this.mouse.on);
     gl.uniform1f(u.uMouseR, P.mouseR);
@@ -645,7 +629,9 @@ export class ParticleEngine {
     gl.uniform3fv(u.uHot, this.palette.hot);
     gl.uniform1f(u.uLight, this.palette.mode);
     gl.uniform1f(u.uLand, this.landPx * worldPerPx(scr.ch));
-    gl.uniform1f(u.uGlyph, this.glyphLevel);
+    gl.uniform1f(u.uOpen, this.open);
+    gl.uniform1f(u.uSpeck, this.speck);
+    gl.uniform1f(u.uAirLvl, this.airLvl);
     gl.uniform1f(u.uDimR, this.dimPx * worldPerPx(scr.ch));
     gl.drawArrays(gl.POINTS, 0, drawn);
     gl.disable(gl.BLEND);

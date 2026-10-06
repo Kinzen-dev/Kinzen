@@ -3,7 +3,7 @@
 // The 262k-particle sampling loop is the ~100 ms long task SIAN pays on the main thread.
 import { WORDMARK } from "../baked/wordmark";
 import { indexMask, type MaskIndex } from "./mask";
-import { burstSeed, sampleWordmark } from "./sample-mask";
+import { sampleWordmark, scatterSeed } from "./sample-mask";
 import type { WorkerRequest, WorkerResponse } from "./protocol";
 
 let mask: MaskIndex | null = null;
@@ -20,8 +20,8 @@ scope.onmessage = (e) => {
       const t = sampleWordmark(mask, req.job);
       scope.postMessage({ id: req.id, kind: "targets", targets: t }, [t.pos.buffer, t.col.buffer]);
     } else {
-      const b = burstSeed(req.job);
-      scope.postMessage({ id: req.id, kind: "burst", burst: b }, [b.pos.buffer, b.vel.buffer]);
+      const b = scatterSeed(req.job);
+      scope.postMessage({ id: req.id, kind: "scatter", burst: b }, [b.pos.buffer, b.vel.buffer]);
     }
   } catch (err) {
     scope.postMessage({ id: req.id, kind: "error", message: String(err) }, []);

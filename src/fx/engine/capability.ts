@@ -65,7 +65,8 @@ export const TIER_CONFIG: Record<Exclude<Tier, "off">, TierConfig> = {
   },
 };
 
-const SOFTWARE = /swiftshader|llvmpipe|softpipe|software|basic render|microsoft basic|mesa offscreen/i;
+/** Also compiled into the pre-paint gate (components/theme-script.tsx), so both agree. */
+export const SOFTWARE = /swiftshader|llvmpipe|softpipe|software|basic render|microsoft basic|mesa offscreen/i;
 
 export function isSoftwareRenderer(renderer: string): boolean {
   return SOFTWARE.test(renderer);

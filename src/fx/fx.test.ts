@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { WORDMARK } from "./baked/wordmark";
 import { WORDMARK_EM } from "./baked/geometry";
 import { decodeMask, indexMask } from "./targets/mask";
-import { burstSeed, sampleWordmark } from "./targets/sample-mask";
+import { sampleWordmark, scatterSeed } from "./targets/sample-mask";
 import { FrameCap } from "./engine/frame-cap";
 import { Governor } from "./engine/governor";
 import { isSoftwareRenderer, pickTier, TIER_CONFIG, type Env } from "./engine/capability";
@@ -70,12 +70,26 @@ describe("target sampling", () => {
     }
   });
 
-  it("bursts from the given origin", () => {
-    const b = burstSeed({ N: 512, origin: [3, -1], speed: 10 });
-    for (let i = 0; i < 512; i++) {
-      expect(Math.abs(b.pos[i * 4] - 3)).toBeLessThan(0.3);
-      expect(Math.abs(b.pos[i * 4 + 1] + 1)).toBeLessThan(0.3);
+  it("scatters the opening dust evenly over the box: no core, nearly at rest", () => {
+    const box = { x0: -12, y0: -4, x1: 12, y1: 5 };
+    const n = 20000;
+    const b = scatterSeed({ N: n, box });
+    // A 6 x 3 grid of cells: an even field puts about n / 18 in each, a burst would pile into one.
+    const cells = new Array(18).fill(0);
+    for (let i = 0; i < n; i++) {
+      const x = b.pos[i * 4],
+        y = b.pos[i * 4 + 1];
+      expect(x).toBeGreaterThanOrEqual(box.x0);
+      expect(x).toBeLessThanOrEqual(box.x1);
+      expect(y).toBeGreaterThanOrEqual(box.y0);
+      expect(y).toBeLessThanOrEqual(box.y1);
+      expect(Math.hypot(b.vel[i * 4], b.vel[i * 4 + 1])).toBeLessThan(0.3);
+      const cx = Math.min(5, Math.floor(((x - box.x0) / (box.x1 - box.x0)) * 6));
+      const cy = Math.min(2, Math.floor(((y - box.y0) / (box.y1 - box.y0)) * 3));
+      cells[cy * 6 + cx]++;
     }
+    expect(Math.max(...cells) / (n / 18)).toBeLessThan(1.25);
+    expect(Math.min(...cells) / (n / 18)).toBeGreaterThan(0.75);
   });
 });
 

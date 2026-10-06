@@ -31,12 +31,10 @@ export type TargetJob = {
   edgeShare: number;
 };
 
-export type BurstJob = {
+export type ScatterJob = {
   N: number;
-  /** Burst origin in world units. */
-  origin: readonly [number, number];
-  /** Initial speed scale (world units per second). */
-  speed: number;
+  /** The area the opening dust is spread over, in world units (x right, y up). */
+  box: { x0: number; y0: number; x1: number; y1: number };
 };
 
 export type Burst = { pos: Float32Array; vel: Float32Array };
