@@ -1,5 +1,5 @@
 import { site } from "./site";
-import type { Locale, Localized, LocalizedList, Project } from "./schema";
+import type { Locale, Localized, LocalizedList, Project, SkillGroup } from "./schema";
 
 export type { Locale, Localized, LocalizedList } from "./schema";
 export { locales, defaultLocale } from "./schema";
@@ -11,6 +11,11 @@ export function t(value: Localized, locale: Locale): string {
 
 export function tList(value: LocalizedList, locale: Locale): string[] {
   return (locale === "th" && value.th) || value.en;
+}
+
+/** Skill items are plain names (same in every language) or localized phrases. */
+export function skillItems(group: SkillGroup, locale: Locale): string[] {
+  return group.items.map((item) => (typeof item === "string" ? item : t(item, locale)));
 }
 
 const isPublic = <T extends { visibility: "public" | "hidden" }>(item: T) => item.visibility === "public";

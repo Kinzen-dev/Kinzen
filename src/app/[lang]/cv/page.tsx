@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
-import { education, experience, languages, links, profile, projects, skills, t } from "@/content";
+import { education, experience, languages, links, profile, projects, skillItems, skills, t } from "@/content";
 import { getDictionary } from "@/i18n/dictionaries";
 import { alternates, localePath, SITE_URL } from "@/lib/site-url";
 import { monthYear } from "@/components/timeline/format";
@@ -140,7 +140,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
           {skills.map((group) => (
             <div key={group.id} className="cv-skill-row">
               <dt>{t(group.label, locale)}</dt>
-              <dd>{group.items.join(", ")}</dd>
+              <dd>{skillItems(group, locale).join(", ")}</dd>
             </div>
           ))}
         </dl>

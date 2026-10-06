@@ -51,7 +51,7 @@
   --color-gold-ink: var(--gold-ink);
 
   --font-sans: var(--font-geist), var(--font-thai), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-mono: var(--font-geist-mono), var(--font-thai), ui-monospace, "SF Mono", Menlo, monospace;
 
   --ease-out-expo: var(--ease-out);
 

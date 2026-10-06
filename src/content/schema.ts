@@ -122,7 +122,11 @@ export type Project = z.infer<typeof project>;
 export const practice = z.object({ id: nonEmpty, title: localized, text: localized, provenance });
 export type Practice = z.infer<typeof practice>;
 
-export const skillGroup = z.object({ id: nonEmpty, label: localized, items: z.array(nonEmpty).min(1) });
+export const skillGroup = z.object({
+  id: nonEmpty,
+  label: localized,
+  items: z.array(z.union([nonEmpty, localized])).min(1),
+});
 export type SkillGroup = z.infer<typeof skillGroup>;
 
 export const education = z.object({

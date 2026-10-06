@@ -14,18 +14,18 @@ const content: SiteContentInput = {
     displayName: { en: "Kittipong Khonthong", th: "กฤติพงษ์ ก้อนทอง" },
     preferredName: "King",
     handle: "Kinzen",
-    role: { en: "Senior Full-Stack Engineer", th: "วิศวกรซอฟต์แวร์ full-stack" },
+    role: { en: "Senior Full-Stack Engineer", th: "วิศวกร full-stack ระดับ senior" },
     heroLine: {
       en: "I build production software end to end: TypeScript backends, Shopify platforms, and AI voice and LINE products with guardrails written in code.",
-      th: "ผมสร้างซอฟต์แวร์ที่ใช้งานจริงครบทั้งระบบ ตั้งแต่ระบบหลังบ้าน TypeScript แพลตฟอร์ม Shopify ไปจนถึง AI รับสายและตอบแชท LINE ที่มีกฎความปลอดภัยเขียนเป็นโค้ด",
+      th: "ผมสร้างซอฟต์แวร์ที่ใช้งานจริงครบทั้งระบบ: ระบบหลังบ้านด้วย TypeScript แพลตฟอร์ม Shopify และผลิตภัณฑ์ AI รับสายและตอบแชท LINE ที่มีกฎกำกับเขียนไว้ในโค้ด",
     },
     oneLiner: {
       en: "Senior full-stack engineer and founder of Vesperwerk. Seven years shipping production TypeScript systems, from Shopify commerce platforms to AI voice and LINE products.",
-      th: "วิศวกรซอฟต์แวร์ full-stack และผู้ก่อตั้ง Vesperwerk ทำระบบ TypeScript ที่ใช้งานจริงมาเจ็ดปี ตั้งแต่แพลตฟอร์มอีคอมเมิร์ซบน Shopify ไปจนถึงผลิตภัณฑ์ AI ด้านเสียงและ LINE",
+      th: "วิศวกร full-stack ระดับ senior และผู้ก่อตั้ง Vesperwerk ทำระบบ TypeScript ที่ใช้งานจริงมา 7 ปี ตั้งแต่แพลตฟอร์มอีคอมเมิร์ซบน Shopify ไปจนถึงผลิตภัณฑ์ AI ด้านเสียงและ LINE",
     },
     bioShort: {
       en: "I'm King, a senior full-stack engineer in Bangkok. I spent four years as Tech Lead for AnyMind Group's EC Platform, building Shopify storefronts, apps and headless builds. Today I run Vesperwerk, a small software studio, where I build AI voice and LINE products with deterministic guardrails.",
-      th: "ผมชื่อกฤติพงษ์ ก้อนทอง เรียกผมว่าคิงก็ได้ เป็นวิศวกรซอฟต์แวร์ full-stack อยู่กรุงเทพฯ สี่ปีที่ผ่านมาผมเป็น Tech Lead ดูแล EC Platform ที่ AnyMind Group (หน้าร้าน แอป และระบบ headless บน Shopify) ตอนนี้ผมทำ Vesperwerk สตูดิโอซอฟต์แวร์เล็ก ๆ ของตัวเอง สร้างผลิตภัณฑ์ AI ด้านเสียงและ LINE ที่มีชุดตรวจคำตอบเขียนเป็นโค้ด",
+      th: "ผมคิง วิศวกร full-stack ระดับ senior อยู่กรุงเทพฯ เคยเป็น Tech Lead ดูแล EC Platform ของ AnyMind Group อยู่ 4 ปี ทำหน้าร้าน แอป และระบบ headless บน Shopify ตอนนี้ผมทำ Vesperwerk สตูดิโอซอฟต์แวร์เล็ก ๆ สร้างผลิตภัณฑ์ AI ด้านเสียงและ LINE ที่มีชุดตรวจแบบ deterministic กำกับทุกคำตอบ",
     },
     bioLong: {
       en: [
@@ -34,9 +34,9 @@ const content: SiteContentInput = {
         "Since April 2026 I run Vesperwerk, a small software studio. Its first product, Yimwhan AI, is a phone and LINE receptionist for dental clinics, with a deterministic safety guard that blocks diagnoses, dosing advice and cure claims in every patient-facing reply. I also built Helm, a macOS workspace where Claude Code, Codex, Kimi and Cursor agents work side by side.",
       ],
       th: [
-        "ผมทำงานกับระบบที่ใช้งานจริงมาเจ็ดปี เริ่มจากนักพัฒนา full-stack ที่ ZyGen (React, Next.js, NestJS บน Docker และ GKE) แล้วเป็น Tech Lead ดูแล EC Platform ที่ AnyMind Group ตั้งแต่ปี 2022 ถึง 2026 ทำหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์อย่าง Mizuno Thailand",
-        "ตั้งแต่เมษายน 2026 ผมเปิด Vesperwerk ผลงานแรกคือ Yimwhan AI ผู้ช่วยรับสายโทรศัพท์และตอบแชท LINE ให้คลินิกทันตกรรม มีชุดตรวจที่กันไม่ให้ AI วินิจฉัยโรค แนะนำยา หรืออ้างผลการรักษา ทุกคำตอบที่ถึงคนไข้ต้องผ่านชุดนี้ก่อน",
-        "ผมยังสร้าง Helm แอป macOS ที่ให้ agent อย่าง Claude Code, Codex, Kimi และ Cursor ทำงานเคียงข้างกัน",
+        "ผมชื่อกฤติพงษ์ ก้อนทอง คนส่วนใหญ่เรียกผมว่าคิง เป็นวิศวกร full-stack ระดับ senior ทำระบบที่ใช้งานจริงมา 7 ปี ทั้งอีคอมเมิร์ซ แพลตฟอร์มหลังบ้าน และผลิตภัณฑ์ AI",
+        "ปี 2022 ถึง 2026 ผมเป็น Tech Lead ดูแล EC Platform ของ AnyMind Group ทำหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์อย่าง Mizuno Thailand ด้วย Admin GraphQL API, Storefront API, Liquid, metafields และ app proxy ก่อนหน้านั้นผมเป็นนักพัฒนา full-stack ที่ ZyGen ทำแอปด้วย React, Next.js, Angular และ NestJS บน Docker และ GKE",
+        "ตั้งแต่เมษายน 2026 ผมทำ Vesperwerk สตูดิโอซอฟต์แวร์เล็ก ๆ ผลงานแรกคือ Yimwhan AI ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม มีชุดตรวจแบบ deterministic ที่กันการวินิจฉัย การแนะนำขนาดยา และการอ้างว่ารักษาหาย ในทุกคำตอบที่ถึงคนไข้ ผมยังสร้าง Helm แอป macOS ที่ให้ agent อย่าง Claude Code, Codex, Kimi และ Cursor ทำงานเคียงข้างกัน",
       ],
     },
     location: {
@@ -63,7 +63,7 @@ const content: SiteContentInput = {
       title: { en: "Agent teams", th: "ทีม agent" },
       text: {
         en: "AI coding agents run as a team: Claude Code and Codex with written roles, handoffs and one accountable lead.",
-        th: "ให้ AI agent ทำงานเป็นทีม Claude Code กับ Codex มีหน้าที่เขียนไว้ชัด ส่งงานต่อกันเป็นระบบ และมีคนรับผิดชอบหนึ่งคน",
+        th: "agent เขียนโค้ดทำงานกันเป็นทีม: Claude Code และ Codex มีหน้าที่เขียนไว้ชัด ส่งงานต่อกันเป็นขั้นตอน และมีหัวหน้าทีมหนึ่งเดียวที่รับผิดชอบ",
       },
       provenance: { claimId: "ai-teams", source: "CLAIMS", confidence: "APPROVED" },
     },
@@ -72,7 +72,7 @@ const content: SiteContentInput = {
       title: { en: "Evidence before merge", th: "มีหลักฐานก่อน merge" },
       text: {
         en: "Nothing merges without the full test suite on the exact commit, an independent review and UI screenshot QA.",
-        th: "ไม่มีโค้ดไหนเข้า main ถ้ายังไม่ผ่านเทสต์ทั้งชุดบน commit นั้นจริง ไม่ผ่านการตรวจจากอีกคน และไม่ผ่านการตรวจหน้าจอ",
+        th: "ไม่มีโค้ดไหน merge ได้ จนกว่าจะผ่านเทสต์ครบชุดบน commit นั้นจริง ผ่านการตรวจจากผู้ตรวจอิสระ และผ่านการตรวจ UI จากภาพหน้าจอ",
       },
       provenance: { claimId: "ai-evidence", source: "CLAIMS", confidence: "APPROVED" },
     },
@@ -81,7 +81,7 @@ const content: SiteContentInput = {
       title: { en: "Code over prompts", th: "กฎอยู่ในโค้ด ไม่ใช่ใน prompt" },
       text: {
         en: "Validators and state machines enforce output rules. Prompts stay thin; the rules that matter live in code and tests.",
-        th: "ใช้ validator และ state machine บังคับกฎของคำตอบ prompt สั้นไว้ กฎที่สำคัญอยู่ในโค้ดและเทสต์",
+        th: "validator และ state machine เป็นตัวบังคับกฎของคำตอบ prompt สั้นเท่าที่จำเป็น ส่วนกฎที่สำคัญอยู่ในโค้ดและเทสต์",
       },
       provenance: { claimId: "ai-guards", source: "CLAIMS", confidence: "APPROVED" },
     },
@@ -106,28 +106,28 @@ const content: SiteContentInput = {
         {
           text: {
             en: "Built Yimwhan AI, a phone and LINE receptionist for dental clinics, with a staff back office using Fastify, Twilio and the LINE Messaging API.",
-            th: "สร้าง Yimwhan AI ผู้ช่วยรับสายโทรศัพท์และตอบแชท LINE ให้คลินิกทันตกรรม พร้อมระบบหลังบ้านสำหรับพนักงาน ใช้ Fastify, Twilio และ LINE Messaging API",
+            th: "สร้าง Yimwhan AI ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมระบบหลังบ้านสำหรับพนักงานคลินิก ด้วย Fastify, Twilio และ LINE Messaging API",
           },
           provenance: { claimId: "exp-founder.bullet-1", source: "CLAIMS", confidence: "VERIFIED" },
         },
         {
           text: {
             en: "Built deterministic guards for patient-facing replies; a replay of 500 real customer messages passed all checks after code filters rescued 37 raw model violations.",
-            th: "สร้างชุดตรวจแบบ deterministic สำหรับคำตอบที่ถึงคนไข้ ทดสอบย้อนกับข้อความจริง 500 ข้อความ ผ่านทุกข้อ โดยตัวกรองในโค้ดดักคำตอบที่ผิดกฎจากโมเดลได้ 37 ครั้ง",
+            th: "สร้างชุดตรวจแบบ deterministic สำหรับคำตอบที่ถึงคนไข้ เมื่อนำข้อความจริงจากลูกค้า 500 ข้อความมารันซ้ำ ผ่านการตรวจครบทุกข้อ โดยตัวกรองในโค้ดดักคำตอบดิบจากโมเดลที่ผิดกฎไว้ได้ 37 ครั้ง",
           },
           provenance: { claimId: "exp-founder.bullet-2", source: "CLAIMS", confidence: "VERIFIED" },
         },
         {
           text: {
             en: "Traced stalled Thai calls to carrier silence suppression and restored audio processing with server-side silence-frame injection; Twilio support confirmed the cause.",
-            th: "ไล่หาสาเหตุสายภาษาไทยที่ค้างจนเจอว่าเป็นการตัดช่วงเงียบของเครือข่ายมือถือ แล้วแก้ด้วยการเติมเฟรมเงียบฝั่งเซิร์ฟเวอร์ ทีม Twilio ยืนยันสาเหตุเดียวกัน",
+            th: "ไล่หาสาเหตุที่สายภาษาไทยค้าง จนเจอว่าผู้ให้บริการเครือข่ายตัดช่วงเงียบทิ้ง แล้วทำให้การประมวลผลเสียงกลับมาทำงานด้วยการเติมเฟรมเงียบจากฝั่งเซิร์ฟเวอร์ ทีมซัพพอร์ตของ Twilio ยืนยันสาเหตุนี้",
           },
           provenance: { claimId: "exp-founder.bullet-3", source: "CLAIMS", confidence: "STATED" },
         },
         {
           text: {
             en: "Built Helm in Tauri 2, Rust and TypeScript: a macOS agent workspace used daily as the primary development environment.",
-            th: "สร้าง Helm ด้วย Tauri 2, Rust และ TypeScript เป็นพื้นที่ทำงานของ agent บน macOS ที่ใช้เป็นเครื่องมือพัฒนาหลักทุกวัน",
+            th: "สร้าง Helm ด้วย Tauri 2, Rust และ TypeScript: พื้นที่ทำงานของ agent บน macOS ที่ผมใช้เป็นเครื่องมือพัฒนาหลักทุกวัน",
           },
           provenance: { claimId: "exp-founder.bullet-5", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -143,7 +143,7 @@ const content: SiteContentInput = {
       location: { en: "Remote", th: "ทำงานทางไกล" },
       summary: {
         en: "Led engineering for the EC Platform: Shopify storefronts, apps and headless commerce for brands.",
-        th: "ดูแลงานวิศวกรรมของ EC Platform ทั้งหน้าร้าน แอป และระบบ headless commerce บน Shopify ให้แบรนด์ต่าง ๆ",
+        th: "นำงานวิศวกรรมของ EC Platform: หน้าร้าน แอป และระบบ headless commerce บน Shopify ให้แบรนด์ต่าง ๆ",
       },
       stack: ["Shopify", "GraphQL", "Liquid", "Next.js", "TypeScript"],
       visibility: "public",
@@ -151,28 +151,28 @@ const content: SiteContentInput = {
         {
           text: {
             en: "Led EC Platform engineering: Shopify storefronts, apps and headless builds, including Mizuno Thailand.",
-            th: "นำทีมวิศวกรรม EC Platform ทำหน้าร้าน แอป และระบบ headless บน Shopify รวมถึง Mizuno Thailand",
+            th: "คุมงานวิศวกรรม EC Platform ทั้งหน้าร้าน แอป และระบบ headless บน Shopify รวมถึงงานของ Mizuno Thailand",
           },
           provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "VERIFIED" },
         },
         {
           text: {
             en: "Delivered Shopify integrations using the Admin GraphQL and Storefront APIs, Liquid, metafields and app proxies, alongside Next.js services.",
-            th: "ส่งมอบงานเชื่อมต่อ Shopify ด้วย Admin GraphQL API, Storefront API, Liquid, metafields และ app proxy ควบคู่กับบริการที่เขียนด้วย Next.js",
+            th: "ทำงานเชื่อมต่อ Shopify ด้วย Admin GraphQL API, Storefront API, Liquid, metafields และ app proxy ควบคู่กับเซอร์วิสที่เขียนด้วย Next.js",
           },
           provenance: { claimId: "exp-anymind.bullet-2", source: "CLAIMS", confidence: "STATED" },
         },
         {
           text: {
             en: "Migrated legacy apps to the Shopify Dev Dashboard and upgraded to the January 2026 Admin API.",
-            th: "ย้ายแอปเก่าไปที่ Shopify Dev Dashboard และอัปเกรดไปใช้ Admin API รุ่นมกราคม 2026",
+            th: "ย้ายแอปเก่าไปที่ Shopify Dev Dashboard และอัปเกรดไปใช้ Admin API เวอร์ชันมกราคม 2026",
           },
           provenance: { claimId: "exp-anymind.bullet-3", source: "CLAIMS", confidence: "STATED" },
         },
         {
           text: {
             en: "Reviewed code, ran performance tests and coordinated releases across cross-functional teams.",
-            th: "ตรวจโค้ด ทำ performance test และประสานการ release กับทีมจากหลายฝ่าย",
+            th: "รีวิวโค้ด ทดสอบ performance และประสานการ release กับทีมหลายฝ่าย",
           },
           provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "STATED" },
         },
@@ -181,14 +181,14 @@ const content: SiteContentInput = {
     {
       id: "exp-zygen",
       org: { name: "ZyGen Co., Ltd." },
-      title: { en: "Full Stack Developer", th: "นักพัฒนา Full Stack" },
+      title: { en: "Full Stack Developer", th: "นักพัฒนา full-stack" },
       type: "full-time",
       start: "2019-10",
       end: "2022-01",
       location: { en: "Bangkok", th: "กรุงเทพฯ" },
       summary: {
         en: "Full-stack delivery across web apps, data platforms and the infrastructure under them.",
-        th: "ทำงาน full-stack ครบทั้งเว็บแอป ระบบข้อมูล และโครงสร้างพื้นฐานที่อยู่ข้างใต้",
+        th: "ทำงาน full-stack ครบทั้งเว็บแอป แพลตฟอร์มข้อมูล และโครงสร้างพื้นฐานที่อยู่เบื้องหลัง",
       },
       stack: ["React", "Next.js", "Angular", "NestJS", "GraphQL", "MongoDB", "Docker", "GKE"],
       visibility: "public",
@@ -196,21 +196,21 @@ const content: SiteContentInput = {
         {
           text: {
             en: "Delivered React, Next.js, Angular and NestJS applications with GraphQL, MongoDB, SQL Server and Redis, including a LINE LIFF app.",
-            th: "ส่งมอบแอปด้วย React, Next.js, Angular และ NestJS ร่วมกับ GraphQL, MongoDB, SQL Server และ Redis รวมถึงแอป LINE LIFF",
+            th: "ทำแอปด้วย React, Next.js, Angular และ NestJS ร่วมกับ GraphQL, MongoDB, SQL Server และ Redis รวมถึงแอป LINE LIFF",
           },
           provenance: { claimId: "exp-zygen", source: "CLAIMS", confidence: "STATED" },
         },
         {
           text: {
             en: "Ran delivery infrastructure on Docker, GKE, GitLab CI/CD, Argo Workflows and Azure App Service.",
-            th: "ดูแลโครงสร้างการ deploy บน Docker, GKE, GitLab CI/CD, Argo Workflows และ Azure App Service",
+            th: "ดูแลระบบ deploy บน Docker, GKE, GitLab CI/CD, Argo Workflows และ Azure App Service",
           },
           provenance: { claimId: "exp-zygen", source: "CLAIMS", confidence: "STATED" },
         },
         {
           text: {
             en: "Technical lead for the Unique Influencer web platform (React, NestJS queues and cron jobs, MariaDB); earlier, Python NLP classifiers and SAP ABAP.",
-            th: "เป็น technical lead ของแพลตฟอร์ม Unique Influencer (React, NestJS queue และ cron job, MariaDB) ก่อนหน้านั้นทำตัวจำแนกข้อความ NLP ด้วย Python และงาน SAP ABAP",
+            th: "เป็น technical lead ของเว็บแพลตฟอร์ม Unique Influencer (React, NestJS queue และ cron job, MariaDB) ก่อนหน้านั้นทำโมเดลจำแนกข้อความ (NLP) ด้วย Python และงาน SAP ABAP",
           },
           provenance: { claimId: "exp-zygen", source: "CLAIMS", confidence: "STATED" },
         },
@@ -238,7 +238,7 @@ const content: SiteContentInput = {
       name: "Yimwhan AI",
       tagline: {
         en: "A phone and LINE receptionist for dental clinics, with clinical-safety guards in code.",
-        th: "ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมกฎความปลอดภัยทางคลินิกที่เขียนเป็นโค้ด",
+        th: "ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมชุดตรวจความปลอดภัยทางคลินิกที่เขียนเป็นโค้ด",
       },
       kind: "product",
       area: "ai",
@@ -265,14 +265,14 @@ const content: SiteContentInput = {
         {
           text: {
             en: "A deterministic safety guard blocks diagnoses, dosing advice and cure claims in every patient-facing reply, across voice, LINE and outbound recall.",
-            th: "ชุดตรวจแบบ deterministic กันการวินิจฉัย การแนะนำยา และการอ้างผลการรักษา ในทุกคำตอบที่ถึงคนไข้ ทั้งทางเสียง LINE และการโทรติดตาม",
+            th: "ชุดตรวจแบบ deterministic กันการวินิจฉัย การแนะนำขนาดยา และการอ้างว่ารักษาหาย ในทุกคำตอบที่ถึงคนไข้ ทั้งทางเสียง LINE และการโทรติดตามคนไข้",
           },
           provenance: { claimId: "exp-founder (clinical-safety-invariant)", source: "CLAIMS", confidence: "VERIFIED" },
         },
         {
           text: {
             en: "A replay of 500 real customer messages passed all checks after code filters rescued 37 raw model violations.",
-            th: "ทดสอบย้อนกับข้อความจริง 500 ข้อความ ผ่านทุกข้อ โดยตัวกรองในโค้ดดักคำตอบที่ผิดกฎจากโมเดลได้ 37 ครั้ง",
+            th: "นำข้อความจริงจากลูกค้า 500 ข้อความมารันซ้ำ ผ่านการตรวจครบทุกข้อ โดยตัวกรองในโค้ดดักคำตอบดิบจากโมเดลที่ผิดกฎไว้ได้ 37 ครั้ง",
           },
           provenance: { claimId: "exp-founder.bullet-2", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -287,7 +287,7 @@ const content: SiteContentInput = {
       caseStudy: {
         problem: {
           en: "An AI receptionist for a dental clinic has to answer fast in Thai, by phone and on LINE, and must never give clinical advice.",
-          th: "AI รับสายของคลินิกทันตกรรมต้องตอบภาษาไทยได้เร็ว ทั้งทางโทรศัพท์และ LINE และต้องไม่ให้คำแนะนำทางคลินิกเด็ดขาด",
+          th: "AI รับสายของคลินิกทันตกรรมต้องตอบเป็นภาษาไทยได้เร็ว ทั้งทางโทรศัพท์และ LINE และห้ามให้คำแนะนำด้านการรักษาเด็ดขาด",
         },
         approach: {
           en: [
@@ -296,18 +296,18 @@ const content: SiteContentInput = {
             "Replayed real conversations through the production pipeline before release, and shipped through gated releases with one-step rollback.",
           ],
           th: [
-            "ทำ prompt ให้สั้น แล้วย้ายกฎไปไว้ในโค้ด มี validator และชุดตรวจความปลอดภัยทางคลินิกชุดเดียวที่ทุกคำตอบถึงคนไข้ต้องผ่าน",
-            "ทำให้ชุดตรวจทนต่อการเลี่ยงด้วยอักขระ Unicode ที่มองไม่เห็น ซึ่งการเทียบข้อความแบบธรรมดาจับไม่ได้",
-            "ทดสอบย้อนกับบทสนทนาจริงผ่านระบบ production ก่อนทุก release และ release ผ่านด่านตรวจที่ย้อนกลับได้ในขั้นตอนเดียว",
+            "เขียน prompt ให้สั้น แล้วย้ายกฎไปไว้ในโค้ด: validator และชุดตรวจความปลอดภัยทางคลินิกชุดเดียวที่ใช้ร่วมกัน ทำงานกับทุกคำตอบที่ถึงคนไข้",
+            "ปิดช่องที่ใช้อักขระจัดรูปแบบของ Unicode ซึ่งมองไม่เห็น หลบการตรวจ (การเทียบข้อความแบบตรง ๆ จับไม่ได้)",
+            "นำบทสนทนาจริงมารันซ้ำผ่าน pipeline เดียวกับ production ก่อน release และปล่อยงานผ่านด่านตรวจ ย้อนกลับได้ในขั้นตอนเดียว",
           ],
         },
         result: {
           en: "On a replay of 500 real customer messages, the code filters rescued all 37 raw model violations and every message passed.",
-          th: "ทดสอบย้อนกับข้อความจริง 500 ข้อความ ตัวกรองในโค้ดดักคำตอบที่ผิดกฎได้ครบทั้ง 37 ครั้ง และทุกข้อความผ่าน",
+          th: "นำข้อความจริงจากลูกค้า 500 ข้อความมารันซ้ำ ตัวกรองในโค้ดดักคำตอบดิบจากโมเดลที่ผิดกฎได้ครบทั้ง 37 ครั้ง และทุกข้อความผ่าน",
         },
         limits: {
           en: "A bounded replay, not a promise about every future conversation.",
-          th: "เป็นการทดสอบในขอบเขตที่กำหนด ไม่ใช่การรับประกันทุกบทสนทนาในอนาคต",
+          th: "เป็นการรันซ้ำในขอบเขตจำกัด ไม่ใช่คำรับประกันสำหรับทุกบทสนทนาในอนาคต",
         },
       },
     },
@@ -334,7 +334,7 @@ const content: SiteContentInput = {
         {
           text: {
             en: "In daily use as my primary development environment.",
-            th: "ใช้เป็นเครื่องมือพัฒนาหลักของผมทุกวัน",
+            th: "ผมใช้เป็นเครื่องมือพัฒนาหลักทุกวัน",
           },
           provenance: { claimId: "exp-founder.bullet-5", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -346,7 +346,7 @@ const content: SiteContentInput = {
       name: "Ronglen",
       tagline: {
         en: "Thai-first spoken party games for 2 to 8 players, on one device or in online voice rooms.",
-        th: "โรงเล่น: เกมปาร์ตี้แบบใช้เสียง เล่นได้ 2 ถึง 8 คน ทั้งบนเครื่องเดียวหรือในห้องออนไลน์",
+        th: "โรงเล่น: เกมปาร์ตี้ภาษาไทยที่เล่นด้วยการพูด สำหรับ 2 ถึง 8 คน เล่นบนเครื่องเดียวหรือในห้องเสียงออนไลน์ก็ได้",
       },
       kind: "side-project",
       area: "games",
@@ -362,7 +362,7 @@ const content: SiteContentInput = {
         {
           text: {
             en: "Online rooms run on LiveKit (WebRTC audio), with Vercel Functions creating game-bound rooms and issuing scoped participant tokens.",
-            th: "ห้องออนไลน์ใช้ LiveKit (เสียงผ่าน WebRTC) โดยมี Vercel Functions สร้างห้องผูกกับเกมและออก token ที่จำกัดสิทธิ์ให้ผู้เล่นแต่ละคน",
+            th: "ห้องออนไลน์ใช้ LiveKit (เสียงผ่าน WebRTC) โดยมี Vercel Functions สร้างห้องที่ผูกกับแต่ละเกม และออก token สิทธิ์จำกัดให้ผู้เล่นแต่ละคน",
           },
           provenance: { claimId: "proj-ronglen.bullet-1", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -374,7 +374,7 @@ const content: SiteContentInput = {
       name: "Visual QA harness",
       tagline: {
         en: "Playwright-based UI verification with geometry checks, interaction crawling and independent AI review.",
-        th: "ระบบตรวจ UI ด้วย Playwright ตรวจทั้งตำแหน่งองค์ประกอบ ไล่กดทุกปุ่ม และให้ AI ที่ไม่เห็นงานมาก่อนช่วยตรวจซ้ำ",
+        th: "ระบบตรวจ UI ด้วย Playwright: เช็คตำแหน่งและขนาดขององค์ประกอบ ไล่ใช้งานหน้าจออัตโนมัติ และให้ AI อีกตัวตรวจซ้ำอิสระ",
       },
       kind: "internal-tool",
       area: "tools",
@@ -390,7 +390,7 @@ const content: SiteContentInput = {
         {
           text: {
             en: "Caught 35 of 38 seeded bugs on its benchmark app; the blind reviewers found two bugs (a search race and a pagination off-by-one) that no deterministic layer could.",
-            th: "จับบั๊กที่ฝังไว้ได้ 35 จาก 38 ตัวบนแอปทดสอบ และ AI ที่ตรวจแบบไม่เห็นงานมาก่อนเจอบั๊กอีก 2 ตัว (race ตอนค้นหา และ pagination เพี้ยนไปหนึ่ง) ที่ชั้นตรวจแบบ deterministic จับไม่ได้",
+            th: "จับบั๊กที่ฝังไว้ได้ 35 จาก 38 ตัวบนแอป benchmark และ AI ผู้ตรวจที่ไม่รู้บริบทมาก่อนเจอบั๊ก 2 ตัว (race condition ตอนค้นหา และ off-by-one ใน pagination) ที่ไม่มีชั้นตรวจแบบ deterministic ชั้นไหนจับได้",
           },
           provenance: { claimId: "proj-visual-qa", source: "CLAIMS", confidence: "STATED" },
         },
@@ -402,7 +402,7 @@ const content: SiteContentInput = {
       name: "Cadence",
       tagline: {
         en: "macOS voice dictation: a native menu-bar shell over a compiled real-time speech engine.",
-        th: "แอปพิมพ์ด้วยเสียงบน macOS: หน้าตา native บนแถบเมนู ทำงานบนเอนจินแปลงเสียงเป็นข้อความแบบเรียลไทม์",
+        th: "แอปพิมพ์ด้วยเสียงบน macOS: แอป native บนแถบเมนูที่ครอบเอนจินแปลงเสียงพูดเป็นข้อความแบบเรียลไทม์ซึ่งคอมไพล์เป็นไบนารี",
       },
       kind: "internal-tool",
       area: "tools",
@@ -419,7 +419,7 @@ const content: SiteContentInput = {
         {
           text: {
             en: "Supervised engine with crash backoff, prompt-free permission checks and verified signed builds.",
-            th: "เอนจินมีตัวคุมที่รีสตาร์ตเองเมื่อล่ม ตรวจสิทธิ์โดยไม่เด้งถามผู้ใช้ และทุก build ผ่านการ sign และตรวจสอบแล้ว",
+            th: "เอนจินมีตัวคุมที่รีสตาร์ตแบบเว้นระยะเมื่อล่ม เช็คสิทธิ์ได้โดยไม่เด้งถามผู้ใช้ และ build ที่ sign แล้วผ่านการตรวจยืนยัน",
           },
           provenance: { claimId: "proj-cadence", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -439,7 +439,7 @@ const content: SiteContentInput = {
         "GraphQL",
         "Kafka",
         "Python",
-        "Hexagonal and event-driven design",
+        { en: "Hexagonal and event-driven design", th: "สถาปัตยกรรม hexagonal และ event-driven" },
       ],
     },
     {
@@ -470,7 +470,13 @@ const content: SiteContentInput = {
     {
       id: "integrations",
       label: { en: "Integrations", th: "การเชื่อมต่อระบบ" },
-      items: ["Shopify Admin and Storefront APIs", "Liquid", "LINE Messaging API", "LIFF", "Twilio Media Streams"],
+      items: [
+        { en: "Shopify Admin and Storefront APIs", th: "Shopify Admin API และ Storefront API" },
+        "Liquid",
+        "LINE Messaging API",
+        "LIFF",
+        "Twilio Media Streams",
+      ],
     },
     {
       id: "ai",
@@ -493,7 +499,10 @@ const content: SiteContentInput = {
 
   languages: [
     { name: { en: "Thai", th: "ไทย" }, level: { en: "Native", th: "ภาษาแม่" } },
-    { name: { en: "English", th: "อังกฤษ" }, level: { en: "Professional working proficiency", th: "ใช้ทำงานได้" } },
+    {
+      name: { en: "English", th: "อังกฤษ" },
+      level: { en: "Professional working proficiency", th: "ใช้ทำงานได้ระดับมืออาชีพ" },
+    },
   ],
 
   links: [

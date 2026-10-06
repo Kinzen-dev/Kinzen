@@ -1,5 +1,5 @@
 import type { Locale } from "@/content/schema";
-import { skills, t } from "@/content";
+import { skillItems, skills, t } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 export function Skills({ locale, dict }: { locale: Locale; dict: Dictionary }) {
@@ -12,7 +12,7 @@ export function Skills({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         {skills.map((group) => (
           <div key={group.id} className="border-r border-b border-rule p-6">
             <dt className="font-semibold tracking-[-0.01em]">{t(group.label, locale)}</dt>
-            <dd className="mt-3 text-ink-2">{group.items.join(", ")}</dd>
+            <dd className="mt-3 text-ink-2">{skillItems(group, locale).join(", ")}</dd>
           </div>
         ))}
       </dl>
