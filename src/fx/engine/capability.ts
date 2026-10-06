@@ -2,8 +2,12 @@
  * Capability tiers (research 07, section 3.4).
  *  off   ?fx=off, Save-Data, no WebGL2, no float colour buffer, software renderer,
  *        or the governor's start-up probe fails. The server-rendered wordmark stays.
- *  still prefers-reduced-motion: seed at the final wordmark, settle, stop the loop.
- *  lite  coarse pointer or a small device: fewer particles, 60 fps cap, one bloom level.
+ *        prefers-reduced-motion is off too: the static wordmark is the designed reduced state
+ *        (HeroFx never loads the field then; this is the second line of that rule).
+ *  still ?fx=still only (debugging): seed at the final wordmark, settle, stop the loop.
+ *  lite  coarse pointer or a small device: fewer particles, 60 fps cap, one bloom level, DPR up
+ *        to 2 like full (the hero box is small, so a phone's DPR 2 fits the pixel budget and the
+ *        wordmark stays as sharp as the text under it).
  *  full  fine pointer and a hardware renderer.
  */
 export type Tier = "off" | "still" | "lite" | "full";
@@ -41,7 +45,7 @@ export const TIER_CONFIG: Record<Exclude<Tier, "off">, TierConfig> = {
   },
   lite: {
     side: 384,
-    maxDpr: 1.5,
+    maxDpr: 2,
     pxBudget: 1_400_000,
     fps: 60,
     bloomLevels: 1,
@@ -107,7 +111,7 @@ export function pickTier(
   if (!hasFloatTargets(gl)) return { tier: "off", reason: "no float colour buffer", renderer };
   if (isSoftwareRenderer(renderer)) return { tier: "off", reason: "software renderer", renderer };
   if (env.fx === "still" || env.fx === "lite" || env.fx === "full") return { tier: env.fx, reason: "forced", renderer };
-  if (env.reducedMotion) return { tier: "still", reason: "reduced motion", renderer };
+  if (env.reducedMotion) return { tier: "off", reason: "reduced motion", renderer };
   const small = (env.memory !== null && env.memory <= 4) || (env.cores !== null && env.cores <= 4);
   if (env.coarse || small) return { tier: "lite", reason: env.coarse ? "coarse pointer" : "small device", renderer };
   return { tier: "full", reason: "capable", renderer };

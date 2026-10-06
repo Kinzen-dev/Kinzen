@@ -1,5 +1,6 @@
 import { WORDMARK_EM } from "../baked/geometry";
 import { pickTier, readEnv, TIER_CONFIG, type Tier } from "../engine/capability";
+import { easeOut } from "../engine/ease";
 import { ParticleEngine, worldPerPx, type Params } from "../engine/engine";
 import { Governor } from "../engine/governor";
 import { readPalette } from "../engine/palette";
@@ -9,16 +10,21 @@ import type { Box, Targets } from "../targets/types";
 
 /**
  * The hero choreography, framework-free. One authored moment, then the material moving:
- *   burst (0 to 450 ms) -> the dust forms the wordmark under the DOM text -> once the glyph
- *   particles have measurably converged onto the DOM glyphs the DOM wordmark cross-fades out
- *   (data-fx="on") -> calm drift by 2.3 s.
+ *   burst (0 to 450 ms) -> the dust forms the wordmark under the DOM text, landed letters held dim
+ *   -> once the glyph particles have measurably converged onto the DOM glyphs, one cross-fade:
+ *   the DOM wordmark fades out (CSS, 600 ms, --ease-out) while the landed letters brighten on the
+ *   same curve (data-fx="on") -> calm drift by 2.3 s.
  * The opening plays once per page load and only while it can be seen: if the hero is off screen
  * (or the tab hidden) when it would play, or leaves view mid-way, the field resumes settled.
- * Resize: the canvas hides at once (the DOM wordmark shows) until the field has refit to the new
- * layout, then cross-fades back; a stale frame never covers text.
+ * The gold dust is emissive light: it belongs to the dark theme only. In the light theme the
+ * field fades out (240 ms) and stops, the DOM wordmark fades back; back in dark it returns settled.
+ * Calm drift runs at 30 fps, and after 8 s without pointer or scroll the loop stops on the frame
+ * it is on; any pointer move, tap, scroll or tab return resumes it.
+ * Resize: the last frame is frozen and mapped onto the new text with a CSS transform (never a
+ * stale frame over misplaced text) while it cross-fades to the DOM wordmark; when the field has
+ * refit it cross-fades back. Both ways 200 ms: a soft refresh, not a flash.
  * Scroll-out (SIAN scrollFade): the name loosens into dust over 1.5 viewports, then the loop
- * stops. Reduced motion: seed at the final wordmark, settle, stop. Any failure: tier "off",
- * the server-rendered wordmark simply stays.
+ * stops. Any failure: tier "off", the server-rendered wordmark simply stays.
  */
 
 const STAGE: Record<"burst" | "form" | "calm" | "still", Partial<Params>> = {
@@ -36,8 +42,17 @@ const T_HANDOFF_MAX = 4000;
 const T_CALM = 2300;
 /** Mean glyph-particle distance to target (CSS px) under which the field reads as the DOM glyphs. */
 const CONV_PX = 1.5;
-/** A refit reveals regardless after this long. */
-const REFIT_MAX = 1200;
+/** Brightness of landed letters under the DOM wordmark before the hand-off. */
+const GLYPH_DIM = 0.22;
+/** Cross-fade durations (ms): opening hand-off, theme switch, refit. */
+const XF_HANDOFF = 600;
+const XF_THEME = 240;
+const XF_REFIT = 200;
+/** Calm drift frame cap, and how long interaction keeps the tier's full rate. */
+const IDLE_FPS = 30;
+const ACTIVE_MS = 1500;
+/** No pointer or scroll for this long: the loop stops on the frame it is on. */
+const IDLE_STOP_MS = 8000;
 
 export type StageEls = {
   /** The hero section ([data-hero]); receives data-fx and data-fx-tier. */
@@ -59,6 +74,8 @@ type Debug = {
   /** Last measured convergence (CSS px), -1 when unmeasured. */
   conv: number;
   ink: { x: number; y: number; w: number; h: number; src: string } | null;
+  /** True while the loop is parked by the idle rule. */
+  idle: boolean;
 };
 
 let textCtx: CanvasRenderingContext2D | null = null;
@@ -108,6 +125,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     phase: "boot",
     conv: -1,
     ink: null,
+    idle: false,
   };
   (window as Window & { __kzFx?: Debug }).__kzFx = debug;
 
@@ -123,6 +141,16 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     hero.dataset.fxTier = tier;
   };
 
+  /* ---------- visibility of the field vs the DOM wordmark (fx.css) ---------- */
+  // data-show on the stage shows the canvas; data-fx="on" on the hero hides the DOM wordmark. Both
+  // transition over --fx-xfade, set per change, so every swap is a cross-fade of a chosen length.
+  const xfade = (ms: number) => hero.style.setProperty("--fx-xfade", `${ms}ms`);
+  const conceal = (ms: number) => {
+    xfade(ms);
+    delete stage.dataset.show;
+    delete hero.dataset.fx;
+  };
+
   const teardown = () => {
     dead = true;
     clearTimers();
@@ -133,7 +161,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     if (dead) return;
     teardown();
     setTier("off", reason);
-    delete hero.dataset.fx;
+    conceal(0);
     onOff();
   };
 
@@ -209,7 +237,11 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     Math.abs(a.fs - b.fs) < 0.05;
 
   const pointCss = (fs: number) => Math.min(2.1, Math.max(1, fs * 0.0052));
+  // Glyph particles dim within a tenth of an em of their letter: dust settling onto a stroke
+  // never reads as a gold copy of the word offset from the DOM one.
+  const dimPx = (fs: number) => Math.max(20, fs * 0.1);
   let palette = readPalette(hero);
+  let dark = palette.mode === "dark";
   let layout = measure();
 
   const targetsFor = (l: Layout) =>
@@ -249,9 +281,8 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     );
     engine.fade = 1 - p;
   };
-  const shouldRun = () => motion && visible && !document.hidden && scrollP < 0.999;
 
-  /* ---------- opening, hand-off, refit ---------- */
+  /* ---------- opening, hand-off, refit, idle ---------- */
   // "idle" before boot, "playing" while the burst runs, "aborted" if it was paused mid-way (it
   // never replays), "done" once the field is settled.
   let opening: "idle" | "playing" | "aborted" | "done" = "idle";
@@ -259,18 +290,32 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   let openedAt = 0;
   let handed = false;
   let wantHandoff = false;
-  let refitting = false;
-  /** Frame count after which a refit may reveal; Infinity until the new targets are in. */
-  let revealFrom = Infinity;
-  let revealAt = 0;
-  let xfadeTimer = 0;
+  /** Resize in progress: the last frame is frozen, the loop may not run until the field refits. */
+  let frozen: Layout | null = null;
+  /** Glyph brightness ramp of the hand-off, driven per frame on the CSS curve. */
+  let ramp: { t0: number; from: number } | null = null;
+  let parked = false;
+  let lastActive = performance.now();
   let watchTick = 0;
 
+  const shouldRun = () => motion && dark && visible && !document.hidden && scrollP < 0.999 && !frozen && !parked;
+
+  /** The field takes over from the DOM wordmark, cross-fading over `ms` (dark theme only). */
+  const present = (ms: number) => {
+    if (!dark || frozen) return;
+    stage.dataset.ready = "";
+    xfade(ms);
+    stage.dataset.show = "";
+    hero.dataset.fx = "on";
+  };
+
+  /** Opening hand-off: the DOM fades out while the landed letters brighten on the same curve. */
   const handoff = () => {
     wantHandoff = false;
     handed = true;
-    hero.dataset.fx = "on";
     if (debug.phase === "form" || debug.phase === "burst") debug.phase = "settled";
+    if (engine.glyphLevel < 1) ramp = { t0: performance.now(), from: engine.glyphLevel };
+    present(XF_HANDOFF);
   };
 
   /** Park the field at its targets in calm drift: the resume path, never a second opening. */
@@ -280,33 +325,20 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     stage0 = motion ? "calm" : "still";
     debug.phase = stage0;
     governor.locked = false;
+    ramp = null;
+    engine.glyphLevel = 1;
     apply(true);
     if (targets) engine.seed(settledSeed(targets));
   };
 
-  const reveal = () => {
-    refitting = false;
-    revealFrom = Infinity;
-    delete stage.dataset.refit;
-    stage.dataset.xfade = "";
-    clearTimeout(xfadeTimer);
-    xfadeTimer = window.setTimeout(() => delete stage.dataset.xfade, 600);
-    handoff();
-  };
-
-  /** Called after every rendered frame (motion tiers): measured gates for hand-off and reveal. */
+  /** Called after every rendered frame (motion tiers): the measured gate for the hand-off. */
   const watch = () => {
-    if (!wantHandoff && !refitting) return;
+    if (!wantHandoff) return;
     if (++watchTick % 4) return;
     const c = engine.convergence();
     debug.conv = c ?? -1;
-    const now = performance.now();
     const close = c !== null && (c < CONV_PX || scrollP > 0);
-    if (refitting) {
-      if (engine.frames > revealFrom && (close || now - revealAt > REFIT_MAX)) reveal();
-      return;
-    }
-    if (close || now - openedAt > T_HANDOFF_MAX) handoff();
+    if (close || performance.now() - openedAt > T_HANDOFF_MAX) handoff();
   };
 
   const sync = () => {
@@ -315,17 +347,51 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       if (opening === "aborted") {
         // Parameters snap to the current scroll state here, at resume, not when it was paused.
         settleNow();
+        engine.glyphLevel = handed ? 1 : GLYPH_DIM;
         openedAt = performance.now();
-        wantHandoff = !handed && !refitting;
+        wantHandoff = !handed;
       }
       engine.start();
     } else {
       engine.stop();
       if (opening === "playing") {
-        // Paused mid-opening (scrolled away, tab hidden): drop it; it resumes settled, never replays.
+        // Paused mid-opening (scrolled away, tab hidden, theme): drop it; it resumes settled.
         clearTimers();
         opening = "aborted";
       }
+    }
+  };
+
+  /** Any sign of life: keep full rate for a moment and wake a parked loop. */
+  const poke = () => {
+    lastActive = performance.now();
+    if (parked) {
+      parked = false;
+      debug.idle = false;
+      sync();
+    }
+  };
+
+  /** Per-frame pacing: the hand-off ramp, the 30 fps calm cap, the idle stop. */
+  const pace = (now: number) => {
+    if (ramp) {
+      const p = Math.min(1, (now - ramp.t0) / XF_HANDOFF);
+      engine.glyphLevel = ramp.from + (1 - ramp.from) * easeOut(p);
+      if (p >= 1) ramp = null;
+    }
+    if (!motion) return;
+    const calm = opening === "done" && !ramp && !wantHandoff && governor.probe === "ok";
+    const fps = calm && now - lastActive > ACTIVE_MS ? Math.min(IDLE_FPS, cfg.fps) : cfg.fps;
+    if (engine.fps !== fps) {
+      engine.setFps(fps);
+      // A deliberately slow window must never read as a slow GPU.
+      governor.locked = fps !== cfg.fps;
+      governor.rewindow();
+    }
+    if (calm && now - lastActive > IDLE_STOP_MS) {
+      parked = true;
+      debug.idle = true;
+      sync();
     }
   };
 
@@ -349,12 +415,19 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     if (dead) return;
     targets = t0;
     engine.setTargets(t0, pointCss(fit.fs));
+    engine.dimPx = dimPx(fit.fs);
     engine.seed(burst ?? settledSeed(t0));
     debug.phase = motion ? "burst" : "still";
 
     engine.onFrame = (raw, now) => {
-      if (!stage.dataset.ready) stage.dataset.ready = "";
+      if (!stage.hasAttribute("data-ready")) stage.dataset.ready = "";
+      // The opening shows the canvas behind the DOM wordmark from its first frame.
+      if (dark && !frozen && !stage.hasAttribute("data-show")) {
+        xfade(0);
+        stage.dataset.show = "";
+      }
       watch();
+      pace(now);
       const v = governor.sample(raw, now);
       if (!v) return;
       if ("kill" in v) goOff(`probe: ${v.reason}`);
@@ -371,10 +444,12 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       return;
     }
 
-    // The opening needs an audience: on screen, tab visible, page at the top.
+    // The opening needs an audience: on screen, tab visible, page at the top, dark ground.
     const r = stage.getBoundingClientRect();
-    const onScreen = r.bottom > 0 && r.top < window.innerHeight && !document.hidden && scrollP < 0.05;
+    const onScreen =
+      dark && r.bottom > 0 && r.top < window.innerHeight && !document.hidden && scrollP < 0.05 && !frozen;
     openedAt = performance.now();
+    engine.glyphLevel = GLYPH_DIM;
     if (!onScreen) {
       // No opening without an audience: the field parks settled when it is first seen.
       opening = "aborted";
@@ -392,7 +467,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       apply();
     });
     later(T_SETTLED, () => {
-      wantHandoff = !handed && !refitting;
+      wantHandoff = !handed && !frozen;
     });
     later(T_CALM, () => {
       opening = "done";
@@ -407,12 +482,16 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   const io = new IntersectionObserver(
     ([en]) => {
       visible = !!en?.isIntersecting;
+      if (visible) poke();
       sync();
     },
     { threshold: 0.02 },
   );
   io.observe(stage);
-  const onVis = () => sync();
+  const onVis = () => {
+    if (!document.hidden) poke();
+    sync();
+  };
   document.addEventListener("visibilitychange", onVis);
   cleanups.push(() => {
     io.disconnect();
@@ -428,6 +507,9 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
         const p = Math.min(1, Math.max(0, window.scrollY / (1.5 * window.innerHeight)));
         if (p === scrollP) return;
         scrollP = p;
+        lastActive = performance.now();
+        parked = false;
+        debug.idle = false;
         apply();
         sync();
       });
@@ -454,6 +536,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     const onLeave = () => engine.pointer(0, 0, false);
     const onClick = (e: MouseEvent) => {
       if ((e.target as Element | null)?.closest("a, button, input, [data-live]")) return;
+      poke();
       if (!engine.isRunning) return;
       const [nx, ny] = norm(e);
       // Strength tuned against the calm spring (30): a visible shell that reforms in under a second.
@@ -464,18 +547,46 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       hero.addEventListener("pointerleave", onLeave);
     }
     hero.addEventListener("click", onClick);
+    // Anywhere on the page: movement or a tap wakes the parked loop.
+    window.addEventListener("pointermove", poke, { passive: true });
+    window.addEventListener("pointerdown", poke, { passive: true });
     cleanups.push(() => {
       hero.removeEventListener("pointermove", onMove);
       hero.removeEventListener("pointerleave", onLeave);
       hero.removeEventListener("click", onClick);
+      window.removeEventListener("pointermove", poke);
+      window.removeEventListener("pointerdown", poke);
     });
   }
 
-  /* ---------- theme and resize ---------- */
+  /* ---------- theme: the field lives on the dark ground only ---------- */
   const onTheme = () => {
     palette = readPalette(hero);
     engine.setPalette(palette);
+    const was = dark;
+    dark = palette.mode === "dark";
+    if (dark === was) {
+      engine.redraw();
+      return;
+    }
+    if (!dark) {
+      // Stop (an opening in progress is dropped), draw one frame on the paper ground so the
+      // fading canvas never shows the dark ground, and hand back to the DOM wordmark.
+      sync();
+      ramp = null;
+      engine.glyphLevel = 1;
+      engine.redraw();
+      conceal(XF_THEME);
+      return;
+    }
+    if (!targets) return; // still booting: the boot path decides.
+    if (opening !== "done") settleNow();
+    handed = true;
+    wantHandoff = false;
     engine.redraw();
+    present(XF_THEME);
+    poke();
+    sync();
   };
   const mo = new MutationObserver(onTheme);
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
@@ -486,32 +597,46 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
     mq.removeEventListener("change", onTheme);
   });
 
+  /* ---------- resize: freeze, align, cross-fade, refit, cross-fade back ---------- */
+  /** Map the frozen frame's ink box onto the current one: the old frame sits on the new text. */
+  const align = (from: Layout, to: Layout) => {
+    const s = to.ink.w / from.ink.w;
+    canvas.style.width = `${from.cw}px`;
+    canvas.style.height = `${from.ch}px`;
+    canvas.style.transformOrigin = "0 0";
+    canvas.style.transform = `translate(${to.ink.x - from.ink.x * s}px, ${to.ink.y - from.ink.y * s}px) scale(${s})`;
+  };
+  const unpin = () => {
+    canvas.style.width = "";
+    canvas.style.height = "";
+    canvas.style.transform = "";
+    canvas.style.transformOrigin = "";
+  };
+
   let resizeTimer = 0;
   let resizeSeq = 0;
   const refit = async () => {
     const next = measure();
-    layout = next;
     const seq = ++resizeSeq;
     try {
       const t = await targetsFor(next);
       if (dead || seq !== resizeSeq) return;
+      // Everything below runs in one task, before paint: the canvas returns to its box and is
+      // redrawn at the new size before anyone can see the old frame stretched.
+      layout = next;
       targets = t;
+      frozen = null;
+      delete stage.dataset.refit;
+      unpin();
       engine.setTargets(t, pointCss(next.fs));
+      engine.dimPx = dimPx(next.fs);
       settleNow();
-      revealFrom = engine.frames;
-      revealAt = performance.now();
-      if (!motion) {
-        engine.settle(20, () => {
-          if (seq === resizeSeq) reveal();
-        });
-      } else {
-        sync();
-        if (!engine.isRunning) {
-          // Off screen or scrolled out: draw once at the new size so nothing stale waits there.
-          engine.redraw();
-          if (seq === resizeSeq) reveal();
-        }
-      }
+      handed = true;
+      wantHandoff = false;
+      engine.redraw();
+      present(XF_REFIT);
+      poke();
+      sync();
     } catch {
       /* keep the canvas hidden: the DOM wordmark stays */
     }
@@ -519,14 +644,17 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   const ro = new ResizeObserver(() => {
     if (!targets) return;
     const next = measure();
-    if (sameLayout(next, layout) && !refitting) return;
-    // Same task as the layout change, before paint: the old-scale frame never shows.
-    refitting = true;
-    revealFrom = Infinity;
-    wantHandoff = false;
-    stage.dataset.refit = "";
-    delete stage.dataset.xfade;
-    delete hero.dataset.fx;
+    if (!frozen) {
+      if (sameLayout(next, layout)) return;
+      // Same task as the layout change, before paint: freeze the last frame where the text is now.
+      frozen = layout;
+      stage.dataset.refit = "";
+      wantHandoff = false;
+      ramp = null;
+      sync();
+      if (stage.hasAttribute("data-show")) conceal(XF_REFIT);
+    }
+    align(frozen, next);
     clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(refit, 150);
   });
@@ -535,14 +663,15 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   cleanups.push(() => {
     ro.disconnect();
     clearTimeout(resizeTimer);
-    clearTimeout(xfadeTimer);
   });
 
   return () => {
     teardown();
+    unpin();
     delete hero.dataset.fx;
+    hero.style.removeProperty("--fx-xfade");
     delete stage.dataset.ready;
+    delete stage.dataset.show;
     delete stage.dataset.refit;
-    delete stage.dataset.xfade;
   };
 }

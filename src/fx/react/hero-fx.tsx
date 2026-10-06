@@ -13,10 +13,20 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (id: number) => void;
 };
 
+/** The theme the page shows: a pinned html[data-theme], otherwise the system scheme. */
+function isDark(): boolean {
+  const pinned = document.documentElement.dataset.theme;
+  if (pinned === "light" || pinned === "dark") return pinned === "dark";
+  return matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
 /**
  * The hero's FX slot. Server-renders an empty, aria-hidden stage box; the field chunk loads only
- * after the browser is idle (timeout 1200 ms) and only while the hero is on screen. `?fx=off`
- * and Save-Data never load it. The server-rendered wordmark stays the LCP and the fallback.
+ * after the browser is idle (timeout 1200 ms), only while the hero is on screen, and only on the
+ * dark ground: the gold dust is emissive light, so the light theme keeps the crisp DOM wordmark
+ * and never loads the field (a switch to dark loads it then; once loaded, the stage itself fades
+ * it out and back on later switches). `?fx=off`, Save-Data and prefers-reduced-motion never load
+ * it. The server-rendered wordmark stays the LCP and the fallback.
  */
 export function HeroFx() {
   const ref = useRef<HTMLDivElement>(null);
@@ -29,7 +39,9 @@ export function HeroFx() {
     if (!stage || !hero) return;
     const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
     const fx = new URLSearchParams(location.search).get("fx");
-    if (fx === "off" || nav.connection?.saveData) {
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    // ?fx=still is a debugging tier that may run under reduced motion; nothing else does.
+    if (fx === "off" || nav.connection?.saveData || (still.matches && fx !== "still")) {
       hero.dataset.fxTier = "off";
       return;
     }
@@ -38,6 +50,7 @@ export function HeroFx() {
     let timer = 0;
     let io: IntersectionObserver | null = null;
     const arm = () => {
+      if (io || !isDark()) return;
       io = new IntersectionObserver(
         ([en]) => {
           if (!en?.isIntersecting) return;
@@ -48,12 +61,36 @@ export function HeroFx() {
       );
       io.observe(stage);
     };
-    if (w.requestIdleCallback) idle = w.requestIdleCallback(arm, { timeout: 1200 });
-    else timer = window.setTimeout(arm, 200);
+    const go = () => {
+      idle = 0;
+      timer = 0;
+      arm();
+    };
+    // A switch to dark arms the field (once the idle wait is over); a switch to light before it
+    // mounted simply leaves it unloaded.
+    const onTheme = () => {
+      if (!idle && !timer) arm();
+    };
+    const mo = new MutationObserver(onTheme);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    const scheme = matchMedia("(prefers-color-scheme: dark)");
+    scheme.addEventListener("change", onTheme);
+    // Reduced motion switched on mid-visit: drop the field, the static wordmark is the design.
+    const onMotion = () => {
+      if (!still.matches || fx === "still") return;
+      hero.dataset.fxTier = "off";
+      setOff(true);
+    };
+    still.addEventListener("change", onMotion);
+    if (w.requestIdleCallback) idle = w.requestIdleCallback(go, { timeout: 1200 });
+    else timer = window.setTimeout(go, 200);
     return () => {
       if (idle) w.cancelIdleCallback?.(idle);
       clearTimeout(timer);
       io?.disconnect();
+      mo.disconnect();
+      scheme.removeEventListener("change", onTheme);
+      still.removeEventListener("change", onMotion);
     };
   }, []);
 

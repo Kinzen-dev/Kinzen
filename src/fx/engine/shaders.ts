@@ -120,7 +120,7 @@ export const pointVS = `#version 300 es
 precision highp float;
 uniform highp sampler2D uPos, uVel, uCol, uTarget;
 uniform mat4 uVP;
-uniform float uSide, uPointPx, uIntensity, uLight, uLand;
+uniform float uSide, uPointPx, uIntensity, uLight, uLand, uGlyph, uDimR;
 uniform vec3 uHot;
 out vec3 vCol;
 out float vAir;
@@ -136,12 +136,18 @@ void main(){
   col = mix(col, uHot, clamp(V.w * 0.05, 0.0, 0.5));
   vCol = col * uIntensity;
   vAir = 1.0;
+  vec4 T = texelFetch(uTarget, tc, 0);
+  // Hand-off: a glyph particle near its letter shines at uGlyph (dim under the DOM wordmark,
+  // raised in step with its fade); dust and anything still in the air keep full brightness.
+  if (uGlyph < 0.999) {
+    float near = T.w * (1.0 - smoothstep(0.3 * uDimR, uDimR, length(P.xy - T.xy)));
+    vCol *= mix(1.0, uGlyph, near);
+  }
   // Paper only: ink prints where it lands. A glyph particle on (within uLand of) its letter
   // writes "landed" density (rgb); anything still in the air, and the dust halo, writes "airborne"
   // density (alpha), which the composite keeps translucent. The burst reads as gold dust in the
   // air, never a stain; the settled letters print as solid ink.
   if (uLight > 0.5) {
-    vec4 T = texelFetch(uTarget, tc, 0);
     float land = T.w * (1.0 - smoothstep(0.35 * uLand, uLand, length(P.xy - T.xy)));
     vAir = (1.0 - land) * dot(vCol, vec3(0.2126, 0.7152, 0.0722));
     vCol *= land;
