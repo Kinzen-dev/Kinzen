@@ -43,6 +43,12 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
                     failed: dict.contact.copyFailed,
                   }}
                 />
+                <a
+                  href={localePath(locale, "/cv")}
+                  className="inline-flex h-11 items-center border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
+                >
+                  {dict.hero.ctaCv}
+                </a>
                 {others.map((l) => (
                   <a
                     key={l.href}
@@ -55,12 +61,6 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
                     <span className="sr-only"> {dict.a11y.newTab}</span>
                   </a>
                 ))}
-                <a
-                  href={localePath(locale, "/cv")}
-                  className="inline-flex h-11 items-center border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
-                >
-                  {dict.hero.ctaCv}
-                </a>
               </div>
             </div>
           ) : null}

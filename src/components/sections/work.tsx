@@ -12,10 +12,12 @@ export { yearLabel } from "../work/rows";
 export function StatusMark({ status, dict }: { status: Project["status"]; dict: Dictionary }) {
   const live = status === "live" || status === "in-production";
   return (
-    <span className="inline-flex items-center gap-2 whitespace-nowrap">
+    // Plain inline (not inline-flex): an empty first flex item would set the baseline at its
+    // bottom edge and drop the label a few pixels below its neighbours.
+    <span className="whitespace-nowrap">
       <span
         aria-hidden="true"
-        className={live ? "size-1.5 rounded-full bg-gold" : "size-1.5 rounded-full border border-ink-3"}
+        className={`mr-2 inline-block size-1.5 rounded-full align-middle ${live ? "bg-gold" : "border border-ink-3"}`}
       />
       {dict.status[status]}
     </span>

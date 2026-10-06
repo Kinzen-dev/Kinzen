@@ -40,6 +40,8 @@
 }
 .fx-stage[data-show] .fx-canvas {
   opacity: 1;
+  /* Set by the stage only when it takes over from a visible DOM wordmark. */
+  transition-delay: var(--fx-in-delay, 0ms);
 }
 [data-hero-wordmark] {
   transition: opacity var(--fx-xfade, 0ms) var(--ease-out);

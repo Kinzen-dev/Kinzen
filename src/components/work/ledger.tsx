@@ -287,7 +287,11 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                           onKeyDown={(e) => onRowKey(e, row.id)}
                           onFocus={() => setFocusId(row.id)}
                         >
-                          <ViewTransition name={workTitleTransition(row.slug)} share="morph" default="none">
+                          <ViewTransition
+                            name={workTitleTransition(row.slug)}
+                            share={{ "nav-forward": "morph", default: "none" }}
+                            default="none"
+                          >
                             <span className="inline-block">{row.name}</span>
                           </ViewTransition>
                         </button>
@@ -337,7 +341,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                           {/* Near the top, so the row title is still on screen when this is clicked:
                               the shared-title morph only pairs elements inside the viewport. */}
                           <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-                            <Link href={row.href} className="ledger-cta">
+                            <Link href={row.href} className="ledger-cta" transitionTypes={["nav-forward"]}>
                               {labels.openProject}
                               <span aria-hidden="true"> →</span>
                             </Link>

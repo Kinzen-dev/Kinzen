@@ -19,7 +19,7 @@ export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dic
           ))}
         </div>
 
-        <aside className="grid content-start gap-8 md:col-span-5 md:col-start-7">
+        <div className="grid content-start gap-8 md:col-span-5 md:col-start-7">
           <div>
             <h3 className="readout">{dict.sections.education}</h3>
             {education.map((e) => (
@@ -53,7 +53,7 @@ export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dic
               ))}
             </div>
           ) : null}
-        </aside>
+        </div>
       </div>
     </section>
   );

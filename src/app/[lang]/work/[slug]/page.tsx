@@ -88,7 +88,13 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
       <header className="mt-8 grid gap-6 border-t border-rule-strong pt-6 md:mt-12 md:grid-cols-12">
         <h1 className="text-2xl tracking-[-0.045em] md:col-span-8">
           {/* A tight inline box, like the ledger row name, so the morph keeps the text's aspect. */}
-          <ViewTransition name={workTitleTransition(project.slug)} share="morph" default="none">
+          {/* Morph only on the way in (row to page). On the way back the big title over a
+              scrolled ledger read as a doubled ghost (review round 6). */}
+          <ViewTransition
+            name={workTitleTransition(project.slug)}
+            share={{ "nav-forward": "morph", default: "none" }}
+            default="none"
+          >
             <span className="inline-block">{project.name}</span>
           </ViewTransition>
         </h1>

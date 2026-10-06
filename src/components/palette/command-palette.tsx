@@ -146,9 +146,11 @@ export function CommandPalette({ data }: { data: PaletteData }) {
         }, 80);
         return;
       }
-      // Nothing to come back to after navigating: land focus on the page, not the old spot.
-      returnFocusRef.current = triggerRef.current;
+      // Another page: no focus to come back to. Focus starts at the top of the new page (like a
+      // link click), never on the header palette button.
+      skipReturnRef.current = true;
       close();
+      (document.activeElement as HTMLElement | null)?.blur();
       router.push(cmd.href);
       return;
     }

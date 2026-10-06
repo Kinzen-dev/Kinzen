@@ -309,6 +309,9 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   /** The field draws the name, cross-fading over `ms` from whatever shows now (dark theme only). */
   const present = (ms: number) => {
     if (!dark || frozen) return;
+    // Over a visible DOM wordmark (a switch to dark at the top), hand over in sequence: the cream
+    // name fades out, then the gold field fades in. Overlapped, the two read as a khaki smear.
+    stage.style.setProperty("--fx-in-delay", wordmarkShown() ? `${Math.round(ms * 0.8)}ms` : "0ms");
     stage.dataset.ready = "";
     setFx(hero, "on", ms);
     stage.dataset.show = "";

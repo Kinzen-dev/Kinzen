@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Locale } from "@/content/schema";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localePath } from "@/lib/site-url";
@@ -7,6 +6,7 @@ import { LanguageSwitch } from "./language-switch";
 import { CommandPalette } from "./palette/command-palette";
 import { paletteData } from "./palette/palette-data";
 import { RevealLayer } from "./motion/reveal-layer";
+import { NavLink } from "./nav-link";
 import { MobileNav } from "./mobile-nav";
 import { HomeLink } from "./home-link";
 import { AnchorFocus } from "./anchor-focus";
@@ -50,9 +50,12 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
           <ul className="flex items-center gap-6 text-sm">
             {items.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="text-ink-2 transition-colors duration-200 hover:text-ink">
+                <NavLink
+                  href={item.href}
+                  className="text-ink-2 transition-colors duration-200 hover:text-ink aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-gold aria-[current=page]:underline-offset-[0.4em]"
+                >
                   {item.label}
-                </Link>
+                </NavLink>
               </li>
             ))}
           </ul>
