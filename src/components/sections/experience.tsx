@@ -4,6 +4,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { EraThread } from "../timeline/era-thread";
 import { monthYear } from "../timeline/format";
 import { SectionHeader } from "./section-header";
+import { inlineList } from "@/lib/text";
 
 export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
@@ -43,7 +44,7 @@ export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary 
                   </ul>
                   <p className="readout mt-6">
                     <span className="sr-only">{dict.experience.stack}: </span>
-                    {era.stack.join(", ")}
+                    {inlineList(era.stack)}
                   </p>
                 </div>
               </li>

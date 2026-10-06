@@ -16,6 +16,7 @@ import type { LedgerLabels, LedgerRow } from "./rows";
 import { workTitleTransition } from "./transition";
 import "./ledger.css";
 import "./transitions.css";
+import { inlineList } from "@/lib/text";
 
 type SortKey = "name" | "year";
 type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
@@ -257,8 +258,8 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                       </div>
                     </div>
                   </th>
-                  <td className="hidden text-sm text-ink-2 md:table-cell">{row.areaLabel}</td>
-                  <td className="readout hidden max-w-[28ch] lg:table-cell">{row.stack.slice(0, 4).join(", ")}</td>
+                  <td className="hidden text-sm whitespace-nowrap text-ink-2 md:table-cell">{row.areaLabel}</td>
+                  <td className="readout hidden max-w-[28ch] lg:table-cell">{inlineList(row.stack.slice(0, 4))}</td>
                   <td className="readout hidden whitespace-nowrap md:table-cell">{row.year}</td>
                   <td className="hidden text-sm md:table-cell">
                     <Status row={row} />
@@ -309,7 +310,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
                             </div>
                             <div>
                               <dt className="ledger-panel-label">{labels.stack}</dt>
-                              <dd className="readout mt-1">{row.stack.join(", ")}</dd>
+                              <dd className="readout mt-1">{inlineList(row.stack)}</dd>
                             </div>
                             {row.links.length > 0 && (
                               <div>

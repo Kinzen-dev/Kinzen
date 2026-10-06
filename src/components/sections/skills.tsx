@@ -1,6 +1,7 @@
 import type { Locale } from "@/content/schema";
 import { skillItems, skills, t } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { inlineList } from "@/lib/text";
 
 export function Skills({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
@@ -10,9 +11,9 @@ export function Skills({ locale, dict }: { locale: Locale; dict: Dictionary }) {
       </h2>
       <dl className="grid border-t border-l border-rule sm:grid-cols-2 lg:grid-cols-3">
         {skills.map((group) => (
-          <div key={group.id} className="border-r border-b border-rule p-6">
+          <div key={group.id} className="border-r border-b border-rule p-6 md:p-8">
             <dt className="font-semibold tracking-[-0.01em]">{t(group.label, locale)}</dt>
-            <dd className="mt-3 text-ink-2">{skillItems(group, locale).join(", ")}</dd>
+            <dd className="mt-3 text-ink-2">{inlineList(skillItems(group, locale))}</dd>
           </div>
         ))}
       </dl>

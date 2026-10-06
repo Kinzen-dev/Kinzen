@@ -19,6 +19,7 @@ const SHORT_RUN = 16;
 /** Compounds the dictionary splits; extend when a break shows up in QA. */
 const COMPOUNDS = [
   "ทันตกรรม",
+  "ทุกข้อ",
   "หน้าร้าน",
   "รวมถึง",
   "ตัวกรอง",

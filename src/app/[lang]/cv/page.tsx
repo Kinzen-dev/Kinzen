@@ -7,6 +7,7 @@ import { alternates, localePath, SITE_URL } from "@/lib/site-url";
 import { monthYear } from "@/components/timeline/format";
 import { PrintButton } from "./print-button";
 import "./cv.css";
+import { inlineList } from "@/lib/text";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/cv">): Promise<Metadata> {
   const { lang } = await params;
@@ -110,7 +111,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
               </ul>
               <p className="cv-stack readout">
                 <span className="sr-only">{dict.cv.stack}: </span>
-                {era.stack.join(", ")}
+                {inlineList(era.stack)}
               </p>
             </li>
           ))}
@@ -128,7 +129,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
               <p className="cv-text">{t(p.tagline, locale)}</p>
               <p className="cv-stack readout">
                 <span className="sr-only">{dict.cv.stack}: </span>
-                {p.stack.join(", ")}
+                {inlineList(p.stack)}
               </p>
             </li>
           ))}
@@ -140,7 +141,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
           {skills.map((group) => (
             <div key={group.id} className="cv-skill-row">
               <dt>{t(group.label, locale)}</dt>
-              <dd>{skillItems(group, locale).join(", ")}</dd>
+              <dd>{inlineList(skillItems(group, locale))}</dd>
             </div>
           ))}
         </dl>

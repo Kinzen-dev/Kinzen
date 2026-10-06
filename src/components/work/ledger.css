@@ -24,6 +24,8 @@
     overflow-x: auto;
     scrollbar-width: none;
     overscroll-behavior-x: contain;
+    /* Chips that run past the edge fade out, so a cut chip reads as "more this way". */
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
   }
   .ledger-pills::-webkit-scrollbar {
     display: none;
@@ -92,6 +94,7 @@
       margin-inline: 0;
       padding-inline: 0;
       overflow: visible;
+      mask-image: none;
     }
     .ledger-count {
       display: block;
@@ -181,6 +184,7 @@
   }
 
   .ledger-icon {
+    overflow: hidden;
     display: grid;
     flex-shrink: 0;
     place-items: center;
