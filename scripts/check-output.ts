@@ -29,7 +29,11 @@ const failures: string[] = [];
 
 for (const file of files) {
   // Strip inline <script> bodies' hashes noise is fine; we scan everything a crawler or client can read.
-  const text = readFileSync(file, "utf8");
+  const bytes = readFileSync(file);
+  // Prerendered image routes (OG cards) are binary PNG bodies: random bytes could spell
+  // a forbidden pattern. Their text comes from the same content this script already scans.
+  if (bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) continue;
+  const text = bytes.toString("utf8");
   for (const rule of [...FORBIDDEN, ...HIDDEN_MARKERS]) {
     const match = text.match(rule.pattern);
     if (match) failures.push(`${file.replace(process.cwd() + "/", "")}: ${rule.reason} (matched "${match[0]}")`);

@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
     metadataBase: new URL(SITE_URL),
     title: { default: dict.meta.title, template: "%s | Kinzen" },
     description: dict.meta.description,
-    alternates: alternates(localePath(lang, "/")),
+    alternates: alternates("/", lang),
     applicationName: "Kinzen",
     authors: [{ name: "Kittipong Khonthong", url: SITE_URL }],
     creator: "Kittipong Khonthong",
@@ -50,8 +50,9 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
       firstName: "Kittipong",
       lastName: "Khonthong",
       username: "Kinzen",
+      images: [{ url: localePath(lang, "/og.png"), width: 1200, height: 630, alt: dict.work.ogAltHome }],
     },
-    twitter: { card: "summary_large_image" },
+    twitter: { card: "summary_large_image", images: [localePath(lang, "/og.png")] },
     formatDetection: { telephone: false },
   };
 }
