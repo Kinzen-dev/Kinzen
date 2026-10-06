@@ -9,6 +9,14 @@
 .helm-scene {
   margin-top: clamp(4rem, 3rem + 5vw, 8rem);
 }
+/* Until HelmArm marks the stage, beats switch instantly and nothing plays: the server's last beat
+   is replaced by the real one without a cross-fade. */
+.helm-stage:not([data-armed]) *,
+.helm-stage:not([data-armed]) *::before,
+.helm-stage:not([data-armed]) *::after {
+  transition: none !important;
+  animation: none !important;
+}
 
 /* ---------- layout ---------- */
 .helm-layout {
@@ -43,6 +51,7 @@
   border-radius: 999px;
   background: var(--pastel);
   color: var(--pastel-ink);
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.08em;
@@ -290,7 +299,7 @@
   --hw-ink: hsl(42 30% 92%);
   --hw-ink-2: hsl(44 12% 75%);
   --hw-ink-3: hsl(255 9% 64%);
-  --hw-faint: hsl(255 8% 50%);
+  --hw-faint: hsl(255 8% 58%);
   --hw-amber: hsl(38 92% 61%);
   --hw-glow: hsl(38 92% 61% / 0.16);
   --hw-green: hsl(151 46% 56%);
@@ -311,8 +320,7 @@
   color: var(--hw-ink);
   background:
     radial-gradient(120% 90% at 82% -10%, var(--hw-glow), transparent 60%),
-    radial-gradient(70% 60% at 0% 110%, hsl(258 40% 30% / 0.22), transparent 70%),
-    var(--hw-ground);
+    radial-gradient(70% 60% at 0% 110%, hsl(258 40% 30% / 0.22), transparent 70%), var(--hw-ground);
   box-shadow:
     0 0 0 1px hsl(256 14% 24%),
     0 2px 6px hsl(260 40% 10% / 0.18),
@@ -627,6 +635,7 @@
   font-weight: 600 !important;
 }
 .hw-state {
+  justify-items: start;
   font-family: var(--font-mono);
   font-size: 0.58em;
   letter-spacing: 0.11em;
@@ -762,6 +771,7 @@
   inset: 0;
   background: var(--cover, var(--hw-pane));
   border-left: 0.55em solid transparent;
+  translate: calc(100% + 0.6em) 0; /* revealed when no typing animation runs */
   animation: hw-type var(--dur) steps(var(--chars)) var(--delay) both;
 }
 .hw-caret {
@@ -818,7 +828,7 @@
   box-shadow:
     0 1px 0 hsl(260 40% 10% / 0.2),
     0 0.8em 1.6em -0.6em hsl(260 50% 5% / 0.7);
-  translate: calc(30cqw - 50%) calc(32cqh - 50%);
+  translate: calc(46cqw - 50%) calc(28cqh - 50%);
   rotate: -4deg;
 }
 .helm-stage[data-step="3"] .hw-note {
@@ -1054,11 +1064,11 @@
     border-color: var(--hw-amber);
   }
 }
-/* The note follows the arc M30 32 Q82 10 70 55 (rack percentages), sampled at t = 0 .25 .5 .75 1,
+/* The note follows the arc M46 28 Q78 8 70 54 (rack percentages), sampled at t = 0 .25 .5 .75 1,
    lands on Sable's header and is absorbed into the pane. */
 @keyframes hw-fly {
   0% {
-    translate: calc(30cqw - 50%) calc(32cqh - 50%);
+    translate: calc(46cqw - 50%) calc(28cqh - 50%);
     rotate: -8deg;
     scale: 0.6;
     opacity: 0;
@@ -1068,25 +1078,25 @@
     scale: 1;
   }
   22% {
-    translate: calc(52cqw - 50%) calc(25.2cqh - 50%);
+    translate: calc(59.5cqw - 50%) calc(22.1cqh - 50%);
     rotate: -2deg;
   }
   44% {
-    translate: calc(66cqw - 50%) calc(26.8cqh - 50%);
+    translate: calc(68cqw - 50%) calc(24.5cqh - 50%);
     rotate: 4deg;
   }
   64% {
-    translate: calc(72cqw - 50%) calc(36.7cqh - 50%);
+    translate: calc(71.5cqw - 50%) calc(35.1cqh - 50%);
     rotate: 2deg;
   }
   84% {
-    translate: calc(70cqw - 50%) calc(55cqh - 50%);
+    translate: calc(70cqw - 50%) calc(54cqh - 50%);
     rotate: -3deg;
     scale: 1;
     opacity: 1;
   }
   100% {
-    translate: calc(70cqw - 50%) calc(58cqh - 50%);
+    translate: calc(70cqw - 50%) calc(57cqh - 50%);
     rotate: 0deg;
     scale: 0.4;
     opacity: 0;

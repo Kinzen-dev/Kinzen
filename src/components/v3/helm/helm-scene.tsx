@@ -8,6 +8,7 @@ import { nobr } from "@/lib/thai-nodes";
 import { StickyStage } from "@/motion/sticky-stage";
 import { Art } from "@/components/art/art";
 import { HelmWindow } from "./helm-window";
+import { HelmArm } from "./helm-arm";
 import "./helm.css";
 
 /**
@@ -25,6 +26,7 @@ export function HelmScene({ locale, v3 }: { locale: Locale; dict: Dictionary; v3
   return (
     <section aria-labelledby="helm-title" className="helm-scene pastel-tools">
       <StickyStage steps={steps} vh={85} label={copy.stageLabel} stageClassName="helm-stage">
+        <HelmArm />
         <div className="shell helm-layout">
           <div className="helm-copy">
             <div className="helm-heading">

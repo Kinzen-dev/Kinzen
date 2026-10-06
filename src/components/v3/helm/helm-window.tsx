@@ -172,12 +172,7 @@ export function HelmWindow() {
           </div>
 
           {PANES.map((pane, i) => (
-            <div
-              key={pane.sign}
-              className="hw-pane"
-              data-pane={pane.sign.toLowerCase()}
-              style={vars({ "--i": i })}
-            >
+            <div key={pane.sign} className="hw-pane" data-pane={pane.sign.toLowerCase()} style={vars({ "--i": i })}>
               <div className="hw-head">
                 <b className="hw-sign">{pane.sign}</b>
                 <span className="hw-swap hw-state">
@@ -220,7 +215,7 @@ export function HelmWindow() {
 
           <div className="hw-flight">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="hw-arc">
-              <path d="M30 32 Q82 10 70 55" vectorEffect="non-scaling-stroke" />
+              <path d="M46 28 Q78 8 70 54" vectorEffect="non-scaling-stroke" />
             </svg>
             <span className="hw-note">
               <span className="hw-note-route">
