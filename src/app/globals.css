@@ -102,6 +102,10 @@
 
   :lang(th) body {
     line-height: 1.75;
+    /* Safety net for glued Thai phrases (see src/lib/thai.ts): a phrase wider than its
+       container may break inside rather than push the layout wider than the screen.
+       Only used when a line has no other break opportunity. */
+    overflow-wrap: anywhere;
   }
 
   h1,

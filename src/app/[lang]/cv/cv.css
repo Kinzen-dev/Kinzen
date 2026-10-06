@@ -51,7 +51,7 @@
 
 @media (min-width: 48rem) {
   .cv-head {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
   }
   .cv-lede,
@@ -95,13 +95,13 @@
 /* One rhythm for every entry: date under the title on phones, at the right on wider pages. */
 .cv-entry-head {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   align-items: baseline;
   gap: 0.25rem 1.5rem;
 }
 @media (min-width: 40rem) {
   .cv-entry-head {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }
 
