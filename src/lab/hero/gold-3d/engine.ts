@@ -88,7 +88,12 @@ function studio(renderer: THREE.WebGLRenderer, ground: [number, number, number])
   return rt;
 }
 
-export function startGold3d(section: HTMLElement, host: HTMLElement, slot: HTMLElement, track: HTMLElement): () => void {
+export function startGold3d(
+  section: HTMLElement,
+  host: HTMLElement,
+  slot: HTMLElement,
+  track: HTMLElement,
+): () => void {
   const prof = readProfile(2);
   const { gold, ground } = sceneColors(section);
   let renderer: THREE.WebGLRenderer;

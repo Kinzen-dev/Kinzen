@@ -2,7 +2,6 @@ import { NOISE_GLSL } from "../a-kit/noise.glsl";
 import { QUAD_VS, program, texture, target, freeTarget, releaseContext, fitCanvas, type Target } from "../a-kit/gl";
 import { inkIndex, thaiBitmap, wordmarkBitmap, type Bitmap } from "../a-kit/glyphs";
 import { readProfile, relRect, runLoop, sceneColors, trackPointer } from "../a-kit/loop";
-import { THAI_FIRST_NAME } from "../a-kit/copy";
 
 /*
  * GPU particle wordmark. Positions and velocities live in float textures (one texel per
@@ -126,6 +125,9 @@ void main(){
   oPos = texelFetch(uSrc, ivec2(gl_FragCoord.xy), 0);
   oVel = vec4(0.0);
 }`;
+
+/** The Thai first name the wordmark morphs into (display art; the banner facts carry the full name). */
+const THAI_FIRST_NAME = "กฤติพงษ์";
 
 type Rect = { x: number; y: number; w: number; h: number };
 

@@ -67,7 +67,10 @@ export function startKeycaps(section: HTMLElement, host: HTMLElement, slot: HTML
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uGold = uGold;
     shader.vertexShader = shader.vertexShader
-      .replace("#include <common>", "#include <common>\nattribute float aGlow;\nvarying float vGlow;\nvarying float vTop;")
+      .replace(
+        "#include <common>",
+        "#include <common>\nattribute float aGlow;\nvarying float vGlow;\nvarying float vTop;",
+      )
       .replace(
         "#include <begin_vertex>",
         "#include <begin_vertex>\nvGlow = aGlow;\nvTop = smoothstep(0.6, 0.95, normal.y);",

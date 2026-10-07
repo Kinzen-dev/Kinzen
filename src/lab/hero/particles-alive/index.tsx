@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { Locale } from "@/content/schema";
+import type { LabProps } from "../../types";
 import { LabBanner } from "../a-kit/banner";
 import { startParticles } from "./engine";
 
 /** Particles alive: the gold dust wordmark answers the cursor, bursts on a click, and turns into the Thai name. */
-export default function ParticlesAlive({ locale }: { locale: Locale }) {
+export default function ParticlesAlive({ locale, banner }: LabProps) {
   const section = useRef<HTMLElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const slot = useRef<HTMLDivElement>(null);
@@ -14,5 +14,5 @@ export default function ParticlesAlive({ locale }: { locale: Locale }) {
     if (!section.current || !host.current || !slot.current) return;
     return startParticles(section.current, host.current, slot.current);
   }, []);
-  return <LabBanner locale={locale} sectionRef={section} slotRef={slot} stage={<div ref={host} />} />;
+  return <LabBanner locale={locale} banner={banner} sectionRef={section} slotRef={slot} stage={<div ref={host} />} />;
 }

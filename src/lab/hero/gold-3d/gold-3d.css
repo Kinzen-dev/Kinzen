@@ -9,11 +9,7 @@
 }
 /* A warm haze behind the letters, so the metal has something to sit in. */
 .g3d-host {
-  background: radial-gradient(
-    60% 42% at 50% 30%,
-    color-mix(in oklab, var(--gold) 13%, transparent),
-    transparent 70%
-  );
+  background: radial-gradient(60% 42% at 50% 30%, color-mix(in oklab, var(--gold) 13%, transparent), transparent 70%);
 }
 /* The copy steps back as the camera flies in (--dolly is 0..1, set by the engine). */
 .g3d .a-copy > :not(.a-wordmark-pad) {

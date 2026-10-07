@@ -6,10 +6,9 @@ import type { Locale } from "@/content/schema";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getV3 } from "@/i18n/v3";
 import { nobr } from "@/lib/thai-nodes";
-import { localePath } from "@/lib/site-url";
 import { WORDMARK_EM } from "@/fx/baked/geometry";
 import { HeroKinetic } from "@/components/sections/hero-kinetic";
-import { bannerCopy, links } from "./copy";
+import type { LabBanner as BannerFacts } from "../../types";
 import "@/components/sections/hero.css";
 import "./banner.css";
 
@@ -22,6 +21,7 @@ import "./banner.css";
  */
 export function LabBanner({
   locale,
+  banner,
   stage,
   slotRef,
   sectionRef,
@@ -30,6 +30,8 @@ export function LabBanner({
   children,
 }: {
   locale: Locale;
+  /** Facts from site.ts, resolved by the lab page on the server. */
+  banner: BannerFacts;
   stage: ReactNode;
   slotRef: Ref<HTMLDivElement>;
   /** The banner section: demos listen for the pointer on it, so it works over the copy too. */
@@ -41,7 +43,6 @@ export function LabBanner({
 }) {
   const dict = getDictionary(locale);
   const copy = getV3(locale).hero;
-  const text = bannerCopy(locale);
   const em = WORDMARK_EM;
 
   return (
@@ -70,7 +71,7 @@ export function LabBanner({
         <div className="a-body hero-body grid gap-6 border-t border-rule pt-6 pb-12 md:grid-cols-12 md:gap-x-6 md:gap-y-8 md:pt-7 md:pb-14">
           <div className="hero-head md:col-span-12">
             <h1 id="lab-hero-title" className="hero-title">
-              <span>{nobr(text.name)}</span> <span className="text-ink-2">{nobr(text.role)}</span>
+              <span>{nobr(banner.name)}</span> <span className="text-ink-2">{nobr(banner.role)}</span>
             </h1>
             <HeroKinetic
               lead={nobr(copy.lead)}
@@ -89,9 +90,9 @@ export function LabBanner({
             />
           </div>
           <div className="hero-act self-end md:col-span-12 xl:col-span-7">
-            <p className="hero-line max-w-[46ch] text-ink-2 md:text-lg">{nobr(text.heroLine)}</p>
+            <p className="hero-line max-w-[46ch] text-ink-2 md:text-lg">{nobr(banner.heroLine)}</p>
             <div className="hero-ctas mt-7">
-              <a href={links.email.href} className="hero-cta hero-cta-primary beam">
+              <a href={banner.email} className="hero-cta hero-cta-primary beam">
                 {nobr(dict.hero.ctaEmail)}
                 <svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="none">
                   <path
@@ -103,11 +104,11 @@ export function LabBanner({
                   />
                 </svg>
               </a>
-              <Link href={localePath(locale, "/cv")} prefetch={false} className="hero-cta hero-cta-ghost">
+              <Link href={banner.cvHref} prefetch={false} className="hero-cta hero-cta-ghost">
                 {nobr(dict.hero.ctaCv)}
               </Link>
-              <a href={links.linkedin.href} rel="me noopener" target="_blank" className="hero-cta hero-cta-ghost">
-                {links.linkedin.label}
+              <a href={banner.linkedin} rel="me noopener" target="_blank" className="hero-cta hero-cta-ghost">
+                LinkedIn
                 <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
               </a>
             </div>
