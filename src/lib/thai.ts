@@ -113,6 +113,12 @@ export const COMPOUNDS = [
   "ชุดตรวจ",
   "บังคับ",
   "full-stack",
+  "ส่วนใหญ่",
+  "สมมติ",
+  "ชั่วโมง",
+  "e-commerce",
+  "ระยะ",
+  "ตัวอย่าง",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });

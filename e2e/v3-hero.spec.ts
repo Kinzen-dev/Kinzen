@@ -207,7 +207,9 @@ test.describe("hero v3", () => {
           for (const src of e.sources) {
             const el = src.node instanceof Element ? src.node : src.node?.parentElement;
             const r = (x: DOMRectReadOnly) => [x.x, x.y, x.width, x.height].map(Math.round).join(",");
-            w.__shifts!.push(`${Math.round(e.startTime)}ms ${el?.className ?? "?"} ${r(src.previousRect)} -> ${r(src.currentRect)}`);
+            w.__shifts!.push(
+              `${Math.round(e.startTime)}ms ${el?.className ?? "?"} ${r(src.previousRect)} -> ${r(src.currentRect)}`,
+            );
           }
         }
       }).observe({ type: "layout-shift", buffered: true });

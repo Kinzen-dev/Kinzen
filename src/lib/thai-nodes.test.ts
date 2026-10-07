@@ -26,4 +26,13 @@ describe("nobr", () => {
     expect(spans.every((s) => s.props.className === "nobr")).toBe(true);
     expect(textOf(out)).toBe(text);
   });
+
+  it("keeps a number with its Thai unit and a Thai lead word with the Latin word after it", () => {
+    const flat = (n: unknown): string => textOf(n);
+    expect(flat(nobr("ทำระบบที่ใช้งานจริงมา 7 ปี"))).toContain("7\u00a0ปี");
+    expect(flat(nobr("ทุก 6 ชั่วโมง"))).toContain("6\u00a0");
+    expect(flat(nobr("เป็นนักพัฒนา full-stack ที่ ZyGen"))).toContain("ที่\u00a0ZyGen");
+    // Ordinary spaces between Thai phrases still break.
+    expect(flat(nobr("รับสาย ตอบแชท"))).toContain("รับสาย ตอบแชท");
+  });
 });

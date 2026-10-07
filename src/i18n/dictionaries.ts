@@ -198,7 +198,7 @@ const th: Dictionary = {
     themeLight: "ธีมสว่าง",
     themeDark: "ธีมมืด",
     languageSwitch: "ภาษา",
-    openPalette: "เปิดเมนูคำสั่ง",
+    openPalette: "เปิดช่องค้นหา",
     openMenu: "เปิดเมนู",
     closeMenu: "ปิดเมนู",
     home: "Kinzen หน้าแรก",

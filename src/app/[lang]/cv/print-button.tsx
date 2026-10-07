@@ -21,7 +21,7 @@ export function PrintButton({ label }: { label: string }) {
       type="button"
       onClick={() => window.print()}
       data-cv-print
-      className="inline-flex h-11 items-center gap-2 border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
+      className="inline-flex h-11 items-center gap-2 rounded-full border border-rule-strong px-[var(--inset-btn)] text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
     >
       <svg
         viewBox="0 0 20 20"

@@ -312,3 +312,13 @@
     text-decoration: none !important;
   }
 }
+
+/* Print pagination: a section title never ends a page alone, and an entry never splits. */
+@media print {
+  .cv-h2 {
+    break-after: avoid-page;
+  }
+  .cv-entry {
+    break-inside: avoid-page;
+  }
+}

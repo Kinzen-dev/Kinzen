@@ -179,6 +179,10 @@
   [id] {
     scroll-margin-top: calc(var(--header-h) + 1rem);
   }
+  /* Keyboard focus scrolls the focused control clear of the fixed pill too (and off the bottom). */
+  :where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])) {
+    scroll-margin-block: calc(var(--header-h) + 0.75rem) 1rem;
+  }
 
   :lang(th) body {
     line-height: 1.75;
@@ -482,4 +486,27 @@ html:has(dialog[open]) {
     background: var(--gold);
     opacity: 0.6;
   }
+}
+
+/* 404: Thai first on /th URLs (html[data-nf="th"] is set before paint). */
+html[data-nf="th"] .nf-copy .nf-th {
+  order: -1;
+  border-top: 0;
+  padding-top: 0;
+}
+html[data-nf="th"] .nf-copy .nf-en {
+  border-top: 1px solid var(--rule);
+  padding-top: 2rem;
+}
+html[data-nf="th"] .nf-th a {
+  background: var(--gold);
+  color: var(--gold-ink);
+  border-color: transparent;
+  font-weight: 600;
+}
+html[data-nf="th"] .nf-en a {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  font-weight: 500;
 }
