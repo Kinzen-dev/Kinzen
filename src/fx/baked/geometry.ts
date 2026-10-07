@@ -2,7 +2,7 @@
 // Ink box of the baked wordmark relative to the line box origin, in em of the wordmark font size.
 export const WORDMARK_EM = {
   x0: 0.08008,
-  y0: 0.02344,
-  w: 3.14648,
-  h: 0.71094,
+  y0: 0.00391,
+  w: 3.24609,
+  h: 0.71680,
 } as const;
