@@ -178,6 +178,25 @@ function targets(bm: Bitmap, rect: Rect, n: number, half: [number, number], seed
   return pts;
 }
 
+/**
+ * Target sets outlive a scene instance: the dust is rebuilt every round of the loop, on the same
+ * layout, and sorting 65k targets is the costliest step of its setup. Keyed by bitmap, box, count.
+ */
+const memo = new Map<string, Float32Array>();
+const seedsFor = new Map<number, Float32Array>();
+function targetsOnce(name: string, bm: Bitmap, rect: Rect, n: number, half: [number, number], seeds: Float32Array) {
+  const key = [name, n, rect.x, rect.y, rect.w, rect.h, half[0], half[1]]
+    .map((v) => (typeof v === "number" ? v.toFixed(1) : v))
+    .join("|");
+  let t = memo.get(key);
+  if (!t) {
+    t = targets(bm, rect, n, half, seeds);
+    if (memo.size > 4) memo.clear();
+    memo.set(key, t);
+  }
+  return t;
+}
+
 /** Contain-fit a bitmap into the slot, centred, allowing Thai marks to overhang a little. */
 function fitInto(bm: Bitmap, slot: Rect): Rect {
   const s = Math.min((slot.w * 0.94) / bm.w, (slot.h * 1.3) / bm.h);
@@ -198,8 +217,12 @@ export async function createParticles(gpu: Gpu, geom0: Geom): Promise<GpuScene> 
   // Density follows the slot: a phone's wordmark is ~14x smaller in area than a laptop's.
   const SIDE = geom0.phone ? 100 : 256;
   const N = SIDE * SIDE;
-  const seeds = new Float32Array(N);
-  for (let i = 0; i < N; i++) seeds[i] = Math.random();
+  let seeds = seedsFor.get(N);
+  if (!seeds) {
+    seeds = new Float32Array(N);
+    for (let i = 0; i < N; i++) seeds[i] = Math.random();
+    seedsFor.set(N, seeds);
+  }
 
   const [sim, draw, init] = await Promise.all([
     programAsync(gl, QUAD_VS, SIM_FS),
@@ -230,9 +253,9 @@ export async function createParticles(gpu: Gpu, geom0: Geom): Promise<GpuScene> 
     geom = g;
     half = [g.cssW / 2, g.cssH / 2];
     rawState(gl);
-    ta = targets(wordmarkBitmap(), g.slot, N, half, seeds);
+    ta = targetsOnce("kinzen", wordmarkBitmap(), g.slot, N, half, seeds);
     texA = upload(texA, ta);
-    texB = upload(texB, thai ? targets(thai, fitInto(thai, g.slot), N, half, seeds) : ta);
+    texB = upload(texB, thai ? targetsOnce("thai", thai, fitInto(thai, g.slot), N, half, seeds) : ta);
   };
   layout(geom0);
   await breathe();
@@ -243,7 +266,7 @@ export async function createParticles(gpu: Gpu, geom0: Geom): Promise<GpuScene> 
     if (disposed) return;
     thai = bm;
     rawState(gl);
-    texB = upload(texB, targets(thai, fitInto(thai, geom.slot), N, half, seeds));
+    texB = upload(texB, targetsOnce("thai", thai, fitInto(thai, geom.slot), N, half, seeds));
   });
 
   /** Positions (x, y in CSS px from the stage centre) as the start state, still. */

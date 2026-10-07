@@ -46,14 +46,14 @@ async function gpuStage(page: Page, path = "/?fx-speed=8") {
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
   await page.goto(path);
   await expect.poll(async () => (await stage(page))?.running ?? false, { timeout: 10_000 }).toBe(true);
-  // The GPU joins once the drawing is under way.
+  // The GPU joins as the drawing finishes.
   await page.waitForFunction(
     () => {
       const s = (window as Window & { __kzStage?: Stage }).__kzStage;
       return !!s && (s.gpu || s.renderer !== "");
     },
     null,
-    { timeout: 10_000 },
+    { timeout: 20_000 },
   );
   const s = (await stage(page))!;
   test.skip(!s.gpu, `software renderer (${s.renderer || "no WebGL2"}): the desk plays alone`);
@@ -85,7 +85,9 @@ test.describe("v4 hero sequence", () => {
   });
 
   test("the clock stops while the hero is off screen and resumes where it was", async ({ page }) => {
-    await gpuStage(page, "/");
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect.poll(async () => (await stage(page))?.running ?? false, { timeout: 10_000 }).toBe(true);
     await page.waitForTimeout(800);
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await expect.poll(async () => (await stage(page))!.running).toBe(false);

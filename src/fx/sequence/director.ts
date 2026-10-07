@@ -307,11 +307,20 @@ export function startSequence(els: StageEls): () => void {
   /** During the desk's hold, hand its ink to the next scene ahead of time (an idle task, not a frame). */
   let primed = false;
   let threeAhead = false;
+  let gpuAsked = false;
   const primeNext = () => {
     // The metal is the one heavy build of the loop (the three.js module, its studio light,
     // shaders): build it while the finished drawing holds still, two steps ahead, so its cost
     // never lands in a moving scene.
-    if (!threeAhead && gpu && cur === "desk" && !next && t > DRAW_S + 0.2) {
+    // The GPU itself (context, first scene) starts as the drawing finishes: its setup never
+    // competes with the pen.
+    if (!gpuAsked && cur === "desk" && t > DRAW_S - 0.4) {
+      gpuAsked = true;
+      if (w.requestIdleCallback) idle = w.requestIdleCallback(startGpu, { timeout: 400 });
+      else timer = window.setTimeout(startGpu, 0);
+    }
+    const first = live.get(nextOf("desk") as GpuSceneId);
+    if (!threeAhead && gpu && first?.scene && cur === "desk" && !next && t > DRAW_S + 1.2) {
       threeAhead = true;
       const ahead = nextOf(nextOf(cur));
       if (ahead === "gold3d" || ahead === "keycaps") ensure(ahead);
@@ -575,10 +584,6 @@ export function startSequence(els: StageEls): () => void {
     publish();
     sync();
     // The GPU comes in once the drawing is under way (after first paint, when the browser is idle).
-    timer = window.setTimeout(() => {
-      if (w.requestIdleCallback) idle = w.requestIdleCallback(startGpu, { timeout: 2000 });
-      else startGpu();
-    }, 1200);
   });
 
   return () => {
