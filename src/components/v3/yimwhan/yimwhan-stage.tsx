@@ -196,7 +196,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                             <span className="yw-words">{nobr(m.message)}</span>
                           </span>
                         </Item>
-                        <Item from={2} step={step} className="yw-msg yw-msg-draft">
+                        <Item from={2} step={step} className="yw-msg yw-msg-draft" hold={m.draft} end>
                           <span className="yw-who">
                             {nobr(m.draft)} <span className="yw-faint">({nobr(m.notSent)})</span>
                           </span>
@@ -206,7 +206,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                             {nobr(m.draftAfter)}
                           </span>
                         </Item>
-                        <Item from={3} step={step} className="yw-guard">
+                        <Item from={3} step={step} className="yw-guard" hold={m.guard}>
                           <span className="yw-guard-head">
                             <ShieldIcon />
                             {nobr(m.guard)}
@@ -227,7 +227,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                             </span>
                           ))}
                         </Item>
-                        <Item from={4} step={step} className="yw-msg yw-msg-reply">
+                        <Item from={4} step={step} className="yw-msg yw-msg-reply" hold={m.sent} end>
                           <span className="yw-who">
                             {nobr(m.sent)} <span className="yw-tick">{"✓✓"}</span>
                           </span>
@@ -303,16 +303,28 @@ function Item({
   from,
   step,
   className,
+  hold,
+  end,
   children,
 }: {
   from: number;
   step: number;
   className: string;
+  /** Label of the dashed slot drawn where this item will land, until it does. */
+  hold?: string;
+  /** Slot sits on the right (model side). */
+  end?: boolean;
   children: ReactNode;
 }) {
-  return (
+  const item = (
     <span className={className} data-at={from} data-on={on(step, from)}>
       {children}
+    </span>
+  );
+  if (!hold) return item;
+  return (
+    <span className="yw-hold" data-end={end || undefined} data-label={hold} data-on={on(step, from)}>
+      {item}
     </span>
   );
 }

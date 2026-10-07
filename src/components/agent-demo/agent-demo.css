@@ -58,7 +58,9 @@
   }
 }
 
+/* Fills the window (the sizers set its height), so the slots below can take the spare room. */
 .agent-demo-transcript {
+  min-height: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -72,7 +74,7 @@
 }
 .agent-demo-draft,
 .agent-demo-reply {
-  justify-self: end;
+  align-self: flex-end;
   justify-items: end;
 }
 
@@ -190,7 +192,11 @@
 }
 
 /* Placeholders for the stages still to come. */
+/* The slots share the spare height of the window, so it never shows a blank lower half while a
+   run is in progress (up to a point: beyond 8rem the slot stops growing). */
 .agent-demo-ghost {
+  flex: 1 1 auto;
+  max-height: 8rem;
   display: flex;
   align-items: center;
   min-height: 3.25rem;
@@ -201,7 +207,7 @@
   font-size: var(--text-sm);
 }
 .agent-demo-ghost.agent-demo-reply {
-  justify-self: end;
+  align-self: flex-end;
   width: min(100%, 22rem);
 }
 

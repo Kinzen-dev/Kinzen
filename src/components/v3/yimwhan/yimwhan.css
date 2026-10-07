@@ -316,15 +316,23 @@
   white-space: nowrap;
   color: var(--ink-2);
 }
+/* Phones: the frame takes the whole room it is given (no letterbox above it); the window runs
+   down to the label, and its transcript pane absorbs the height. */
 @media (max-width: 39.99rem) {
   .yw-frame {
     --w: 30;
     --h: 39;
+    font-size: min(calc(100cqw / 30), calc(100cqh / 30));
+    height: 100cqh;
   }
   .yw-illus-at {
-    top: 37.4em;
+    top: auto;
+    bottom: 0;
     right: 50%;
     translate: 50% 0;
+  }
+  .yw-stage {
+    padding-top: calc(var(--header-h) + 0.25rem);
   }
 }
 
@@ -763,6 +771,35 @@
   translate: 0 var(--shift, 0px);
   transition: translate 700ms var(--yw-ease);
 }
+/* Slots for what is still to come: a quiet dashed outline with the item's name, so the pane
+   reads as a pipeline being filled, never as empty space. */
+.yw-hold {
+  position: relative;
+  display: grid;
+}
+.yw-hold[data-end] {
+  align-self: flex-end;
+  max-width: 88%;
+}
+.yw-hold > .yw-msg {
+  max-width: none;
+}
+.yw-hold::before {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed color-mix(in oklch, var(--ink) 22%, transparent);
+  border-radius: 0.95em;
+  font-size: 0.7em;
+  color: var(--ink-3);
+  transition: opacity 300ms ease-out;
+}
+.yw-hold[data-on]::before {
+  opacity: 0;
+}
 .yw-msg {
   display: grid;
   gap: 0.35em;
@@ -1171,8 +1208,9 @@
 @media (max-width: 39.99rem) {
   .yw-win {
     left: 0;
+    bottom: 2.75rem;
     width: auto;
-    height: 36.5em;
+    height: auto;
   }
   /* Phones: the live call strip over the conversation; queue, sidebar and phone stay out. */
   .yw-win-body {
