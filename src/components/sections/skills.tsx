@@ -9,6 +9,7 @@ import { SectionHeader } from "./section-header";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
 import { ToolMark } from "@/components/tools/tool-mark";
+import { ToolMarkTap } from "@/components/tools/tool-mark-tap";
 import "../v3/tools/tools.css";
 
 /** Dot colour before each group title (area pastels; "plain" = paper with a rule). */
@@ -73,7 +74,7 @@ function toolList(items: Tool[]) {
   return (
     <ul className="tools-list">
       {items.map((item) => (
-        <li key={item.key}>
+        <li key={item.key} data-tool-host>
           <ToolMark name={item.key} />
           <span>{toolLabel(item.label)}</span>
         </li>
@@ -101,6 +102,7 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
 
   return (
     <section id="skills" aria-labelledby="skills-title" className="pt-24 md:pt-32">
+      <ToolMarkTap />
       <div className="shell">
         <SectionHeader id="skills" title={plain(dict.sections.skills)} intro={v3.tools.intro} />
       </div>
@@ -116,7 +118,7 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
             seconds={i % 2 === 1 ? 62 : 54}
             className="tools-marquee"
             items={row.map((tool) => (
-              <span key={tool.key} className="tool-chip">
+              <span key={tool.key} className="tool-chip" data-tool-host>
                 <ToolMark name={tool.key} />
                 <span>{toolLabel(tool.label)}</span>
               </span>
