@@ -45,8 +45,11 @@
   line-height: 1.28;
   letter-spacing: -0.015em;
 }
+/* "I build" is one bright phrase in the same ink and weight as the rest of the line ("I" alone in a
+   grey read as a text cursor); the gold sweep on "build" and the underline on the phrase carry
+   the emphasis. */
 .hero-kinetic-lead {
-  color: var(--ink-2);
+  color: var(--ink);
 }
 /* The Thai face arrives late (preload off), and "ผมสร้าง" at display size changes width when it
    swaps in, which slid the whole phrase box sideways (CLS 0.0115 on /th at 1440). Its width is
