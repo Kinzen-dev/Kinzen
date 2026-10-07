@@ -10,6 +10,8 @@
 /* ---------- hero card ---------- */
 .pj-hero {
   display: grid;
+  /* minmax(0): a long Thai run must wrap inside the card, never widen the column into the padding. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--inset-card);
   padding: var(--pj-inset);
   border-radius: var(--radius-card);
@@ -56,6 +58,7 @@
 }
 .pj-tagline {
   max-width: 44ch;
+  text-wrap: balance;
   margin-top: 1rem;
   font-size: var(--text-lg);
   line-height: var(--text-lg--line-height);
@@ -106,10 +109,11 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+/* Label then value, both from the top: values in one row share a first line even when one wraps. */
 .pj-fact {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.75rem;
   min-width: 0;
   padding: var(--inset-card);
@@ -122,10 +126,30 @@
   );
 }
 .pj-fact dd {
+  min-width: 0;
+  overflow-wrap: break-word;
   font-size: var(--text-lg);
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: -0.02em;
+}
+
+.pj-status {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.pj-status-dot {
+  flex: none;
+  width: 0.4rem;
+  height: 0.4rem;
+  border: 1px solid var(--ink-3);
+  border-radius: 999px;
+  translate: 0 -0.15em;
+}
+.pj-status-dot[data-live] {
+  border-color: var(--gold);
+  background: var(--gold);
 }
 
 /* ---------- sections ---------- */
@@ -229,7 +253,7 @@
   color: var(--gold);
 }
 
-/* Architecture plate, framed as a card. The plate's own scroller keeps the inset on phones. */
+/* Architecture plate, framed as a card. Phones: fitted overview first, full size on request. */
 .pj-plate {
   min-width: 0;
   padding: var(--inset-card);
@@ -245,6 +269,7 @@
 }
 .pj-next {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--inset-card);
   padding: var(--pj-inset);
   border-radius: var(--radius-card);
@@ -285,6 +310,7 @@
 }
 .pj-next-tagline {
   max-width: 52ch;
+  text-wrap: balance;
   color: color-mix(in oklch, var(--pastel-ink) 82%, var(--pastel));
 }
 .pj-next-art {
@@ -303,5 +329,30 @@
   .pj-next-art .pj-art-ink {
     width: auto;
     height: 100%;
+  }
+}
+
+.pj-plate-bar {
+  display: none;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+.pj-plate-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding-inline: var(--inset-pill);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+@media (max-width: 47.999rem) {
+  .pj-plate-bar {
+    display: flex;
+  }
+  .pj-plate:not([data-full]) .plate-svg {
+    min-width: 0;
   }
 }

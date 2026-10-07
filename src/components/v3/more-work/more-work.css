@@ -32,6 +32,12 @@
   .mw-slot {
     flex: 0 0 min(84%, 22rem);
     scroll-snap-align: start;
+    /* One flick = one card. */
+    scroll-snap-stop: always;
+  }
+  /* Room after the last card, so it comes to rest at the start like the first one. */
+  .mw-slot:last-child {
+    margin-inline-end: calc(100% - min(84%, 22rem));
   }
 }
 @media (min-width: 48rem) {
@@ -177,6 +183,7 @@
 }
 .mw-tagline {
   max-width: 46ch;
+  text-wrap: balance;
   font-size: var(--text-sm);
   color: color-mix(in oklch, var(--pastel-ink) 80%, var(--pastel));
 }
@@ -238,6 +245,7 @@
 /* ---------- home sub-header ---------- */
 .mw-head {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem 1.5rem;
   align-items: end;
   padding-bottom: clamp(1.5rem, 1rem + 2vw, 2.5rem);
@@ -301,6 +309,7 @@
 /* ---------- /work index page header ---------- */
 .wi-head {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
   padding-block: 1.25rem clamp(2rem, 1rem + 3vw, 3.5rem);
   border-top: 1px solid var(--rule-strong);

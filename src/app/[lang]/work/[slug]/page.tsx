@@ -8,12 +8,14 @@ import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
 import { alternates, localePath, prefetchFor } from "@/lib/site-url";
 import { JsonLd, projectJsonLd } from "@/lib/json-ld";
 import { ProjectPlate, getPlateSpec } from "@/components/plates";
-import { StatusMark } from "@/components/sections/work";
+import { isLive } from "@/components/work/rows";
 import { periodLabel } from "@/components/work/format";
 import { workTitleTransition } from "@/components/work/transition";
 import "@/components/work/transitions.css";
 import { Art } from "@/components/art/art";
 import { PROJECT_ART } from "@/components/v3/more-work/work-cards";
+import { PlateFrame } from "@/components/v3/project/plate-frame";
+import { getV3 } from "@/i18n/v3";
 import "@/components/v3/project/project.css";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
@@ -75,7 +77,16 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
       value: <span className="tabular">{periodLabel(project.period, locale, dict.ledger.present)}</span>,
     },
     { label: dict.project.role, value: t(project.role, locale) },
-    { label: dict.ledger.status, value: <StatusMark status={project.status} dict={dict} /> },
+    {
+      label: dict.ledger.status,
+      // Not StatusMark (nowrap): a long Thai status must wrap inside the chip, not run into its padding.
+      value: (
+        <span className="pj-status">
+          <span aria-hidden="true" className="pj-status-dot" data-live={isLive(project.status) || undefined} />
+          <span>{nobr(dict.status[project.status])}</span>
+        </span>
+      ),
+    },
     { label: dict.ledger.area, value: dict.areas[project.area] },
   ];
 
@@ -245,7 +256,7 @@ function PlateSection({ projectId, projectName, locale }: { projectId: string; p
       <h2 id="architecture-title" className="pj-h2">
         {nobr(dict.work.architecture)}
       </h2>
-      <div className="pj-plate">
+      <PlateFrame {...getV3(locale).moreWork.plate}>
         <ProjectPlate
           projectId={projectId}
           projectName={projectName}
@@ -253,7 +264,7 @@ function PlateSection({ projectId, projectName, locale }: { projectId: string; p
           dict={dict}
           idPrefix="page-plate"
         />
-      </div>
+      </PlateFrame>
     </section>
   );
 }

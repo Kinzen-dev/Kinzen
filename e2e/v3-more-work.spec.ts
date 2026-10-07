@@ -102,6 +102,21 @@ test.describe("more work on home", () => {
     await grid.evaluate((ul) => ul.scrollTo({ left: 0 }));
     await expect(dots.first()).toHaveAttribute("aria-current", "true");
 
+    // One flick moves one card; the last card rests at the start like the first one.
+    expect(await grid.evaluate((ul) => getComputedStyle(ul.children[0]).scrollSnapStop)).toBe("always");
+    // Where the first card rests: the scroller's start padding (the gutter).
+    const firstLeft = await grid.evaluate(
+      (ul) => ul.getBoundingClientRect().left + parseFloat(getComputedStyle(ul).paddingLeft),
+    );
+    await dots.nth(3).click();
+    await expect
+      .poll(() =>
+        grid.evaluate((ul, at) => Math.abs(ul.lastElementChild!.getBoundingClientRect().left - at), firstLeft),
+      )
+      .toBeLessThanOrEqual(1);
+    await expect(dots.nth(3)).toHaveAttribute("aria-current", "true");
+    await grid.evaluate((ul) => ul.scrollTo({ left: 0 }));
+
     const links = page.locator("#work .mw-link");
     await links.first().focus();
     await page.keyboard.press("ArrowRight");

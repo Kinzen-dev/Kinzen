@@ -92,7 +92,7 @@ export function CardDeck({
       const second = ul.children[1] as HTMLElement | undefined;
       if (!first || !second) return;
       const step = second.offsetLeft - first.offsetLeft;
-      const index = ul.scrollLeft >= max - 2 ? cards.length - 1 : Math.round(ul.scrollLeft / step);
+      const index = Math.round(ul.scrollLeft / step);
       setActive(Math.max(0, Math.min(cards.length - 1, index)));
     };
     const onScroll = () => {
