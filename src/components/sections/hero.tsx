@@ -63,8 +63,8 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
           KINZEN
         </p>
 
-        <div className="grid gap-6 border-t border-rule pt-6 pb-12 md:grid-cols-12 md:gap-x-6 md:gap-y-8 md:pt-7 md:pb-14">
-          <div className="md:col-span-12">
+        <div className="hero-body grid gap-6 border-t border-rule pt-6 pb-12 md:grid-cols-12 md:gap-x-6 md:gap-y-8 md:pt-7 md:pb-14">
+          <div className="hero-head md:col-span-12">
             <h1 id="hero-title" className="hero-title">
               <span>{nobr(t(profile.displayName, locale))}</span>{" "}
               <span className="text-ink-2">{nobr(t(profile.role, locale))}</span>
@@ -87,8 +87,8 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
               })}
             />
           </div>
-          <div className="self-end md:col-span-12 xl:col-span-5">
-            <p className="max-w-[46ch] text-ink-2 md:text-lg">{nobr(t(profile.heroLine, locale))}</p>
+          <div className="hero-act self-end md:col-span-12 xl:col-span-5">
+            <p className="hero-line max-w-[46ch] text-ink-2 md:text-lg">{nobr(t(profile.heroLine, locale))}</p>
             <div className="hero-ctas mt-7">
               {email ? (
                 <a href={email.href} className="hero-cta hero-cta-primary beam">
