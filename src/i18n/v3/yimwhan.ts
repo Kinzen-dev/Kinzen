@@ -135,6 +135,8 @@ const en = {
     notSent: "not sent",
     draftBefore: "",
     draftFlagged: "This sounds like an infection around the wisdom tooth.",
+    /** The same span, word by word (the guard's scan line runs under one word at a time). */
+    draftFlaggedWords: ["This ", "sounds ", "like ", "an ", "infection ", "around ", "the ", "wisdom ", "tooth."],
     draftAfter: " Tomorrow at 10:00 is free.",
     guard: "Guard",
     checks: [
@@ -279,6 +281,7 @@ const th: YimwhanCopy = {
     notSent: "ยังไม่ส่ง",
     draftBefore: "",
     draftFlagged: "อาการแบบนี้น่าจะเป็นเหงือกรอบฟันคุดอักเสบค่ะ",
+    draftFlaggedWords: ["อาการ", "แบบนี้", "น่าจะ", "เป็น", "เหงือก", "รอบ", "ฟันคุด", "อักเสบค่ะ"],
     draftAfter: " พรุ่งนี้ 10:00 มีคิวว่างนะคะ",
     guard: "ชุดตรวจ",
     checks: [

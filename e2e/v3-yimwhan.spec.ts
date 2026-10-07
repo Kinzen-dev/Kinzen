@@ -106,6 +106,60 @@ test.describe("v3 Yimwhan scene", () => {
     await expect(page.locator(":focus")).toHaveClass(/agent-demo-choice/);
   });
 
+  // Review round 3: the copy column is never empty between beats, and the mockup keeps moving
+  // inside a beat (scroll-linked), not only at the beat changes.
+  test("beat copy crossfades without an empty frame", async ({ page }) => {
+    await page.goto("/");
+    await expect
+      .poll(async () => {
+        await scrollTrack(page, 0.18);
+        return page.locator("#yimwhan .yw-stage-grid").getAttribute("data-step");
+      })
+      .toBe("0");
+    await page.waitForTimeout(600);
+    const dip = await page.evaluate(async () => {
+      const t = document.querySelector<HTMLElement>("#yimwhan .yw-track")!;
+      const top = t.getBoundingClientRect().top + scrollY;
+      const beats = [...document.querySelectorAll<HTMLElement>("#yimwhan .yw-beat")];
+      scrollTo(0, top + (t.offsetHeight - innerHeight) * 0.22);
+      let min = 1;
+      const t0 = performance.now();
+      await new Promise<void>((done) => {
+        const tick = () => {
+          min = Math.min(min, Math.max(+getComputedStyle(beats[0]).opacity, +getComputedStyle(beats[1]).opacity));
+          if (performance.now() - t0 < 700) requestAnimationFrame(tick);
+          else done();
+        };
+        requestAnimationFrame(tick);
+      });
+      return min;
+    });
+    expect(dip).toBeGreaterThan(0.2);
+  });
+
+  test("the mockup moves with the scroll inside a beat", async ({ page }) => {
+    await page.goto("/");
+    const typed = () =>
+      page.evaluate(
+        () =>
+          [...document.querySelectorAll<HTMLElement>("#yimwhan .yw-mock .yw-w")].filter(
+            (w) => w.getClientRects().length && +getComputedStyle(w).opacity > 0.5,
+          ).length,
+      );
+    await expect
+      .poll(async () => {
+        await scrollTrack(page, 2.05 / 5);
+        return page.locator("#yimwhan .yw-stage-grid").getAttribute("data-step");
+      })
+      .toBe("2");
+    await page.waitForTimeout(300);
+    const early = await typed();
+    await scrollTrack(page, 2.6 / 5);
+    await page.waitForTimeout(300);
+    const later = await typed();
+    expect(later).toBeGreaterThan(early);
+  });
+
   test("leaving the guard demo mid-run finishes it: blocked draft and safe reply", async ({ page }) => {
     await page.goto("/");
     const demo = page.locator("#yimwhan .agent-demo");
