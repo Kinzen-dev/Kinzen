@@ -17,24 +17,28 @@ test.describe("agent demo", () => {
     });
   }
 
-  test("keys 1/2/3 choose a patient message only while the demo is in view", async ({ page }) => {
+  test("keys 1/2/3 choose a patient message only while focus is inside the demo", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     const demo = page.locator("#yimwhan .agent-demo");
     const choices = demo.getByRole("group").getByRole("button");
     await expect(choices).toHaveCount(3);
 
-    // Out of view: the shortcut must not steal the key.
+    // In view but focus elsewhere: a digit typed on the page must not act (WCAG 2.1.4).
+    await demo.scrollIntoViewIfNeeded();
+    await page.locator("body").click({ position: { x: 1, y: 1 } });
     await page.keyboard.press("3");
     await expect(choices.nth(2)).toHaveAttribute("aria-pressed", "false");
 
-    await demo.scrollIntoViewIfNeeded();
+    // Focus inside the demo: the digit picks that message and focus follows it.
+    await choices.nth(0).focus();
     await expect
       .poll(async () => {
         await page.keyboard.press("2");
         return choices.nth(1).getAttribute("aria-pressed");
       })
       .toBe("true");
+    await expect(choices.nth(1)).toBeFocused();
 
     // Reduced motion shows the finished exchange at once: draft blocked, safe reply sent.
     const live = demo.locator(".agent-demo-live");

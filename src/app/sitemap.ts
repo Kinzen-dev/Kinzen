@@ -7,10 +7,14 @@ export const dynamic = "force-static";
 
 const abs = (path: string) => `${SITE_URL}${path === "/" ? "" : path}`;
 
-/** Every public page in both languages, each entry listing its alternates. */
+/**
+ * Every public page in both languages, each entry listing its alternates. lastmod is the content
+ * date kept in site.ts (YYYY-MM, a valid W3C Datetime), never the build clock: a deploy without a
+ * content change must not look like an update.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date(`${lastUpdated}-01T00:00:00Z`);
-  const paths = ["/", "/work", "/cv", ...projects.map((p) => `/work/${p.slug}`)];
+  const lastModified = lastUpdated;
+  const paths = ["/", "/work", "/cv", ...projects.map((p) => `/work/${p.slug}`), "/privacy"];
 
   return paths.flatMap((path) =>
     locales.map((locale) => ({

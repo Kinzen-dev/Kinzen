@@ -12,6 +12,11 @@ type Json = Record<string, unknown>;
 const PERSON_ID = `${SITE_URL}/#person`;
 const abs = (path: string) => `${SITE_URL}${path === "/" ? "" : path}`;
 const inLanguage = (locale: Locale) => (locale === "th" ? "th-TH" : "en");
+/**
+ * Google reads ProfilePage dateModified as a DateTime: emit it only when the content date is a
+ * whole calendar day. A month-only date ("2026-10") is left out rather than padded to a made-up day.
+ */
+const FULL_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function JsonLd({ data }: { data: Json }) {
   return (
@@ -62,7 +67,7 @@ export function profilePageJsonLd(locale: Locale, title: string): Json {
         url,
         name: title,
         inLanguage: inLanguage(locale),
-        dateModified: lastUpdated,
+        ...(FULL_DATE.test(lastUpdated) ? { dateModified: lastUpdated } : {}),
         mainEntity: { "@id": PERSON_ID },
       },
       person(locale),

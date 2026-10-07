@@ -104,11 +104,10 @@ const en = {
     localTime: "My local time",
   },
   colophon: {
-    weighs: "This page weighs",
     built: "Built",
     from: "from commit",
     fonts: "Set in Geist and Noto Sans Thai.",
-    measuring: "measuring",
+    privacy: "Privacy",
   },
   project: {
     back: "All work",
@@ -284,11 +283,10 @@ const th: Dictionary = {
     localTime: "เวลาฝั่งผม",
   },
   colophon: {
-    weighs: "หน้านี้หนัก",
-    built: "build เมื่อ",
+    built: "สร้างเว็บไซต์เมื่อ",
     from: "จาก commit",
     fonts: "ใช้ฟอนต์ Geist และ Noto Sans Thai",
-    measuring: "กำลังวัด",
+    privacy: "ความเป็นส่วนตัว",
   },
   project: {
     back: "ผลงานทั้งหมด",

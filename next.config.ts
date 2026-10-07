@@ -1,16 +1,66 @@
 import type { NextConfig } from "next";
 import { execSync } from "node:child_process";
 
+/** A git SHA, abbreviated or full. Anything else (e.g. "local") is never published. */
+const SHA = /^[0-9a-f]{7,40}$/;
+
+/**
+ * The commit this build was made from: the deploy script's BUILD_COMMIT (the pushed SHA, passed
+ * with `vercel deploy --build-env`), then Vercel's git integration, then the local checkout.
+ * Empty when none is known: the footer then leaves the commit out instead of linking a placeholder.
+ */
 function buildCommit(): string {
-  if (process.env.VERCEL_GIT_COMMIT_SHA) return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7);
+  for (const value of [process.env.BUILD_COMMIT, process.env.VERCEL_GIT_COMMIT_SHA]) {
+    const sha = value?.trim().toLowerCase();
+    if (sha && SHA.test(sha)) return sha;
+  }
   try {
-    return execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+    const sha = execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] })
       .toString()
       .trim();
+    return SHA.test(sha) ? sha : "";
   } catch {
-    return "local";
+    return "";
   }
 }
+
+const csp = (directives: Record<string, string[]>) =>
+  Object.entries(directives)
+    .map(([name, sources]) => [name, ...sources].join(" "))
+    .join("; ");
+
+/**
+ * CSP, enforced part: directives no page needs to break. Every page is prerendered, so there is
+ * no per-request nonce, and Next's inline flight scripts and the theme script need 'unsafe-inline'.
+ */
+const ENFORCED = {
+  "object-src": ["'none'"],
+  "base-uri": ["'self'"],
+  "frame-ancestors": ["'none'"],
+  "form-action": ["'self'"],
+};
+
+/**
+ * CSP, report-only part: the full origin inventory. Everything is same-origin, including Vercel
+ * Web Analytics and Speed Insights (scripts and intake under first-party paths). frame-ancestors
+ * is enforced above (browsers ignore it in a report-only policy). Dev adds 'unsafe-eval' for
+ * React's dev tooling.
+ */
+const REPORT_ONLY = {
+  "default-src": ["'self'"],
+  "script-src": ["'self'", "'unsafe-inline'", ...(process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : [])],
+  "style-src": ["'self'", "'unsafe-inline'"],
+  "img-src": ["'self'"],
+  "font-src": ["'self'"],
+  "connect-src": ["'self'"],
+  "worker-src": ["'self'"],
+  "manifest-src": ["'self'"],
+  "media-src": ["'self'"],
+  "frame-src": ["'none'"],
+  "object-src": ["'none'"],
+  "base-uri": ["'self'"],
+  "form-action": ["'self'"],
+};
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -18,6 +68,8 @@ const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "Content-Security-Policy", value: csp(ENFORCED) },
+  { key: "Content-Security-Policy-Report-Only", value: csp(REPORT_ONLY) },
 ];
 
 const nextConfig: NextConfig = {

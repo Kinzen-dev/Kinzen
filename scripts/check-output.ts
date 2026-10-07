@@ -20,6 +20,9 @@ const HIDDEN_MARKERS: { pattern: RegExp; reason: string }[] = [
   { pattern: /\[object Object\]|>undefined<|>NaN</, reason: "a value rendered as [object Object], undefined or NaN" },
 ];
 
+/** Every link to a commit page of the site's repository; group 1 is the ref. */
+const COMMIT_LINK = /github\.com\/Kinzen-dev\/Kinzen\/commit\/([^"'\s<>\\]*)/g;
+
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);
@@ -40,6 +43,13 @@ for (const file of files) {
   for (const rule of [...FORBIDDEN, ...HIDDEN_MARKERS]) {
     const match = text.match(rule.pattern);
     if (match) failures.push(`${file.replace(process.cwd() + "/", "")}: ${rule.reason} (matched "${match[0]}")`);
+  }
+  // The footer links the build's commit only when it is a real SHA (TECH-01): a placeholder such
+  // as "local" or an empty ref would publish a link to a GitHub 404.
+  for (const match of text.matchAll(COMMIT_LINK)) {
+    if (!/^[0-9a-f]{7,40}$/.test(match[1])) {
+      failures.push(`${file.replace(process.cwd() + "/", "")}: commit link is not a git SHA (matched "${match[0]}")`);
+    }
   }
 }
 

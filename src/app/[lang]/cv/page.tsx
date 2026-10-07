@@ -5,6 +5,7 @@ import type { Locale } from "@/content/schema";
 import { education, experience, languages, links, profile, projects, skillItems, skills, t } from "@/content";
 import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
 import { alternates, localePath, SITE_URL } from "@/lib/site-url";
+import { pageOpenGraph } from "@/lib/open-graph";
 import { monthYear } from "@/components/timeline/format";
 import { PrintButton } from "./print-button";
 import "./cv.css";
@@ -20,6 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/cv">): Pro
     title: dict.cv.title,
     description: dict.cv.description,
     alternates: { ...alternates("/cv"), canonical: localePath(locale, "/cv") },
+    openGraph: pageOpenGraph(locale, "/cv", "profile"),
   };
 }
 

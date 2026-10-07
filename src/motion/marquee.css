@@ -1,0 +1,33 @@
+/* ---------- marquee group: the pause/resume control (TECH-11) ---------- */
+.marquee-group[data-paused] .marquee-track {
+  animation-play-state: paused;
+}
+.marquee-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+.marquee-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: var(--inset-pill);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  transition:
+    color 200ms,
+    border-color 200ms;
+}
+.marquee-toggle:hover {
+  border-color: var(--rule-strong);
+  color: var(--ink);
+}
+/* Reduced motion: the rows are already still and wrapped; nothing to pause. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-controls {
+    display: none;
+  }
+}
