@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
 import { loadMotion } from "@/motion/gsap";
 
 /** Where each card starts in the collage, by its grid column (left / right) and row. */
@@ -127,6 +127,14 @@ export function CardDeck({
     next.focus();
   };
 
+  // Keyboard focus lands on the card's name link, low in the card: bring the WHOLE card into view,
+  // clear of the floating nav pill (scroll-margin on the slot), and in view inside the carousel.
+  const onFocus = (event: FocusEvent<HTMLUListElement>) => {
+    const target = event.target as HTMLElement;
+    if (!target.matches(":focus-visible")) return;
+    target.closest<HTMLElement>(".mw-slot")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  };
+
   return (
     <div className="mw-deck" data-scatter={scatter || undefined}>
       <ul
@@ -134,6 +142,7 @@ export function CardDeck({
         className="mw-grid"
         aria-label={label}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
         data-reveal-group={reveal || undefined}
       >
         {cards.map((card, i) => (
