@@ -52,6 +52,9 @@
     0 1px 1px light-dark(oklch(0.2 0.02 65 / 0.08), oklch(0 0 0 / 0.35)),
     0 14px 24px -14px light-dark(oklch(0.2 0.02 65 / 0.35), oklch(0 0 0 / 0.7));
   transform: translate(var(--x), var(--y)) rotate(calc(var(--tilt) + var(--drag-tilt))) scale(var(--lift));
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   transition:
     transform 640ms cubic-bezier(0.34, 1.4, 0.64, 1),
     box-shadow var(--dur-2) var(--ease-out);
@@ -88,7 +91,6 @@
 }
 .note:nth-child(even) .note-tape {
   rotate: 5deg;
-  left: 42%;
 }
 .note-art {
   height: 4.5rem;
@@ -102,20 +104,21 @@
   .note {
     cursor: grab;
     touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
   }
   .note:hover {
     --lift: 1.02;
   }
   .note[data-dragging] {
-    --lift: 1.05;
     cursor: grabbing;
-    transition: box-shadow var(--dur-2) var(--ease-out);
-    box-shadow:
-      0 2px 4px light-dark(oklch(0.2 0.02 65 / 0.1), oklch(0 0 0 / 0.4)),
-      0 30px 48px -18px light-dark(oklch(0.2 0.02 65 / 0.42), oklch(0 0 0 / 0.8));
   }
+}
+/* Picked up (mouse, pen or a held finger): the paper lifts off the board. */
+.note[data-dragging] {
+  --lift: 1.05;
+  transition: box-shadow var(--dur-2) var(--ease-out);
+  box-shadow:
+    0 2px 4px light-dark(oklch(0.2 0.02 65 / 0.1), oklch(0 0 0 / 0.4)),
+    0 30px 48px -18px light-dark(oklch(0.2 0.02 65 / 0.42), oklch(0 0 0 / 0.8));
 }
 
 .notes-bar {
@@ -127,7 +130,7 @@
   margin-top: 1rem;
 }
 .notes-hint {
-  display: none;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   font-size: var(--text-sm);
@@ -157,9 +160,15 @@
   border-color: var(--rule);
   color: var(--ink-2);
 }
+.notes-hint-fine {
+  display: none;
+}
 @media (hover: hover) and (pointer: fine) {
-  .notes-hint {
-    display: inline-flex;
+  .notes-hint-fine {
+    display: inline;
+  }
+  .notes-hint-touch {
+    display: none;
   }
 }
 /* Touch only: nothing to put back until a note has moved (keyboard), so no idle button. */

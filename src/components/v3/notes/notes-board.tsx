@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useId,
   useRef,
   useState,
@@ -17,16 +18,21 @@ export type Note = { id: string; pastel: string; tilt: number; body: ReactNode }
 type Offset = { x: number; y: number };
 type Bounds = { minX: number; maxX: number; minY: number; maxY: number };
 type Drag = { id: number; px: number; py: number; o: Offset; b: Bounds; lastX: number; tilt: number };
+type Press = { id: number; x: number; y: number; timer: number };
 
 const STEP = 16;
 const BIG_STEP = 64;
 const EDGE = 8;
+/** Touch: hold this long (without moving) to pick a note up; moving first scrolls the page. */
+const HOLD_MS = 380;
+const SLOP = 10;
 
 const clamp = (v: number, lo: number, hi: number) => (lo > hi ? 0 : Math.min(hi, Math.max(lo, v)));
 
 /**
  * Pastel sticky notes on a board (v3 "How I work"). Mouse and pen drag a note anywhere on the
- * board; touch leaves them still so the page keeps scrolling. Keyboard: the notes stay a normal
+ * board. Touch: press and hold a note to pick it up, then drag; a finger that moves before the
+ * hold completes scrolls the page as usual (the note never steals a scroll). Keyboard: the notes stay a normal
  * list, each note is focusable and the arrow keys nudge it (Shift for a bigger step). "Put the
  * notes back" returns every note to its place. Moves only write a transform (no layout work).
  */
@@ -35,12 +41,13 @@ export function NotesBoard({
   labels,
 }: {
   notes: Note[];
-  labels: { hint: ReactNode; keys: string; reset: ReactNode };
+  labels: { hint: ReactNode; hintTouch: ReactNode; keys: string; reset: ReactNode };
 }) {
   const keysId = useId();
   const board = useRef<HTMLDivElement>(null);
   const offsets = useRef(new Map<string, Offset>());
   const drag = useRef<Drag | null>(null);
+  const press = useRef<Press | null>(null);
   const frame = useRef(0);
   const top = useRef(notes.length);
   const [moved, setMoved] = useState(false);
@@ -76,19 +83,49 @@ export function NotesBoard({
     setMoved(offsets.current.size > 0);
   }, []);
 
-  const onPointerDown = (id: string) => (e: PointerEvent<HTMLLIElement>) => {
-    if (e.button !== 0 || e.pointerType === "touch") return;
-    const el = e.currentTarget;
+  const begin = (el: HTMLElement, id: string, pointerId: number, x: number, y: number) => {
     const o = offsets.current.get(id) ?? { x: 0, y: 0 };
-    drag.current = { id: e.pointerId, px: e.clientX, py: e.clientY, o, b: bounds(el, o), lastX: e.clientX, tilt: 0 };
-    el.setPointerCapture(e.pointerId);
+    drag.current = { id: pointerId, px: x, py: y, o, b: bounds(el, o), lastX: x, tilt: 0 };
+    try {
+      el.setPointerCapture(pointerId);
+    } catch {
+      /* the pointer already ended */
+    }
     el.dataset.dragging = "";
     raise(el);
+  };
+
+  const cancelPress = () => {
+    if (press.current) window.clearTimeout(press.current.timer);
+    press.current = null;
+  };
+
+  const onPointerDown = (id: string) => (e: PointerEvent<HTMLLIElement>) => {
+    if (e.button !== 0) return;
+    const el = e.currentTarget;
+    if (e.pointerType === "touch") {
+      cancelPress();
+      const { pointerId, clientX: x, clientY: y } = e;
+      press.current = {
+        id: pointerId,
+        x,
+        y,
+        timer: window.setTimeout(() => {
+          press.current = null;
+          begin(el, id, pointerId, x, y);
+          navigator.vibrate?.(8);
+        }, HOLD_MS),
+      };
+      return;
+    }
     // No preventDefault: the native mousedown focuses the note (so no keyboard ring appears),
-    // and user-select: none on fine pointers keeps text from being selected mid-drag.
+    // and user-select: none keeps text from being selected mid-drag.
+    begin(el, id, e.pointerId, e.clientX, e.clientY);
   };
 
   const onPointerMove = (e: PointerEvent<HTMLLIElement>) => {
+    const p = press.current;
+    if (p && p.id === e.pointerId && Math.hypot(e.clientX - p.x, e.clientY - p.y) > SLOP) cancelPress();
     const d = drag.current;
     if (!d || d.id !== e.pointerId) return;
     const el = e.currentTarget;
@@ -102,6 +139,7 @@ export function NotesBoard({
   };
 
   const onPointerUp = (id: string) => (e: PointerEvent<HTMLLIElement>) => {
+    if (press.current?.id === e.pointerId) cancelPress();
     const d = drag.current;
     if (!d || d.id !== e.pointerId) return;
     const el = e.currentTarget;
@@ -116,6 +154,21 @@ export function NotesBoard({
     write(el, o);
     commit(id, o);
   };
+
+  // A held note owns the finger: stop the page from scrolling while it is carried. Non-passive,
+  // so it has to be a native listener; it does nothing unless a note is being dragged.
+  useEffect(() => {
+    const el = board.current;
+    if (!el) return;
+    const onTouchMove = (e: TouchEvent) => {
+      if (drag.current && e.cancelable) e.preventDefault();
+    };
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      el.removeEventListener("touchmove", onTouchMove);
+      if (press.current) window.clearTimeout(press.current.timer);
+    };
+  }, []);
 
   const onKeyDown = (id: string) => (e: KeyboardEvent<HTMLLIElement>) => {
     const dir: Record<string, [number, number]> = {
@@ -159,6 +212,10 @@ export function NotesBoard({
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp(n.id)}
               onPointerCancel={onPointerUp(n.id)}
+              onContextMenu={(e) => {
+                // A long press would open the touch callout over the note being picked up.
+                if (press.current || drag.current) e.preventDefault();
+              }}
               onKeyDown={onKeyDown(n.id)}
             >
               <span aria-hidden="true" className="note-tape" />
@@ -183,7 +240,8 @@ export function NotesBoard({
               strokeLinejoin="round"
             />
           </svg>
-          {labels.hint}
+          <span className="notes-hint-fine">{labels.hint}</span>
+          <span className="notes-hint-touch">{labels.hintTouch}</span>
         </p>
         <button type="button" className="notes-reset" data-idle={moved ? undefined : ""} onClick={reset}>
           <svg

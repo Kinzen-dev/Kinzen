@@ -81,7 +81,7 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
                   <span aria-hidden="true" className={`tools-swatch ${tint === "plain" ? "tool-chip-plain" : ""}`} />
                   {nobr(t(group.label, locale))}
                 </dt>
-                <dd className="mt-3 text-ink-2">{inlineList(skillItems(group, locale))}</dd>
+                <dd className="mt-3 text-ink-2">{nobr(inlineList(skillItems(group, locale)))}</dd>
               </div>
             );
           })}

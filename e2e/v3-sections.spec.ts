@@ -118,6 +118,46 @@ test.describe("how I work notes", () => {
     expect(end.y + end.height).toBeLessThanOrEqual(board.y + board.height + 12);
   });
 
+  test("touch: a quick swipe scrolls the page; press and hold picks a note up", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "touch screen");
+    await page.goto("/");
+    await scrollTo(page, "practice");
+    const note = page.locator("#practice [data-note]").first();
+    await note.scrollIntoViewIfNeeded();
+    const box = (await note.boundingBox())!;
+    const cdp = await page.context().newCDPSession(page);
+    const at = (x: number, y: number) => [{ x, y, id: 1 }];
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+
+    // A quick swipe that starts on a note scrolls the page and leaves the note where it is.
+    const s0 = await page.evaluate(() => scrollY);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: at(x, y) });
+    for (let i = 1; i <= 8; i++) {
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: at(x, y - i * 25) });
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(s0 + 60);
+    expect(await noteOffset(note)).toEqual({ x: 0, y: 0 });
+
+    // Hold still, then drag: the note moves and the page does not.
+    await note.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    const held = (await note.boundingBox())!;
+    const hx = held.x + held.width / 2;
+    const hy = held.y + held.height / 2;
+    const y0 = await page.evaluate(() => scrollY);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: at(hx, hy) });
+    await page.waitForTimeout(600);
+    for (let i = 1; i <= 6; i++) {
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: at(hx - i * 4, hy + i * 12) });
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect.poll(async () => (await noteOffset(note)).y).toBeGreaterThan(40);
+    expect(Math.abs((await page.evaluate(() => scrollY)) - y0)).toBeLessThan(20);
+    await expect(page.getByRole("button", { name: "Put the notes back" })).toBeVisible();
+  });
+
   test("note insets are symmetric", async ({ page }) => {
     await page.goto("/");
     for (const note of await page.locator("#practice [data-note]").all()) {

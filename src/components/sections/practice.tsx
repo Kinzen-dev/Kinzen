@@ -41,7 +41,7 @@ export function Practice({ locale, dict, v3 = getV3(locale) }: { locale: Locale;
       <SectionHeader id="practice" title={plain(dict.sections.practice)} intro={dict.sections.practiceIntro} />
       <NotesBoard
         notes={notes}
-        labels={{ hint: nobr(v3.notes.hint), keys: plain(v3.notes.keys), reset: nobr(v3.notes.reset) }}
+        labels={{ hint: nobr(v3.notes.hint), hintTouch: nobr(v3.notes.hintTouch), keys: plain(v3.notes.keys), reset: nobr(v3.notes.reset) }}
       />
     </section>
   );
