@@ -20,12 +20,23 @@ import "./transitions.css";
 import { inlineList } from "@/lib/text";
 import { plain } from "@/lib/thai";
 
-/** When the last Back/Forward happened (restore the ledger's scroll only on history traversal). */
+/** When the last Back/Forward happened: the ledger restores its state only on history traversal. */
 let poppedAt = -Infinity;
+/** The first ledger mount in this document (a full-page Back/Forward has no popstate). */
+let firstMount = true;
 if (typeof window !== "undefined") {
   window.addEventListener("popstate", () => {
     poppedAt = performance.now();
   });
+}
+
+/** True when this mount comes from Back/Forward (client-side, or a full-page history load). */
+function fromHistory() {
+  const first = firstMount;
+  firstMount = false;
+  if (performance.now() - poppedAt < 1500) return true;
+  const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+  return first && nav?.type === "back_forward";
 }
 import { nobr } from "@/lib/thai-nodes";
 
@@ -96,19 +107,22 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
 
   // Coming Back from a project page should look exactly as the visitor left it, scroll included
   // (engines differ: Chromium lands on the #work heading, WebKit replays a pre-restore offset).
-  // keep the open row, filter and sort for this tab (session storage, never sent anywhere).
+  // The open row, filter and sort are kept for this tab (session storage, never sent anywhere)
+  // and restored ONLY on Back/Forward; a fresh visit (link, palette, typed URL, reload) starts in
+  // the curated order.
   const restored = useRef(false);
   useEffect(() => {
     const key = `kz-ledger:${window.location.pathname}`;
     if (!restored.current) {
       restored.current = true;
+      const traversal = fromHistory();
       try {
         const saved = JSON.parse(sessionStorage.getItem(key) ?? "null") as {
           sort: Sort;
           filter: LedgerRow["area"] | "all";
           openId: string | null;
         } | null;
-        if (saved) {
+        if (saved && traversal) {
           // Restoring persisted UI state after hydration is a sync from an external store.
           /* eslint-disable react-hooks/set-state-in-effect */
           setSort(saved.sort);
@@ -121,7 +135,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
             window.requestAnimationFrame(() => buttons.current.get(reopen)?.focus({ preventScroll: true }));
           }
           const y = Number(sessionStorage.getItem(`${key}:y`));
-          if (performance.now() - poppedAt < 1500 && y > 0) {
+          if (y > 0) {
             // After the reopened row has laid out, and after the router's own hash scroll.
             window.setTimeout(() => window.scrollTo(0, y), 120);
           }
