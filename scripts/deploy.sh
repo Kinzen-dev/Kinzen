@@ -17,5 +17,10 @@ git fetch -q origin main
 sha=$(git rev-parse HEAD)
 [[ "$sha" == "$(git rev-parse origin/main)" ]] || { echo "deploy: HEAD is not origin/main (push or pull first)"; exit 1; }
 
+# A checkout without the project link (a fresh worktree) would make `vercel deploy --yes` create and
+# publish a brand-new project. Deploy only when this directory is linked to kinzen-frontend.
+linked=$(python3 -c 'import json;print(json.load(open(".vercel/project.json"))["projectName"])' 2>/dev/null || true)
+[[ "$linked" == "kinzen-frontend" ]] || { echo "deploy: .vercel/project.json links '${linked:-nothing}', not kinzen-frontend"; exit 1; }
+
 vercel deploy --prod --yes --build-env "BUILD_COMMIT=$sha"
 exec scripts/release-check.sh
