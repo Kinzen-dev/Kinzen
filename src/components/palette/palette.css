@@ -171,3 +171,12 @@
     display: none !important;
   }
 }
+
+/* The trigger's chord hint: Ctrl K and ⌘K stacked in one cell; only the platform's one shows. */
+.palette-kbd-chord > span {
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+.palette-kbd-chord > span[data-on] {
+  visibility: visible;
+}

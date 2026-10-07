@@ -249,7 +249,11 @@ export function CommandPalette({ data }: { data: PaletteData }) {
           <path d="m15 15 4.5 4.5" />
         </svg>
         <span aria-hidden="true" className="hidden lg:inline">
-          <kbd className="palette-kbd">{shortcut}</kbd>
+          {/* Both chords share one grid cell, so swapping to ⌘K after hydration never resizes the header. */}
+          <kbd className="palette-kbd palette-kbd-chord">
+            <span data-on={apple ? undefined : ""}>Ctrl K</span>
+            <span data-on={apple ? "" : undefined}>⌘K</span>
+          </kbd>
         </span>
       </button>
 
