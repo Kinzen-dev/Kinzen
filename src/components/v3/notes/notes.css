@@ -160,6 +160,15 @@
   border-color: var(--rule);
   color: var(--ink-2);
 }
+/* Something moved: the way back is the obvious next action. */
+.notes-reset:not([data-idle]) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+.notes-reset:not([data-idle]):hover {
+  background: color-mix(in oklch, var(--ink) 86%, var(--ground));
+}
 .notes-hint-fine {
   display: none;
 }

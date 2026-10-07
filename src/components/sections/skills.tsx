@@ -1,10 +1,10 @@
+import { Fragment } from "react";
 import type { Locale } from "@/content/schema";
 import { skillItems, skills, t } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getV3, type V3Copy } from "@/i18n/v3";
 import { Marquee } from "@/motion/marquee";
 import { SectionHeader } from "./section-header";
-import { inlineList } from "@/lib/text";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
 import "../v3/tools/tools.css";
@@ -31,6 +31,34 @@ function interleave(lists: { tint: string; label: string }[][]) {
     for (const l of lists) if (l[i]) out.push(l[i]);
   }
   return out;
+}
+
+/**
+ * A comma-separated stack list that only breaks between items or at spaces: short items stay
+ * whole, and a hyphenated word ("speech-to-text") never breaks at its hyphens.
+ */
+function stackList(items: string[]) {
+  return items.map((item, i) => (
+    <Fragment key={item}>
+      {i > 0 ? ", " : null}
+      {item.length <= 20 ? (
+        <span className="whitespace-nowrap">{nobr(item)}</span>
+      ) : (
+        item
+          .split(/(\S*-\S*)/)
+          .filter(Boolean)
+          .map((part, j) =>
+            part.includes("-") ? (
+              <span key={j} className="whitespace-nowrap">
+                {part}
+              </span>
+            ) : (
+              <Fragment key={j}>{nobr(part)}</Fragment>
+            ),
+          )
+      )}
+    </Fragment>
+  ));
 }
 
 /**
@@ -81,7 +109,7 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
                   <span aria-hidden="true" className={`tools-swatch ${tint === "plain" ? "tool-chip-plain" : ""}`} />
                   {nobr(t(group.label, locale))}
                 </dt>
-                <dd className="mt-3 text-ink-2">{nobr(inlineList(skillItems(group, locale)))}</dd>
+                <dd className="mt-3 text-ink-2">{stackList(skillItems(group, locale))}</dd>
               </div>
             );
           })}

@@ -50,3 +50,8 @@
 .about-doodles > .doodle {
   height: 3.5rem;
 }
+
+/* The lede is a short display paragraph: balanced lines, no lone last line. */
+.about-lede {
+  text-wrap: balance;
+}

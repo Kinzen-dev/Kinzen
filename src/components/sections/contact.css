@@ -92,23 +92,31 @@
   text-decoration-thickness: 2px;
 }
 
-/* Phones: the primary CTA on its own full-width row, then an even two-column grid (copy spans
-   both; CV and LinkedIn share a row). Wider: one wrapping row. */
+/* The action row is composed by the width of its own column (container query), so a button is
+   never left alone on a line:
+   - narrow (phones): the primary CTA and Copy email each take a full row, CV and LinkedIn share one;
+   - medium: an even 2 x 2 grid;
+   - wide: all four on one row. */
 .contact-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
 }
-.contact-actions > :is(.contact-cta, button) {
-  grid-column: 1 / -1;
-}
 .contact-actions > * {
   width: 100%;
 }
-@media (min-width: 40rem) {
+.contact-actions > :is(.contact-cta, button) {
+  grid-column: 1 / -1;
+}
+@container (min-width: 24rem) {
+  .contact-actions > :is(.contact-cta, button) {
+    grid-column: auto;
+  }
+}
+@container (min-width: 36rem) {
   .contact-actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
   }
   .contact-actions > * {
