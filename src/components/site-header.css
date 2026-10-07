@@ -177,3 +177,7 @@ main > [data-hero]:first-child {
     font-size: var(--text-lg);
   }
 }
+.mobile-nav:focus,
+.mobile-nav:focus-visible {
+  outline: none;
+}

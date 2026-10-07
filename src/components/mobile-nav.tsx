@@ -20,12 +20,17 @@ export function MobileNav({
   labels: { open: string; close: string; nav: string };
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    const onClose = () => setOpen(false);
+    // WebKit leaves focus on <body> after close; always hand it back to the menu button.
+    const onClose = () => {
+      setOpen(false);
+      trigger.current?.focus({ preventScroll: true });
+    };
     dialog.addEventListener("close", onClose);
     return () => dialog.removeEventListener("close", onClose);
   }, []);
@@ -33,6 +38,7 @@ export function MobileNav({
   return (
     <>
       <button
+        ref={trigger}
         type="button"
         onClick={() => {
           ref.current?.showModal();
@@ -55,7 +61,16 @@ export function MobileNav({
         </svg>
       </button>
 
-      <dialog ref={ref} aria-label={plain(labels.nav)} className="mobile-nav lg:hidden" data-scene="page">
+      {/* autoFocus: the sheet itself takes focus on open (no keyboard ring on the close button for
+          touch users in WebKit); Tab then reaches the close button and the links in order. */}
+      <dialog
+        ref={ref}
+        aria-label={plain(labels.nav)}
+        className="mobile-nav lg:hidden"
+        data-scene="page"
+        autoFocus
+        tabIndex={-1}
+      >
         {/* Bottom sheet (v3): grab handle, title row, big tap targets, safe-area aware. */}
         <span aria-hidden="true" className="mobile-nav-handle" />
         <div className="flex items-center justify-between px-[var(--inset-card)] pt-2 pb-3">
