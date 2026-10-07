@@ -109,7 +109,7 @@ const en = {
   colophon: {
     built: "Built",
     from: "from commit",
-    fonts: "Set in Geist and Noto Sans Thai.",
+    fonts: "Set in Google Sans, Google Sans Code and Playpen Sans Thai.",
     privacy: "Privacy",
   },
   project: {
@@ -307,7 +307,7 @@ const th: Dictionary = {
   colophon: {
     built: "สร้างเว็บไซต์เมื่อ",
     from: "จาก commit",
-    fonts: "ใช้ฟอนต์ Geist และ Noto Sans Thai",
+    fonts: "ใช้ฟอนต์ Google Sans, Google Sans Code และ Playpen Sans Thai",
     privacy: "ความเป็นส่วนตัว",
   },
   project: {

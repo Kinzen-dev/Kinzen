@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
-import { Geist, Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { locales, type Locale } from "@/content/schema";
@@ -10,16 +9,8 @@ import { pageOpenGraph } from "@/lib/open-graph";
 import { ThemeScript } from "@/components/theme-script";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { fontVariables } from "../fonts";
 import "../globals.css";
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
-const notoThai = Noto_Sans_Thai({
-  subsets: ["thai"],
-  variable: "--font-thai",
-  display: "swap",
-  preload: false,
-});
 
 export const dynamicParams = false;
 
@@ -64,11 +55,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const dict = getDictionary(lang);
 
   return (
-    <html
-      lang={lang}
-      className={`${geist.variable} ${geistMono.variable} ${notoThai.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang={lang} className={fontVariables} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>

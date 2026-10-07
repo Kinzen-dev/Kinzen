@@ -84,7 +84,7 @@ export function MobileNav({
         {/* Bottom sheet (v3): grab handle, title row, big tap targets, safe-area aware. */}
         <span aria-hidden="true" className="mobile-nav-handle" />
         <div className="flex items-center justify-between px-[var(--inset-card)] pt-2 pb-3">
-          <span className="font-semibold tracking-[-0.02em]">KINZEN</span>
+          <span className="font-bold tracking-[-0.02em]">KINZEN</span>
           <button
             type="button"
             onClick={() => ref.current?.close()}

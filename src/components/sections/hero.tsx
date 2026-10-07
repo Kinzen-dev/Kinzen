@@ -58,7 +58,7 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
         <p
           aria-hidden="true"
           data-hero-wordmark
-          className="hero-wordmark -mx-[0.04em] pt-[clamp(1.5rem,5vh,4rem)] font-semibold select-none"
+          className="hero-wordmark pt-[clamp(1.5rem,5vh,4rem)] select-none"
         >
           KINZEN
         </p>
