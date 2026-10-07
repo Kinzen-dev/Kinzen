@@ -303,7 +303,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
 function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage: number; still?: boolean }) {
   const blocked = at(stage, "blocked");
   return (
-    <ol className={`agent-demo-transcript grid content-start gap-4 ${still ? "is-still" : ""}`}>
+    <ol className={`agent-demo-transcript flex flex-col gap-4 ${still ? "is-still" : ""}`}>
       <li className="agent-demo-msg agent-demo-patient">
         <span className="agent-demo-who">{nobr(copy.patient)}</span>
         <p className="agent-demo-bubble bg-pastel-ai text-pastel-ink">{nobr(s.patient)}</p>
