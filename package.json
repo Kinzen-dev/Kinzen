@@ -12,6 +12,7 @@
     "check:output": "tsx scripts/check-output.ts",
     "check:js-budget": "tsx scripts/check-js-budget.ts",
     "fx:bake": "tsx scripts/bake-wordmark.mts",
+    "logos:gen": "tsx scripts/gen-tool-logos.ts",
     "e2e": "playwright test",
     "format": "prettier --write .",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:output && pnpm check:js-budget"
@@ -38,6 +39,7 @@
     "eslint-config-next": "16.3.8",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "simple-icons": "^16.34.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",

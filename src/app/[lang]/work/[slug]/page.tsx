@@ -20,6 +20,7 @@ import "@/components/v3/project/project.css";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
 import { CaseCta } from "@/components/case-cta";
+import { ToolMark } from "@/components/tools/tool-mark";
 
 export const dynamicParams = false;
 
@@ -167,6 +168,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
         <ul className="pj-pills">
           {project.stack.map((s) => (
             <li key={s} className="pj-pill">
+              <ToolMark name={s} />
               {s}
             </li>
           ))}
