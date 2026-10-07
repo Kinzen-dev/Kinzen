@@ -56,7 +56,8 @@ async function watchCsp(page: Page) {
 
 async function scrollThrough(page: Page) {
   await page.evaluate(async () => {
-    for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight * 0.8) {
+    // Bounded: a page that grows while scrolling (reveals, lazy art) must not loop for the whole timeout.
+    for (let y = 0, i = 0; y < document.documentElement.scrollHeight && i < 40; y += window.innerHeight * 0.8, i++) {
       window.scrollTo(0, y);
       await new Promise((r) => setTimeout(r, 120));
     }
