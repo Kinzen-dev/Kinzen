@@ -22,27 +22,24 @@ const C = {
 
 const FONT_DIR = join(process.cwd(), "assets", "fonts");
 
+/** Static Google Sans instances, subset to Latin + Thai (Satori reads TTF, not woff2 or variable). */
 async function fonts() {
-  const [regular, semibold, mono, thai, thaiSemibold] = await Promise.all(
-    [
-      "Geist-Regular.ttf",
-      "Geist-SemiBold.ttf",
-      "GeistMono-Regular.ttf",
-      "NotoSansThai-Regular.ttf",
-      "NotoSansThai-SemiBold.ttf",
-    ].map((f) => readFile(join(FONT_DIR, f))),
+  const [regular, semibold, bold, mono] = await Promise.all(
+    ["GoogleSans-Regular.ttf", "GoogleSans-SemiBold.ttf", "GoogleSans-Bold.ttf", "GoogleSansCode-Regular.ttf"].map(
+      (f) => readFile(join(FONT_DIR, f)),
+    ),
   );
   return [
-    { name: "Geist", data: regular, weight: 400 as const, style: "normal" as const },
-    { name: "Geist", data: semibold, weight: 600 as const, style: "normal" as const },
-    { name: "Geist Mono", data: mono, weight: 400 as const, style: "normal" as const },
-    { name: "Noto Sans Thai", data: thai, weight: 400 as const, style: "normal" as const },
-    { name: "Noto Sans Thai", data: thaiSemibold, weight: 600 as const, style: "normal" as const },
+    { name: "Google Sans", data: regular, weight: 400 as const, style: "normal" as const },
+    { name: "Google Sans", data: semibold, weight: 600 as const, style: "normal" as const },
+    { name: "Google Sans", data: bold, weight: 700 as const, style: "normal" as const },
+    { name: "Google Sans Code", data: mono, weight: 400 as const, style: "normal" as const },
   ];
 }
 
-const SANS = "Geist, Noto Sans Thai";
-const MONO = "Geist Mono, Noto Sans Thai";
+const SANS = "Google Sans";
+// The code face has no Thai; Thai in a mono line falls through to Google Sans.
+const MONO = "Google Sans Code, Google Sans";
 
 function Dot({ live }: { live: boolean }) {
   return (
@@ -83,11 +80,12 @@ export async function homeCard(input: { name: string; role: string; studio: stri
       <div
         style={{
           display: "flex",
-          fontSize: 334,
-          fontWeight: 600,
-          letterSpacing: "-0.06em",
+          // Ink 3.246em wide from 0.081em in (Google Sans 700, -0.05em): fills the 1072px measure.
+          fontSize: 330,
+          fontWeight: 700,
+          letterSpacing: "-0.05em",
           lineHeight: 0.8,
-          marginLeft: -14,
+          marginLeft: -27,
         }}
       >
         KINZEN
@@ -136,7 +134,7 @@ export async function projectCard({
 }) {
   [name, tagline, status, period] = [name, tagline, status, period].map(thaiBreaks);
   if (drawing) drawing = thaiBreaks(drawing);
-  // Fit long names on one line: Geist 600 averages ~0.56em per character.
+  // Fit long names on one line: Google Sans 600 averages ~0.56em per character.
   const nameSize = Math.min(140, Math.floor(1072 / (name.length * 0.56)));
   return new ImageResponse(
     <div
@@ -153,7 +151,7 @@ export async function projectCard({
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 48, fontWeight: 600, letterSpacing: "-0.04em" }}>KINZEN</span>
+        <span style={{ fontSize: 48, fontWeight: 700, letterSpacing: "-0.03em" }}>KINZEN</span>
         <span style={{ fontFamily: MONO, fontSize: 24, color: C.ink3 }}>{`kinzen.dev${path}`}</span>
       </div>
       <div style={{ display: "flex", flexDirection: "column" }}>
