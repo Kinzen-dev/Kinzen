@@ -13,7 +13,7 @@ function monthLabel(yearMonth: string, locale: Locale) {
     month: "short",
     year: "numeric",
     timeZone: "UTC",
-  }).format(new Date(`${yearMonth}-01T00:00:00Z`));
+  }).format(new Date(`${yearMonth.slice(0, 7)}-01T00:00:00Z`));
 }
 
 export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary }) {

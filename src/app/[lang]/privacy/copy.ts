@@ -13,8 +13,7 @@ const DOCS = {
 const en = {
   title: "Privacy",
   description: "What kinzen.dev stores in your browser and what it sends, as the site works today.",
-  intro:
-    "What this site stores in your browser and what it sends, as it works today. It covers kinzen.dev only.",
+  intro: "What this site stores in your browser and what it sends, as it works today. It covers kinzen.dev only.",
   sections: [
     {
       id: "sends",
@@ -42,12 +41,7 @@ const en = {
         {
           title: "Vercel Speed Insights",
           body: "Measures how fast each page loads (Web Vitals). Per Vercel's documentation, each measurement is sent with:",
-          points: [
-            "the route and URL",
-            "network speed",
-            "browser, device type and operating system",
-            "the country",
-          ],
+          points: ["the route and URL", "network speed", "browser, device type and operating system", "the country"],
           source: { label: "Vercel: Speed Insights privacy", href: DOCS.speed },
         },
         {
@@ -114,7 +108,8 @@ export type PrivacyCopy = typeof en;
 const th: PrivacyCopy = {
   title: "ความเป็นส่วนตัว",
   description: "kinzen.dev เก็บอะไรไว้ในเบราว์เซอร์ของคุณ และส่งข้อมูลอะไรออกไปบ้าง ตามที่เว็บไซต์ทำงานอยู่ตอนนี้",
-  intro: "หน้านี้บอกว่าเว็บไซต์เก็บอะไรไว้ในเบราว์เซอร์ของคุณ และส่งข้อมูลอะไรออกไปบ้าง ตามที่ทำงานอยู่ตอนนี้ ครอบคลุมเฉพาะ kinzen.dev",
+  intro:
+    "หน้านี้บอกว่าเว็บไซต์เก็บอะไรไว้ในเบราว์เซอร์ของคุณ และส่งข้อมูลอะไรออกไปบ้าง ตามที่ทำงานอยู่ตอนนี้ ครอบคลุมเฉพาะ kinzen.dev",
   sections: [
     {
       id: "sends",
