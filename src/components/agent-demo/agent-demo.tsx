@@ -140,6 +140,17 @@ export function AgentDemo({ copy }: { copy: Copy }) {
     }
   }, [active, play]);
 
+  // Leaving the viewport mid-run: finish the run at once (blocked draft, safe reply sent), so the
+  // last state a visitor saw is never an unsafe draft that has not been blocked yet.
+  useEffect(() => {
+    if (inView || stage === FINAL || !started.current) return;
+    const id = requestAnimationFrame(() => {
+      setStage(FINAL);
+      setVeil(null);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [inView, stage]);
+
   // Reduced motion: whatever is selected shows its final transcript, no veil.
   useEffect(() => {
     if (!reduced) return;
@@ -205,15 +216,15 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       data-active={active}
       className="agent-demo grid gap-8 md:grid-cols-12 md:grid-rows-[auto_1fr] md:gap-x-8"
     >
-      <div className="order-1 grid content-start gap-3 md:order-none md:col-span-4 md:row-start-1">
-        <h4 id="agent-demo-heading" className="text-xl tracking-[-0.03em]">
+      <div className="order-1 grid content-start gap-3 md:order-none md:col-span-5 md:row-start-1 xl:col-span-4">
+        <h4 id="agent-demo-heading" className="text-xl tracking-[-0.03em] text-balance">
           {nobr(copy.title)}
         </h4>
         <p className="max-w-[44ch] text-ink-2">{nobr(copy.intro)}</p>
       </div>
 
       <figure
-        className="agent-demo-window order-3 m-0 overflow-clip rounded-card border border-rule bg-surface shadow-lift md:order-none md:col-span-8 md:col-start-5 md:row-span-2 md:row-start-1"
+        className="agent-demo-window order-3 m-0 overflow-clip rounded-card border border-rule bg-surface shadow-lift md:order-none md:col-span-7 md:col-start-6 md:row-span-2 md:row-start-1 xl:col-span-8 xl:col-start-5"
         aria-labelledby="agent-demo-title"
       >
         <figcaption className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-rule px-[var(--inset-card)] py-3">
@@ -247,7 +258,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       </figure>
 
       {/* Phones: choices sit above the window, so a tap changes what is just below it. */}
-      <div className="order-2 grid content-start gap-5 md:order-none md:col-span-4 md:row-start-2">
+      <div className="order-2 grid content-start gap-5 md:order-none md:col-span-5 md:row-start-2 xl:col-span-4">
         <div role="group" aria-labelledby="agent-demo-choose" className="grid gap-2">
           <p id="agent-demo-choose" className="flex items-baseline justify-between gap-4 text-sm text-ink-2">
             <span>{nobr(copy.choose)}</span>
@@ -267,7 +278,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
               <kbd className="readout" aria-hidden="true">
                 {i + 1}
               </kbd>
-              <span>{s.choice}</span>
+              <span className="text-balance">{nobr(s.choice)}</span>
             </button>
           ))}
         </div>

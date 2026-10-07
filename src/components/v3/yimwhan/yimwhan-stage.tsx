@@ -63,7 +63,13 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
 
   return (
     <StickyStage steps={STEPS} vh={85} label={copy.stageLabel} className="yw-track" stageClassName="yw-stage">
-      <div ref={rootRef} className="yw-stage-grid" data-step={step} data-live={live || undefined}>
+      <div
+        ref={rootRef}
+        className="yw-stage-grid"
+        data-step={step}
+        data-live={live || undefined}
+        style={{ "--step": step } as CSSProperties}
+      >
         <div className="yw-copy">
           <div className="yw-progress" aria-hidden="true">
             <span className="yw-count tabular">
@@ -83,6 +89,8 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                   {nobr(copy.step)} {i + 1}
                 </p>
                 <h4 className="yw-beat-title">{nobr(b.title)}</h4>
+                {/* Fills with the scroll inside this beat, so the page never feels stuck between beats. */}
+                <span className="yw-beat-meter" aria-hidden="true" />
                 <p className="yw-beat-text">{nobr(b.text)}</p>
                 {b.stat ? <p className="yw-beat-stat">{nobr(b.stat)}</p> : null}
               </li>
@@ -105,7 +113,8 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                     <i />
                   </span>
                   <span className="yw-win-title">
-                    {nobr(m.window)} · {nobr(m.clinic)}
+                    {nobr(m.window)}
+                    <span className="yw-win-clinic"> · {nobr(m.clinic)}</span>
                   </span>
                   <span className="yw-chip yw-chip-ok">
                     <span className="yw-dot yw-pulse" />
@@ -353,12 +362,17 @@ function fit(list: HTMLElement | null, step: number, mode: "top" | "bottom") {
   const room = view.clientHeight;
   let shift = room - bottom;
   if (mode === "top") {
-    // Scroll whole items off the top, never leave a sliver of one behind.
+    // Scroll just enough for the newest item, unless that leaves only a sliver of the item being
+    // cut at the top: then that item goes off whole.
     const need = bottom - room;
-    const padTop = parseFloat(getComputedStyle(list).paddingTop) || 0;
-    const next = [...list.children].find((el) => (el as HTMLElement).offsetTop - padTop >= need) as
-      HTMLElement | undefined;
-    shift = need <= 0 ? 0 : -((next?.offsetTop ?? need + padTop) - padTop);
+    const css = getComputedStyle(list);
+    const padTop = parseFloat(css.paddingTop) || 0;
+    const sliver = 2.5 * (parseFloat(css.fontSize) || 14);
+    const items = [...list.children] as HTMLElement[];
+    const cut = items.find((e) => e.offsetTop - padTop < need && e.offsetTop + e.offsetHeight - padTop > need);
+    const left = cut ? cut.offsetTop + cut.offsetHeight - padTop - need : Infinity;
+    const next = cut ? items[items.indexOf(cut) + 1] : undefined;
+    shift = need <= 0 ? 0 : left < sliver && next ? -(next.offsetTop - padTop) : -need;
   }
   list.style.setProperty("--shift", `${Math.round(shift)}px`);
 }

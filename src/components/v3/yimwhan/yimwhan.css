@@ -184,8 +184,8 @@
 }
 .yw-seg {
   position: relative;
-  width: clamp(1.25rem, 3vw, 2.25rem);
-  height: 3px;
+  width: clamp(1.5rem, 3.4vw, 2.75rem);
+  height: 4px;
   border-radius: 999px;
   background: var(--rule);
   overflow: clip;
@@ -209,16 +209,19 @@
   display: grid;
   align-content: start;
   gap: 0.75rem;
+  /* Entry waits for the exit: the two headings never overlap (no ghost of the previous one). */
   transition:
-    opacity 520ms var(--yw-ease),
-    translate 520ms var(--yw-ease),
-    filter 520ms var(--yw-ease);
+    opacity 420ms var(--yw-ease) 160ms,
+    translate 520ms var(--yw-ease) 120ms,
+    filter 420ms var(--yw-ease) 160ms;
 }
 .yw-beat:not([data-on]) {
   opacity: 0;
   translate: 0 0.75rem;
   filter: blur(6px);
   pointer-events: none;
+  transition-duration: 150ms;
+  transition-delay: 0ms;
 }
 .yw-beat[data-past] {
   translate: 0 -0.75rem;
@@ -237,6 +240,28 @@
   font-size: var(--text-xl);
   line-height: var(--text-xl--line-height);
   letter-spacing: -0.03em;
+}
+/* Scroll position inside the current beat (0..1), continuous: the meter under the title and the
+   mockup drift read it, so every pixel of scroll shows. */
+.yw-stage-grid {
+  --bp: clamp(0, calc(var(--p) * 5 - var(--step)), 1);
+}
+.yw-beat-meter {
+  position: relative;
+  display: block;
+  width: 4rem;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--rule);
+  overflow: clip;
+}
+.yw-beat-meter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform-origin: left center;
+  scale: var(--bp) 1;
 }
 .yw-beat-text {
   max-width: 38ch;
@@ -277,7 +302,7 @@
   position: relative;
   min-height: 0;
   height: 100%;
-  container-type: size;
+  container: yw / size;
   display: grid;
   place-items: end center;
 }
@@ -316,21 +341,7 @@
   white-space: nowrap;
   color: var(--ink-2);
 }
-/* Phones: the frame takes the whole room it is given (no letterbox above it); the window runs
-   down to the label, and its transcript pane absorbs the height. */
 @media (max-width: 39.99rem) {
-  .yw-frame {
-    --w: 30;
-    --h: 39;
-    font-size: min(calc(100cqw / 30), calc(100cqh / 30));
-    height: 100cqh;
-  }
-  .yw-illus-at {
-    top: auto;
-    bottom: 0;
-    right: 50%;
-    translate: 50% 0;
-  }
   .yw-stage {
     padding-top: calc(var(--header-h) + 0.25rem);
   }
@@ -415,6 +426,8 @@
   position: absolute;
   top: 0;
   right: 0;
+  /* Depth: window and phone drift at different rates with the scroll. */
+  translate: 0 calc((0.5 - var(--p)) * 2em);
   width: 50em;
   height: 38em;
   display: grid;
@@ -992,6 +1005,7 @@
   position: absolute;
   left: 0;
   bottom: 0;
+  translate: 0 calc((0.35 - var(--p)) * 6em);
   width: 15.5em;
   height: 32em;
   padding: 0.45em;
@@ -1204,49 +1218,112 @@
   animation-play-state: paused;
 }
 
-/* ---------- phone composition: the back office pane alone, fewer things moving ---------- */
-@media (max-width: 39.99rem) {
+/* ---------- compact composition (phones, landscape phones, any short or narrow room) ----------
+   Fewer things, bigger: the back office pane alone (plus the live call strip when there is
+   height for it), sized so no mockup text drops under ~10.5px. Shrinking the full composition
+   instead made 7px text (review round 1). */
+@container yw (max-width: 34rem) or (max-height: 25rem) {
+  .yw-frame {
+    --w: 22;
+    font-size: max(14.5px, min(calc(100cqw / 22), calc(100cqh / 17)));
+    width: min(100cqw, 22em);
+    height: 100cqh;
+  }
+  .yw-illus-at {
+    top: auto;
+    bottom: 0;
+    right: 50%;
+    translate: 50% 0;
+  }
   .yw-win {
-    left: 0;
-    bottom: 2.75rem;
+    inset: 0 0 2.6rem;
     width: auto;
     height: auto;
+    translate: none;
   }
-  /* Phones: the live call strip over the conversation; queue, sidebar and phone stay out. */
   .yw-win-body {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
   }
   .yw-side,
   .yw-phone,
-  .yw-queue > :not(.yw-call) {
+  .yw-win-clinic,
+  .yw-queue > :not(.yw-call),
+  .yw-check[data-pass] .yw-mono {
     display: none;
   }
   .yw-queue {
-    padding: 0.9em 1em 0;
+    padding: 0.75em 0.9em 0;
     border-right: 0;
   }
   .yw-call {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    column-gap: 0.9em;
+    column-gap: 0.8em;
     margin: 0;
+    padding: 0.6em 0.8em;
   }
   .yw-call-head {
     grid-column: 1 / -1;
+    font-size: 0.76em;
+  }
+  .yw-call-time {
+    font-size: 1em;
   }
   .yw-wave {
-    width: 5.5em;
+    width: 4em;
+    height: 1.2em;
+  }
+  .yw-caption {
+    font-size: 0.78em;
   }
   .yw-pane {
-    padding-inline: 1em;
+    padding: 0.75em 0.9em 0;
+  }
+  .yw-pane-head {
+    padding-bottom: 0.6em;
+  }
+  .yw-feed {
+    gap: 0.7em;
+    padding-block: 0.75em;
+  }
+  .yw-who,
+  .yw-status-chip,
+  .yw-tag,
+  .yw-hold::before {
+    font-size: 0.74em;
+  }
+  .yw-chip {
+    font-size: 0.76em;
   }
   .yw-bubble {
-    font-size: 0.9em;
+    font-size: 0.86em;
   }
   .yw-check,
   .yw-guard-head {
     font-size: 0.8em;
+  }
+  .yw-check-icon {
+    font-size: 0.92em;
+  }
+  .yw-msg,
+  .yw-hold[data-end] {
+    max-width: 94%;
+  }
+  .yw-pane-title .yw-tag {
+    font-size: 0.78em;
+  }
+  .yw-verdict .yw-mono {
+    font-size: 1em;
+  }
+}
+/* Short rooms (landscape phones, small phones): the conversation alone. */
+@container yw (max-height: 25rem) {
+  .yw-queue {
+    display: none;
+  }
+  .yw-win-body {
+    grid-template-rows: minmax(0, 1fr);
   }
 }
 
@@ -1283,6 +1360,13 @@
     translate: none;
     filter: none;
     pointer-events: auto;
+  }
+  .yw-beat-meter {
+    display: none;
+  }
+  .yw-win,
+  .yw-phone {
+    translate: none;
   }
   .yw-beat-n {
     position: static;
