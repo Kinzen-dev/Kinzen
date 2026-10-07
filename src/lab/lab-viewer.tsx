@@ -7,14 +7,21 @@ import { demos as heroA } from "./hero/registry-a";
 import { demos as heroB } from "./hero/registry-b";
 import { demos as playA } from "./play/registry-a";
 import { demos as playB } from "./play/registry-b";
+import { demos as toolsA } from "./tools/registry-a";
+import { demos as toolsB } from "./tools/registry-b";
 import "./lab.css";
 
-const SETS: Record<"hero" | "play", LabDemo[]> = { hero: [...heroA, ...heroB], play: [...playA, ...playB] };
+type Kind = "hero" | "play" | "tools";
+const SETS: Record<Kind, LabDemo[]> = {
+  hero: [...heroA, ...heroB],
+  play: [...playA, ...playB],
+  tools: [...toolsA, ...toolsB],
+};
 // Built once at module scope (never during render): one lazy chunk per demo.
-const VIEWS = new Map([...SETS.hero, ...SETS.play].map((d) => [d.id, lazy(d.load)]));
+const VIEWS = new Map([...SETS.hero, ...SETS.play, ...SETS.tools].map((d) => [d.id, lazy(d.load)]));
 
 /** Lab switcher: one demo at a time (hash = demo id), a bar to move between them. */
-export function LabViewer({ kind, locale, banner }: { kind: "hero" | "play"; locale: Locale; banner: LabBanner }) {
+export function LabViewer({ kind, locale, banner }: { kind: Kind; locale: Locale; banner: LabBanner }) {
   const list = SETS[kind];
   const [id, setId] = useState<string | null>(null);
   useEffect(() => {
