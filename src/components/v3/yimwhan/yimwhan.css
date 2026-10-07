@@ -281,17 +281,28 @@
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
 }
+.yw-beat-fact {
+  max-width: 40ch;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--ink) 6%, transparent);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
 @media (max-width: 63.99rem) {
   .yw-beat-title {
     font-size: var(--text-lg);
     line-height: var(--text-lg--line-height);
   }
   .yw-beat-text,
-  .yw-beat-stat {
+  .yw-beat-stat,
+  .yw-beat-fact {
     font-size: var(--text-sm);
     line-height: var(--text-sm--line-height);
   }
-  .yw-beat-stat {
+  .yw-beat-stat,
+  .yw-beat-fact {
     padding: 0.625rem 0.875rem;
   }
 }
@@ -569,7 +580,7 @@
   display: block;
   padding: 0.6em 0.85em;
   border-radius: 0.95em;
-  font-size: max(var(--fmin), 0.86em);
+  font-size: max(12px, 0.86em);
   line-height: 1.5;
   text-wrap: pretty;
 }
@@ -584,7 +595,7 @@
   box-shadow: 0 0 0 2px color-mix(in oklch, var(--yw-mint) 55%, transparent);
 }
 .yw-msg-old .yw-bubble {
-  font-size: max(var(--fmin), 0.8em);
+  font-size: max(12px, 0.8em);
   background: color-mix(in oklch, var(--ink) 7%, transparent);
   color: var(--ink-2);
   border-end-start-radius: 0.3em;
@@ -813,7 +824,7 @@
 }
 .yw-caller,
 .yw-caption {
-  font-size: max(var(--fmin), 0.8em);
+  font-size: max(12px, 0.8em);
   line-height: 1.4;
   color: var(--ink);
 }
@@ -952,10 +963,18 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  /* Whole rows only: a row that does not fit wraps into a clipped second column. */
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  column-gap: 3em;
   overflow: hidden; /* not clip: axe treats clip as visible */
   margin-inline: -1em;
 }
 .yw-rows .yw-row {
+  flex: none;
+  width: 100%;
   height: var(--row);
   padding-inline: 1em;
   border-bottom: 1px solid var(--rule);
@@ -984,8 +1003,6 @@
   position: relative;
   min-height: 0;
   overflow: hidden; /* not clip: axe treats clip as visible */
-  /* Older messages scroll up under a deliberate soft edge, like any chat. */
-  mask-image: linear-gradient(to bottom, transparent 0, #000 3.5em);
 }
 .yw-feed {
   position: relative;
@@ -1095,7 +1112,6 @@
   min-height: 0;
   overflow: hidden; /* not clip: axe treats clip as visible */
   padding-inline: 0.65em;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 2.5em);
 }
 .yw-chat {
   position: relative;
@@ -1111,7 +1127,7 @@
   color: oklch(0.85 0.01 85);
 }
 .yw-lb {
-  font-size: max(var(--fmin), 0.76em);
+  font-size: max(12px, 0.76em);
   line-height: 1.45;
   text-wrap: pretty;
 }
@@ -1246,38 +1262,41 @@
   .yw-panel {
     position: absolute;
     inset: 0;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: flex-start;
-    gap: 0.7em 3em;
     padding: 0.9em;
     overflow: hidden;
-    transition:
-      opacity 380ms var(--yw-ease) 120ms,
-      translate 480ms var(--yw-ease) 80ms;
-  }
-  .yw-panel > * {
-    flex: none;
-    width: 100%;
-    max-width: none;
-  }
-  .yw-panel > .yw-msg-draft,
-  .yw-panel > .yw-msg-reply {
-    width: 92%;
-  }
-  .yw-panel > .yw-msg-patient {
-    width: 92%;
+    /* Consecutive cards hold the same conversation in the same place at the boundary, so a short
+       plain crossfade reads as one continuous card. */
+    transition: opacity 220ms ease-out;
   }
   .yw-panel:not([data-on]) {
     opacity: 0;
-    translate: 0 0.8em;
-    transition-duration: 150ms;
-    transition-delay: 0ms;
   }
-  .yw-panel[data-past]:not([data-on]) {
-    translate: 0 -0.8em;
+  /* Items in one column, full width (symmetric insets, one alignment for every message). Those that
+     do not fit wrap into a second column that is clipped away: what shows is always whole. */
+  .yw-stack {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 0.6em 3em;
+    height: 100%;
+  }
+  .yw-stack[data-chat] {
+    --rp: clamp(0, calc((var(--p) * 5 - var(--n)) * 4), 1);
+    flex-direction: column-reverse;
+    translate: 0 calc(var(--push, 0px) * (1 - var(--rp)));
+  }
+  .yw-stack > * {
+    flex: none;
+    width: 100%;
+  }
+  .yw-stack > .yw-day {
+    width: auto;
+    align-self: center;
+  }
+  .yw-cmp .yw-msg {
+    max-width: none;
+    justify-items: stretch;
   }
   .yw-note {
     display: grid;
