@@ -1,13 +1,19 @@
 /* ==================================================================
    Helm scene (ticket v3-05). Light scene: copy + tools-lavender panel
    holding a Helm window mockup. StickyStage writes data-step (0..4)
-   and --p (0..1) on .helm-stage; everything below is drawn from them.
+   and --p (0..1) on .helm-stage; --b = --p x 5 is the beat position
+   (beat N runs from N to N+1). Everything below is drawn from them and
+   scrubbed by scroll, so every scroll tick of every beat moves something.
    Motion = transform / opacity only (typing = a cover sliding off the
-   text in character steps), plus a few paint-only SVG strokes.
+   text in character steps, a paused animation seeked by scroll), plus a
+   few paint-only SVG strokes.
    ================================================================== */
 
 .helm-scene {
   margin-top: clamp(4rem, 3rem + 5vw, 8rem);
+}
+.helm-stage {
+  --b: calc(var(--p, 1) * 5);
 }
 /* Until HelmArm marks the stage, beats switch instantly and nothing plays: the server's last beat
    is replaced by the real one without a cross-fade. */
@@ -262,14 +268,20 @@
     margin-top: 0.5rem;
     font-size: var(--text-sm);
   }
+  .helm-beats {
+    margin-top: 1rem;
+  }
   .helm-beat-title {
     font-size: 1.0625rem;
   }
   .helm-beat-body {
     font-size: var(--text-sm);
   }
-  .helm-meta,
   .helm-progress {
+    margin-top: 0.75rem;
+    max-width: none;
+  }
+  .helm-meta {
     display: none;
   }
   .helm-title {
@@ -277,8 +289,48 @@
   }
 }
 @media (max-width: 55.99rem) and (max-height: 760px) {
-  .helm-lede {
+  .helm-lede,
+  .helm-kicker {
     display: none;
+  }
+  .helm-title {
+    margin-top: 0;
+  }
+}
+
+/* ---------- phone landscape: story text beside the window, always on screen ---------- */
+@media (orientation: landscape) and (max-height: 540px) {
+  .helm-layout {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 1.5rem;
+    padding-block: calc(var(--header-h) + 0.25rem) 0.75rem;
+  }
+  .helm-kicker,
+  .helm-art,
+  .helm-lede,
+  .helm-meta {
+    display: none;
+  }
+  .helm-title {
+    margin-top: 0;
+    font-size: 2rem;
+  }
+  .helm-beats {
+    margin-top: 0.75rem;
+  }
+  .helm-progress {
+    display: flex;
+    margin-top: 0.75rem;
+  }
+  .helm-panel {
+    padding: 0.5rem;
+  }
+  .helm-window-wrap {
+    width: calc((100svh - var(--header-h) - 3.75rem) * 1.16);
+  }
+  .helm-caption {
+    margin-top: 0.4rem;
   }
 }
 
@@ -308,6 +360,8 @@
   --hw-cyan: hsl(186 72% 55%);
   --hw-magenta: hsl(322 58% 62%);
   --hw-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Beat 5: the merge lands late in the beat (toast, MERGED tag). */
+  --tv: clamp(0, (var(--b) - 4.68) * 8, 1);
 
   position: relative;
   display: grid;
@@ -391,7 +445,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45em;
-  padding: 0.25em 0.75em 0.25em 0.55em;
+  padding: 0.25em 0.65em;
   border: 1px solid var(--hw-line-2);
   border-radius: 999px;
   font-size: 0.82em;
@@ -440,7 +494,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.55em;
-  padding: 1.1em 0.8em 0.9em;
+  padding: 1em 0.8em;
   background: var(--hw-s1);
   border-right: 1px solid var(--hw-line);
   min-width: 0;
@@ -528,6 +582,15 @@
 .hw-tag [data-show="done"] {
   color: var(--hw-green);
 }
+/* Beat 5: the workspace reads WORKING until the merge lands, then MERGED. */
+.helm-stage[data-step="4"] .hw-tag > [data-show="working"] {
+  opacity: calc(1 - var(--tv));
+  translate: none;
+}
+.helm-stage[data-step="4"] .hw-tag > [data-show="done"] {
+  opacity: var(--tv);
+  translate: none;
+}
 .hw-mission {
   display: flex;
   align-items: center;
@@ -553,37 +616,162 @@
   padding: 0.7em;
   min-height: 0;
 }
-.hw-empty {
+
+/* ---------- launcher (beat 1): fills itself in as the visitor scrolls ---------- */
+.hw-launch {
+  --pick: clamp(0, (var(--b) - 0.42) * 12, 1);
+  --press: clamp(0, (var(--b) - 0.7) * 10, 1);
   position: absolute;
   inset: 0;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  justify-items: stretch;
+  gap: 0.85em;
+  width: min(30em, 100% - 2em);
+  margin: auto;
+  height: fit-content;
+  padding: 1.2em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 0.9em;
+  background: var(--hw-s1);
+  box-shadow: 0 1.2em 2.6em -1.2em hsl(260 50% 3% / 0.8);
+  transition:
+    opacity 260ms var(--hw-ease),
+    scale 420ms var(--hw-ease);
+}
+.helm-stage:not([data-step="0"]) .hw-launch {
+  opacity: 0;
+  scale: 0.97;
+}
+.hw-launch-title {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 600;
+}
+.hw-launch-title .hw-icon {
+  color: var(--hw-amber);
+}
+.hw-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6em;
+}
+.hw-mode {
+  display: grid;
+  gap: 0.15em;
+  padding: 0.6em 0.75em;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.6em;
+  font-size: 0.8em;
+  color: var(--hw-ink-3);
+}
+.hw-mode b {
+  font-weight: 600 !important;
+  color: var(--hw-ink-2);
+}
+.hw-mode.is-on {
+  border-color: hsl(38 92% 61% / 0.6);
+  background: hsl(38 92% 61% / 0.07);
+}
+.hw-path {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.55em 0.75em;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.55em;
+  background: var(--hw-ground);
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  white-space: nowrap;
+}
+.hw-path > b {
+  color: var(--hw-amber);
+}
+.hw-launch-label {
+  padding-inline: 0;
+  margin-bottom: -0.3em;
+}
+.hw-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5em;
+}
+.hw-tile {
+  position: relative;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.7em;
-  font-size: 0.92em;
+  gap: 0.45em;
+  padding-block: 0.55em;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.55em;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
   color: var(--hw-ink-3);
-  transition: opacity 240ms var(--hw-ease);
 }
-.hw-empty-icon {
-  width: 2.6em;
-  height: 2.6em;
-  color: var(--hw-line-2);
+.hw-tile-grid {
+  width: 0.95em;
+  height: 0.95em;
+  border: 1.5px solid currentColor;
+  border-radius: 0.2em;
+  opacity: 0.7;
 }
-.hw-empty .hw-mission-cta {
-  margin-top: 0.3em;
-  color: var(--hw-ink-2);
-  border-color: color-mix(in oklch, var(--hw-amber) 55%, transparent);
-  animation: hw-cta 2.2s ease-in-out infinite;
+.hw-tile-grid[data-n="2"] {
+  background: linear-gradient(90deg, transparent 45%, currentColor 45% 55%, transparent 55%);
 }
-.hw-mission-cta .hw-kbd {
-  margin-left: 0.4em;
+.hw-tile-grid[data-n="4"],
+.hw-tile-grid[data-n="6"] {
+  background:
+    linear-gradient(90deg, transparent 45%, currentColor 45% 55%, transparent 55%),
+    linear-gradient(transparent 45%, currentColor 45% 55%, transparent 55%);
 }
-.helm-stage:not([data-step="0"]) .hw-empty {
-  opacity: 0;
+/* The picked tile: an amber layer whose opacity follows the scroll. */
+.hw-tile[data-pick]::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1.5px solid var(--hw-amber);
+  border-radius: inherit;
+  background: hsl(38 92% 61% / 0.12);
+  opacity: var(--pick);
+}
+.hw-tile[data-pick] {
+  color: color-mix(in oklch, var(--hw-amber) calc(var(--pick) * 100%), var(--hw-ink-3));
+}
+.hw-create {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  padding: 0.6em 1em;
+  border-radius: 0.6em;
+  background: linear-gradient(hsl(38 92% 63%), hsl(35 88% 54%));
+  color: hsl(258 40% 9%);
+  font-size: 0.86em;
+  font-weight: 600;
+  scale: calc(1 - var(--press) * 0.03);
+}
+.hw-create::after {
+  content: "";
+  position: absolute;
+  inset: -0.35em;
+  border-radius: 0.85em;
+  box-shadow: 0 0 0 0.25em hsl(38 92% 61% / 0.35);
+  opacity: var(--press);
+}
+.hw-create .hw-kbd {
+  border-color: hsl(258 40% 9% / 0.35);
+  color: hsl(258 40% 9% / 0.75);
 }
 
+/* ---------- panes ---------- */
 .hw-pane {
+  --v: 0;
+  --v4: 0;
   position: relative;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
@@ -592,20 +780,23 @@
   border: 1px solid var(--hw-line);
   border-radius: 0.8em;
   background: var(--hw-pane);
-  opacity: 0;
-  translate: 0 -0.6em;
-  scale: 0.96;
+  opacity: var(--v);
+  translate: 0 calc((1 - var(--v)) * -0.6em);
+  scale: calc(0.96 + var(--v) * 0.04);
   transition:
-    opacity 320ms var(--hw-ease) calc(var(--i) * 90ms),
-    translate 520ms var(--hw-ease) calc(var(--i) * 90ms),
-    scale 520ms var(--hw-ease) calc(var(--i) * 90ms),
     border-color 200ms var(--hw-ease),
     box-shadow 320ms var(--hw-ease);
 }
-.helm-stage:not([data-step="0"]) .hw-pane {
-  opacity: 1;
-  translate: 0 0;
-  scale: 1;
+/* Beat 2: the panes spawn one after another while the visitor scrolls. */
+.helm-stage[data-step="1"] .hw-pane {
+  --v: clamp(0, (var(--b) - 1.06 - var(--i) * 0.15) * 6, 1);
+}
+.helm-stage:is([data-step="2"], [data-step="3"], [data-step="4"]) .hw-pane {
+  --v: 1;
+}
+/* Beat 5: each pane's check lands in turn (--done is its moment inside the beat). */
+.helm-stage[data-step="4"] .hw-pane {
+  --v4: clamp(0, (var(--b) - 4 - var(--done)) * 25, 1);
 }
 /* Atlas holds focus while the crew works. */
 .helm-stage:is([data-step="2"], [data-step="3"]) .hw-pane[data-pane="atlas"] {
@@ -614,12 +805,24 @@
     0 0 0 1px var(--hw-amber),
     0 0 1.6em -0.2em hsl(38 92% 61% / 0.35);
 }
-/* Sable lights up when the note lands. */
-.helm-stage[data-step="3"] .hw-pane[data-pane="sable"] {
-  animation: hw-ring 1.4s var(--hw-ease) 2.3s 2 both;
+/* A ring layer: amber on Sable when the note lands (beat 4), green on each verified pane (beat 5). */
+.hw-pane::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid var(--hw-amber);
+  box-shadow: inset 0 0 1.4em -0.4em hsl(38 92% 61% / 0.45);
+  opacity: 0;
+  pointer-events: none;
 }
-.helm-stage[data-step="4"] .hw-pane {
-  border-color: color-mix(in oklch, var(--hw-green) 45%, var(--hw-line));
+.helm-stage[data-step="3"] .hw-pane[data-pane="sable"]::after {
+  opacity: clamp(0, (var(--b) - 3.7) * 10, 1);
+}
+.helm-stage[data-step="4"] .hw-pane::after {
+  border-color: hsl(151 46% 56% / 0.7);
+  box-shadow: none;
+  opacity: var(--v4);
 }
 
 .hw-head {
@@ -628,7 +831,7 @@
   gap: 0.55em;
   min-width: 0;
   height: 2.6em;
-  padding-inline: 0.85em 0.7em;
+  padding-inline: 0.75em;
 }
 .hw-sign {
   font-size: 0.95em;
@@ -659,6 +862,14 @@
   border-color: hsl(151 46% 56% / 0.45);
   background: hsl(151 46% 56% / 0.12);
   color: var(--hw-green);
+}
+.helm-stage[data-step="4"] .hw-pane .hw-state > [data-show="working"] {
+  opacity: calc(1 - var(--v4));
+  translate: none;
+}
+.helm-stage[data-step="4"] .hw-pane .hw-state > [data-show="done"] {
+  opacity: var(--v4);
+  translate: none;
 }
 .hw-state .hw-icon {
   width: 1.4em;
@@ -694,28 +905,34 @@
   color: var(--hw-faint);
 }
 
-/* Activity strip: a hue gradient runs along it while the pane works. */
+/* Activity strip: a hue gradient runs along it while the pane works; green once verified. */
 .hw-strip {
   position: relative;
   height: 2px;
   overflow: clip;
   background: linear-gradient(90deg, var(--hw-line), transparent 80%);
 }
+.hw-strip::before,
 .hw-strip::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, var(--hw-indigo) 40%, hsl(295 50% 64%) 60%, transparent);
   opacity: 0;
+}
+.hw-strip::after {
+  background: linear-gradient(90deg, transparent, var(--hw-indigo) 40%, hsl(295 50% 64%) 60%, transparent);
   translate: -100% 0;
 }
-.helm-stage:is([data-step="2"], [data-step="3"]) .hw-strip::after {
-  opacity: 1;
+.hw-strip::before {
+  background: linear-gradient(90deg, hsl(151 46% 56% / 0.8), transparent 85%);
+}
+.helm-stage:is([data-step="2"], [data-step="3"], [data-step="4"]) .hw-strip::after {
+  opacity: calc(1 - var(--v4));
   animation: hw-run 2.6s linear infinite;
   animation-delay: calc(var(--i) * -0.7s);
 }
-.helm-stage[data-step="4"] .hw-strip {
-  background: linear-gradient(90deg, hsl(151 46% 56% / 0.7), transparent 85%);
+.helm-stage[data-step="4"] .hw-strip::before {
+  opacity: var(--v4);
 }
 
 /* Terminal. */
@@ -740,6 +957,9 @@
 .hw-prompt b {
   color: var(--hw-amber);
 }
+.hw-line-pair {
+  display: contents;
+}
 .hw-line {
   position: relative;
   display: none;
@@ -762,8 +982,24 @@
 .helm-stage[data-step="4"] .hw-line {
   display: block;
 }
-/* Typing: a cover in the pane colour slides off the text one character per step; its left
-   edge is the caret. Transform only. */
+.hw-line[data-variant="short"] {
+  display: none !important;
+}
+/* Typing, scrubbed: a cover in the background colour slides off the text one character per
+   step; its left edge is the caret. The animation is paused and seeked by scroll: --k is how far
+   this line is through its own window [a, a + len] of beat `at`. Without a running animation
+   (no JS, reduced motion, before arming) the cover rests off the text. */
+.hw-line,
+.hw-typed {
+  --k: clamp(0, (var(--b) - var(--at) - var(--a)) / var(--len), 1);
+}
+.hw-typed {
+  position: relative;
+  display: inline-block;
+  overflow: clip;
+  vertical-align: bottom;
+  --cover: var(--hw-ground);
+}
 .hw-line::after,
 .hw-typed::after {
   content: "";
@@ -771,8 +1007,9 @@
   inset: 0;
   background: var(--cover, var(--hw-pane));
   border-left: 0.55em solid transparent;
-  translate: calc(100% + 0.6em) 0; /* revealed when no typing animation runs */
-  animation: hw-type var(--dur) steps(var(--chars)) var(--delay) both;
+  translate: calc(100% + 0.6em) 0;
+  animation: hw-type 1s steps(var(--chars)) paused both;
+  animation-delay: calc(var(--k) * -1s);
 }
 .hw-caret {
   display: block;
@@ -783,10 +1020,12 @@
   animation: hw-blink 1.05s steps(1) infinite;
 }
 
-/* ---------- message in flight (step 3) ---------- */
+/* ---------- message in flight (beat 4), seeked by scroll ---------- */
 .hw-flight {
+  --fk: clamp(0, (var(--b) - 3.22) / 0.48, 1);
   position: absolute;
   inset: 0.7em;
+  z-index: 2;
   container-type: size;
   pointer-events: none;
   opacity: 0;
@@ -801,6 +1040,7 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+  opacity: clamp(0, (var(--b) - 3.16) * 12, 1);
 }
 .hw-arc path {
   fill: none;
@@ -830,9 +1070,9 @@
     0 0.8em 1.6em -0.6em hsl(260 50% 5% / 0.7);
   translate: calc(46cqw - 50%) calc(28cqh - 50%);
   rotate: -4deg;
-}
-.helm-stage[data-step="3"] .hw-note {
-  animation: hw-fly 1.5s var(--hw-ease) 0.95s both;
+  opacity: 0;
+  animation: hw-fly 1s linear paused both;
+  animation-delay: calc(var(--fk) * -1s);
 }
 .hw-note-route {
   font-family: var(--font-mono);
@@ -847,26 +1087,27 @@
   font-weight: 600;
 }
 
-/* ---------- merge toast (step 4) ---------- */
+/* ---------- merge toast (beat 5), scrubbed ---------- */
 .hw-toast {
   position: absolute;
   left: 50%;
   bottom: 1.4em;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 0.6em;
-  padding: 0.55em 1em 0.55em 0.65em;
+  padding: 0.55em 0.9em;
   border: 1px solid hsl(151 46% 56% / 0.45);
   border-radius: 999px;
   background: hsl(259 17% 14% / 0.96);
   box-shadow: 0 1em 2em -1em hsl(260 50% 4% / 0.8);
   font-size: 0.86em;
   white-space: nowrap;
+  opacity: var(--tv);
+  translate: -50% calc((1 - var(--tv)) * 1em);
+}
+.helm-stage:not([data-step="4"]) .hw-toast {
   opacity: 0;
-  translate: -50% 1em;
-  transition:
-    opacity 260ms var(--hw-ease),
-    translate 520ms var(--hw-ease);
 }
 .hw-toast .hw-icon {
   width: 1.5em;
@@ -884,11 +1125,6 @@
   padding-left: 0.6em;
   border-left: 1px solid var(--hw-line-2);
   color: var(--hw-ink-3);
-}
-.helm-stage[data-step="4"] .hw-toast {
-  opacity: 1;
-  translate: -50% 0;
-  transition-delay: 0.9s;
 }
 
 /* ---------- command bar ---------- */
@@ -934,63 +1170,90 @@
 .hw-composer [data-show="placeholder"] {
   color: var(--hw-faint);
 }
-.hw-typed {
-  position: relative;
-  display: inline-block;
-  --cover: var(--hw-ground);
-  --chars: 40;
-  --dur: 1100ms;
-  --delay: 0ms;
-}
-.hw-typed::after {
-  animation: none;
-  translate: calc(100% + 0.6em) 0;
-}
-.helm-stage[data-step="2"] .hw-typed::after {
-  animation: hw-type var(--dur) steps(var(--chars)) var(--delay) both;
-}
 
-/* ---------- phone composition: compact 2x2, no rail ---------- */
+/* ==================================================================
+   Phone composition: simplified, not shrunk. No rail, no command bar,
+   no tiny chips; short terminal lines; nothing under 10.5px.
+   ================================================================== */
 @container hw (max-width: 36rem) {
   .hw {
-    aspect-ratio: 1 / 0.8;
-    font-size: clamp(8px, 2.75cqi, 11.5px);
-    grid-template-rows: 3em minmax(0, 1fr) 3.1em;
+    aspect-ratio: 1 / 0.86;
+    font-size: clamp(13px, 3.9cqi, 15px);
+    grid-template-rows: 2.8em minmax(0, 1fr);
   }
   .hw-body {
     grid-template-columns: minmax(0, 1fr);
   }
   .hw-rail,
-  .hw-tools .hw-icon,
+  .hw-command,
+  .hw-crumb,
+  .hw-tools,
   .hw-head-icon,
   .hw-state,
   .hw-banner,
+  .hw-prompt,
+  .hw-caret,
+  .hw-engine i,
   .hw-toast-meta,
-  [data-phone="hide"] {
+  .hw-modes,
+  .hw-launch-label,
+  .hw-create .hw-kbd,
+  .hw-line[data-variant="full"] {
     display: none !important;
   }
+  .hw-line[data-variant="short"] {
+    display: none;
+  }
+  .helm-stage[data-step="2"] .hw-line[data-variant="short"][data-at="2"],
+  .helm-stage[data-step="3"] .hw-line[data-variant="short"]:is([data-at="2"], [data-at="3"]),
+  .helm-stage[data-step="4"] .hw-line[data-variant="short"] {
+    display: block !important;
+  }
+  .hw-titlebar {
+    padding-inline: 0.8em;
+  }
+  .hw-vesper {
+    margin-left: auto;
+  }
   .hw-rack {
-    gap: 0.5em;
-    padding: 0.55em;
+    gap: 0.45em;
+    padding: 0.5em;
   }
   .hw-flight {
-    inset: 0.55em;
+    inset: 0.5em;
   }
   .hw-head {
-    padding-inline: 0.7em 0.6em;
+    gap: 0.35em;
     height: 2.4em;
+    padding-inline: 0.6em;
+  }
+  .hw-engine {
+    padding: 0.2em 0.5em;
+    font-size: 0.82em;
   }
   .hw-term {
-    padding: 0.55em 0.7em;
-    font-size: 0.74em;
-    line-height: 1.55;
+    padding: 0.45em 0.6em;
+    font-size: 0.82em;
+    line-height: 1.45;
   }
-  .hw-composer {
-    flex: 1 1 auto;
+  .hw-note {
+    font-size: 0.84em;
+  }
+  .hw-note-route {
+    font-size: 1em;
   }
   .hw-toast {
-    bottom: 1em;
-    font-size: 0.8em;
+    bottom: 0.8em;
+    font-size: 0.84em;
+  }
+  .hw-launch {
+    gap: 0.7em;
+    width: calc(100% - 1.6em);
+    padding: 1em;
+  }
+  .hw-path,
+  .hw-tile {
+    font-size: 0.86em;
   }
 }
 
@@ -1002,15 +1265,6 @@
   }
   50% {
     opacity: 1;
-  }
-}
-@keyframes hw-cta {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 hsl(38 92% 61% / 0);
-  }
-  50% {
-    box-shadow: 0 0 0 0.35em hsl(38 92% 61% / 0.14);
   }
 }
 @keyframes hw-glyph {
@@ -1054,18 +1308,8 @@
     stroke-dashoffset: -16;
   }
 }
-@keyframes hw-ring {
-  0% {
-    box-shadow: 0 0 0 0 hsl(38 92% 61% / 0.6);
-    border-color: var(--hw-amber);
-  }
-  100% {
-    box-shadow: 0 0 0 0.9em hsl(38 92% 61% / 0);
-    border-color: var(--hw-amber);
-  }
-}
-/* The note follows the arc M46 28 Q78 8 70 54 (rack percentages), sampled at t = 0 .25 .5 .75 1,
-   lands on Sable's header and is absorbed into the pane. */
+/* The note follows the arc M46 28 Q78 8 70 54 (rack percentages), sampled every t = 1/8, then is
+   absorbed into Sable's pane. Seeked by scroll (linear in time = linear in scroll). */
 @keyframes hw-fly {
   0% {
     translate: calc(46cqw - 50%) calc(28cqh - 50%);
@@ -1073,21 +1317,37 @@
     scale: 0.6;
     opacity: 0;
   }
-  10% {
+  6% {
     opacity: 1;
     scale: 1;
   }
-  22% {
-    translate: calc(59.5cqw - 50%) calc(22.1cqh - 50%);
-    rotate: -2deg;
+  10.5% {
+    translate: calc(53.6cqw - 50%) calc(24.1cqh - 50%);
+    rotate: -6deg;
   }
-  44% {
+  21% {
+    translate: calc(59.5cqw - 50%) calc(22.1cqh - 50%);
+    rotate: -3deg;
+  }
+  31.5% {
+    translate: calc(64.4cqw - 50%) calc(22.1cqh - 50%);
+    rotate: 0deg;
+  }
+  42% {
     translate: calc(68cqw - 50%) calc(24.5cqh - 50%);
+    rotate: 3deg;
+  }
+  52.5% {
+    translate: calc(70.4cqw - 50%) calc(28.6cqh - 50%);
     rotate: 4deg;
   }
-  64% {
+  63% {
     translate: calc(71.5cqw - 50%) calc(35.1cqh - 50%);
     rotate: 2deg;
+  }
+  73.5% {
+    translate: calc(71.4cqw - 50%) calc(43.6cqh - 50%);
+    rotate: 0deg;
   }
   84% {
     translate: calc(70cqw - 50%) calc(54cqh - 50%);
@@ -1105,8 +1365,8 @@
 
 /* ==================================================================
    Reduced motion: StickyStage puts the stage in normal flow at the
-   last step. Show every beat as a list and the finished window, with
-   the hand-off still drawn so the static picture tells all five beats.
+   last step. Show every beat as a list and the finished window; the
+   hand-off reads from the two terminal lines.
    ================================================================== */
 @media (prefers-reduced-motion: reduce) {
   .helm-layout {
@@ -1132,15 +1392,13 @@
   .helm-lede {
     display: block;
   }
-  /* The hand-off reads from the two terminal lines (Atlas -> Sable, Sable <- Atlas). */
   .hw-flight {
     display: none;
   }
-  .hw-arc path,
   .hw-lamp,
   .hw-caret,
   .hw-strip::after,
-  .hw-empty .hw-mission-cta {
+  .hw-arc path {
     animation: none !important;
   }
   .hw-line::after,

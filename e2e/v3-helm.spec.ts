@@ -11,6 +11,8 @@ async function scrollTrack(page: Page, f: number) {
 }
 
 test.describe("v3 Helm scene", () => {
+  // Several viewports and full-track scrolls per test: give a loaded laptop room.
+  test.describe.configure({ timeout: 90_000 });
   for (const route of ["/", "/th"]) {
     test(`${route}: real text equivalent, decorative mockup, case link`, async ({ page }) => {
       await page.goto(route);
@@ -46,14 +48,16 @@ test.describe("v3 Helm scene", () => {
     await scrollTrack(page, 0.7);
     await expect(page.locator(".helm-stage")).toHaveAttribute("data-step", "3");
     await expect(page.locator(".hw-flight")).toHaveCSS("opacity", "1");
-    await expect(page.locator('.hw-pane[data-pane="sable"] .hw-line[data-at="3"]').first()).toBeVisible();
-    await scrollTrack(page, 0.95);
+    // Phones show the short wording of the same line.
+    await expect(
+      page.locator('.hw-pane[data-pane="sable"] .hw-line[data-at="3"]').filter({ visible: true }).first(),
+    ).toBeVisible();
+    await scrollTrack(page, 0.99);
     await expect(page.locator(".helm-stage")).toHaveAttribute("data-step", "4");
     await expect(page.locator(".hw-toast")).toHaveCSS("opacity", "1", { timeout: 3000 });
   });
 
   test("reduced motion: normal flow, every beat shown, finished window", async ({ browser }) => {
-    test.setTimeout(30_000);
     const ctx = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage();
     await page.goto("/");
@@ -87,13 +91,14 @@ test.describe("v3 Helm scene", () => {
 
   for (const theme of ["light", "dark"]) {
     test(`axe clean in the ${theme} theme, in every beat`, async ({ page }) => {
-      test.setTimeout(120_000);
+      test.setTimeout(150_000);
       await page.addInitScript((t) => localStorage.setItem("theme", t), theme);
       await page.goto("/");
       await expect(page.locator(".helm-stage")).toHaveAttribute("data-armed", "");
-      for (const f of [0.05, 0.3, 0.5, 0.7, 0.95]) {
+      // The settled end of each beat (scroll-scrubbed layers mid-fade are not a resting state).
+      for (const f of [0.19, 0.39, 0.59, 0.79, 0.99]) {
         await scrollTrack(page, f);
-        await page.waitForTimeout(2000); // let the beat's fades settle
+        await page.waitForTimeout(1200);
         const results = await new AxeBuilder({ page })
           .include(".helm-scene")
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
