@@ -109,6 +109,27 @@ test.describe("v3 Helm scene", () => {
     });
   }
 
+  test("the Thai window speaks Thai (labels), code stays as code", async ({ page }) => {
+    await page.goto("/th");
+    const hw = page.locator(".hw");
+    await expect(hw).toContainText("สร้าง workspace");
+    await expect(hw).not.toContainText("Create workspace");
+    await expect(hw).toContainText("~/projects/orchard");
+  });
+
+  test("the launcher is gone before the first pane appears", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".helm-stage")).toHaveAttribute("data-armed", "");
+    for (let beat = 0.96; beat <= 1.2; beat += 0.02) {
+      await scrollTrack(page, beat / 5);
+      const [launch, pane] = await page.evaluate(() => [
+        +getComputedStyle(document.querySelector(".hw-launch")!).opacity,
+        Math.max(...[...document.querySelectorAll(".hw-pane")].map((e) => +getComputedStyle(e).opacity)),
+      ]);
+      expect(Math.min(launch, pane), `beat ${beat.toFixed(2)}`).toBeLessThanOrEqual(0.02);
+    }
+  });
+
   for (const theme of ["light", "dark"]) {
     test(`axe clean in the ${theme} theme, in every beat`, async ({ page }) => {
       test.setTimeout(150_000);

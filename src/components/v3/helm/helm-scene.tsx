@@ -84,7 +84,7 @@ export function HelmScene({ locale, v3 }: { locale: Locale; dict: Dictionary; v3
 
           <figure className="helm-panel">
             <div className="helm-window-wrap">
-              <HelmWindow />
+              <HelmWindow ui={copy.ui} />
             </div>
             <figcaption className="helm-caption">
               <span className="sr-only">{nobr(copy.summary)} </span>

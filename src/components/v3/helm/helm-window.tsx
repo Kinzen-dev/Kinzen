@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import type { HelmCopy } from "@/i18n/v3/helm";
 
 /**
  * The Helm window mockup: real app structure (titlebar, workspace rail, launcher, 2x2 rack of
@@ -162,7 +163,7 @@ function Typed({
   );
 }
 
-export function HelmWindow() {
+export function HelmWindow({ ui }: { ui: HelmCopy["ui"] }) {
   return (
     <div className="hw" aria-hidden="true">
       <div className="hw-titlebar">
@@ -187,22 +188,22 @@ export function HelmWindow() {
 
       <div className="hw-body">
         <div className="hw-rail">
-          <p className="hw-label">Workspaces</p>
+          <p className="hw-label">{ui.workspaces}</p>
           <p className="hw-count">
             <span className="hw-swap">
               <b data-show="empty">0</b>
               <b data-show="open">4</b>
             </span>
-            open terminals
+            {ui.openTerminals}
           </p>
           <ul className="hw-spaces">
             <li className="hw-space is-active" style={vars({ "--hue": "var(--hw-indigo)" })}>
               <i className="hw-glyph" />
               <span>orchard</span>
               <span className="hw-swap hw-tag">
-                <b data-show="idle">IDLE</b>
-                <b data-show="working">WORKING</b>
-                <b data-show="done">MERGED</b>
+                <b data-show="idle">{ui.idle}</b>
+                <b data-show="working">{ui.working}</b>
+                <b data-show="done">{ui.merged}</b>
               </span>
             </li>
             <li className="hw-space" style={vars({ "--hue": "var(--hw-magenta)" })}>
@@ -215,7 +216,7 @@ export function HelmWindow() {
             </li>
           </ul>
           <span className="hw-mission">
-            <b>+</b> new mission
+            <b>+</b> {ui.newMission}
           </span>
         </div>
 
@@ -224,14 +225,14 @@ export function HelmWindow() {
           <div className="hw-launch">
             <p className="hw-launch-title">
               <Icon d={ICON.sparkle} />
-              New workspace
+              {ui.newWorkspace}
             </p>
             <div className="hw-modes">
               <span className="hw-mode is-on">
-                <b>Space</b> panes in a grid
+                <b>Space</b> {ui.spaceHint}
               </span>
               <span className="hw-mode">
-                <b>Swarm</b> a composed roster
+                <b>Swarm</b> {ui.swarmHint}
               </span>
             </div>
             <p className="hw-path">
@@ -245,7 +246,7 @@ export function HelmWindow() {
                 className="hw-typed hw-path-typed"
               />
             </p>
-            <p className="hw-label hw-launch-label">How many terminals?</p>
+            <p className="hw-label hw-launch-label">{ui.howMany}</p>
             <div className="hw-tiles">
               <i className="hw-tile-cursor" />
               {["1", "2", "4", "6"].map((n) => (
@@ -256,7 +257,7 @@ export function HelmWindow() {
               ))}
             </div>
             <span className="hw-create">
-              Create workspace <span className="hw-kbd">⌘↵</span>
+              {ui.create} <span className="hw-kbd">⌘↵</span>
             </span>
           </div>
 
@@ -270,11 +271,11 @@ export function HelmWindow() {
               <div className="hw-head">
                 <b className="hw-sign">{pane.sign}</b>
                 <span className="hw-swap hw-state">
-                  <b data-show="idle">IDLE</b>
-                  <b data-show="working">WORKING</b>
+                  <b data-show="idle">{ui.idle}</b>
+                  <b data-show="working">{ui.working}</b>
                   <b data-show="done">
                     <Icon d={ICON.check} />
-                    PASSED
+                    {ui.passed}
                   </b>
                 </span>
                 <span className="hw-engine" data-live={i === 0 || undefined}>
@@ -322,20 +323,20 @@ export function HelmWindow() {
               <span className="hw-note-route">
                 Atlas <b>→</b> Sable
               </span>
-              <span className="hw-note-body">picker.ts ready for review</span>
+              <span className="hw-note-body">{ui.noteBody}</span>
             </span>
           </div>
 
           <div className="hw-toast">
             <Icon d={ICON.check} />
             <span>
-              Merged{" "}
+              {ui.mergedBefore}{" "}
               <span className="hw-toast-branch">
                 <b>feat/slot-picker</b>{" "}
               </span>
-              into main
+              {ui.mergedAfter}
             </span>
-            <span className="hw-toast-meta">4 of 4 checks</span>
+            <span className="hw-toast-meta">{ui.checks}</span>
           </div>
         </div>
       </div>
@@ -351,16 +352,9 @@ export function HelmWindow() {
         <span className="hw-composer">
           <b>›</b>
           <span className="hw-swap">
-            <span data-show="placeholder">Message the crew</span>
+            <span data-show="placeholder">{ui.placeholder}</span>
             <span data-show="typed">
-              <Typed
-                as="span"
-                text="add a slot picker to booking, with tests"
-                at={2}
-                a={0}
-                len={0.3}
-                className="hw-typed"
-              />
+              <Typed as="span" text={ui.dispatch} at={2} a={0} len={0.3} className="hw-typed" />
             </span>
           </span>
         </span>
