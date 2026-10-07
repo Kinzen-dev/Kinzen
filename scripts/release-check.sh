@@ -46,6 +46,11 @@ if (( deploy )); then
     fail "smoke test failed"
   }
   echo "   $(grep -c '^ok' /tmp/kinzen-smoke.log) checks ok"
+
+  echo "== Live footer commit"
+  curl -s https://www.kinzen.dev/ | grep -q "Kinzen-dev/Kinzen/commit/$short" \
+    || fail "the live footer does not link commit $short (deploy with scripts/deploy.sh)"
+  echo "   links $short"
 fi
 
 echo "RELEASE CHECK PASSED for $short"

@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { locales, type Locale } from "@/content/schema";
-import { localePath, neutralPath } from "@/lib/site-url";
-import { plain } from "@/lib/thai";
+import type { Locale } from "@/content/schema";
+import { LOCALES, localePath, neutralPath } from "@/lib/site-url";
+import { plain } from "@/lib/thai-plain";
 
 export function LanguageSwitch({
   locale,
@@ -21,7 +21,7 @@ export function LanguageSwitch({
 
   return (
     <nav aria-label={plain(label)} className="flex items-center text-sm">
-      {locales.map((target, i) => (
+      {LOCALES.map((target, i) => (
         <span key={target} className="flex items-center">
           {i > 0 && (
             <span aria-hidden="true" className="text-ink-3">
@@ -39,7 +39,7 @@ export function LanguageSwitch({
             hrefLang={target}
             lang={target}
             aria-current={target === locale ? "true" : undefined}
-            className={`relative inline-grid h-9 min-w-9 place-items-center rounded-full px-1.5 ${target === locale ? "text-ink" : "text-ink-3 transition-colors duration-200 hover:bg-[color-mix(in_oklab,var(--ink)_7%,transparent)] hover:text-ink"}`}
+            className={`relative inline-grid h-9 min-w-9 place-items-center rounded-full px-1.5 ${target === locale ? "text-ink" : "text-ink-2 transition-colors duration-200 hover:bg-[color-mix(in_oklab,var(--ink)_7%,transparent)] hover:text-ink"}`}
           >
             {target === "en" ? "EN" : "TH"}
             <span className="sr-only"> {labels[target]}</span>

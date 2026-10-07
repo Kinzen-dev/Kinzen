@@ -3,7 +3,8 @@ import "./primitives.css";
 
 /**
  * Infinite marquee (CSS loop). The list is rendered twice; the second copy is aria-hidden so a
- * screen reader hears it once. Pauses on hover and focus-within; static under reduced motion.
+ * screen reader hears it once. Pauses on hover and focus-within, and for good inside a paused
+ * MarqueeGroup (marquee-group.tsx); static under reduced motion.
  */
 export function Marquee({
   items,

@@ -18,7 +18,7 @@ import { workTitleTransition } from "./transition";
 import "./ledger.css";
 import "./transitions.css";
 import { inlineList } from "@/lib/text";
-import { plain } from "@/lib/thai";
+import { plain } from "@/lib/thai-plain";
 
 /** When the last Back/Forward happened: the ledger restores its state only on history traversal. */
 let poppedAt = -Infinity;

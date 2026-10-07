@@ -1,3 +1,7 @@
+import { stripJoiners } from "./thai-plain";
+
+export { plain, stripJoiners } from "./thai-plain";
+
 /**
  * Thai line breaking. Browsers split Thai with a dictionary (ICU) that cuts compound
  * words at their parts ("ทันต|กรรม", "ใช้|งาน"), which native readers read as broken
@@ -17,7 +21,6 @@
  * - `thaiBreaks` (OG images, where satori has no Thai dictionary) puts U+200B between
  *   atoms, so the card wraps only where the page would.
  */
-const WJ = "\u2060";
 const ZWSP = "\u200b";
 const THAI_RUN = /[\u0E00-\u0E7F]+/g;
 
@@ -171,6 +174,28 @@ export const COMPOUNDS = [
   "ผิดกฎ",
   "รันเทสต์",
   "ชุดตรวจความปลอดภัย",
+  "ความเป็นส่วนตัว",
+  "ไม่ใช้คุกกี้",
+  // Audit round a-01 (2026-10-07): breaks seen in the rewritten copy.
+  "ทดสอบซ้ำ",
+  "การประเมิน",
+  "การย้าย",
+  "การอัปเกรด",
+  "ด้านบน",
+  "ไม่ต่ำกว่า",
+  // Blind review r1: splits seen in the About lede and the case facts.
+  "ส่วนใหญ่",
+  "ทั้งระบบ",
+  "ด้วยตนเอง",
+  "เป็นเวลา",
+  "เป็นอิสระ",
+  "ฝั่งตะวันตก",
+  "ผ่านกฎ",
+  "เข้าชม",
+  "ตอบกลับ",
+  "คำตอบสุดท้าย",
+  "อวดอ้าง",
+  "ในการทดสอบนี้",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });
@@ -217,14 +242,4 @@ export function thaiGlue(text: string): string {
 /** Image text (satori): explicit break opportunities between atoms only. */
 export function thaiBreaks(text: string): string {
   return stripJoiners(text).replace(THAI_RUN, (run) => atoms(run).join(ZWSP));
-}
-
-/** Remove the joiners again (metadata, aria, copied text, comparisons). */
-export function stripJoiners(text: string): string {
-  return text.replaceAll(WJ, "");
-}
-
-/** Attribute values (aria-label, title, alt) must be plain text. */
-export function plain<T extends string | undefined>(text: T): T {
-  return (text === undefined ? text : stripJoiners(text)) as T;
 }

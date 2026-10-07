@@ -28,6 +28,7 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm check:output
+      - run: pnpm check:js-budget
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e

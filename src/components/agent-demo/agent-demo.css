@@ -282,3 +282,17 @@
 .agent-demo-typing .agent-demo-who {
   color: var(--ink-2);
 }
+
+/* Narrow phones (under 400px): three side-by-side choices leave about 60px per label, which
+   "Toothache" and "เลือดออก" overflow. Stack them, one full-width row each. */
+@media (max-width: 24.99rem) {
+  .agent-demo-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* The number keys need a keyboard; touch-only devices do not get the hint. */
+@media (hover: none) and (pointer: coarse) {
+  .agent-demo-keyhint {
+    display: none;
+  }
+}

@@ -93,6 +93,13 @@ export function HelmScene({ locale, v3 }: { locale: Locale; dict: Dictionary; v3
           </figure>
         </div>
       </StickyStage>
+      {/* Phones hide .helm-meta inside the pinned stage (no room); the case link follows the stage. */}
+      <p className="helm-cta-after shell">
+        <a href={localePath(locale, "/work/helm")} className="helm-cta">
+          {nobr(copy.cta)}
+          <span aria-hidden="true">→</span>
+        </a>
+      </p>
     </section>
   );
 }

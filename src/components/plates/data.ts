@@ -10,8 +10,8 @@ const yimwhan: PlateSpec = {
   projectId: "proj-yimwhan",
   drawing: "KZ-01",
   title: {
-    en: "Voice and LINE path through the clinical-safety guard",
-    th: "เส้นทางเสียงและ LINE ผ่านชุดตรวจความปลอดภัยทางคลินิก",
+    en: "Voice and LINE path through the reply rule checks",
+    th: "เส้นทางเสียงและ LINE ผ่านชุดตรวจคำตอบตามกฎ",
   },
   revision: "2026-10",
   width: 1240,
@@ -75,7 +75,7 @@ const yimwhan: PlateSpec = {
     },
     {
       id: "guard",
-      label: { en: "Clinical-safety guard", th: "ชุดตรวจความปลอดภัย" },
+      label: { en: "Reply rule checks", th: "ชุดตรวจคำตอบตามกฎ" },
       sub: { en: ["voice, LINE, recall"], th: ["เสียง LINE และการโทรติดตาม"] },
       emphasis: true,
       x: 770,
@@ -212,8 +212,13 @@ const yimwhan: PlateSpec = {
       ],
       at: [897, 600],
       lines: {
-        en: ["Blocks diagnoses, dosing advice", "and cure claims in every", "patient-facing reply"],
-        th: ["กันการวินิจฉัย การแนะนำขนาดยา", "และการอ้างว่ารักษาหาย", "ในทุกคำตอบที่ถึงคนไข้"],
+        en: [
+          "Checks each draft before it",
+          "reaches a patient, with rules",
+          "that block diagnoses, dosing",
+          "advice and cure claims",
+        ],
+        th: ["ตรวจร่างคำตอบก่อนส่งถึงคนไข้", "ตามกฎบล็อกการวินิจฉัย", "การแนะนำขนาดยา", "และการอ้างว่ารักษาหาย"],
       },
     },
     {
@@ -224,8 +229,8 @@ const yimwhan: PlateSpec = {
       ],
       at: [1044, 146],
       lines: {
-        en: ["Replay of 500 real", "messages: 37 model", "violations caught", "in code"],
-        th: ["รันซ้ำ 500 ข้อความจริง", "โค้ดดักคำตอบที่ผิดกฎ", "ได้ 37 ครั้ง"],
+        en: ["July 2026 test, 500 real", "LINE messages: code", "checks caught 37 rule", "violations in raw drafts"],
+        th: ["ทดสอบ ก.ค. 2026", "500 ข้อความจริงทาง LINE", "ชุดตรวจในโค้ดจับร่าง", "ที่ผิดกฎได้ 37 ครั้ง"],
       },
     },
     {

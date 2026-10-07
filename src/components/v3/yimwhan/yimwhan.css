@@ -1433,3 +1433,15 @@
     height: min(30rem, 80svh);
   }
 }
+
+/* Narrow phones (320px): the window dots go, and the status chip drops under the title instead of
+   sliding over the LINE tag. */
+@container yw (max-width: 400px) {
+  .yw-cmp-bar {
+    flex-wrap: wrap;
+    row-gap: 0.4em;
+  }
+  .yw-cmp-bar .yw-lights {
+    display: none;
+  }
+}

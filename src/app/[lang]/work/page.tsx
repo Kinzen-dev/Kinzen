@@ -4,6 +4,7 @@ import type { Locale, Project } from "@/content/schema";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getV3 } from "@/i18n/v3";
 import { alternates } from "@/lib/site-url";
+import { pageOpenGraph } from "@/lib/open-graph";
 import { nobr } from "@/lib/thai-nodes";
 import { Work } from "@/components/sections/work";
 import { Doodle, projectDoodle } from "@/components/doodles/doodle";
@@ -17,7 +18,12 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/work">): P
   const { lang } = await params;
   const locale = lang as Locale;
   const page = getV3(locale).moreWork.page;
-  return { title: page.title, description: page.description, alternates: alternates("/work", locale) };
+  return {
+    title: page.title,
+    description: page.description,
+    alternates: alternates("/work", locale),
+    openGraph: pageOpenGraph(locale, "/work", "website"),
+  };
 }
 
 /** The /work index (D5): every public system as a card, then the full sortable ledger. */

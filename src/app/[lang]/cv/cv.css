@@ -9,6 +9,7 @@
 
 .cv-head {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem 1.5rem;
   padding-bottom: 2.5rem;
 }
@@ -62,6 +63,8 @@
 
 .cv-section {
   display: grid;
+  /* An implicit column sizes to min-content, which WebKit measures wider than a phone for Thai. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem 1.5rem;
   border-top: 1px solid var(--rule-strong);
   padding-block: 1.25rem 2.25rem;
@@ -81,6 +84,7 @@
 
 .cv-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .cv-entry {
@@ -126,6 +130,7 @@
 
 .cv-points {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.375rem;
   margin-top: 0.75rem;
   max-width: 66ch;
@@ -153,11 +158,13 @@
 
 .cv-skills {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.625rem;
 }
 
 .cv-skill-row {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.125rem 1.5rem;
 }
 
@@ -176,6 +183,7 @@
 
 .cv-langs {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.25rem;
 }
 
@@ -254,6 +262,11 @@
     text-decoration: none;
   }
 
+  /* Selected work opens page 2 (with its label): split after Experience it would continue on a
+     page with an empty left column. Everything from here fits one A4 page in both languages. */
+  .cv-section:has(#cv-projects) {
+    break-before: page;
+  }
   .cv-section {
     grid-template-columns: 32mm 1fr;
     gap: 2mm 6mm;

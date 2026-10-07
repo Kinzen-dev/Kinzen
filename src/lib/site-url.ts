@@ -2,6 +2,13 @@ import type { Locale } from "@/content/schema";
 
 export const SITE_URL = "https://www.kinzen.dev";
 
+/**
+ * The site's languages, for client code. Same list as `locales` in content/schema, which client
+ * components must not import: building the zod schemas there pulls zod into the bundle and its
+ * JIT probe (`new Function`) trips the Content-Security-Policy (script-src has no 'unsafe-eval').
+ */
+export const LOCALES = ["en", "th"] as const satisfies readonly Locale[];
+
 /** Public path for a locale: English is unprefixed, Thai lives under /th. */
 export function localePath(locale: Locale, path = "/"): string {
   const clean = path.startsWith("/") ? path : `/${path}`;

@@ -93,7 +93,7 @@ test("reduced motion: the next card does not lift on hover", async ({ page, isMo
   expect(await next.evaluate((el) => getComputedStyle(el).translate)).toBe("none");
 });
 
-test("phones: Thai ledes and fact chips stay inside their padding; fact rows share a first line", async ({
+test("phones: Thai ledes and fact chips stay inside their padding; status and area share a row", async ({
   page,
   isMobile,
 }) => {
@@ -120,7 +120,8 @@ test("phones: Thai ledes and fact chips stay inside their padding; fact rows sha
         return {
           lede: inside(hero, hero.querySelector(".pj-tagline")!),
           chips: facts.map((f) => inside(f, f.querySelector("dd")!)),
-          rows: [tops[0] === tops[1], tops[2] === tops[3]],
+          // Phones: period and role take a full row each; status and area share the last row.
+          rows: [tops[0] < tops[1] && tops[1] < tops[2], tops[2] === tops[3]],
         };
       });
       expect(m.lede, `${route} @${width} lede`).toBe(true);

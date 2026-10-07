@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { navTarget } from "./nav-link";
-import { plain } from "@/lib/thai";
+import { plain } from "@/lib/thai-plain";
 import { prefetchFor } from "@/lib/site-url";
 
 /**
@@ -32,7 +32,17 @@ export function MobileNav({
       trigger.current?.focus({ preventScroll: true });
     };
     dialog.addEventListener("close", onClose);
-    return () => dialog.removeEventListener("close", onClose);
+    // The menu and its trigger are phone/tablet only (lg:hidden). Rotating or widening past lg
+    // while it is open would leave a hidden modal that makes the whole page inert: close it.
+    const wide = window.matchMedia("(min-width: 64rem)");
+    const onWide = () => {
+      if (wide.matches && dialog.open) dialog.close();
+    };
+    wide.addEventListener("change", onWide);
+    return () => {
+      dialog.removeEventListener("close", onClose);
+      wide.removeEventListener("change", onWide);
+    };
   }, []);
 
   return (

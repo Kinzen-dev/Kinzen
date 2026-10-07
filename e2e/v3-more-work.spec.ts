@@ -21,16 +21,16 @@ async function seriousViolations(page: Page) {
 const cards = (page: Page) => page.locator("#work .mw-card");
 
 test.describe("more work on home", () => {
-  test("four project cards link to their pages, All systems leads to /work, no ledger", async ({ page }) => {
+  test("four project cards link to their pages, All work leads to /work, no ledger", async ({ page }) => {
     await page.goto("/");
     await expect(cards(page)).toHaveCount(4);
     const hrefs = await page.locator("#work .mw-link").evaluateAll((a) => a.map((el) => el.getAttribute("href")));
     expect(hrefs).toEqual(["/work/anymind-ec-platform", "/work/visual-qa-harness", "/work/cadence", "/work/ronglen"]);
     await expect(page.locator("table.ledger-table")).toHaveCount(0);
 
-    await page.getByRole("link", { name: "All systems" }).click();
+    await page.getByRole("link", { name: "All work" }).click();
     await expect(page).toHaveURL(/\/work$/);
-    await expect(page.getByRole("heading", { level: 1, name: "All systems" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "All work" })).toBeVisible();
   });
 
   test("the whole card is the link to its project", async ({ page }) => {
@@ -107,7 +107,7 @@ test.describe("more work on home", () => {
     await page.waitForLoadState("networkidle");
     const last = page.locator("#work .mw-link").last();
     expect(await last.evaluate((a) => a.closest(".mw-slot")!.getAttribute("data-scatter"))).toBe("armed");
-    await page.getByRole("link", { name: "All systems" }).focus();
+    await page.getByRole("link", { name: "All work" }).focus();
     for (let i = 0; i < 4; i++) await page.keyboard.press("Tab");
     await expect(last).toBeFocused();
     expect(await last.evaluate((a) => getComputedStyle(a.closest(".mw-card")!).transform)).toBe("none");
@@ -127,7 +127,7 @@ test.describe("more work on home", () => {
     expect(m.first.width).toBeLessThan(390);
     expect(m.second.left).toBeLessThan(390); // the next card peeks in
 
-    const dots = page.getByRole("group", { name: "Choose a system" }).getByRole("button");
+    const dots = page.getByRole("group", { name: "Choose a project" }).getByRole("button");
     await expect(dots).toHaveCount(4);
     await expect(dots.first()).toHaveAttribute("aria-current", "true");
     await dots.nth(2).click();
@@ -172,8 +172,8 @@ test.describe("more work on home", () => {
 
 test.describe("/work index", () => {
   for (const { route, lang, h1, index } of [
-    { route: "/work", lang: "en", h1: "All systems", index: "Index" },
-    { route: "/th/work", lang: "th", h1: "ระบบทั้งหมด", index: "ตารางรวม" },
+    { route: "/work", lang: "en", h1: "All work", index: "Index" },
+    { route: "/th/work", lang: "th", h1: "ผลงานทั้งหมด", index: "ตารางรวม" },
   ]) {
     test(`${route} is prerendered with cards, the ledger and alternates`, async ({ page, request }) => {
       const res = await request.get(route);
@@ -224,8 +224,8 @@ test.describe("/work index", () => {
 test("keyboard focus on a home card brings the whole card into view, clear of the nav pill", async ({ page }) => {
   await page.goto("/");
   const links = page.locator("#work .mw-link");
-  // Reach the first card link with Tab from the "All systems" link just above it.
-  await page.getByRole("link", { name: "All systems" }).focus();
+  // Reach the first card link with Tab from the "All work" link just above it.
+  await page.getByRole("link", { name: "All work" }).focus();
   await page.keyboard.press("Tab");
   await expect(links.first()).toBeFocused();
   await page.waitForTimeout(300);

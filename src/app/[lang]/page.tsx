@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { Locale } from "@/content/schema";
 import { getDictionary } from "@/i18n/dictionaries";
 import { Hero } from "@/components/sections/hero";
@@ -15,6 +16,12 @@ import { NumbersStrip } from "@/components/v3/numbers/numbers-strip";
 import { YimwhanScene } from "@/components/v3/yimwhan/yimwhan-scene";
 import { HelmScene } from "@/components/v3/helm/helm-scene";
 import { MoreWork } from "@/components/v3/more-work/more-work";
+import { pageOpenGraph } from "@/lib/open-graph";
+
+export async function generateMetadata({ params }: PageProps<"/[lang]">): Promise<Metadata> {
+  const { lang } = await params;
+  return { openGraph: pageOpenGraph(lang as Locale, "/", "profile") };
+}
 
 const offClockArt = (
   <>

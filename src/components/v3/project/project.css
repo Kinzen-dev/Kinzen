@@ -104,6 +104,13 @@
   gap: 0.625rem;
   margin-top: 0.75rem;
 }
+/* Phones: period and role read on one line each (a date range or a Thai role never splits mid-unit
+   in a half-width card); status and area share the last row. */
+@media (max-width: 47.99rem) {
+  .pj-fact:nth-child(-n + 2) {
+    grid-column: 1 / -1;
+  }
+}
 @media (min-width: 48rem) {
   .pj-facts {
     grid-template-columns: repeat(4, minmax(0, 1fr));
