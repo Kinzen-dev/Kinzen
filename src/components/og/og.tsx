@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import type { Locale } from "@/content/schema";
 import { thaiBreaks } from "@/lib/thai";
+import { placeThaiMarks } from "./thai-marks";
 
 /**
  * Open Graph cards in the site register: warm dark ground, ink, one gold accent,
@@ -37,6 +38,9 @@ async function fonts() {
   ];
 }
 
+/** Page text to card text: plain text with explicit Thai break points and pre-placed marks. */
+const cardText = (text: string) => placeThaiMarks(thaiBreaks(text));
+
 const SANS = "Google Sans";
 // The code face has no Thai; Thai in a mono line falls through to Google Sans.
 const MONO = "Google Sans Code, Google Sans";
@@ -58,7 +62,7 @@ function Dot({ live }: { live: boolean }) {
 
 export async function homeCard(input: { name: string; role: string; studio: string; city: string }) {
   // Page text carries word joiners; images need plain text with explicit Thai break points.
-  const [name, role, studio, city] = [input.name, input.role, input.studio, input.city].map(thaiBreaks);
+  const [name, role, studio, city] = [input.name, input.role, input.studio, input.city].map(cardText);
   return new ImageResponse(
     <div
       style={{
@@ -132,8 +136,8 @@ export async function projectCard({
   period: string;
   drawing?: string;
 }) {
-  [name, tagline, status, period] = [name, tagline, status, period].map(thaiBreaks);
-  if (drawing) drawing = thaiBreaks(drawing);
+  [name, tagline, status, period] = [name, tagline, status, period].map(cardText);
+  if (drawing) drawing = cardText(drawing);
   // Fit long names on one line: Google Sans 600 averages ~0.56em per character.
   const nameSize = Math.min(140, Math.floor(1072 / (name.length * 0.56)));
   return new ImageResponse(
