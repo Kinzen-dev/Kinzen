@@ -1,0 +1,379 @@
+/* call-to-booking: a phone transcript, a booking card, and a scrubber that drives one timeline. */
+.cb {
+  position: relative;
+  display: grid;
+  grid-template-areas: "card" "call" "scrub";
+  gap: 1rem;
+  padding: var(--inset-card);
+}
+@media (min-width: 56rem) {
+  .cb {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-areas: "call card" "scrub scrub";
+    gap: 1.5rem 2rem;
+    padding: 2rem;
+  }
+}
+
+/* ---------- transcript ---------- */
+.cb-call {
+  grid-area: call;
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  min-width: 0;
+}
+.cb-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+.cb-live {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--pa-green);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--pa-green) 22%, transparent);
+  animation: cb-live 1.6s ease-in-out infinite;
+}
+@keyframes cb-live {
+  50% {
+    box-shadow: 0 0 0 7px color-mix(in oklch, var(--pa-green) 8%, transparent);
+  }
+}
+.cb-lines {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cb-line {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.375rem 0;
+}
+:lang(th) .cb-line {
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+}
+.cb-line p {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+.cb-who {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+.cb-line[data-who="ai"] .cb-who {
+  color: var(--pa-mint);
+}
+.cb-line[data-who="ai"] p,
+.cb-line[data-who="ai"] {
+  color: var(--ink-2);
+}
+.cb-line[data-who="ai"] p {
+  color: var(--ink-2);
+}
+/* Phones: who-said-it rides inline, so the whole call fits above the scrubber. */
+@media (max-width: 40rem) {
+  .cb-line,
+  :lang(th) .cb-line {
+    display: block;
+    padding: 0;
+  }
+  .cb-who {
+    display: inline;
+    margin-inline-end: 0.5rem;
+  }
+  .cb-line p {
+    display: inline;
+    font-size: var(--text-xs);
+  }
+  .cb-lines {
+    gap: 0.375rem;
+  }
+  .cb-row {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 0.75rem;
+    padding: 0.375rem 0.625rem;
+  }
+  :lang(th) .cb-row {
+    grid-template-columns: 6.25rem minmax(0, 1fr);
+  }
+  .cb-row dd {
+    font-size: var(--text-xs);
+  }
+  .cb-scrub {
+    flex-wrap: nowrap;
+    align-items: center;
+    padding-top: 0.75rem;
+  }
+  .cb-range .pa-label,
+  .cb-time {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .cb-play {
+    padding-inline: 1rem;
+  }
+}
+.cb-fact {
+  border-radius: 0.3rem;
+  color: var(--ink);
+  font-weight: 600;
+  background: linear-gradient(
+      color-mix(in oklch, var(--gold) 42%, transparent),
+      color-mix(in oklch, var(--gold) 32%, transparent)
+    )
+    no-repeat 0 0 / 0% 100%;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Motion: until the timeline takes over, only the first line has been said. */
+.cb:not([data-still]) .cb-line:not(:first-child),
+.cb:not([data-still]) .cb-val,
+.cb:not([data-still]) .cb-ready {
+  opacity: 0;
+}
+/* Reduced motion: two composed stills. */
+.cb[data-still="before"] .cb-val,
+.cb[data-still="before"] .cb-ready,
+.cb[data-still="after"] .cb-empty,
+.cb[data-still="after"] .cb-draft {
+  opacity: 0;
+}
+.cb[data-still="after"] .cb-fact {
+  background-size: 100% 100%;
+}
+
+/* ---------- booking card ---------- */
+.cb-card {
+  grid-area: card;
+  align-self: start;
+  display: grid;
+  gap: 0.75rem;
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--surface) 85%, transparent);
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+.cb-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+.cb-status {
+  display: grid;
+  justify-items: end;
+}
+.cb-status > * {
+  grid-area: 1 / 1;
+  padding: 0.2rem 0.625rem;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.cb-draft {
+  color: var(--ink-2);
+  background: color-mix(in oklch, var(--ink) 10%, transparent);
+}
+.cb-ready {
+  color: var(--pa-green);
+  background: color-mix(in oklch, var(--pa-green) 18%, transparent);
+  font-weight: 600;
+}
+.cb-fields {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+}
+.cb-row {
+  --glow: 0;
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.625rem;
+  background: color-mix(in oklch, var(--gold) calc(var(--glow) * 16%), color-mix(in oklch, var(--ink) 5%, transparent));
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--gold) calc(var(--glow) * 100%), transparent);
+}
+.cb-row dt {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+.cb-row dd {
+  display: grid;
+  margin: 0;
+  min-height: 1.6em;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.cb-row dd > * {
+  grid-area: 1 / 1;
+}
+.cb-empty {
+  align-self: center;
+  width: 55%;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--ink) 10%, transparent) 30%,
+      color-mix(in oklch, var(--ink) 22%, transparent) 50%,
+      color-mix(in oklch, var(--ink) 10%, transparent) 70%
+    )
+    0 0 / 300% 100%;
+  animation: cb-shimmer 1.8s linear infinite;
+}
+@keyframes cb-shimmer {
+  to {
+    background-position: -150% 0;
+  }
+}
+
+/* ---------- scrubber ---------- */
+.cb-scrub {
+  grid-area: scrub;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+.cb-play {
+  flex: none;
+}
+.cb-play span {
+  font-size: 0.75rem;
+}
+.cb-range {
+  flex: 1 1 16rem;
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.cb-track {
+  position: relative;
+  height: 2.75rem;
+}
+/* A decorative call waveform behind the slider. */
+.cb-wave {
+  position: absolute;
+  inset: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.cb-wave i {
+  width: 2px;
+  border-radius: 1px;
+  background: color-mix(in oklch, var(--ink) 22%, transparent);
+}
+.cb-track input {
+  --p: 0;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--gold) 45%, transparent) 0 calc(var(--p) * 100%),
+      transparent calc(var(--p) * 100%)
+    )
+    0 50% / 100% 0.25rem no-repeat;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.cb-track input:active {
+  cursor: grabbing;
+}
+.cb-track input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 3px solid var(--ground);
+  box-shadow:
+    0 0 0 1px var(--gold),
+    0 0 18px color-mix(in oklch, var(--gold) 70%, transparent);
+  animation: cb-thumb 2.2s ease-in-out infinite;
+}
+.cb-track input::-moz-range-thumb {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 3px solid var(--ground);
+  box-shadow: 0 0 18px color-mix(in oklch, var(--gold) 70%, transparent);
+}
+.cb-track input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+@keyframes cb-thumb {
+  50% {
+    box-shadow:
+      0 0 0 6px color-mix(in oklch, var(--gold) 25%, transparent),
+      0 0 18px color-mix(in oklch, var(--gold) 70%, transparent);
+  }
+}
+.cb-time {
+  flex: none;
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+.cb-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ---------- flying copies ---------- */
+.cb-fly {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: none;
+}
+.cb-clone {
+  position: absolute;
+  padding: 0 0.3rem;
+  margin-left: -0.3rem;
+  border-radius: 0.4rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+  color: oklch(0.18 0.02 260);
+  background: var(--gold);
+  box-shadow: 0 10px 28px -8px color-mix(in oklch, var(--gold) 80%, transparent);
+  opacity: 0;
+  will-change: transform, opacity;
+}

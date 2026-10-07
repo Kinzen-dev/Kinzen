@@ -1,0 +1,426 @@
+/* latency-playground: hold to talk, then a millisecond waterfall of the four pipeline stages. */
+.lp {
+  --stt: oklch(0.8 0.1 230);
+  --llm: oklch(0.78 0.12 300);
+  --guard: var(--gold);
+  --tts: var(--pa-green);
+  display: grid;
+  gap: 1.25rem;
+  padding: var(--inset-card);
+  grid-template-areas: "top" "talk" "lanes" "chat" "compare";
+}
+@media (min-width: 60rem) {
+  .lp {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-areas: "top top" "talk lanes" "chat lanes" "chat compare";
+    grid-template-rows: auto auto auto 1fr;
+    gap: 1.5rem 2rem;
+    padding: 2rem;
+  }
+}
+.lp-top {
+  grid-area: top;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+.lp-opts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.lp-opts .pa-seg button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------- hold to talk ---------- */
+.lp-talk {
+  grid-area: talk;
+  display: grid;
+  gap: 0.75rem;
+}
+.lp-mic {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 4rem;
+  padding-inline: 1.75rem;
+  border-radius: 999px;
+  background: var(--gold);
+  color: oklch(0.2 0.02 260);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  box-shadow: 0 12px 30px -12px color-mix(in oklch, var(--gold) 80%, transparent);
+  transition:
+    scale var(--dur-2) var(--pa-ease),
+    box-shadow var(--dur-2) var(--pa-ease);
+}
+.lp-mic:hover {
+  box-shadow: 0 14px 36px -10px color-mix(in oklch, var(--gold) 90%, transparent);
+}
+.lp-mic[data-active] {
+  scale: 0.97;
+  box-shadow:
+    0 0 0 6px color-mix(in oklch, var(--gold) 28%, transparent),
+    0 0 0 14px color-mix(in oklch, var(--gold) 10%, transparent);
+  animation: lp-ring 1.1s ease-in-out infinite;
+}
+@keyframes lp-ring {
+  50% {
+    box-shadow:
+      0 0 0 10px color-mix(in oklch, var(--gold) 22%, transparent),
+      0 0 0 22px color-mix(in oklch, var(--gold) 6%, transparent);
+  }
+}
+.lp-mic-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: oklch(0.2 0.02 260);
+}
+.lp-mic[data-active] .lp-mic-dot {
+  background: oklch(0.6 0.2 25);
+}
+.lp-wave {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3rem;
+  padding-inline: 0.5rem;
+}
+.lp-wave i {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: color-mix(in oklch, var(--gold) 70%, transparent);
+  transform: scaleY(0.15);
+}
+.lp[data-phase="talking"] .lp-wave i {
+  background: var(--gold);
+}
+
+/* ---------- chat ---------- */
+.lp-chat {
+  grid-area: chat;
+  display: grid;
+  gap: 0.625rem;
+  align-content: start;
+}
+.lp-bubble {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 30rem;
+  min-height: 4.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1.125rem;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  opacity: 0.35;
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+.lp-bubble[data-on] {
+  opacity: 1;
+}
+.lp-bubble p {
+  margin: 0;
+}
+.lp-patient {
+  justify-self: start;
+  border-top-left-radius: 0.375rem;
+  background: color-mix(in oklch, var(--ink) 9%, var(--surface));
+}
+.lp-clinic {
+  justify-self: end;
+  border-top-right-radius: 0.375rem;
+  background: color-mix(in oklch, var(--pa-green) 18%, var(--surface));
+}
+.lp-clinic p span {
+  animation: lp-word 260ms var(--pa-ease) both;
+  animation-delay: calc(var(--i) * var(--pace, 300ms));
+}
+@keyframes lp-word {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+.lp-rec {
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+/* ---------- waterfall ---------- */
+.lp-lanes {
+  --lab: 9rem;
+  --gap: 0.75rem;
+  --now: 0;
+  --fw: 0;
+  grid-area: lanes;
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--surface) 80%, transparent);
+  min-width: 0;
+}
+:lang(th) .lp-lanes {
+  --lab: 10.5rem;
+}
+.lp-lanes-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.lp-counter {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--ink);
+}
+.lp-rows {
+  position: relative;
+  display: grid;
+  gap: 0.625rem;
+  padding-top: 1.75rem;
+}
+.lp-lane {
+  display: grid;
+  grid-template-columns: var(--lab) minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: center;
+}
+.lp-lane-name {
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.lp-track {
+  position: relative;
+  height: 1.5rem;
+  border-radius: 0.375rem;
+  background: color-mix(in oklch, var(--ink) 6%, transparent);
+}
+.lp-lane[data-stage="stt"] {
+  --c: var(--stt);
+}
+.lp-lane[data-stage="llm"] {
+  --c: var(--llm);
+}
+.lp-lane[data-stage="guard"] {
+  --c: var(--guard);
+}
+.lp-lane[data-stage="tts"] {
+  --c: var(--tts);
+}
+.lp-ghost {
+  position: absolute;
+  top: 0.1875rem;
+  bottom: 0.1875rem;
+  min-width: 3px;
+  border-radius: 0.25rem;
+  outline: 1px dashed color-mix(in oklch, var(--c) 45%, transparent);
+  outline-offset: -1px;
+}
+.lp-seg {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--c);
+  box-shadow: 0 0 14px color-mix(in oklch, var(--c) 55%, transparent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+/* Speaking: the reply is being heard. */
+.lp-ghost[data-speak] .lp-seg {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--c) 0 3px,
+    color-mix(in oklch, var(--c) 35%, transparent) 3px 7px
+  );
+  box-shadow: none;
+}
+.lp-tick {
+  position: absolute;
+  bottom: calc(100% + 0.125rem);
+  translate: -50% 0;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--llm);
+}
+.lp-tick::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 0.6rem;
+  background: var(--llm);
+}
+.lp-axis-row {
+  margin-top: -0.25rem;
+}
+.lp-axis {
+  position: relative;
+  height: 1rem;
+}
+.lp-axis span {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--ink-3);
+  translate: -50% 0;
+}
+.lp-axis span:first-child {
+  translate: 0 0;
+}
+.lp-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 1.25rem;
+  left: calc(var(--lab) + var(--gap));
+  right: 0;
+  pointer-events: none;
+}
+.lp-cursor {
+  position: absolute;
+  top: 1.5rem;
+  bottom: 0;
+  left: calc(var(--now) * 100%);
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+  box-shadow: 0 0 10px var(--ink);
+  opacity: 0;
+}
+.lp[data-phase="running"] .lp-cursor {
+  opacity: 0.8;
+}
+.lp-fw {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--fw) * 100%);
+  border-left: 1px dashed color-mix(in oklch, var(--pa-green) 70%, transparent);
+  transition: left var(--dur-4) var(--pa-ease);
+}
+.lp-fw span {
+  position: absolute;
+  top: 0;
+  left: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--pa-green);
+  background: color-mix(in oklch, var(--pa-green) 14%, var(--surface));
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+/* The batch first word sits far right: its label opens to the left. */
+.lp-lanes[data-late] .lp-fw span {
+  left: auto;
+  right: 0.375rem;
+}
+.lp-lanes[data-heard] .lp-fw span {
+  background: var(--pa-green);
+  color: oklch(0.18 0.02 260);
+  animation: lp-heard 520ms var(--pa-ease);
+}
+@keyframes lp-heard {
+  from {
+    scale: 0.7;
+  }
+  60% {
+    scale: 1.1;
+  }
+}
+@media (max-width: 36rem) {
+  .lp-lanes {
+    --lab: 0rem;
+    --gap: 0rem;
+  }
+  :lang(th) .lp-lanes {
+    --lab: 0rem;
+  }
+  .lp-lane {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+  .lp-axis-row > span:first-child {
+    display: none;
+  }
+  .lp-overlay {
+    left: 0;
+  }
+  /* The lane name sits above its track here: keep the tick, drop its label. */
+  .lp-tick {
+    font-size: 0;
+  }
+}
+
+/* ---------- comparison ---------- */
+.lp-compare {
+  grid-area: compare;
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+}
+.lp-cmp {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr) 5.5rem;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: var(--text-xs);
+}
+.lp-cmp-name {
+  color: var(--ink-2);
+}
+.lp-cmp-bar {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ink) 7%, transparent);
+  overflow: hidden;
+}
+.lp-cmp-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--pa-green);
+  transition: width var(--dur-4) var(--pa-ease);
+}
+.lp-cmp[data-mode="batch"] .lp-cmp-bar i {
+  background: var(--gold);
+}
+.lp-cmp-val {
+  text-align: end;
+  color: var(--ink);
+}
+.lp-hint {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+@media (max-width: 40rem) {
+  .lp-mic {
+    min-height: 3.5rem;
+  }
+  .lp-wave {
+    height: 2rem;
+  }
+  .lp-bubble {
+    min-height: 0;
+  }
+}
