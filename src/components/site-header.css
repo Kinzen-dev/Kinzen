@@ -43,7 +43,10 @@ html[data-nav-tone="dark"] .site-header {
     color-scheme: dark;
   }
 }
+/* The header resolves its own ink (it re-declares the tokens), so the brand follows the pill's
+   tone instead of inheriting the page's colour (dark-on-dark over dark scenes in light theme). */
 [data-scene="auto"] {
+  color: var(--ink);
   transition: color var(--dur-3) var(--ease-out);
 }
 
