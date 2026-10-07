@@ -27,3 +27,13 @@ export function alternates(path: string, locale: Locale = "en") {
     },
   };
 }
+
+/**
+ * Link prefetch for a site path. Unprefixed single-segment English routes (/cv, /work) are
+ * served through a rewrite to /en/..., but Next's client predicts their route from the patterns
+ * it has seen and asks for the [lang] home segment with lang="cv" (a 404 in the console). For
+ * those, skip the prefetch; the click still navigates client-side with a full request.
+ */
+export function prefetchFor(href: string): false | undefined {
+  return /^\/(?!th(?:[/?#]|$))[^/?#]+$/.test(href) ? false : undefined;
+}

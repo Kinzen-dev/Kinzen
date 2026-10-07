@@ -16,6 +16,10 @@ export const artManifest = {
   "scene-voice-to-text": { w: 474, h: 246 },
   "scene-workbench": { w: 474, h: 263 },
   "scene-yimwhan-desk": { w: 473, h: 295 },
+  "portrait-head": { w: 263, h: 246 },
+  "portrait-laptop": { w: 473, h: 314 },
+  "portrait-paper-plane": { w: 282, h: 397 },
+  "portrait-wave": { w: 299, h: 397 },
 } as const satisfies Record<string, { w: number; h: number }>;
 
 export type ArtName = keyof typeof artManifest;

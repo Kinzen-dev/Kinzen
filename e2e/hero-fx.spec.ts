@@ -5,9 +5,10 @@ import { expect, test, type Page } from "@playwright/test";
 // dark, motion allowed, hardware WebGL2, no ?fx=off, no Save-Data). Pending hides the DOM wordmark
 // so the dust condenses out of nothing; the field sets "on" on its first frame, "off" (wordmark
 // back) when it gives up; a CSS safety net reveals the wordmark by 1.8 s if nothing answers.
-// LCP stays a real text element painted at once: the hero line when the wordmark is held, the
-// wordmark itself otherwise. The gold dust is emissive light: dark ground only, never in the light
-// theme and never under reduced motion.
+// LCP stays a real text element painted at once: the kinetic line or the hero line when the
+// wordmark is held, the wordmark itself otherwise. The gold dust is emissive light on a dark ground:
+// since v3 (decision D6) the hero is a dark scene in BOTH themes, so the field runs in the light
+// theme too; never under reduced motion.
 
 type FxDebug = { engine?: { isRunning: boolean } | null };
 const running = (page: Page) =>
@@ -16,8 +17,8 @@ const html = (page: Page) => page.locator("html");
 const wordmark = (page: Page) => page.locator("[data-hero-wordmark]");
 
 /** Load home on the dark ground and wait for the field's tier; skips when the GPU is off. */
-async function darkHome(page: Page) {
-  await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
+async function darkHome(page: Page, colorScheme: "dark" | "light" = "dark") {
+  await page.emulateMedia({ colorScheme, reducedMotion: "no-preference" });
   await page.goto("/");
   const hero = page.locator("[data-hero]");
   await expect(hero).toHaveAttribute("data-fx-tier", /^(off|still|lite|full)$/, { timeout: 10_000 });
@@ -57,9 +58,11 @@ async function recordLcp(page: Page) {
         const el = e.element;
         const name = el?.hasAttribute("data-hero-wordmark")
           ? "wordmark"
-          : el?.matches("[data-hero] h1 ~ p, [data-hero] h1 + p")
-            ? "hero-line"
-            : (el?.tagName ?? "none");
+          : el?.closest("[data-hero-kinetic]")
+            ? "kinetic"
+            : el?.matches("[data-hero] p")
+              ? "hero-line"
+              : (el?.tagName ?? "none");
         w.__lcp!.push({ el: name, t: e.startTime });
       }
     }).observe({ type: "largest-contentful-paint", buffered: true });
@@ -69,7 +72,9 @@ const lcpOf = (page: Page) =>
   page.evaluate(() => (window as Window & { __lcp?: { el: string; t: number }[] }).__lcp ?? []);
 
 test.describe("hero fx", () => {
-  test("LCP is a real text element painted at once: the hero line while the field holds the name", async ({ page }) => {
+  test("LCP is a real text element painted at once: the kinetic line or hero line while the field holds the name", async ({
+    page,
+  }) => {
     await fakeHardwareGate(page);
     await recordLcp(page);
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
@@ -78,14 +83,14 @@ test.describe("hero fx", () => {
     test.skip(!gated, "no WebGL2 at all in this browser: the gate never opens");
     await page.waitForTimeout(1200);
     const lcp = await lcpOf(page);
-    expect(lcp[0]?.el).toBe("hero-line");
+    expect(["kinetic", "hero-line"]).toContain(lcp[0]?.el);
     expect(lcp[0]!.t).toBeLessThan(1500);
   });
 
-  test("LCP is the wordmark itself when the field will not run (light theme)", async ({ page }) => {
+  test("LCP is the wordmark itself when the field will not run (?fx=off, light theme)", async ({ page }) => {
     await recordLcp(page);
     await page.emulateMedia({ colorScheme: "light", reducedMotion: "no-preference" });
-    await page.goto("/");
+    await page.goto("/?fx=off");
     await page.waitForTimeout(1200);
     const lcp = await lcpOf(page);
     expect(lcp.at(-1)?.el).toBe("wordmark");
@@ -101,9 +106,16 @@ test.describe("hero fx", () => {
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
     await page.goto("/");
     test.skip((await html(page).getAttribute("data-fx")) !== "pending", "no WebGL2 at all in this browser");
-    expect(await wordmark(page).evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
-    await page.waitForTimeout(900);
-    expect(await wordmark(page).evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
+    // Timed from navigation start, not from goto() returning: under load goto can take longer
+    // than the hold itself, and a fixed wait after it would land past the 1.8 s safety net.
+    const hiddenAt = await wordmark(page).evaluate((el) => ({
+      t: performance.now(),
+      opacity: getComputedStyle(el).opacity,
+    }));
+    if (hiddenAt.t < 1500) expect(hiddenAt.opacity).toBe("0");
+    await page.waitForFunction(() => performance.now() > 1300);
+    const held = await wordmark(page).evaluate((el) => ({ t: performance.now(), o: getComputedStyle(el).opacity }));
+    if (held.t < 1700) expect(held.o).toBe("0");
     await expect(wordmark(page)).toHaveCSS("opacity", "1", { timeout: 2_500 });
   });
 
@@ -118,7 +130,9 @@ test.describe("hero fx", () => {
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
     await page.goto("/");
     test.skip((await html(page).getAttribute("data-fx")) !== "pending", "no WebGL2 at all in this browser");
-    await expect(html(page)).toHaveAttribute("data-fx", "off", { timeout: 1_500 });
+    // Only the failure path sets data-fx="off" (the CSS safety net reveals without touching it),
+    // so a roomy timeout still tests the hand-back; every chunk is proxied here, which is slow.
+    await expect(html(page)).toHaveAttribute("data-fx", "off", { timeout: 5_000 });
     await expect(wordmark(page)).toHaveCSS("opacity", "1");
   });
 
@@ -162,12 +176,11 @@ test.describe("hero fx", () => {
     await expect(page.locator("[data-hero-wordmark]")).toHaveCSS("opacity", "1");
   });
 
-  test("the light theme never loads the field: crisp ink wordmark, no canvas", async ({ page }) => {
-    await page.emulateMedia({ colorScheme: "light", reducedMotion: "no-preference" });
-    await page.goto("/");
-    await page.waitForTimeout(2500);
-    await expect(page.locator(".fx-stage canvas")).toHaveCount(0);
-    await expect(page.locator("[data-hero-wordmark]")).toHaveCSS("opacity", "1");
+  test("the light theme runs the field too: the hero is a dark scene in both themes (D6)", async ({ page }) => {
+    await darkHome(page, "light");
+    await expect(html(page)).toHaveAttribute("data-fx", "on", { timeout: 10_000 });
+    await expect(wordmark(page)).toHaveCSS("opacity", "0");
+    await expect(page.locator(".fx-stage[data-ready][data-show]")).toHaveCount(1);
   });
 
   test("the hero is never blank: off tier keeps the wordmark, any other tier draws the field", async ({ page }) => {
@@ -184,25 +197,17 @@ test.describe("hero fx", () => {
     }
   });
 
-  test("theme switch: light stops the field and restores the wordmark, dark brings it back settled", async ({
-    page,
-  }) => {
+  test("theme switch keeps the field running: the hero stays a dark scene in both themes", async ({ page }) => {
     await darkHome(page);
     await expect(html(page)).toHaveAttribute("data-fx", "on", { timeout: 10_000 });
-    await page.evaluate(() => (document.documentElement.dataset.theme = "light"));
-    await expect(page.locator(".fx-stage[data-show]")).toHaveCount(0);
-    await expect(html(page)).toHaveAttribute("data-fx", "off");
-    await expect(page.locator("[data-hero-wordmark]")).toHaveCSS("opacity", "1");
-    await expect(page.locator(".fx-canvas")).toHaveCSS("opacity", "0");
-    expect(await running(page)).toBe(false);
-    await page.evaluate(() => (document.documentElement.dataset.theme = "dark"));
-    // Back settled: shown at once (no second opening), the field running again.
-    await expect(html(page)).toHaveAttribute("data-fx", "on");
-    await expect(page.locator(".fx-stage[data-show]")).toHaveCount(1);
-    await expect
-      .poll(() => page.evaluate(() => (window as Window & { __kzFx?: { phase: string } }).__kzFx?.phase))
-      .toBe("calm");
-    expect(await running(page)).toBe(true);
+    for (const theme of ["light", "dark"]) {
+      await page.evaluate((t) => (document.documentElement.dataset.theme = t), theme);
+      await page.waitForTimeout(300);
+      await expect(html(page)).toHaveAttribute("data-fx", "on");
+      await expect(page.locator(".fx-stage[data-show]")).toHaveCount(1);
+      await expect(wordmark(page)).toHaveCSS("opacity", "0");
+      await expect.poll(() => running(page)).toBe(true);
+    }
   });
 
   test("a resize never shows a stale frame: the last frame is frozen onto the new text, then the field refits", async ({

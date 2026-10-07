@@ -2,6 +2,7 @@ import { experience, links, projects, skillItems, skills, t } from "@/content";
 import type { Locale } from "@/content/schema";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import { localePath } from "@/lib/site-url";
+import { getV3 } from "@/i18n/v3";
 
 export type PaletteAction = "print-cv" | "copy-email" | "toggle-theme" | "switch-language";
 
@@ -58,6 +59,15 @@ export function paletteData(locale: Locale, dict: Dictionary): PaletteData {
       .flatMap((g) => [...skillItems(g, "en"), ...skillItems(g, "th")])
       .join(" ")}`,
     href: anchor("skills"),
+  });
+  // The /work index page (every system, ledger and cards).
+  const workPage = (l: Locale) => getV3(l).moreWork.page;
+  sections.splice(1, 0, {
+    id: "page-work",
+    group: "sections",
+    label: workPage(locale).heading,
+    keywords: `${workPage("en").heading} ${workPage("th").heading} ${workPage("en").index} ${workPage("th").index} work index projects portfolio ledger`,
+    href: localePath(locale, "/work"),
   });
 
   const work: PaletteCommand[] = projects.map((p) => ({

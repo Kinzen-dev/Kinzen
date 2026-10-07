@@ -74,8 +74,11 @@ export function StickyStage({
       });
       // First paint of the right step when the page loads mid-scene (Back, hash link).
       const p0 = st.progress;
+      const step0 = Math.min(steps - 1, Math.floor(p0 * steps));
       s.style.setProperty("--p", p0.toFixed(4));
-      s.dataset.step = String(Math.min(steps - 1, Math.floor(p0 * steps)));
+      s.dataset.step = String(step0);
+      // Scenes that drive JS from progress get their starting state too, not only after a scroll.
+      cb.current?.(p0, step0);
       kill = () => st.kill();
     };
 

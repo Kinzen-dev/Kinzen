@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import "@/motion/primitives.css";
 
 /**
  * Live clock store shared by every clock on the page. `?at=<ISO date>` freezes
@@ -62,6 +63,49 @@ export function BangkokTime({ locale }: { locale: string }) {
     <time className="tabular" dateTime={t === null ? undefined : new Date(t).toISOString()}>
       {text}
     </time>
+  );
+}
+
+/**
+ * Bangkok time as odometer digits: each digit is a column that rolls to the new value when the
+ * minute changes (and rolls in from 00:00 on first paint). The <time> text is what assistive
+ * tech reads; the columns are decorative. Reduced motion: the digits just change.
+ */
+export function BangkokClockDigits({ locale, className }: { locale: string; className?: string }) {
+  const t = useNow();
+  const text =
+    t === null
+      ? null
+      : new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+          timeZone: BANGKOK,
+        }).format(t);
+  const shown = text ?? "00:00";
+  return (
+    <span className={["odometer tabular", className].filter(Boolean).join(" ")} data-rolled="">
+      <time className="sr-only" dateTime={t === null ? undefined : new Date(t).toISOString()}>
+        {text ?? "--:--"}
+      </time>
+      <span aria-hidden="true" className="odometer-digits" data-pending={text === null || undefined}>
+        {[...shown].map((ch, i) =>
+          /\d/.test(ch) ? (
+            <span
+              key={i}
+              className="odometer-col"
+              style={{ ["--d" as string]: ch, ["--i" as string]: shown.length - i }}
+            >
+              <span className="odometer-strip">0 1 2 3 4 5 6 7 8 9</span>
+            </span>
+          ) : (
+            <span key={i} className="odometer-sep">
+              {ch}
+            </span>
+          ),
+        )}
+      </span>
+    </span>
   );
 }
 

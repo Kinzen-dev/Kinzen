@@ -209,7 +209,7 @@ const en = {
         draftBefore: "Sorry to hear that. ",
         draftFlagged: "Take ibuprofen 400 mg every 6 hours",
         draftAfter: " and it should settle down.",
-        rule: "no-drug-or-dose",
+        rule: "dosing-gate",
         ruleLabel: "Names a medicine and a dose",
         reply:
           "Sorry you are in pain. Medicine is something our dentist needs to advise on. Shall I find you the earliest appointment?",
@@ -220,7 +220,7 @@ const en = {
         draftBefore: "",
         draftFlagged: "That sounds like gingivitis, nothing serious.",
         draftAfter: " No need to worry!",
-        rule: "no-diagnosis",
+        rule: "no_diagnose",
         ruleLabel: "Makes a diagnosis",
         reply:
           "Thanks for telling us. Only the dentist can say what is causing it, after an exam. Would you like me to book a check-up?",
@@ -231,7 +231,7 @@ const en = {
         draftBefore: "Yes! ",
         draftFlagged: "Our whitening is guaranteed to last for life.",
         draftAfter: " Book now and see.",
-        rule: "no-outcome-promise",
+        rule: "efficacy_claim",
         ruleLabel: "Promises a treatment result",
         reply:
           "Results differ from person to person, so the dentist checks your teeth first and explains what to expect. Would you like a consultation?",
@@ -452,7 +452,7 @@ const th: Dictionary = {
         draftBefore: "ปวดแบบนี้ทรมานแย่เลยค่ะ ",
         draftFlagged: "ทาน Ibuprofen 400 มก. ทุก 6 ชั่วโมง",
         draftAfter: " แล้วอาการน่าจะดีขึ้นค่ะ",
-        rule: "no-drug-or-dose",
+        rule: "dosing-gate",
         ruleLabel: "ระบุชื่อยาและขนาดยา",
         reply: "ขอให้หายปวดไว ๆ นะคะ เรื่องยาต้องให้คุณหมอเป็นผู้แนะนำค่ะ ให้ช่วยเช็คคิวว่างที่เร็วที่สุดให้ไหมคะ",
       },
@@ -462,7 +462,7 @@ const th: Dictionary = {
         draftBefore: "",
         draftFlagged: "อาการแบบนี้น่าจะเป็นเหงือกอักเสบค่ะ ไม่ร้ายแรง",
         draftAfter: " ไม่ต้องกังวลนะคะ",
-        rule: "no-diagnosis",
+        rule: "no_diagnose",
         ruleLabel: "วินิจฉัยโรค",
         reply: "ขอบคุณที่เล่าอาการให้ฟังนะคะ สาเหตุต้องให้คุณหมอตรวจก่อนถึงจะบอกได้ค่ะ ให้จองคิวตรวจกับคุณหมอเลยไหมคะ",
       },
@@ -472,7 +472,7 @@ const th: Dictionary = {
         draftBefore: "ใช่ค่ะ ",
         draftFlagged: "ที่นี่รับประกันฟันขาวถาวรตลอดชีวิต",
         draftAfter: " จองคิวได้เลยนะคะ",
-        rule: "no-outcome-promise",
+        rule: "efficacy_claim",
         ruleLabel: "รับประกันผลการรักษา",
         reply:
           "ผลของแต่ละคนไม่เหมือนกันค่ะ คุณหมอจะตรวจฟันก่อน แล้วอธิบายว่าผลน่าจะออกมาประมาณไหน สนใจนัดปรึกษาคุณหมอไหมคะ",

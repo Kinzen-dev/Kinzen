@@ -10,7 +10,7 @@ const abs = (path: string) => `${SITE_URL}${path === "/" ? "" : path}`;
 /** Every public page in both languages, each entry listing its alternates. */
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date(`${lastUpdated}-01T00:00:00Z`);
-  const paths = ["/", "/cv", ...projects.map((p) => `/work/${p.slug}`)];
+  const paths = ["/", "/work", "/cv", ...projects.map((p) => `/work/${p.slug}`)];
 
   return paths.flatMap((path) =>
     locales.map((locale) => ({

@@ -2,10 +2,14 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { links, profile, projects, t, yearsInProduction } from "@/content";
-import { localePath } from "@/lib/site-url";
+import { localePath, prefetchFor } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { BangkokTime } from "../clock";
 import { nobr } from "@/lib/thai-nodes";
+import { getV3, type V3Copy } from "@/i18n/v3";
+import { HeroKinetic } from "./hero-kinetic";
+import { HeroScale } from "./hero-scale";
+import "./hero.css";
 
 /**
  * The first screen. The wordmark is real server-rendered text; the particle field (when the
@@ -18,14 +22,19 @@ import { nobr } from "@/lib/thai-nodes";
  * reduced motion and on software GL the wordmark itself is the LCP (72 to 164 ms, 4x CPU 216 to
  * 456 ms). Only if the field fails after the gate does the wordmark become a late LCP entry, when
  * fx.css reveals it (at once on a failure the field reports, by 1.8 s at worst).
+ * v3: the hero is a dark scene in both themes. Under the name, a kinetic line ("I build" + a
+ * cycling phrase, the first phrase painted with the first frame, so it is real LCP-eligible text);
+ * pill CTAs in the Contact order (email, CV, LinkedIn); glass fact chips; and on scroll the whole
+ * scene scales down into a rounded card (HeroScale).
  */
-export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; fx?: ReactNode }) {
+export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionary; fx?: ReactNode; v3?: V3Copy }) {
+  const copy = (v3 ?? getV3(locale)).hero;
   const email = links.find((l) => l.kind === "email");
   const linkedin = links.find((l) => l.kind === "linkedin");
   const years = yearsInProduction(new Date(process.env.NEXT_PUBLIC_BUILD_DATE ?? "2026-10-06"));
 
   const facts = [
-    { label: dict.facts.bangkokTime, value: <BangkokTime locale={locale} /> },
+    { label: dict.facts.bangkokTime, value: <BangkokTime locale={locale} />, live: true },
     { label: dict.facts.yearsInProduction, value: <span className="tabular">{years}</span> },
     { label: dict.facts.systems, value: <span className="tabular">{projects.length}</span> },
     { label: dict.facts.founder, value: "Vesperwerk" },
@@ -40,6 +49,7 @@ export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; f
       data-scene="dark"
     >
       {fx}
+      <HeroScale />
       <div className="shell relative">
         <p
           aria-hidden="true"
@@ -49,35 +59,45 @@ export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; f
           KINZEN
         </p>
 
-        <div className="grid gap-10 border-t border-rule-strong pt-6 pb-6 md:grid-cols-12 md:gap-6 md:pb-10">
-          <div className="md:col-span-6">
-            <h1 id="hero-title" className="text-xl tracking-[-0.03em]">
-              <span className="block">{nobr(t(profile.displayName, locale))}</span>
-              <span className="block text-ink-2">{nobr(t(profile.role, locale))}</span>
+        <div className="grid gap-6 border-t border-rule pt-6 pb-12 md:grid-cols-12 md:gap-x-6 md:gap-y-8 md:pt-7 md:pb-14">
+          <div className="md:col-span-12">
+            <h1 id="hero-title" className="hero-title">
+              <span>{nobr(t(profile.displayName, locale))}</span>{" "}
+              <span className="text-ink-2">{nobr(t(profile.role, locale))}</span>
             </h1>
-            <p className="mt-6 max-w-[44ch] text-lg text-ink-2">{nobr(t(profile.heroLine, locale))}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <HeroKinetic
+              lead={nobr(copy.lead)}
+              word={nobr(copy.key)}
+              join={copy.join}
+              phrases={copy.phrases.map((p) => nobr(p))}
+            />
+          </div>
+          <div className="self-end md:col-span-12 lg:col-span-6">
+            <p className="max-w-[46ch] text-ink-2 md:text-lg">{nobr(t(profile.heroLine, locale))}</p>
+            <div className="mt-7 flex flex-wrap gap-3">
               {email ? (
-                <a
-                  href={email.href}
-                  className="inline-flex h-11 items-center bg-gold px-5 text-sm font-semibold text-gold-ink transition-opacity duration-200 hover:opacity-90"
-                >
+                <a href={email.href} className="hero-cta hero-cta-primary beam">
                   {nobr(dict.hero.ctaEmail)}
+                  <svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="none">
+                    <path
+                      d="M3 8h9M8.5 4l4 4-4 4"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </a>
               ) : null}
               <Link
                 href={localePath(locale, "/cv")}
-                className="inline-flex h-11 items-center border border-rule-strong px-5 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
+                prefetch={prefetchFor(localePath(locale, "/cv"))}
+                className="hero-cta hero-cta-ghost"
               >
                 {nobr(dict.hero.ctaCv)}
               </Link>
               {linkedin ? (
-                <a
-                  href={linkedin.href}
-                  rel="me noopener"
-                  target="_blank"
-                  className="inline-flex h-11 items-center border border-rule px-5 text-sm font-medium transition-colors duration-200 hover:border-rule-strong"
-                >
+                <a href={linkedin.href} rel="me noopener" target="_blank" className="hero-cta hero-cta-ghost">
                   {linkedin.label}
                   <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
                 </a>
@@ -85,11 +105,14 @@ export function Hero({ locale, dict, fx }: { locale: Locale; dict: Dictionary; f
             </div>
           </div>
 
-          <dl className="grid grid-cols-2 self-end border-t border-l border-rule md:col-span-6 md:col-start-7">
+          <dl className="hero-facts self-end md:col-span-12 lg:col-span-6">
             {facts.map((fact) => (
-              <div key={fact.label} className="flex flex-col justify-between gap-2 border-r border-b border-rule p-4">
-                <dt className="readout">{fact.label}</dt>
-                <dd className="text-lg font-medium tracking-[-0.02em]">{fact.value}</dd>
+              <div key={fact.label} className="hero-chip">
+                <dt className="readout">
+                  {fact.live ? <span className="hero-live" aria-hidden="true" /> : null}
+                  {nobr(fact.label)}
+                </dt>
+                <dd>{fact.value}</dd>
               </div>
             ))}
           </dl>

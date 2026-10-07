@@ -9,7 +9,18 @@
 .era-timeline {
   --thread-pad: 0px;
   --thread-x: 0.625rem;
+  --era-py: 2.5rem;
+  --era-icon: 3.5rem;
   position: relative;
+}
+@media (min-width: 48rem) {
+  .era-timeline {
+    --era-py: 3.5rem;
+    --era-icon: 4rem;
+  }
+}
+.era-timeline [data-era] {
+  padding-block: var(--era-py);
 }
 /* Indent past the thread without shifting the era's grid off the page columns:
    phones indent the whole row, wider screens only the left (date and company) column. */
@@ -36,22 +47,16 @@
   background: var(--rule);
 }
 
-/* Each era's start node, aligned with the centre of its date readout. */
+/* Each era's start node, level with the centre of its era icon (inside the era card). */
 .era-node {
   position: absolute;
-  top: calc(2.5rem + 5.5px);
+  top: calc(var(--era-py) + 1px + var(--inset-card) + var(--era-icon) / 2 - 3.5px);
   left: calc(var(--thread-x) - 3.5px);
   width: 7px;
   height: 7px;
   border: 1px solid var(--ink-3);
   border-radius: 50%;
   background: var(--ground);
-}
-
-@media (min-width: 48rem) {
-  .era-node {
-    top: calc(3.5rem + 5.5px);
-  }
 }
 
 .era-thread {
@@ -98,7 +103,72 @@
   }
 }
 
+/* ---------- v3 era card: the left column is a soft surface card, never a dead column ---------- */
+.era-card {
+  position: relative;
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.era-icon {
+  display: grid;
+  place-items: center;
+  width: var(--era-icon);
+  height: var(--era-icon);
+  border-radius: var(--radius-sm);
+  background: var(--pastel, var(--ground));
+  color: var(--pastel-ink);
+}
+/* Era counter: large, quiet, top right. */
+.era-index {
+  font-size: var(--text-xl);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--rule);
+}
+/* "present": the live gold dot. */
+.era-live {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 0 color-mix(in oklch, var(--gold) 60%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .era-live {
+    animation: era-live 2.4s var(--ease-out) infinite;
+  }
+}
+@keyframes era-live {
+  70%,
+  100% {
+    box-shadow: 0 0 0 0.45rem color-mix(in oklch, var(--gold) 0%, transparent);
+  }
+}
+/* Stack tags: pill shape, the pill inset. */
+.era-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 2rem;
+  padding-inline: var(--inset-pill);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+:lang(th) .era-chip {
+  font-family: var(--font-sans);
+}
+
 @media print {
+  .era-card {
+    box-shadow: none;
+  }
   .era-thread,
   .era-timeline::before,
   .era-node {

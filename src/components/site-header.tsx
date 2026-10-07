@@ -11,6 +11,7 @@ import { MobileNav } from "./mobile-nav";
 import { HomeLink } from "./home-link";
 import { AnchorFocus } from "./anchor-focus";
 import { PlainCopy } from "./plain-copy";
+import { NavTone } from "./nav-tone";
 import { plain } from "@/lib/thai";
 import "./site-header.css";
 
@@ -75,6 +76,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
             <RevealLayer />
             <AnchorFocus />
             <PlainCopy />
+            <NavTone />
             <MobileNav
               items={items}
               labels={{ open: dict.a11y.openMenu, close: dict.a11y.close, nav: dict.a11y.mainNav }}

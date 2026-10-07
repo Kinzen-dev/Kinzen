@@ -1,0 +1,52 @@
+/* About (v3): portrait on a pastel ground, bio, two soft cards. */
+/* The half-length portrait stands on the card's bottom edge, like a figure in a window: inset
+   on the top and sides, bleeding at the bottom where the drawing is cut. */
+.about-portrait {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  align-self: start;
+  aspect-ratio: 5 / 4;
+  padding: var(--inset-card) var(--inset-card) 0;
+  border-radius: var(--radius-card);
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  overflow: clip;
+}
+/* A soft paper disc behind the drawing, like the shapes behind every v3 line art. */
+.about-portrait::before {
+  content: "";
+  position: absolute;
+  inset: 12% 18% -20%;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--surface) 55%, transparent);
+}
+.about-portrait-art {
+  position: relative;
+  height: 100%;
+  max-width: 100%;
+}
+
+.about-card {
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.about-card-pastel {
+  border-color: transparent;
+  background: var(--pastel);
+  color: var(--pastel-ink);
+}
+.about-card-pastel .readout {
+  color: color-mix(in oklch, var(--pastel-ink) 72%, transparent);
+}
+.about-doodles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+.about-doodles > .doodle {
+  height: 3.5rem;
+}

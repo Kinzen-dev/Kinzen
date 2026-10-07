@@ -101,7 +101,9 @@
 }
 
 @media (min-width: 48rem) {
-  :root {
+  /* Scenes re-declare the tokens, so the desktop bump must reach them too. */
+  :root,
+  [data-scene] {
     --inset-card: 1.5rem;
   }
 }
@@ -306,7 +308,9 @@ html:has(dialog[open]) {
   animation: 160ms var(--ease-out) both vt-fade-out;
 }
 /* The header is the same on both pages: keep it still instead of cross-fading it. */
-[data-site-header] {
+/* On the pill, not the header: view-transition-name makes an element a backdrop root, which
+   left the pill's backdrop-filter blurring only the transparent header (no glass at all). */
+[data-site-header] .nav-pill {
   view-transition-name: site-header;
 }
 ::view-transition-group(site-header) {

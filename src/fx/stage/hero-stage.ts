@@ -91,13 +91,21 @@ type Debug = {
 let textCtx: CanvasRenderingContext2D | null = null;
 
 /**
- * The DOM wordmark's rendered ink box in viewport px, measured rather than assumed: a Range over
+ * The DOM wordmark's rendered ink box in the stage's own (layout) px, measured rather than assumed:
+ * a Range over
  * the text gives the pen origin and the font's content box (baseline = top + font ascent), and
  * canvas text metrics with the same font and tracking give the ink extents around that origin
- * (side bearings included). Null when the platform cannot measure (no letterSpacing on canvas,
+ * (side bearings included). `at` is the stage's viewport origin and its current scale (the v3 hero
+ * scales down as it leaves), so the box is right while the hero is scaled too.
+ * Null when the platform cannot measure (no letterSpacing on canvas,
  * no font metrics) or the result disagrees with the baked geometry by more than 4%.
  */
-function measureInk(el: HTMLElement, cs: CSSStyleDeclaration, fs: number): Box | null {
+function measureInk(
+  el: HTMLElement,
+  cs: CSSStyleDeclaration,
+  fs: number,
+  at: { x: number; y: number; k: number },
+): Box | null {
   const text = (el.textContent ?? "").trim();
   if (!text) return null;
   textCtx ??= document.createElement("canvas").getContext("2d");
@@ -111,9 +119,9 @@ function measureInk(el: HTMLElement, cs: CSSStyleDeclaration, fs: number): Box |
   range.selectNodeContents(el);
   const rr = range.getBoundingClientRect();
   if (!rr.width || !m.fontBoundingBoxAscent) return null;
-  const baseline = rr.top + m.fontBoundingBoxAscent;
+  const baseline = (rr.top - at.y) / at.k + m.fontBoundingBoxAscent;
   const box: Box = {
-    x: rr.left - m.actualBoundingBoxLeft,
+    x: (rr.left - at.x) / at.k - m.actualBoundingBoxLeft,
     y: baseline - m.actualBoundingBoxAscent,
     w: m.actualBoundingBoxLeft + m.actualBoundingBoxRight,
     h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent,
@@ -216,16 +224,19 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
   const measure = () => {
     const c = stage.getBoundingClientRect();
     const r = wordmark.getBoundingClientRect();
+    // The hero may be mid scale-down (a transform on an ancestor): work in layout px, where the
+    // canvas lives, so a resize or refit while scaled lands the name exactly on the text.
+    const k = stage.offsetWidth ? c.width / stage.offsetWidth : 1;
     const cs = getComputedStyle(wordmark);
     const fs = parseFloat(cs.fontSize);
-    const measured = measureInk(wordmark, cs, fs);
+    const measured = measureInk(wordmark, cs, fs, { x: c.left, y: c.top, k });
     let ink: Box;
     if (measured) {
-      ink = { x: measured.x - c.left, y: measured.y - c.top, w: measured.w, h: measured.h };
+      ink = measured;
     } else {
       // Baked fallback: the ink box relative to the content box, from the bake.
-      const left = r.left + parseFloat(cs.paddingLeft) - c.left;
-      const top = r.top + parseFloat(cs.paddingTop) - c.top;
+      const left = (r.left - c.left) / k + parseFloat(cs.paddingLeft);
+      const top = (r.top - c.top) / k + parseFloat(cs.paddingTop);
       ink = {
         x: left + WORDMARK_EM.x0 * fs,
         y: top + WORDMARK_EM.y0 * fs,
@@ -234,7 +245,7 @@ export function startHeroStage(els: StageEls, onOff: () => void): () => void {
       };
     }
     debug.ink = { ...ink, src: measured ? "measured" : "baked" };
-    return { cw: c.width, ch: c.height, fs, ink };
+    return { cw: c.width / k, ch: c.height / k, fs, ink };
   };
   type Layout = ReturnType<typeof measure>;
   const sameLayout = (a: Layout, b: Layout) =>
