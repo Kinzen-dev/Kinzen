@@ -47,4 +47,18 @@ test.describe("audit review regressions", () => {
       expect(body, route).not.toMatch(/ ๆ/);
     }
   });
+
+  test("reduced motion at 320px: no page scrolls sideways (still tool chips wrap)", async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: 320, height: 700 }, reducedMotion: "reduce" });
+    const page = await ctx.newPage();
+    for (const route of ["/", "/th", "/th/cv", "/th/work/anymind-ec-platform"]) {
+      await page.goto(route);
+      const [sw, vw] = await page.evaluate(() => [
+        document.documentElement.scrollWidth,
+        document.documentElement.clientWidth,
+      ]);
+      expect(sw, route).toBeLessThanOrEqual(vw);
+    }
+    await ctx.close();
+  });
 });
