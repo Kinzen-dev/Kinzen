@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { locales, type Locale } from "@/content/schema";
 import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
 import { SITE_URL, alternates, localePath } from "@/lib/site-url";
+import { pageOpenGraph } from "@/lib/open-graph";
 import { ThemeScript } from "@/components/theme-script";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -42,16 +43,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
     applicationName: "Kinzen",
     authors: [{ name: "Kittipong Khonthong", url: SITE_URL }],
     creator: "Kittipong Khonthong",
-    openGraph: {
-      type: "profile",
-      siteName: "Kinzen",
-      locale: lang === "th" ? "th_TH" : "en_US",
-      alternateLocale: lang === "th" ? "en_US" : "th_TH",
-      firstName: "Kittipong",
-      lastName: "Khonthong",
-      username: "Kinzen",
-      images: [{ url: localePath(lang, "/og.png"), width: 1200, height: 630, alt: dict.work.ogAltHome }],
-    },
+    openGraph: pageOpenGraph(lang, null, "profile"),
     twitter: { card: "summary_large_image", images: [localePath(lang, "/og.png")] },
     formatDetection: { telephone: false },
   };
