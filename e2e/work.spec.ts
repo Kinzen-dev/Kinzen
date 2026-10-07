@@ -66,10 +66,10 @@ test.describe("works ledger", () => {
     expect(before).toEqual(["Helm", "Yimwhan AI", "Ronglen", "Cadence", "Visual QA harness", "AnyMind EC Platform"]);
     if (!isMobile) await expect(page.locator("#index thead th").nth(3)).toHaveAttribute("aria-sort", "descending");
 
-    await sortBy(/Sort by System/).click();
+    await sortBy(/Sort by Project/).click();
     const asc = await rowNames(page);
     expect(asc).toEqual([...before].sort((a, b) => a.localeCompare(b, "en")));
-    await sortBy(/Sort by System/).click();
+    await sortBy(/Sort by Project/).click();
     expect(await rowNames(page)).toEqual([...asc].reverse());
 
     await sortBy(/Sort by Year/).click();
@@ -129,7 +129,7 @@ test.describe("works ledger", () => {
   }) => {
     const curated = await rowNames(page);
     await page
-      .getByRole("button", { name: /Sort by System/ })
+      .getByRole("button", { name: /Sort by Project/ })
       .filter({ visible: true })
       .click();
     const sorted = await rowNames(page);
@@ -143,7 +143,7 @@ test.describe("works ledger", () => {
 
     // Back/Forward = history traversal: the sorted order and the open row come back.
     await page
-      .getByRole("button", { name: /Sort by System/ })
+      .getByRole("button", { name: /Sort by Project/ })
       .filter({ visible: true })
       .click();
     await page.getByRole("button", { name: "Helm", exact: true }).click();
