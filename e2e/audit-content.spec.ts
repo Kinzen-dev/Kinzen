@@ -43,6 +43,15 @@ const RETIRED = [
   "ถอดข้อความสด",
   "ระบบทั้งหมด",
   "ระบบที่คัดมา",
+  "rescued",
+  "code filters",
+  "configured checks",
+  "before AI coding tools",
+  "cards above",
+  "การ์ดด้านบน",
+  "Email King",
+  "ส่งอีเมลหาคิง",
+  "ไม่รู้บริบทมาก่อนเป็นผู้พบ",
   "ยังยืนยันได้เต็มปาก",
 ];
 
@@ -72,8 +81,9 @@ test.describe("audit content: claims", () => {
 
   test("the published numbers are unchanged: 500 / 37 and 35 of 38", async ({ request }) => {
     const yimwhan = flatten(await (await request.get("/work/yimwhan-ai")).text());
-    expect(yimwhan).toContain("replay of 500 real customer messages");
-    expect(yimwhan).toContain("37 violations in the raw model drafts");
+    expect(yimwhan).toContain("500 real customer messages ran through the LINE reply pipeline");
+    expect(yimwhan).toContain("caught 37 rule violations in raw model drafts");
+    expect(yimwhan).toContain("in this test set");
     const qa = flatten(await (await request.get("/work/visual-qa-harness")).text());
     expect(qa).toContain("35 of 38 seeded bugs");
     const qaTh = flatten(await (await request.get("/th/work/visual-qa-harness")).text());
@@ -106,14 +116,19 @@ test.describe("audit content: case pages", () => {
   for (const slug of SLUGS) {
     for (const lang of ["en", "th"] as const) {
       const path = lang === "th" ? `/th/work/${slug}` : `/work/${slug}`;
-      test(`${path} ends with email and CV before Next project`, async ({ page }) => {
+      test(`${path} ends with a role door (email) and a project door (studio) before Next project`, async ({ page }) => {
         await page.goto(path);
         const cta = page.locator("[data-case-cta]");
         await expect(cta).toHaveCount(1);
-        const email = cta.getByRole("link", { name: lang === "th" ? thai("ส่งอีเมลหาคิง") : "Email King" });
+        await expect(cta.getByRole("heading", { level: 2 })).toHaveText(
+          lang === "th" ? thai("คุยเรื่องงานประจำหรืองานโปรเจกต์") : "Discuss a role or a project",
+        );
+        const email = cta.getByRole("link", { name: lang === "th" ? thai("ส่งอีเมลหาผม") : "Email me" });
         await expect(email).toHaveAttribute("href", "mailto:ktpz.dev@gmail.com");
-        const cv = cta.getByRole("link", { name: lang === "th" ? thai("ดู CV") : "View CV" });
-        await expect(cv).toHaveAttribute("href", lang === "th" ? "/th/cv" : "/cv");
+        const studio = cta.getByRole("link", { name: /Vesperwerk/ });
+        await expect(studio).toHaveAttribute("href", lang === "th" ? "https://vesperwerk.com/th" : "https://vesperwerk.com/en");
+        await expect(studio).toHaveAttribute("target", "_blank");
+        await expect(studio).toHaveAccessibleName(lang === "th" ? /เปิดในแท็บใหม่/ : /opens in a new tab/);
         // Block sits before the Next project link in reading order.
         const order = await cta.evaluate((el) => {
           const next = document.querySelector(".pj-next-wrap");
@@ -124,7 +139,7 @@ test.describe("audit content: case pages", () => {
         await email.focus();
         await expect(email).toBeFocused();
         await page.keyboard.press("Tab");
-        await expect(cv).toBeFocused();
+        await expect(studio).toBeFocused();
       });
     }
   }

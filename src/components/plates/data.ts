@@ -229,8 +229,8 @@ const yimwhan: PlateSpec = {
       ],
       at: [1044, 146],
       lines: {
-        en: ["Replay of 500 real", "messages, July 2026:", "37 rule violations", "caught in code"],
-        th: ["ทดสอบซ้ำ 500 ข้อความจริง", "ก.ค. 2026 โค้ดบล็อกร่าง", "ที่ไม่ผ่านกฎได้ 37 ครั้ง"],
+        en: ["July 2026 test, 500 real", "LINE messages: code", "checks caught 37 rule", "violations in raw drafts"],
+        th: ["ทดสอบ ก.ค. 2026", "500 ข้อความจริงทาง LINE", "ชุดตรวจในโค้ดจับร่าง", "ที่ผิดกฎได้ 37 ครั้ง"],
       },
     },
     {

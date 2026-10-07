@@ -115,8 +115,8 @@ const content: SiteContentInput = {
         },
         {
           text: {
-            en: "Built deterministic checks for patient-facing replies. In a July 2026 replay of 500 real customer messages, the code filters rescued 37 raw model violations and every final reply passed the configured checks.",
-            th: "สร้างชุดตรวจคำตอบตามกฎที่กำหนดไว้ในโค้ด (deterministic) และทดสอบซ้ำด้วยข้อความจริงจากลูกค้า 500 ข้อความเมื่อกรกฎาคม 2026 ตัวกรองบล็อกร่างคำตอบที่ไม่ผ่านกฎได้ 37 ครั้ง และคำตอบหลังผ่านตัวกรองผ่านเกณฑ์ครบทุกข้อในชุดทดสอบนี้",
+            en: "Built deterministic code checks for patient-facing replies. In a July 2026 test, 500 real customer messages ran through the LINE reply pipeline: the code checks caught 37 rule violations in raw model drafts, mostly overstated claims, and every final reply passed those checks in this test set.",
+            th: "สร้างชุดตรวจในโค้ดแบบ deterministic (ตรวจตามกฎที่กำหนดไว้) สำหรับคำตอบที่ถึงคนไข้ ทดสอบเมื่อกรกฎาคม 2026 โดยส่งข้อความจริงจากลูกค้า 500 ข้อความเข้าเส้นทางตอบกลับของ LINE ชุดตรวจในโค้ดจับร่างคำตอบจากโมเดลที่ผิดกฎได้ 37 ครั้ง ส่วนใหญ่เป็นคำอวดอ้างเกินจริง และในการทดสอบนี้ คำตอบสุดท้ายทุกข้อความผ่านการตรวจทั้งหมด",
           },
           provenance: { claimId: "exp-founder.bullet-2", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -153,8 +153,8 @@ const content: SiteContentInput = {
       highlights: [
         {
           text: {
-            en: "Led EC Platform engineering: Shopify storefronts, apps and headless builds, including Mizuno Thailand.",
-            th: "ดูแลงานวิศวกรรม EC Platform ทั้งหน้าร้าน แอป และระบบ headless บน Shopify รวมถึงงานของ Mizuno Thailand",
+            en: "Took requirements from the PM, estimated the work, delegated it across the team, and delivered stores for brands including Mizuno Thailand.",
+            th: "รับโจทย์จาก PM ประเมินงาน กระจายงานให้ทีม และส่งมอบร้านค้าให้แบรนด์ต่าง ๆ รวมถึง Mizuno Thailand",
           },
           provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -275,8 +275,8 @@ const content: SiteContentInput = {
         },
         {
           text: {
-            en: "In a July 2026 replay of 500 real customer messages through the LINE reply pipeline, all final replies passed the configured checks; the code filters caught 37 violations in the raw model drafts.",
-            th: "ทดสอบซ้ำด้วยข้อความจริงจากลูกค้า 500 ข้อความผ่านเส้นทางตอบกลับของ LINE เมื่อกรกฎาคม 2026 ตัวกรองในโค้ดบล็อกร่างคำตอบที่ไม่ผ่านกฎได้ 37 ครั้ง และคำตอบหลังผ่านตัวกรองผ่านเกณฑ์ครบทุกข้อในชุดทดสอบนี้",
+            en: "In a July 2026 test, 500 real customer messages ran through the LINE reply pipeline: the code checks caught 37 rule violations in raw model drafts, mostly overstated claims, and every final reply passed those checks in this test set.",
+            th: "ทดสอบเมื่อกรกฎาคม 2026 โดยส่งข้อความจริงจากลูกค้า 500 ข้อความเข้าเส้นทางตอบกลับของ LINE ชุดตรวจในโค้ดจับร่างคำตอบจากโมเดลที่ผิดกฎได้ 37 ครั้ง ส่วนใหญ่เป็นคำอวดอ้างเกินจริง และในการทดสอบนี้ คำตอบสุดท้ายทุกข้อความผ่านการตรวจทั้งหมด",
           },
           provenance: { claimId: "exp-founder.bullet-2", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -306,8 +306,8 @@ const content: SiteContentInput = {
           ],
         },
         result: {
-          en: "In a July 2026 replay of 500 real customer messages, the code filters caught all 37 violations in the raw model drafts, and every final reply passed the configured checks.",
-          th: "ทดสอบซ้ำด้วยข้อความจริงจากลูกค้า 500 ข้อความเมื่อกรกฎาคม 2026 ตัวกรองในโค้ดบล็อกร่างคำตอบที่ไม่ผ่านกฎได้ครบทั้ง 37 ครั้ง และคำตอบหลังผ่านตัวกรองผ่านเกณฑ์ครบทุกข้อในชุดทดสอบนี้",
+          en: "In a July 2026 test, 500 real customer messages ran through the LINE reply pipeline: the code checks caught 37 rule violations in raw model drafts, mostly overstated claims, and every final reply passed those checks in this test set.",
+          th: "ทดสอบเมื่อกรกฎาคม 2026 โดยส่งข้อความจริงจากลูกค้า 500 ข้อความเข้าเส้นทางตอบกลับของ LINE ชุดตรวจในโค้ดจับร่างคำตอบจากโมเดลที่ผิดกฎได้ 37 ครั้ง ส่วนใหญ่เป็นคำอวดอ้างเกินจริง และในการทดสอบนี้ คำตอบสุดท้ายทุกข้อความผ่านการตรวจทั้งหมด",
         },
         limits: {
           en: "A bounded replay, not a promise about every future conversation.",
@@ -382,18 +382,18 @@ const content: SiteContentInput = {
             "Requirements came from the PM. I estimated the work, then split it and delegated it across the team.",
             "I ran knowledge-sharing sessions for the team.",
             "Everything ran in English, with colleagues in India, Indonesia, Singapore, Japan, Thailand and the West.",
-            "This was before AI coding tools: the estimates, the code and the reviews came from my own knowledge.",
+            "I did this without AI coding tools: the estimates, the code and the reviews came from my own knowledge.",
           ],
           th: [
             "รับโจทย์จาก PM แล้วผมประเมินงาน แบ่งงาน และกระจายให้คนในทีม",
             "ผมจัดช่วงแบ่งปันความรู้ภายในทีม",
             "สื่อสารเป็นภาษาอังกฤษทั้งหมด กับเพื่อนร่วมงานในอินเดีย อินโดนีเซีย สิงคโปร์ ญี่ปุ่น ไทย และฝั่งตะวันตก",
-            "ช่วงนั้นยังไม่มีเครื่องมือ AI ช่วยเขียนโค้ด การประเมินงาน โค้ด และการรีวิว มาจากความรู้ของผมเองทั้งหมด",
+            "ช่วงนั้นผมทำงานโดยไม่ได้ใช้เครื่องมือ AI ช่วยเขียนโค้ด การประเมินงาน โค้ด และการรีวิว มาจากความรู้ของผมเองทั้งหมด",
           ],
         },
         validation: {
-          en: "I reviewed the team's code before the work was delivered.",
-          th: "ผมรีวิวโค้ดของทีมก่อนส่งมอบงาน",
+          en: "I reviewed the team's code before delivery, ran performance tests and coordinated releases with the teams involved.",
+          th: "ผมรีวิวโค้ดของทีมก่อนส่งมอบงาน ทดสอบประสิทธิภาพ และประสานการออกเวอร์ชันกับทีมที่เกี่ยวข้อง",
         },
         result: {
           en: "Stores for brands including Mizuno Thailand were delivered on this platform, with the integrations, the Dev Dashboard migration and the January 2026 Admin API upgrade listed above. Across my career I have worked on 20+ Shopify stores.",
@@ -486,7 +486,7 @@ const content: SiteContentInput = {
         {
           text: {
             en: "Caught 35 of 38 seeded bugs on its benchmark app in July 2026. Two of those 35, a search race and a pagination off-by-one, were found only by the blind AI reviewers; the deterministic checks in this benchmark missed them.",
-            th: "ตรวจพบบั๊กที่จงใจใส่ไว้ในแอปทดสอบได้ 35 จาก 38 จุดเมื่อกรกฎาคม 2026 ในจำนวนนี้มี 2 จุดที่ AI ซึ่งตรวจโดยไม่รู้บริบทมาก่อนเป็นผู้พบ ได้แก่ race condition ระหว่างค้นหา และ off-by-one ในการแบ่งหน้า ซึ่งชุดตรวจแบบ deterministic ตรวจไม่พบในการทดสอบนี้",
+            th: "ตรวจพบบั๊กที่จงใจใส่ไว้ในแอปทดสอบได้ 35 จาก 38 จุดเมื่อกรกฎาคม 2026 ในจำนวนนี้มี 2 จุดที่ AI ผู้ตรวจซึ่งไม่เห็นงานมาก่อนเป็นคนเจอ ได้แก่ race condition ระหว่างค้นหา และ off-by-one ในการแบ่งหน้า ซึ่งชุดตรวจแบบ deterministic ตรวจไม่พบในการทดสอบนี้",
           },
           provenance: { claimId: "proj-visual-qa", source: "CLAIMS", confidence: "STATED" },
         },

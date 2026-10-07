@@ -19,9 +19,9 @@ export function numberFacts(now: Date): NumberFact[] {
   const replay = experience
     .flatMap((e) => e.highlights ?? [])
     .map((h) => h.text.en)
-    .find((s) => /replay of \d+ real customer messages/.test(s));
-  const replayed = Number(replay?.match(/replay of (\d+) real customer messages/)?.[1]);
-  const caught = Number(replay?.match(/rescued (\d+) raw model violations/)?.[1]);
+    .find((s) => /\d+ real customer messages/.test(s));
+  const replayed = Number(replay?.match(/(\d+) real customer messages/)?.[1]);
+  const caught = Number(replay?.match(/caught (\d+) rule violations/)?.[1]);
   if (!replayed || !caught) throw new Error("numbers: the replay claim is missing from content");
   return [
     { key: "production", value: yearsInProduction(now) },

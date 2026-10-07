@@ -121,7 +121,7 @@ const en = {
     links: "Links",
     next: "Next project",
     /** The contact block at the end of every case, before Next project. */
-    cta: { heading: "Talk about work like this", email: "Email King" },
+    cta: { heading: "Discuss a role or a project", email: "Email me", studio: "Project enquiries: Vesperwerk" },
   },
   notFound: {
     title: "This page wandered off",
@@ -243,7 +243,8 @@ const th: Dictionary = {
     aheadOfYou: "เร็วกว่าคุณ",
     behindYou: "ช้ากว่าคุณ",
     sameAsYou: "เวลาเดียวกับคุณ",
-    hours: "ชม.",
+    // Leading space: the offset renders as "{n}{hours}", and Thai reads "11 ชม." with a space.
+    hours: " ชม.",
   },
   sections: {
     work: "ผลงานคัดเลือก",
@@ -313,7 +314,7 @@ const th: Dictionary = {
     outcomes: "งานและผลลัพธ์",
     links: "ลิงก์",
     next: "โปรเจกต์ถัดไป",
-    cta: { heading: "คุยเรื่องงานแบบนี้กับผม", email: "ส่งอีเมลหาคิง" },
+    cta: { heading: "คุยเรื่องงานประจำหรืองานโปรเจกต์", email: "ส่งอีเมลหาผม", studio: "งานโปรเจกต์: Vesperwerk" },
   },
   notFound: {
     title: "หน้านี้หลงทางไปแล้ว",
