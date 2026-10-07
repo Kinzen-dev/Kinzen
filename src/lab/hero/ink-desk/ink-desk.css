@@ -1,0 +1,118 @@
+/* ink-desk (lab-hero-b): the self-drawing portrait beside the copy. */
+.ink .hb-stage {
+  height: 16.5rem;
+  margin-top: 0.25rem;
+  padding-inline: calc(var(--gutter) * 0.5);
+}
+@media (min-width: 64rem) {
+  .ink .hb-stage {
+    height: auto;
+    padding: 0 var(--gutter) 6rem 0;
+  }
+}
+.ink-host {
+  height: 100%;
+  display: grid;
+  align-items: center;
+}
+.ink-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 34rem;
+  overflow: visible;
+  color: var(--ink);
+}
+.ink-art {
+  fill: currentColor;
+}
+/* Mask strokes: wide enough to uncover a traced ink line from its contour (art lines are ~4-5 units). */
+.ink-mask-strokes path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ink-flood {
+  fill: #fff;
+}
+.ink-prop {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ink-bubble-shape {
+  fill: color-mix(in oklab, var(--ink) 5%, var(--night));
+}
+.ink-bubble-tag {
+  fill: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.ink-check circle {
+  fill: var(--gold);
+}
+.ink-check path {
+  fill: none;
+  stroke: var(--gold-ink);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ink-line,
+.ink-pulse {
+  fill: none;
+  stroke-linecap: round;
+}
+.ink-line {
+  stroke: var(--gold);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--gold) 55%, transparent));
+}
+.ink-pulse {
+  stroke: oklch(0.95 0.06 85);
+  stroke-width: 4.5;
+  filter: drop-shadow(0 0 6px var(--gold));
+}
+.ink-antenna {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 6px var(--gold));
+}
+.ink-pen-tip {
+  fill: oklch(0.96 0.05 85);
+}
+.ink-pool {
+  fill: color-mix(in oklab, var(--gold) 7%, transparent);
+  filter: blur(18px);
+}
+
+/* Before the script takes over nothing is drawn (no finished frame flashing first). */
+.ink-svg[data-state="idle"] :is(.ink-boil, .ink-line, .ink-pen) {
+  opacity: 0;
+}
+/* Reduced motion (and no script): the finished drawing, still. */
+.ink-svg[data-state="done"] .ink-flood {
+  opacity: 1;
+}
+.ink-svg[data-state="done"] .ink-pen {
+  opacity: 0;
+}
+.ink-svg[data-state="done"] .ink-pulse {
+  opacity: 0;
+}
+.ink-svg[data-state="done"] .ink-ring {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ink-svg :is(.ink-boil, .ink-line) {
+    opacity: 1 !important;
+  }
+  .ink-boil {
+    filter: none;
+  }
+}

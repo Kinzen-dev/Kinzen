@@ -1,0 +1,110 @@
+/* Shared banner for the lab-hero-b demos (preview branch only). The scene is dark in both themes. */
+.hb {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  padding-top: var(--header-h);
+}
+.hb-stage {
+  position: relative;
+  z-index: 0;
+}
+.hb-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  padding-block: clamp(1rem, 4vh, 3rem) clamp(1.5rem, 6vh, 4rem);
+  pointer-events: none;
+}
+.hb-text {
+  display: grid;
+  gap: 0;
+  max-width: 36rem;
+  pointer-events: auto;
+}
+.hb-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  color: var(--ink-2);
+}
+.hb-mark-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 999px;
+  background: var(--gold);
+  box-shadow: 0 0 0.75rem color-mix(in oklab, var(--gold) 70%, transparent);
+}
+.hb-title {
+  margin-top: 1rem;
+  font-size: var(--text-base);
+}
+.hb-display {
+  margin-top: 0.5rem;
+  font-size: clamp(1.875rem, 1rem + 2.6vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+:lang(th) .hb-display {
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+}
+.hb-phrase {
+  color: var(--gold);
+}
+.hb-phrase-phone {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .hb-phrase-wide {
+    display: none;
+  }
+  .hb-phrase-phone {
+    display: inline;
+  }
+}
+.hb-line {
+  margin-top: 1.25rem;
+  max-width: 46ch;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+@media (min-width: 48rem) {
+  .hb-line {
+    font-size: var(--text-lg);
+  }
+}
+.hb-ctas {
+  margin-top: 1.75rem;
+}
+
+/* ---------- split: stage beside the copy from 64rem, under it on phones ---------- */
+@media (min-width: 64rem) {
+  .hb-split .hb-stage {
+    position: absolute;
+    top: var(--header-h);
+    right: 0;
+    bottom: 0;
+    left: calc(var(--gutter) + min(34rem, 38vw) + 2.5rem);
+  }
+  .hb-split .hb-text {
+    max-width: min(34rem, 38vw);
+  }
+}
+
+/* ---------- overlay: stage under the whole banner ---------- */
+.hb-overlay .hb-stage {
+  position: absolute;
+  inset: 0;
+}

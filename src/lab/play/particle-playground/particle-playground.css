@@ -1,0 +1,185 @@
+/* Lab: particle playground (preview only). */
+.ppg {
+  padding-top: calc(var(--header-h) + clamp(1.5rem, 4vw, 3rem));
+  padding-bottom: 3rem;
+}
+.ppg-head {
+  max-width: 44rem;
+}
+.ppg-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+:lang(th) .ppg-kicker {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  font-size: var(--text-xs);
+}
+.ppg-kicker i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.ppg-title {
+  margin-top: 0.75rem;
+  font-size: clamp(2rem, 1.2rem + 3vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+:lang(th) .ppg-title {
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.ppg-lede {
+  margin-top: 0.75rem;
+  color: var(--ink-2);
+  max-width: 38rem;
+}
+
+.ppg-card {
+  margin-top: 1.75rem;
+  display: grid;
+  box-shadow: var(--shadow-lift);
+}
+.ppg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  padding: var(--inset-card);
+  border-bottom: 1px solid var(--rule);
+}
+.ppg-seg {
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+}
+.ppg-seg button {
+  min-height: 2.25rem;
+  padding-inline: 1rem;
+  border-radius: 999px;
+  color: var(--ink-2);
+  transition:
+    background var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+.ppg-seg button[aria-pressed="true"] {
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+.ppg-form {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+.ppg-input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+  color: var(--ink);
+  font-size: 1rem;
+}
+.ppg-input::placeholder {
+  color: var(--ink-3);
+}
+.ppg-input:focus-visible,
+.ppg-btn:focus-visible,
+.ppg-seg button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.ppg-btn {
+  min-height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.ppg-btn:disabled {
+  opacity: 0.45;
+}
+.ppg-btn:not(:disabled):hover {
+  border-color: var(--gold);
+}
+
+.ppg-stage {
+  position: relative;
+  height: clamp(20rem, 62svh, 36rem);
+  background:
+    radial-gradient(60% 55% at 50% 50%, color-mix(in oklab, var(--gold) 9%, transparent), transparent 70%),
+    var(--ground);
+}
+.ppg-canvas,
+.ppg-ink {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ppg-canvas {
+  display: block;
+  /* Type mode: vertical swipes still scroll the page on phones; Draw mode owns the gesture. */
+  touch-action: pan-y;
+}
+[data-mode="draw"] .ppg-canvas {
+  touch-action: none;
+  cursor: crosshair;
+}
+.ppg-ink {
+  pointer-events: none;
+}
+.ppg-ink path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-opacity: 0.55;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--gold) 70%, transparent));
+}
+.ppg-hint {
+  position: absolute;
+  inset: auto 0 22%;
+  text-align: center;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+.ppg-status {
+  position: absolute;
+  left: var(--inset-card);
+  right: var(--inset-card);
+  bottom: 0.875rem;
+  color: var(--ink-3);
+  pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 30rem) {
+  .ppg-controls {
+    justify-content: space-between;
+  }
+  .ppg-form {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .ppg-stage {
+    height: clamp(18rem, 56svh, 26rem);
+  }
+}

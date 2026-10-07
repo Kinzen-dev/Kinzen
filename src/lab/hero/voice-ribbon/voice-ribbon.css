@@ -1,0 +1,186 @@
+/* voice-ribbon (lab-hero-b): the gold ribbon, the play control and the live transcript. */
+.vr .hb-stage {
+  margin-top: 0.5rem;
+  padding-inline: var(--gutter);
+}
+@media (min-width: 64rem) {
+  .vr .hb-stage {
+    margin: 0;
+    padding: 0 var(--gutter) 6rem 0;
+  }
+}
+.vr-host {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  align-content: center;
+  height: 100%;
+}
+.vr-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.875rem;
+}
+.vr-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  height: 2.75rem;
+  padding-inline: 0.5rem var(--inset-btn);
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--gold) 60%, transparent);
+  background: color-mix(in oklab, var(--gold) 12%, transparent);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
+}
+.vr-play:hover {
+  background: color-mix(in oklab, var(--gold) 22%, transparent);
+}
+.vr-play-icon {
+  display: grid;
+  place-items: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 999px;
+  background: var(--gold);
+  fill: var(--gold-ink);
+}
+[data-phase="idle"] .vr-play-icon {
+  animation: vr-call 2.2s var(--ease-out) infinite;
+}
+@keyframes vr-call {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 55%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 0.75rem color-mix(in oklab, var(--gold) 0%, transparent);
+  }
+}
+.vr-meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+}
+:lang(th) .vr-meta {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+}
+.vr-canvas {
+  display: block;
+  width: calc(100% + var(--gutter) * 2);
+  margin-inline: calc(var(--gutter) * -1);
+  height: 7.5rem;
+  margin-block: 0.5rem 0.25rem;
+}
+@media (min-width: 64rem) {
+  .vr-canvas {
+    width: calc(100% + var(--gutter));
+    margin-inline: -1rem calc(var(--gutter) * -1);
+    height: clamp(12rem, 30vh, 18rem);
+    margin-block: 1rem;
+  }
+}
+.vr-hint {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  transition: opacity 400ms var(--ease-out);
+}
+.vr-host:not([data-phase="idle"]) .vr-hint {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* ---------- transcript ---------- */
+.vr-lines {
+  --row: 3.25rem;
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+}
+.vr-lines li {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  column-gap: 0.75rem;
+  align-items: baseline;
+  transition: opacity 400ms var(--ease-out);
+}
+.vr-lines li[data-state="wait"] {
+  display: none;
+}
+.vr-lines li[data-state="done"] {
+  opacity: 0.62;
+}
+.vr-who {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+:lang(th) .vr-who,
+.vr-lines :lang(th) .vr-who {
+  font-family: var(--font-sans);
+}
+[data-who="ai"] .vr-who {
+  color: var(--gold);
+}
+.vr-text {
+  font-size: var(--text-base);
+  color: var(--ink);
+  line-height: 1.5;
+}
+.vr-lines li[data-state="live"] .vr-text::after {
+  content: "";
+  display: inline-block;
+  width: 0.125rem;
+  height: 1em;
+  margin-left: 0.125rem;
+  vertical-align: -0.15em;
+  background: var(--gold);
+  animation: vr-blink 0.9s steps(1) infinite;
+}
+@keyframes vr-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.vr-gloss {
+  grid-column: 2;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out);
+}
+.vr-lines li[data-state="done"] .vr-gloss {
+  opacity: 1;
+}
+@media (max-width: 63.99rem) {
+  /* Phones: one line at a time (the newest that has started), with its speaker above it. */
+  .vr-lines {
+    min-height: 4.5rem;
+  }
+  .vr-lines li:not([data-current]) {
+    display: none;
+  }
+  .vr-lines li {
+    grid-template-columns: minmax(0, 1fr);
+    opacity: 1 !important;
+  }
+  .vr-gloss {
+    grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-phase="idle"] .vr-play-icon,
+  .vr-lines li[data-state="live"] .vr-text::after {
+    animation: none;
+  }
+}

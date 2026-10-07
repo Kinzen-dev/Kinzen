@@ -2,7 +2,7 @@
 
 import { createElement, lazy, Suspense, useEffect, useState } from "react";
 import type { Locale } from "@/content/schema";
-import type { LabDemo } from "./types";
+import type { LabBanner, LabDemo } from "./types";
 import { demos as heroA } from "./hero/registry-a";
 import { demos as heroB } from "./hero/registry-b";
 import { demos as playA } from "./play/registry-a";
@@ -14,7 +14,7 @@ const SETS: Record<"hero" | "play", LabDemo[]> = { hero: [...heroA, ...heroB], p
 const VIEWS = new Map([...SETS.hero, ...SETS.play].map((d) => [d.id, lazy(d.load)]));
 
 /** Lab switcher: one demo at a time (hash = demo id), a bar to move between them. */
-export function LabViewer({ kind, locale }: { kind: "hero" | "play"; locale: Locale }) {
+export function LabViewer({ kind, locale, banner }: { kind: "hero" | "play"; locale: Locale; banner: LabBanner }) {
   const list = SETS[kind];
   const [id, setId] = useState<string | null>(null);
   useEffect(() => {
@@ -37,7 +37,7 @@ export function LabViewer({ kind, locale }: { kind: "hero" | "play"; locale: Loc
       <div className="lab-stage" key={demo.id}>
         <Suspense fallback={<div className="lab-loading">Loading {demo.title}…</div>}>
           {/* A lookup into module-scope lazies, not a component made during render. */}
-          {createElement(View, { locale })}
+          {createElement(View, { locale, banner })}
         </Suspense>
       </div>
       <nav className="lab-bar" aria-label="Lab demos">

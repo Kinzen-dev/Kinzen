@@ -1,0 +1,407 @@
+/* agents-at-work (lab-hero-b): a Helm-like window of three agent panes. */
+.aw .hb-stage {
+  height: 19rem;
+  margin-top: 0.5rem;
+  padding-inline: var(--gutter);
+}
+@media (min-width: 64rem) {
+  .aw .hb-stage {
+    height: auto;
+    margin: 0;
+    padding: 0;
+  }
+}
+.aw-host {
+  position: relative;
+  height: 100%;
+  display: grid;
+  align-items: stretch;
+}
+@media (min-width: 64rem) {
+  .aw-host {
+    align-items: center;
+    padding: 0 var(--gutter) 7rem 0;
+  }
+}
+
+.aw-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 32rem;
+  border-radius: var(--radius-card);
+  border: 1px solid color-mix(in oklab, var(--ink) 12%, transparent);
+  background: linear-gradient(170deg, var(--night-surface), color-mix(in oklab, var(--night) 70%, black));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--ink) 10%, transparent),
+    0 40px 80px -40px oklch(0 0 0 / 0.8),
+    0 0 0 1px oklch(0 0 0 / 0.3);
+  overflow: hidden;
+}
+@media (min-width: 64rem) {
+  .aw-window {
+    height: min(32rem, 70%);
+  }
+}
+.aw-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+}
+.aw-dots {
+  display: flex;
+  gap: 0.375rem;
+}
+.aw-dots i {
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ink) 18%, transparent);
+}
+.aw-title {
+  flex: 1;
+  text-align: center;
+}
+.aw-live {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--gold);
+}
+.aw-live-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--gold);
+  animation: aw-pulse 1.8s var(--ease-in-out) infinite alternate;
+}
+@keyframes aw-pulse {
+  from {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- panes ---------- */
+.aw-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 1px;
+  background: color-mix(in oklab, var(--ink) 8%, transparent);
+  grid-template-rows: auto 1fr auto;
+}
+@media (min-width: 40rem) {
+  .aw-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-rows: 0.8fr 1.2fr;
+  }
+  .aw-pane-plan {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .aw-pane-build {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .aw-pane-review {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+.aw-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: color-mix(in oklab, var(--night) 82%, black);
+  transition: background-color 500ms var(--ease-out);
+}
+.aw-pane[data-state="typing"] {
+  background: color-mix(in oklab, var(--night-surface) 75%, black);
+}
+.aw-pane.aw-receive {
+  background: color-mix(in oklab, var(--gold) 9%, var(--night));
+}
+.aw-pane-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.aw-avatar {
+  display: grid;
+  place-items: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 0.3rem;
+  background: color-mix(in oklab, var(--ink) 12%, transparent);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.aw-name {
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+.aw-role {
+  padding: 0.0625rem 0.375rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--ink) 14%, transparent);
+}
+.aw-state {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.aw-state-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ink) 30%, transparent);
+}
+.aw-pane[data-state="typing"] .aw-state {
+  color: var(--gold);
+}
+.aw-pane[data-state="typing"] .aw-state-dot {
+  background: var(--gold);
+  animation: aw-pulse 0.7s var(--ease-in-out) infinite alternate;
+}
+.aw-pane[data-state="done"] .aw-state-dot {
+  background: color-mix(in oklab, var(--gold) 55%, var(--ink));
+}
+
+.aw-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  padding: 0.25rem 0.75rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+  transition: opacity 600ms var(--ease-out);
+}
+:lang(th) .aw-pane-plan .aw-body {
+  font-family: var(--font-sans);
+}
+@media (min-width: 64rem) {
+  .aw-body {
+    font-size: 0.78125rem;
+  }
+}
+@media (max-width: 39.99rem) {
+  /* Phones: the panes stack and fold to their headers; only the active agent's pane is open. */
+  .aw-grid {
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    align-content: start;
+  }
+  .aw-pane[data-active] {
+    flex: 1;
+  }
+  .aw-grid:has(.aw-pane[data-active]) {
+    display: flex;
+    flex-direction: column;
+  }
+  .aw-pane:not([data-active]) .aw-body {
+    display: none;
+  }
+  .aw-pane[data-active] .aw-body {
+    /* The newest lines stay in view; older ones roll off the top. */
+    justify-content: flex-end;
+    animation: aw-open 420ms var(--ease-out);
+  }
+}
+@keyframes aw-open {
+  from {
+    opacity: 0;
+    translate: 0 -0.5rem;
+  }
+}
+[data-fading="on"] .aw-body {
+  opacity: 0;
+}
+.aw-line {
+  flex-shrink: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-height: 1.6em;
+}
+.aw-line .k {
+  color: oklch(0.78 0.09 300);
+}
+.aw-line .f {
+  color: oklch(0.85 0.08 200);
+}
+.aw-line .n,
+.aw-line .t {
+  color: oklch(0.86 0.08 80);
+}
+.aw-line .c {
+  color: var(--ink-3);
+}
+.aw-line .ok {
+  color: oklch(0.8 0.13 150);
+}
+.aw-line .p {
+  color: var(--gold);
+}
+.aw-msg {
+  color: var(--ink);
+}
+.aw-dim {
+  color: var(--ink-3);
+}
+.aw-caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1.1em;
+  margin-left: 1px;
+  vertical-align: -0.2em;
+  background: var(--gold);
+  animation: aw-blink 1s steps(1) infinite;
+}
+@keyframes aw-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- handoff wire + chip ---------- */
+.aw-wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.aw-wire {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--gold) 60%, transparent));
+}
+.aw-head {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.aw-wire,
+.aw-head,
+.aw-chip {
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+[data-handoff="on"] :is(.aw-wire, .aw-head, .aw-chip) {
+  opacity: 1;
+}
+.aw-chip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--gold-ink);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px -6px color-mix(in oklab, var(--gold) 80%, transparent);
+  will-change: transform;
+}
+:lang(th) .aw-chip {
+  font-family: var(--font-sans);
+}
+
+/* ---------- the commit lands in the copy ---------- */
+.aw-commit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  opacity: 0;
+  translate: 0 0.375rem;
+  transition:
+    opacity 500ms var(--ease-out),
+    translate 500ms var(--ease-out);
+}
+:lang(th) .aw-commit {
+  font-family: var(--font-sans);
+}
+.aw-commit[data-on] {
+  opacity: 1;
+  translate: 0 0;
+}
+.aw-commit-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 999px;
+  background: var(--gold);
+}
+.aw-commit-hash {
+  color: var(--gold);
+  font-family: var(--font-mono);
+}
+.aw .hb-line {
+  /* Longhands: the CSS pipeline adds an sRGB fallback for oklch(), and a repeated `background`
+     shorthand after the clip would reset background-clip. */
+  background-image: linear-gradient(
+    100deg,
+    var(--ink-2) 0%,
+    var(--ink-2) 36%,
+    var(--gold) 46%,
+    oklch(0.97 0.05 85) 50%,
+    var(--gold) 54%,
+    var(--ink-2) 64%,
+    var(--ink-2) 100%
+  );
+  background-position: 100% 0;
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.aw .hb-line.aw-landed {
+  animation: aw-land 2.6s cubic-bezier(0.45, 0, 0.55, 1) both;
+}
+@keyframes aw-land {
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aw .hb-line {
+    background-image: none;
+    color: var(--ink-2);
+  }
+  .aw-caret,
+  .aw-live-dot {
+    animation: none;
+  }
+  .aw-commit {
+    transition: none;
+  }
+}
