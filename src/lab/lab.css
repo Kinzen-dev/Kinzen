@@ -105,3 +105,13 @@
     height: 1.75rem;
   }
 }
+
+/* Wide screens: the bar sits bottom-right, clear of the hero copy and CTAs on the left. */
+@media (min-width: 64rem) {
+  .lab-bar {
+    left: auto;
+    right: 1rem;
+    translate: none;
+    width: min(28rem, calc(100% - 2rem));
+  }
+}
