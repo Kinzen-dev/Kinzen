@@ -80,4 +80,25 @@ test.describe("audit review regressions", () => {
     }
     await ctx.close();
   });
+
+  test("narrow phones: every demo choice label stays inside its button", async ({ browser }) => {
+    for (const width of [320, 375]) {
+      const ctx = await browser.newContext({ viewport: { width, height: 800 } });
+      const page = await ctx.newPage();
+      for (const route of ["/", "/th"]) {
+        await page.goto(route);
+        await page.locator(".agent-demo-choices").first().scrollIntoViewIfNeeded();
+        const overflowing = await page.evaluate(
+          () =>
+            [...document.querySelectorAll(".agent-demo-choice")].filter((btn) => {
+              const b = btn.getBoundingClientRect();
+              const label = btn.querySelector(".agent-demo-short")!.getBoundingClientRect();
+              return label.left < b.left || label.right > b.right + 0.5 || btn.scrollWidth > btn.clientWidth + 1;
+            }).length,
+        );
+        expect(overflowing, `${route} @${width}`).toBe(0);
+      }
+      await ctx.close();
+    }
+  });
 });
