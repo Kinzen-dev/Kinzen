@@ -192,18 +192,34 @@ test.describe("hero v3", () => {
 
   test("no layout shift on load or while the phrases cycle", async ({ page }) => {
     await page.addInitScript(() => {
-      const w = window as Window & { __cls?: number };
+      const w = window as Window & { __cls?: number; __shifts?: string[] };
       w.__cls = 0;
+      w.__shifts = [];
+      type Shift = PerformanceEntry & {
+        value: number;
+        hadRecentInput: boolean;
+        sources: { node?: Node | null; previousRect: DOMRectReadOnly; currentRect: DOMRectReadOnly }[];
+      };
       new PerformanceObserver((l) => {
-        for (const e of l.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
-          if (!e.hadRecentInput) w.__cls! += e.value;
+        for (const e of l.getEntries() as Shift[]) {
+          if (e.hadRecentInput) continue;
+          w.__cls! += e.value;
+          for (const src of e.sources) {
+            const el = src.node instanceof Element ? src.node : src.node?.parentElement;
+            const r = (x: DOMRectReadOnly) => [x.x, x.y, x.width, x.height].map(Math.round).join(",");
+            w.__shifts!.push(`${Math.round(e.startTime)}ms ${el?.className ?? "?"} ${r(src.previousRect)} -> ${r(src.currentRect)}`);
+          }
         }
       }).observe({ type: "layout-shift", buffered: true });
     });
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
     await page.waitForTimeout(6_500);
-    expect(await page.evaluate(() => (window as Window & { __cls?: number }).__cls)).toBe(0);
+    const { cls, shifts } = await page.evaluate(() => {
+      const w = window as Window & { __cls?: number; __shifts?: string[] };
+      return { cls: w.__cls, shifts: w.__shifts };
+    });
+    expect(cls, shifts?.join("\n")).toBe(0);
   });
 
   for (const width of [360, 390, 768, 1024, 1440, 1920]) {
