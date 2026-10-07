@@ -12,6 +12,9 @@ import { StatusMark } from "@/components/sections/work";
 import { periodLabel } from "@/components/work/format";
 import { workTitleTransition } from "@/components/work/transition";
 import "@/components/work/transitions.css";
+import { Art } from "@/components/art/art";
+import { PROJECT_ART } from "@/components/v3/more-work/work-cards";
+import "@/components/v3/project/project.css";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
 
@@ -76,79 +79,97 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
     { label: dict.ledger.area, value: dict.areas[project.area] },
   ];
 
-  return (
-    <article className="shell pt-8 md:pt-14">
-      <p>
-        <Link
-          href={localePath(locale, "/work")}
-          prefetch={prefetchFor(localePath(locale, "/work"))}
-          className="link text-sm text-ink-2"
-        >
-          <span aria-hidden="true">← </span>
-          {nobr(dict.project.back)}
-        </Link>
-      </p>
+  const art = PROJECT_ART[project.id];
+  const nextArt = PROJECT_ART[next.id];
 
-      <header className="mt-8 grid gap-6 border-t border-rule-strong pt-6 md:mt-12 md:grid-cols-12">
-        <h1 className="text-2xl tracking-[-0.045em] md:col-span-8">
-          {/* A tight inline box, like the ledger row name, so the morph keeps the text's aspect. */}
-          {/* Morph only on the way in (row to page). On the way back the big title over a
-              scrolled ledger read as a doubled ghost (review round 6). */}
-          <ViewTransition
-            name={workTitleTransition(project.slug)}
-            share={{ "nav-forward": "morph", default: "none" }}
-            default="none"
-          >
-            <span className="inline-block">{project.name}</span>
-          </ViewTransition>
-        </h1>
-        <p className="max-w-[44ch] text-lg text-ink-2 md:col-span-7">{nobr(t(project.tagline, locale))}</p>
+  return (
+    <article className="pj shell pt-6 md:pt-10">
+      <header className={`pj-hero pastel-${project.area}`}>
+        <div className="pj-hero-text">
+          <p>
+            <Link
+              href={localePath(locale, "/work")}
+              prefetch={prefetchFor(localePath(locale, "/work"))}
+              className="pj-back"
+            >
+              <span aria-hidden="true">←</span>
+              {nobr(dict.project.back)}
+            </Link>
+          </p>
+          <div>
+            <h1 className="pj-title">
+              {/* A tight inline box, like the ledger row name, so the morph keeps the text's aspect. */}
+              {/* Morph only on the way in (row to page). On the way back the big title over a
+                  scrolled ledger read as a doubled ghost (review round 6). */}
+              <ViewTransition
+                name={workTitleTransition(project.slug)}
+                share={{ "nav-forward": "morph", default: "none" }}
+                default="none"
+              >
+                <span className="inline-block">{project.name}</span>
+              </ViewTransition>
+            </h1>
+            <p className="pj-tagline">{nobr(t(project.tagline, locale))}</p>
+          </div>
+        </div>
+        {art ? (
+          <div className="pj-hero-art" aria-hidden="true">
+            <Art name={art} className="pj-art-ink" />
+          </div>
+        ) : null}
       </header>
 
-      <dl className="mt-10 grid grid-cols-2 border-t border-l border-rule md:grid-cols-4">
+      <dl className="pj-facts">
         {facts.map((f) => (
-          <div key={f.label} className="border-r border-b border-rule p-4">
-            <dt className="text-sm text-ink-3">{f.label}</dt>
-            <dd className="mt-2 font-medium tracking-[-0.01em]">{f.value}</dd>
+          <div key={f.label} className="pj-fact">
+            <dt className="readout">{nobr(f.label)}</dt>
+            <dd>{typeof f.value === "string" ? nobr(f.value) : f.value}</dd>
           </div>
         ))}
       </dl>
 
-      <section aria-labelledby="outcomes-title" className="mt-16 grid gap-6 md:mt-24 md:grid-cols-12">
-        <h2 id="outcomes-title" className="text-xl tracking-[-0.035em] md:col-span-4">
+      <section aria-labelledby="outcomes-title" className={`pj-section pastel-${project.area}`}>
+        <h2 id="outcomes-title" className="pj-h2">
           {nobr(dict.project.outcomes)}
         </h2>
-        <ul className="grid gap-4 md:col-span-7 md:col-start-6">
-          {project.outcomes.map((o) => (
-            <li key={o.text.en} className="flex max-w-[64ch] gap-3 text-lg">
-              <span aria-hidden="true" className="mt-[0.8em] h-px w-3 shrink-0 bg-ink-3" />
+        <ol className="pj-outcomes">
+          {project.outcomes.map((o, n) => (
+            <li key={o.text.en} className="pj-outcome">
+              <span aria-hidden="true" className="pj-num tabular">
+                {String(n + 1).padStart(2, "0")}
+              </span>
               <span>{nobr(t(o.text, locale))}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section aria-labelledby="stack-title" className="pj-section">
+        <h2 id="stack-title" className="pj-h2">
+          {nobr(dict.project.stack)}
+        </h2>
+        <ul className="pj-pills">
+          {project.stack.map((s) => (
+            <li key={s} className="pj-pill">
+              {s}
             </li>
           ))}
         </ul>
       </section>
 
-      <section aria-labelledby="stack-title" className="mt-16 grid gap-6 border-t border-rule pt-6 md:grid-cols-12">
-        <h2 id="stack-title" className="text-xl tracking-[-0.035em] md:col-span-4">
-          {nobr(dict.project.stack)}
-        </h2>
-        <ul className="readout flex flex-wrap gap-x-5 gap-y-2 text-sm md:col-span-7 md:col-start-6">
-          {project.stack.map((s) => (
-            <li key={s}>{s}</li>
-          ))}
-        </ul>
-      </section>
-
       {links.length > 0 && (
-        <section aria-labelledby="links-title" className="mt-16 grid gap-6 border-t border-rule pt-6 md:grid-cols-12">
-          <h2 id="links-title" className="text-xl tracking-[-0.035em] md:col-span-4">
+        <section aria-labelledby="links-title" className="pj-section">
+          <h2 id="links-title" className="pj-h2">
             {nobr(dict.project.links)}
           </h2>
-          <ul className="grid gap-2 md:col-span-7 md:col-start-6">
+          <ul className="pj-links">
             {links.map((l) => (
               <li key={l.href}>
-                <a href={l.href} className="link text-lg" rel="noopener" target="_blank">
+                <a href={l.href} className="pj-linkbtn" rel="noopener" target="_blank">
                   {l.label}
+                  <span aria-hidden="true" className="pj-ext">
+                    ↗
+                  </span>
                   <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
                 </a>
               </li>
@@ -160,15 +181,11 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
       <PlateSection projectId={project.id} projectName={project.name} locale={locale} />
 
       {caseStudy && (
-        <section
-          data-case-study
-          aria-labelledby="case-title"
-          className="mt-16 grid gap-6 border-t border-rule pt-6 md:grid-cols-12"
-        >
-          <h2 id="case-title" className="text-xl tracking-[-0.035em] md:col-span-4">
+        <section data-case-study aria-labelledby="case-title" className="pj-section">
+          <h2 id="case-title" className="pj-h2">
             {nobr(dict.work.caseStudy.heading)}
           </h2>
-          <div className="grid gap-8 md:col-span-7 md:col-start-6">
+          <div className="pj-body grid gap-8">
             <div>
               <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.problem)}</h3>
               <p className="mt-2 text-lg">{nobr(t(caseStudy.problem, locale))}</p>
@@ -197,13 +214,20 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
       )}
 
       {next.id !== project.id && (
-        <nav aria-label={plain(dict.project.next)} className="mt-24 border-t border-rule-strong pt-6">
-          <p className="text-sm text-ink-3">{nobr(dict.project.next)}</p>
-          <Link href={localePath(locale, `/work/${next.slug}`)} className="group mt-2 block">
-            <span className="block text-2xl font-semibold tracking-[-0.045em] transition-colors duration-200 group-hover:text-gold">
-              {next.name}
+        <nav aria-label={plain(dict.project.next)} className="pj-next-wrap">
+          <Link href={localePath(locale, `/work/${next.slug}`)} className={`pj-next pastel-${next.area}`}>
+            <span className="pj-next-text">
+              <span className="readout pj-next-label">
+                {nobr(dict.project.next)} <span aria-hidden="true">→</span>
+              </span>
+              <span className="pj-next-name">{next.name}</span>
+              <span className="pj-next-tagline">{nobr(t(next.tagline, locale))}</span>
             </span>
-            <span className="mt-2 block max-w-[52ch] text-ink-2">{nobr(t(next.tagline, locale))}</span>
+            {nextArt ? (
+              <span className="pj-next-art" aria-hidden="true">
+                <Art name={nextArt} className="pj-art-ink" />
+              </span>
+            ) : null}
           </Link>
         </nav>
       )}
@@ -217,11 +241,11 @@ function PlateSection({ projectId, projectName, locale }: { projectId: string; p
   if (!getPlateSpec(projectId)) return null;
   const dict = getDictionary(locale);
   return (
-    <section aria-labelledby="architecture-title" className="mt-16 border-t border-rule pt-6 md:mt-24">
-      <h2 id="architecture-title" className="text-xl tracking-[-0.035em]">
+    <section aria-labelledby="architecture-title" className="pj-section pj-section-wide">
+      <h2 id="architecture-title" className="pj-h2">
         {nobr(dict.work.architecture)}
       </h2>
-      <div className="mt-8">
+      <div className="pj-plate">
         <ProjectPlate
           projectId={projectId}
           projectName={projectName}
