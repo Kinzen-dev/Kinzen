@@ -102,7 +102,7 @@ test.describe("works ledger", () => {
   test("an opened row shows outcomes, the plate and the project link", async ({ page }) => {
     await page.getByRole("button", { name: "Yimwhan AI", exact: true }).click();
     const panel = page.locator("#index .ledger-panel");
-    await expect(panel.getByText("Outcomes")).toBeVisible();
+    await expect(panel.getByText("Work and results")).toBeVisible();
     await expect(panel.getByRole("img", { name: /KZ-01/ })).toBeAttached();
     await expect(panel.getByRole("link", { name: /Open project page/ })).toHaveAttribute("href", "/work/yimwhan-ai");
     expect(await seriousViolations(page)).toEqual([]);
@@ -204,9 +204,9 @@ test.describe("works ledger", () => {
 
 test.describe("project pages", () => {
   for (const { route, lang, heading, marker } of [
-    { route: "/work/yimwhan-ai", lang: "en", heading: "Yimwhan AI", marker: "Outcomes" },
-    { route: "/th/work/yimwhan-ai", lang: "th", heading: "Yimwhan AI", marker: "ผลลัพธ์" },
-    { route: "/work/ronglen", lang: "en", heading: "Ronglen", marker: "Outcomes" },
+    { route: "/work/yimwhan-ai", lang: "en", heading: "Yimwhan AI", marker: "Work and results" },
+    { route: "/th/work/yimwhan-ai", lang: "th", heading: "Yimwhan AI", marker: "งานและผลลัพธ์" },
+    { route: "/work/ronglen", lang: "en", heading: "Ronglen", marker: "Work and results" },
   ]) {
     test(`${route} is prerendered, indexable and accessible`, async ({ page, request }) => {
       const res = await request.get(route);
