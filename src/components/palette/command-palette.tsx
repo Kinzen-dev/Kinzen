@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { localePath, neutralPath } from "@/lib/site-url";
 import { rank } from "./fuzzy";
@@ -8,11 +8,9 @@ import type { PaletteCommand, PaletteData } from "./palette-data";
 import "./palette.css";
 import { plain } from "@/lib/thai";
 
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false;
-  if (target.isContentEditable) return true;
-  return target.closest("input, textarea, select, [contenteditable='true'], [role='textbox']") !== null;
-}
+const noSubscribe = () => () => {};
+/** Apple keyboards say Cmd; the server (and everyone else) says Ctrl. */
+const isApple = () => /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
 function currentTheme(): "light" | "dark" {
   const pinned = document.documentElement.dataset.theme;
@@ -31,8 +29,9 @@ function toggleTheme() {
 }
 
 /**
- * Cmd/Ctrl+K or "/" opens a native modal dialog holding an ARIA combobox and
- * listbox. Additive only: every command here also exists as a visible link or
+ * Cmd/Ctrl+K or the header button opens a native modal dialog holding an ARIA combobox and
+ * listbox. No single-character shortcut (WCAG 2.1.4: a printable key must not fire a feature
+ * from anywhere on the page). Additive only: every command here also exists as a visible link or
  * control elsewhere on the site.
  */
 export function CommandPalette({ data }: { data: PaletteData }) {
@@ -54,6 +53,8 @@ export function CommandPalette({ data }: { data: PaletteData }) {
   const [active, setActive] = useState(0);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [announcement, setAnnouncement] = useState("");
+  const apple = useSyncExternalStore(noSubscribe, isApple, () => false);
+  const shortcut = apple ? "⌘K" : "Ctrl K";
 
   const commands = useMemo(
     () =>
@@ -82,7 +83,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
     dialogRef.current?.close();
   }, []);
 
-  // Global shortcuts: Cmd/Ctrl+K anywhere, "/" when not typing in a field.
+  // Cmd/Ctrl+K anywhere (a modified key, so it never collides with typing).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const dialog = dialogRef.current;
@@ -90,11 +91,6 @@ export function CommandPalette({ data }: { data: PaletteData }) {
         e.preventDefault();
         if (dialog?.open) close();
         else open();
-        return;
-      }
-      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey && !dialog?.open && !isTypingTarget(e.target)) {
-        e.preventDefault();
-        open();
       }
     }
     document.addEventListener("keydown", onKey);
@@ -237,7 +233,8 @@ export function CommandPalette({ data }: { data: PaletteData }) {
         onClick={open}
         aria-haspopup="dialog"
         aria-label={plain(labels.trigger)}
-        title={plain(`${labels.trigger} (Ctrl K, /)`)}
+        aria-keyshortcuts="Meta+K Control+K"
+        title={`${plain(labels.trigger)} (${shortcut})`}
         className="flex h-9 items-center gap-2 rounded-full px-2.5 text-ink-2 transition-colors duration-200 hover:bg-[color-mix(in_oklab,var(--ink)_7%,transparent)] hover:text-ink"
       >
         <svg
@@ -252,7 +249,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
           <path d="m15 15 4.5 4.5" />
         </svg>
         <span aria-hidden="true" className="hidden lg:inline">
-          <kbd className="palette-kbd">/</kbd>
+          <kbd className="palette-kbd">{shortcut}</kbd>
         </span>
       </button>
 

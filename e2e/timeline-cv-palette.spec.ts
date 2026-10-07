@@ -44,11 +44,15 @@ test.describe("command palette", () => {
     await expect(dialog).toBeHidden();
   });
 
-  test('"/" opens the palette, but not while typing in a field', async ({ page }) => {
+  test('Cmd/Ctrl+K opens the palette; "/" is not a shortcut (WCAG 2.1.4)', async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
     const dialog = page.getByRole("dialog", { name: "Command palette" });
     await page.keyboard.press("/");
+    await page.waitForTimeout(200);
+    await expect(dialog).toBeHidden();
+
+    await page.keyboard.press("ControlOrMeta+k");
     await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();

@@ -30,8 +30,8 @@ const at = (stage: number, id: (typeof STAGES)[number]["id"]) => stage >= STAGES
 
 function isField(el: Element | null): boolean {
   if (!el) return false;
-  const tag = el.tagName;
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (el as HTMLElement).isContentEditable;
+  if ((el as HTMLElement).isContentEditable) return true;
+  return el.closest("input, textarea, select, [contenteditable='true'], [role='textbox']") !== null;
 }
 
 /**
@@ -198,23 +198,24 @@ export function AgentDemo({ copy }: { copy: Copy }) {
     return () => window.clearTimeout(id);
   }, [stage, scenario, run, copy]);
 
-  // Keys 1/2/3: only while the demo is in view and focus is not in a field.
+  // Keys 1/2/3: only while focus is inside the demo (WCAG 2.1.4), never from a field, an IME
+  // composition or a held key. Typing a digit anywhere else on the page does nothing here.
   useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
     const onKey = (e: KeyboardEvent) => {
-      if (!inView || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
-      if (isField(document.activeElement)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat || e.isComposing) return;
+      if (isField(e.target instanceof Element ? e.target : null)) return;
       const n = Number(e.key);
       if (!Number.isInteger(n) || n < 1 || n > copy.scenarios.length) return;
       e.preventDefault();
       choose(n - 1);
       // Keep focus and the pressed state on the same control.
-      if (rootRef.current?.contains(document.activeElement)) {
-        rootRef.current.querySelectorAll<HTMLButtonElement>(".agent-demo-choice")[n - 1]?.focus();
-      }
+      root.querySelectorAll<HTMLButtonElement>(".agent-demo-choice")[n - 1]?.focus();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [inView, choose, copy.scenarios.length]);
+    root.addEventListener("keydown", onKey);
+    return () => root.removeEventListener("keydown", onKey);
+  }, [choose, copy.scenarios.length]);
 
   return (
     <div
