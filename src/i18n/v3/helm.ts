@@ -9,8 +9,8 @@ const en = {
   step: "Step",
   beats: [
     {
-      title: "An empty workspace",
-      body: "One workspace, bound to one project folder. Nothing is running yet.",
+      title: "Open a workspace",
+      body: "Point it at a project folder and pick how many agents to run. Nothing is running yet.",
     },
     {
       title: "Agents take their seats",
@@ -42,8 +42,8 @@ const th: HelmCopy = {
   step: "ขั้นที่",
   beats: [
     {
-      title: "เริ่มจาก workspace ว่าง",
-      body: "หนึ่ง workspace ผูกกับโฟลเดอร์ของโปรเจกต์เดียว ตอนนี้ยังไม่มีอะไรรันอยู่",
+      title: "เปิด workspace ใหม่",
+      body: "ชี้ไปที่โฟลเดอร์ของโปรเจกต์ แล้วเลือกว่าจะให้ agent ทำงานกี่ตัว ตอนนี้ยังไม่มีอะไรรันอยู่",
     },
     {
       title: "agent เข้าประจำที่",
