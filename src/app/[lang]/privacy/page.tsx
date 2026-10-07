@@ -70,13 +70,15 @@ export default async function PrivacyPage({ params }: PageProps<"/[lang]/privacy
       ))}
 
       {email ? (
-        <p className="mt-14 max-w-[46rem] border-t border-rule pt-8 text-ink-2 md:mt-20">
-          {nobr(before)}
-          <a className="link" href={email.href}>
-            {email.label}
-          </a>
-          {nobr(after)}
-        </p>
+        <div className="mt-14 border-t border-rule pt-8 md:mt-20">
+          <p className="max-w-[46rem] text-ink-2">
+            {nobr(before)}
+            <a className="link" href={email.href}>
+              {email.label}
+            </a>
+            {nobr(after)}
+          </p>
+        </div>
       ) : null}
     </article>
   );

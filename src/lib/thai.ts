@@ -171,6 +171,8 @@ export const COMPOUNDS = [
   "ผิดกฎ",
   "รันเทสต์",
   "ชุดตรวจความปลอดภัย",
+  "ความเป็นส่วนตัว",
+  "ไม่ใช้คุกกี้",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });

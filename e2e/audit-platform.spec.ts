@@ -135,7 +135,10 @@ test.describe("footer (TECH-01, TECH-02, TECH-06)", () => {
       const footer = page.getByRole("contentinfo");
       const commit = footer.locator('a[href*="/commit/"]');
       if ((await commit.count()) > 0) {
-        await expect(commit).toHaveAttribute("href", /^https:\/\/github\.com\/Kinzen-dev\/Kinzen\/commit\/[0-9a-f]{7,40}$/);
+        await expect(commit).toHaveAttribute(
+          "href",
+          /^https:\/\/github\.com\/Kinzen-dev\/Kinzen\/commit\/[0-9a-f]{7,40}$/,
+        );
         await expect(commit).toHaveText(/^[0-9a-f]{7}$/);
       }
       await expect(footer).not.toContainText(/local|weighs|measuring|หน้านี้หนัก|กำลังวัด|KB/);
@@ -171,6 +174,17 @@ test.describe("privacy page (TECH-06)", () => {
         expect(serious.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
       });
     }
+  }
+});
+
+test.describe("privacy page layout", () => {
+  for (const route of ["/privacy", "/th/privacy"]) {
+    test(`${route} never scrolls sideways at 320 px`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 700 });
+      await page.goto(route);
+      const m = await page.evaluate(() => ({ inner: window.innerWidth, scroll: document.documentElement.scrollWidth }));
+      expect(m.scroll).toBeLessThanOrEqual(m.inner);
+    });
   }
 });
 
@@ -222,7 +236,10 @@ test.describe("shortcuts (TECH-10)", () => {
 
 test.describe("marquee pause (TECH-11)", () => {
   const playState = (page: Page) =>
-    page.locator(".tools-marquee .marquee-track").first().evaluate((el) => getComputedStyle(el).animationPlayState);
+    page
+      .locator(".tools-marquee .marquee-track")
+      .first()
+      .evaluate((el) => getComputedStyle(el).animationPlayState);
 
   test("pause holds when focus and pointer leave, survives a reload, resumes on demand", async ({ page }) => {
     await page.goto("/");
@@ -249,7 +266,10 @@ test.describe("marquee pause (TECH-11)", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await expect(page.getByRole("button", { name: thai("หยุดภาพเคลื่อนไหว") })).toBeHidden();
     expect(
-      await page.locator(".tools-marquee .marquee-track").first().evaluate((el) => getComputedStyle(el).animationName),
+      await page
+        .locator(".tools-marquee .marquee-track")
+        .first()
+        .evaluate((el) => getComputedStyle(el).animationName),
     ).toBe("none");
   });
 });

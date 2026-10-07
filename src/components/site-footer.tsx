@@ -3,6 +3,7 @@ import type { Locale } from "@/content/schema";
 import { lastUpdated } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localePath, prefetchFor } from "@/lib/site-url";
+import { nobr } from "@/lib/thai-nodes";
 import { Colophon } from "./colophon";
 
 const BUILT = new Date(process.env.NEXT_PUBLIC_BUILD_DATE ?? "2026-10-06");
@@ -27,10 +28,13 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
         <p className="readout md:text-right">
           © {year} {dict.footer.rights}
           {locale === "th" ? " " : ". "}
-          {dict.footer.updated} <time dateTime={lastUpdated}>{monthLabel(lastUpdated, locale)}</time>
+          {dict.footer.updated}{" "}
+          <time dateTime={lastUpdated} className="whitespace-nowrap">
+            {monthLabel(lastUpdated, locale)}
+          </time>
           {locale === "th" ? " " : ". "}
           <Link href={privacy} prefetch={prefetchFor(privacy)} className="link">
-            {dict.colophon.privacy}
+            {nobr(dict.colophon.privacy)}
           </Link>
         </p>
       </div>

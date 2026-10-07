@@ -20,7 +20,10 @@ export function Colophon({ locale, labels }: { locale: Locale; labels: Dictionar
 
   return (
     <p className="readout max-w-prose">
-      {labels.built} <time dateTime={BUILT.toISOString()}>{builtLabel}</time>
+      {labels.built}{" "}
+      <time dateTime={BUILT.toISOString()} className="whitespace-nowrap">
+        {builtLabel}
+      </time>
       {COMMIT ? (
         <>
           {" "}
