@@ -262,6 +262,11 @@
     text-decoration: none;
   }
 
+  /* Selected work opens page 2 (with its label): split after Experience it would continue on a
+     page with an empty left column. Everything from here fits one A4 page in both languages. */
+  .cv-section:has(#cv-projects) {
+    break-before: page;
+  }
   .cv-section {
     grid-template-columns: 32mm 1fr;
     gap: 2mm 6mm;
