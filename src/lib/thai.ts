@@ -146,6 +146,10 @@ export const COMPOUNDS = [
   "app proxies",
   "speech-to-text",
   "Real-time",
+  "ตัวบังคับ",
+  "เท่าที่จำเป็น",
+  "เขียนไว้",
+  "ที่สำคัญ",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });
