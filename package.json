@@ -10,10 +10,11 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "check:output": "tsx scripts/check-output.ts",
+    "check:js-budget": "tsx scripts/check-js-budget.ts",
     "fx:bake": "tsx scripts/bake-wordmark.mts",
     "e2e": "playwright test",
     "format": "prettier --write .",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:output"
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:output && pnpm check:js-budget"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
