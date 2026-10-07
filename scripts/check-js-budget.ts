@@ -29,6 +29,8 @@ const BUDGETS: { group: string; match: RegExp; gzip: number }[] = [
   { group: "work index", match: /^\/(en|th)\/work$/, gzip: withHeadroom(151_372) },
   { group: "case", match: /^\/(en|th)\/work\/[^/]+$/, gzip: withHeadroom(146_500) },
   { group: "privacy", match: /^\/(en|th)\/privacy$/, gzip: withHeadroom(143_845) },
+  // Lab (preview branch wow/lab only): rough demos, loose budget.
+  { group: "lab", match: /^\/(en|th)\/lab\/[^/]+$/, gzip: 400_000 },
 ];
 
 function walk(dir: string): string[] {
