@@ -170,3 +170,10 @@ main > [data-hero]:first-child {
     }
   }
 }
+/* Short screens (phone landscape): the six links fit without an inner scroll. */
+@media (max-height: 30rem) {
+  .mobile-nav .mobile-nav-link {
+    padding-block: 0.5rem;
+    font-size: var(--text-lg);
+  }
+}

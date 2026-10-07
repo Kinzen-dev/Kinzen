@@ -35,4 +35,11 @@ describe("nobr", () => {
     // Ordinary spaces between Thai phrases still break.
     expect(flat(nobr("รับสาย ตอบแชท"))).toContain("รับสาย ตอบแชท");
   });
+
+  it("keeps a polite ending with the word before it", () => {
+    const out = nobr("ฟันคุดบวม เคี้ยวแล้วเจ็บมากค่ะ") as ReactElement<{ children: unknown[] }>;
+    const spans = (out.props.children as unknown[]).filter(isValidElement) as ReactElement<{ children: string }>[];
+    expect(spans.some((s) => s.props.children.endsWith("ค่ะ") && s.props.children.length > 3)).toBe(true);
+    expect(textOf(out)).toBe("ฟันคุดบวม เคี้ยวแล้วเจ็บมากค่ะ");
+  });
 });

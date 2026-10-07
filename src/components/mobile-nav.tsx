@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { plain } from "@/lib/thai";
+import { prefetchFor } from "@/lib/site-url";
 
 /**
  * Full-screen phone menu as a modal <dialog>: the page behind is inert (focus stays in
@@ -85,6 +86,7 @@ export function MobileNav({
                     cannot restore, so Back from a project page would leave the old page on screen. */}
                 <Link
                   href={item.href}
+                  prefetch={prefetchFor(item.href)}
                   onClick={() => ref.current?.close()}
                   className="mobile-nav-link block py-4 text-2xl font-semibold tracking-[-0.03em]"
                 >

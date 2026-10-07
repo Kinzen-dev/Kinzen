@@ -54,7 +54,7 @@ export function RevealLayer() {
           observer.unobserve(entry.target);
         }
       },
-      { rootMargin: "0px 0px -10% 0px" },
+      { rootMargin: "0px 0px -4% 0px" },
     );
     pending.forEach((el) => observer.observe(el));
 

@@ -133,6 +133,19 @@ export const COMPOUNDS = [
   "เท่าที่",
   "จำเป็น",
   "ข้อความจริง",
+  "ผู้ตรวจอิสระ",
+  "ตรวจอิสระ",
+  "ครบชุด",
+  "เข้าออฟฟิศ",
+  "หน้าเดียว",
+  "ความปลอดภัยทางคลินิก",
+  "ได้ไหม",
+  "Claude Code",
+  "EC Platform",
+  "app proxy",
+  "app proxies",
+  "speech-to-text",
+  "Real-time",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });
