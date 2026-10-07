@@ -117,6 +117,7 @@ export const COMPOUNDS = [
   "บังคับ",
   "full-stack",
   "ส่วนใหญ่",
+  "ยังไง",
   "สมมติ",
   "ชั่วโมง",
   "e-commerce",
