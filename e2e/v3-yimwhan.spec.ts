@@ -103,6 +103,44 @@ test.describe("v3 Yimwhan scene", () => {
     await expect(page.locator(":focus")).toHaveClass(/agent-demo-choice/);
   });
 
+  test("leaving the guard demo mid-run finishes it: blocked draft and safe reply", async ({ page }) => {
+    await page.goto("/");
+    const demo = page.locator("#yimwhan .agent-demo");
+    await demo.locator(".agent-demo-window").scrollIntoViewIfNeeded();
+    await demo.getByRole("group").getByRole("button").first().click();
+    // Mid-run: the draft is not blocked yet.
+    await expect(demo.locator(".agent-demo-live del")).toHaveCount(0);
+    await page.evaluate(() => scrollTo(0, 0));
+    await expect(demo.locator(".agent-demo-live del")).toHaveCount(1);
+    await expect(demo.locator(".agent-demo-live .agent-demo-reply .agent-demo-bubble")).toHaveCount(1);
+  });
+
+  // Review round 1: mockup text on phones stays readable (the compact composition, not a shrunk one).
+  for (const [w, h] of [
+    [390, 844],
+    [360, 780],
+    [844, 390],
+  ] as const) {
+    test(`mockup text is at least 10.5px at ${w}x${h}`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await page.goto("/th");
+      await scrollTrack(page, 0.95);
+      await expect(page.locator("#yimwhan .yw-stage-grid")).toHaveAttribute("data-step", "4");
+      const smallest = await page.evaluate(() => {
+        let min = Infinity;
+        const walker = document.createTreeWalker(document.querySelector("#yimwhan .yw-mock")!, NodeFilter.SHOW_TEXT);
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          const el = n.parentElement!;
+          if (!n.textContent!.trim() || !el.getClientRects().length) continue;
+          if (getComputedStyle(el).visibility === "hidden") continue;
+          min = Math.min(min, parseFloat(getComputedStyle(el).fontSize));
+        }
+        return min;
+      });
+      expect(smallest).toBeGreaterThanOrEqual(10.5);
+    });
+  }
+
   for (const theme of ["light", "dark"] as const) {
     test(`the scene is axe clean in the ${theme} theme`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
