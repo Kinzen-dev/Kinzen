@@ -1,0 +1,249 @@
+/* live-system (lab-hero-b): the architecture drawing behind and beside the copy. */
+.ls .hb-stage {
+  height: 15.5rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 64rem) {
+  .ls .hb-stage {
+    height: auto;
+    margin: 0;
+  }
+}
+.ls-host {
+  position: absolute;
+  inset: 0;
+}
+.ls-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  --deny: oklch(0.66 0.2 27);
+}
+
+/* ---------- edges: a faint wire and a slow dash flowing along it ---------- */
+.ls-edge {
+  fill: none;
+  stroke: color-mix(in oklab, var(--ink) 16%, transparent);
+  stroke-width: 1.5;
+}
+.ls-flow {
+  fill: none;
+  stroke: color-mix(in oklab, var(--gold) 38%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 14;
+  stroke-linecap: round;
+  animation: ls-flow 2.4s linear infinite;
+}
+@keyframes ls-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+/* ---------- nodes ---------- */
+.ls-node .ls-disc {
+  fill: var(--night-surface);
+  stroke: color-mix(in oklab, var(--ink) 30%, transparent);
+  stroke-width: 1.25;
+  transition:
+    stroke 400ms var(--ease-out),
+    fill 400ms var(--ease-out);
+}
+.ls-node .ls-ring {
+  fill: none;
+  stroke: color-mix(in oklab, var(--ink) 9%, transparent);
+  stroke-width: 1;
+}
+.ls-node .ls-breath {
+  fill: color-mix(in oklab, var(--gold) 9%, transparent);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ls-breath 4.2s var(--ease-in-out) infinite alternate;
+}
+@keyframes ls-breath {
+  from {
+    transform: scale(0.72);
+    opacity: 0.25;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
+.ls-node .ls-icon {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.ls-label {
+  fill: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+:lang(th) .ls-label,
+:lang(th) .ls-tag text {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+@media (min-width: 64rem) {
+  .ls-label {
+    font-size: 13px;
+  }
+}
+
+/* A packet arriving: the node's disc rims in gold for a moment. */
+.ls-node.hit .ls-disc,
+.ls-node.check .ls-disc {
+  stroke: var(--gold);
+  animation: ls-hit 600ms var(--ease-out);
+}
+.ls-node .ls-disc {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes ls-hit {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.ls-node-guard .ls-disc {
+  stroke: color-mix(in oklab, var(--gold) 55%, transparent);
+}
+/* The guard stops one: red rim, a ring bursting out, the icon blinks red. */
+.ls-node.deny .ls-disc {
+  stroke: var(--deny);
+  fill: color-mix(in oklab, var(--deny) 22%, var(--night-surface));
+  animation: ls-shake 420ms var(--ease-out);
+}
+.ls-node.deny .ls-icon {
+  stroke: var(--deny);
+}
+.ls-node.deny .ls-ring,
+.ls-node.lit .ls-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ls-burst 800ms var(--ease-out) both;
+}
+.ls-node.deny .ls-ring {
+  stroke: var(--deny);
+  stroke-width: 2;
+}
+@keyframes ls-shake {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: -3px 0;
+  }
+  55% {
+    translate: 2.5px 0;
+  }
+  80% {
+    translate: -1px 0;
+  }
+}
+@keyframes ls-burst {
+  from {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+/* A reply goes out: the node fills gold. */
+.ls-node.lit .ls-disc,
+.ls-node-reply.still .ls-disc {
+  fill: var(--gold);
+  stroke: var(--gold);
+}
+.ls-node.lit .ls-icon,
+.ls-node-reply.still .ls-icon {
+  stroke: var(--gold-ink);
+}
+.ls-node.lit .ls-ring {
+  stroke: var(--gold);
+  stroke-width: 2;
+}
+.ls-node-guard.still .ls-disc {
+  stroke: var(--deny);
+}
+.ls-node-reply .ls-disc {
+  transition-duration: 900ms;
+}
+
+/* ---------- packets ---------- */
+.ls-core {
+  fill: oklch(0.97 0.04 85);
+}
+.ls-halo {
+  fill: url(#ls-halo-g);
+}
+.ls-trail {
+  fill: var(--gold);
+}
+.ls-packet-line .ls-core {
+  fill: oklch(0.93 0.02 85);
+}
+.ls-packet-line .ls-trail {
+  fill: color-mix(in oklab, var(--gold) 55%, var(--ink));
+}
+.ls-shard {
+  fill: var(--deny);
+}
+
+/* ---------- the reason tag over the guard ---------- */
+.ls-tag text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  opacity: 0;
+}
+.ls-tag[data-kind="deny"] text {
+  fill: var(--deny);
+}
+.ls-tag[data-kind="pass"] text {
+  fill: var(--gold);
+}
+.ls-tag.on text {
+  animation: ls-tag 1.6s var(--ease-out) both;
+}
+.ls-tag.still text {
+  animation: none;
+  opacity: 1;
+}
+@keyframes ls-tag {
+  0% {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  15%,
+  70% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-flow,
+  .ls-node .ls-breath {
+    animation: none;
+  }
+}
