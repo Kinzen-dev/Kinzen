@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { plain } from "@/lib/thai";
+import { plain } from "@/lib/thai-plain";
 
 const noop = () => () => {};
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { plain } from "@/lib/thai";
+import { plain } from "@/lib/thai-plain";
 
 export function CopyEmail({
   email,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useSyncExternalStore } from "react";
-import { plain } from "@/lib/thai";
+import { plain } from "@/lib/thai-plain";
 
 type Theme = "light" | "dark";
 
