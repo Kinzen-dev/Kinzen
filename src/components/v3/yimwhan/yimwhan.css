@@ -134,6 +134,25 @@
   }
 }
 
+/* Phones in landscape: side by side, or the mockup shrinks to a stamp. */
+@media (min-width: 40rem) and (max-height: 32rem) {
+  .yw-stage {
+    padding-block: calc(var(--header-h) + 0.25rem) 0.75rem;
+  }
+  .yw-stage-grid {
+    grid-template-columns: minmax(15rem, 5fr) minmax(0, 6fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .yw-copy {
+    order: 0;
+  }
+  .yw-mock-area {
+    place-items: center;
+  }
+}
+
 /* ---------- beat copy ---------- */
 .yw-copy {
   order: 2;
@@ -214,6 +233,7 @@
   white-space: nowrap;
 }
 .yw-beat-title {
+  text-wrap: balance;
   font-size: var(--text-xl);
   line-height: var(--text-xl--line-height);
   letter-spacing: -0.03em;
@@ -732,7 +752,7 @@
   min-height: 0;
   overflow: clip;
   /* Soft top edge once the transcript starts scrolling. */
-  mask-image: linear-gradient(to bottom, transparent 0, #000 2em);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 1em);
 }
 .yw-feed {
   position: relative;

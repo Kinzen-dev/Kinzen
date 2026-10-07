@@ -339,7 +339,15 @@ function fit(list: HTMLElement | null, step: number, mode: "top" | "bottom") {
   }
   const bottom = top + last.offsetHeight + pad;
   const room = view.clientHeight;
-  const shift = mode === "top" ? Math.min(0, room - bottom) : room - bottom;
+  let shift = room - bottom;
+  if (mode === "top") {
+    // Scroll whole items off the top, never leave a sliver of one behind.
+    const need = bottom - room;
+    const padTop = parseFloat(getComputedStyle(list).paddingTop) || 0;
+    const next = [...list.children].find((el) => (el as HTMLElement).offsetTop - padTop >= need) as
+      HTMLElement | undefined;
+    shift = need <= 0 ? 0 : -((next?.offsetTop ?? need + padTop) - padTop);
+  }
   list.style.setProperty("--shift", `${Math.round(shift)}px`);
 }
 
