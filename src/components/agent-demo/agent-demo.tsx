@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Dictionary } from "@/i18n/dictionaries";
+import type { YimwhanCopy } from "@/i18n/v3/yimwhan";
 import "./agent-demo.css";
 import { nobr } from "@/lib/thai-nodes";
 
-type Copy = Dictionary["demo"];
+type Copy = YimwhanCopy["demo"];
 type Scenario = Copy["scenarios"][number];
 
 /**

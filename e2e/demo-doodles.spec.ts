@@ -39,7 +39,7 @@ test.describe("agent demo", () => {
     // Reduced motion shows the finished exchange at once: draft blocked, safe reply sent.
     const live = demo.locator(".agent-demo-live");
     await expect(live.locator("del")).toHaveText("That sounds like gingivitis, nothing serious.");
-    await expect(live.getByText("no-diagnosis", { exact: true })).toBeVisible();
+    await expect(live.getByText("no_diagnose", { exact: true })).toBeVisible();
     await expect(live.getByText(/Would you like me to book a check-up\?/)).toBeVisible();
     await expect(live.locator("li").last()).toHaveCSS("opacity", "1");
     await expect(demo.locator('[aria-live="polite"]')).toContainText("Makes a diagnosis");

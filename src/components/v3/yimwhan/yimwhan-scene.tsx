@@ -15,7 +15,7 @@ import "./yimwhan.css";
  * desk illustration, a five-beat sticky story (patient message to logged safe reply, coded
  * mockups with fictional data), then the interactive guard demo as the finale.
  */
-export function YimwhanScene({ locale, dict, v3 }: { locale: Locale; dict: Dictionary; v3: V3Copy }) {
+export function YimwhanScene({ locale, v3 }: { locale: Locale; dict: Dictionary; v3: V3Copy }) {
   const copy = v3.yimwhan;
   const project = projects.find((p) => p.id === "proj-yimwhan");
   if (!project) return null;
@@ -59,7 +59,7 @@ export function YimwhanScene({ locale, dict, v3 }: { locale: Locale; dict: Dicti
             <span className="yw-eyebrow-dot" aria-hidden="true" />
             {nobr(copy.finaleEyebrow)}
           </p>
-          <AgentDemo copy={dict.demo} />
+          <AgentDemo copy={copy.demo} />
         </section>
       </article>
     </div>
