@@ -59,9 +59,12 @@ test.describe("works ledger", () => {
     await expect(buttons.first()).toHaveAttribute("aria-expanded", "true");
   });
 
-  test("sorts by name and by year", async ({ page }) => {
+  test("sorts by name and by year", async ({ page, isMobile }) => {
     const sortBy = (label: RegExp) => page.getByRole("button", { name: label }).filter({ visible: true });
     const before = await rowNames(page);
+    // The index opens in a stated order: Year, newest first (ongoing work first).
+    expect(before).toEqual(["Helm", "Yimwhan AI", "Ronglen", "Cadence", "Visual QA harness", "AnyMind EC Platform"]);
+    if (!isMobile) await expect(page.locator("#index thead th").nth(3)).toHaveAttribute("aria-sort", "descending");
 
     await sortBy(/Sort by System/).click();
     const asc = await rowNames(page);
@@ -117,11 +120,11 @@ test.describe("works ledger", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Helm" })).toBeVisible();
     await page.getByRole("link", { name: /All work/ }).click();
     await expect(page).toHaveURL(/\/work$/);
-    // A link is a fresh visit: the ledger starts closed, in the curated order.
+    // A link is a fresh visit: the ledger starts closed, in the default order.
     await expect(page.getByRole("button", { name: "Helm", exact: true })).toHaveAttribute("aria-expanded", "false");
   });
 
-  test("a fresh visit (reload, link) starts in the curated order; Back restores sort and open row", async ({
+  test("a fresh visit (reload, link) starts in the default order; Back restores sort and open row", async ({
     page,
   }) => {
     const curated = await rowNames(page);
