@@ -119,6 +119,8 @@ export const COMPOUNDS = [
   "e-commerce",
   "ระยะ",
   "ตัวอย่าง",
+  "บทสนทนา",
+  "ข้อมูลสมมติ",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });
