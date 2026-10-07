@@ -1,7 +1,8 @@
-import type { CSSProperties } from "react";
+import { Fragment, type CSSProperties } from "react";
 import type { Locale } from "@/content/schema";
 import { LOGO_SPRITE, logos, type LogoSlug } from "@/components/tools/logos.generated";
 import { toolMark } from "@/components/tools/tool-marks";
+import { nobr } from "@/lib/thai-nodes";
 import "./mark.css";
 
 /**
@@ -124,4 +125,23 @@ export function Mark({ slug, className }: { slug: LogoSlug; className?: string }
       <use href={`${LOGO_SPRITE}#${slug}`} />
     </svg>
   );
+}
+
+/**
+ * Text that only breaks at spaces: a hyphenated word ("event-driven", "speech-to-text") never
+ * breaks at its hyphens (same rule as the live section's toolLabel). Used for names and lines.
+ */
+export function toolName(label: string) {
+  return label
+    .split(/(\S*-\S*)/)
+    .filter(Boolean)
+    .map((part, j) =>
+      part.includes("-") ? (
+        <span key={j} className="whitespace-nowrap">
+          {part}
+        </span>
+      ) : (
+        <Fragment key={j}>{nobr(part)}</Fragment>
+      ),
+    );
 }

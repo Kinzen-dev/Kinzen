@@ -145,66 +145,61 @@
   transform: scaleX(var(--tour-p, 0));
   transition: none;
 }
-.lo-row-panel {
+/* The detail block: all groups in one grid cell (its height is the tallest), crossfading. */
+.lo-detail {
   display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.55s var(--ease-out);
+  margin-top: 1rem;
 }
-.lo-row-panel > div {
-  overflow: hidden;
-  min-height: 0;
+.lo-detail-item {
+  grid-area: 1 / 1;
   opacity: 0;
-  transition: opacity 0.4s var(--ease-out);
+  translate: 0 0.375rem;
+  visibility: hidden;
+  transition:
+    opacity 0.35s var(--ease-out),
+    translate 0.5s var(--ease-out),
+    visibility 0s linear 0.35s;
 }
-.lo-row[data-active] .lo-row-panel {
-  grid-template-rows: 1fr;
-}
-.lo-row[data-active] .lo-row-panel > div {
+.lo-detail-item[data-on] {
   opacity: 1;
-  transition-delay: 0.12s;
+  translate: 0 0;
+  visibility: visible;
+  transition:
+    opacity 0.45s var(--ease-out) 0.1s,
+    translate 0.6s var(--ease-out) 0.1s,
+    visibility 0s;
 }
-.lo-row-line {
-  padding-inline-start: 2rem;
+.lo-detail-line {
   color: var(--ink);
   font-size: var(--text-sm);
 }
-.lo-row-tools {
+.lo-detail-overview {
+  color: var(--ink-3);
+}
+.lo-detail-tools {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem 0.875rem;
-  padding: 0.625rem 0 0.875rem 2rem;
+  padding-top: 0.625rem;
   list-style: none;
   font-size: var(--text-xs);
   color: var(--ink-2);
 }
-.lo-row-tools li {
+.lo-detail-tools li {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
 }
-.lo-row-tools .lt-mark {
+.lo-detail-tools .lt-mark {
   width: 0.95rem;
   height: 0.95rem;
 }
-.lo-row-tools i {
+.lo-detail-tools i {
   width: 0.35rem;
   height: 0.35rem;
   margin-inline: 0.3rem;
   border-radius: 50%;
   background: var(--ink-3);
-}
-.lo-row[data-active] .lt-mark {
-  fill: var(--brand);
-}
-.lo-overview {
-  margin-top: 0.875rem;
-  font-size: var(--text-sm);
-  color: var(--ink-3);
-  opacity: 0;
-  transition: opacity 0.4s var(--ease-out);
-}
-.lo-overview[data-on] {
-  opacity: 1;
 }
 
 /* ---------- the stage ---------- */
@@ -287,7 +282,7 @@
   height: 100%;
   border-radius: 50%;
   background: radial-gradient(
-      circle at 34% 28%,
+      circle at var(--lx, 34%) var(--ly, 28%),
       oklch(0.98 0.04 95) 0%,
       oklch(0.88 0.11 88) 16%,
       oklch(0.76 0.13 80) 42%,
@@ -485,8 +480,8 @@
   .lo-core-orb::after {
     animation: none;
   }
-  .lo-row-panel,
-  .lo-row-panel > div,
+  .lo-detail-item,
+  .lo-detail-item[data-on],
   .lt-mark,
   .lo-node {
     transition: none;

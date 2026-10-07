@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { LabProps } from "../../types";
 import { nobr } from "@/lib/thai-nodes";
-import { groups, Mark, tokens, type GroupId } from "../logo-orbit/stack";
+import { groups, Mark, tokens, toolName, type GroupId } from "../logo-orbit/stack";
 import { COPY } from "./copy";
 import "./stack-pipeline.css";
 
@@ -468,11 +468,11 @@ export default function StackPipeline({ locale }: LabProps) {
                     {String(i + 1).padStart(2, "0")}
                   </p>
                   <h3 className="sp-cap-label">{nobr(group.label)}</h3>
-                  <p className="sp-cap-line">{nobr(c.lines[group.id])}</p>
+                  <p className="sp-cap-line">{toolName(c.lines[group.id])}</p>
                   <div className="sp-names">
                     <ul>
                       {group.tools.map((t) => (
-                        <li key={t.key}>{nobr(t.label)}</li>
+                        <li key={t.key}>{toolName(t.label)}</li>
                       ))}
                     </ul>
                   </div>

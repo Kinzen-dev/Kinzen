@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import type { LabProps } from "../../types";
 import { nobr } from "@/lib/thai-nodes";
 import { COPY } from "./copy";
-import { groups, Mark, tokens, type GroupId } from "./stack";
+import { groups, Mark, tokens, toolName, type GroupId } from "./stack";
 import "./logo-orbit.css";
 
 /** Core outward: what the products are about first, the infrastructure they run on last. */
@@ -219,6 +219,9 @@ export default function LogoOrbit({ locale }: LabProps) {
       if (Math.abs(tpx - px) > 0.001 || Math.abs(tpy - py) > 0.001) settled = false;
       tilt = baseTilt + py * 0.05;
       roll = px * 0.045;
+      // The orb's lit side follows the pointer a little, as if the light source moved with it.
+      stage.style.setProperty("--lx", `${(34 + px * 9).toFixed(1)}%`);
+      stage.style.setProperty("--ly", `${(28 + py * 7).toFixed(1)}%`);
       const cr = Math.cos(roll);
       const sr = Math.sin(roll);
       const para = phone ? 4 : 12;
@@ -638,26 +641,38 @@ export default function LogoOrbit({ locale }: LabProps) {
                     <span className="lo-row-count">{nobr(c.tools(group.tools.length))}</span>
                     <span className="lo-row-bar" aria-hidden="true" />
                   </button>
-                  <div className="lo-row-panel">
-                    <div>
-                      <p className="lo-row-line">{nobr(c.lines[group.id])}</p>
-                      <ul className="lo-row-tools">
-                        {group.tools.map((t) => (
-                          <li key={t.key}>
-                            {t.mark && t.mark !== "practice" ? <Mark slug={t.mark} /> : <i aria-hidden="true" />}
-                            {nobr(t.label)}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div className="sr-only">
+                    <p>{nobr(c.lines[group.id])}</p>
+                    <ul>
+                      {group.tools.map((t) => (
+                        <li key={t.key}>{nobr(t.label)}</li>
+                      ))}
+                    </ul>
                   </div>
                 </li>
               );
             })}
           </ol>
-          <p className="lo-overview" data-on={focus < 0 || undefined} aria-hidden={focus >= 0}>
-            {nobr(c.overview(total))}
-          </p>
+          {/* One detail block under a still list (no row ever moves under the pointer): every
+              group's line and tools stacked in one cell, the active one shown. */}
+          <div className="lo-detail" aria-hidden="true">
+            <div className="lo-detail-item" data-on={focus < 0 || undefined}>
+              <p className="lo-detail-line lo-detail-overview">{nobr(c.overview(total))}</p>
+            </div>
+            {rings.map(({ group }, i) => (
+              <div key={group.id} className="lo-detail-item" data-on={focus === i || undefined}>
+                <p className="lo-detail-line">{toolName(c.lines[group.id])}</p>
+                <ul className="lo-detail-tools" data-lit={focus === i || undefined}>
+                  {group.tools.map((t) => (
+                    <li key={t.key}>
+                      {t.mark && t.mark !== "practice" ? <Mark slug={t.mark} /> : <i />}
+                      <span>{toolName(t.label)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
       </div>
