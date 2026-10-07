@@ -10,6 +10,9 @@ const en = {
   /** What he builds (content: Yimwhan, AnyMind EC Platform, Helm, Visual QA). Longest first: the
    *  first phrase is the one painted on load, and it sets the LCP size. */
   phrases: ["AI phone and LINE assistants", "Shopify platforms", "agent workspaces", "developer tools"],
+  /** Phone set (below 48rem), index-aligned with `phrases`: every phrase fits one line at 360 px,
+   *  so the cycler box is one line tall and short phrases never leave an empty band. */
+  phrasesPhone: ["AI receptionists", "Shopify platforms", "agent workspaces", "developer tools"],
 };
 export type HeroCopy = typeof en;
 const th: HeroCopy = {
@@ -22,5 +25,6 @@ const th: HeroCopy = {
     "พื้นที่ทำงานของ AI agent",
     "เครื่องมือสำหรับนักพัฒนา",
   ],
+  phrasesPhone: ["AI รับสายและตอบแชท", "แพลตฟอร์ม Shopify", "พื้นที่ทำงานของ AI agent", "เครื่องมือสำหรับนักพัฒนา"],
 };
 export const hero = { en, th };

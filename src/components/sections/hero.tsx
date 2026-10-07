@@ -69,7 +69,18 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
               lead={nobr(copy.lead)}
               word={nobr(copy.key)}
               join={copy.join}
-              phrases={copy.phrases.map((p) => nobr(p))}
+              phrases={copy.phrases.map((p, i) => {
+                const phone = copy.phrasesPhone[i] ?? p;
+                if (phone === p) return nobr(p);
+                // Both variants stay in the DOM; CSS shows one per breakpoint (display: none takes
+                // the other out of layout and of the accessibility tree), so the box never reflows.
+                return (
+                  <>
+                    <span className="kinetic-wide">{nobr(p)}</span>
+                    <span className="kinetic-phone">{nobr(phone)}</span>
+                  </>
+                );
+              })}
             />
           </div>
           <div className="self-end md:col-span-12 lg:col-span-6">
