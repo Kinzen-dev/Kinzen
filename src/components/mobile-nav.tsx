@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { navTarget } from "./nav-link";
 import { plain } from "@/lib/thai";
 import { prefetchFor } from "@/lib/site-url";
 
@@ -14,10 +16,11 @@ export function MobileNav({
   items,
   labels,
 }: {
-  items: { href: string; label: string }[];
+  items: { href: string; label: string; elsewhere?: string }[];
   labels: { open: string; close: string; nav: string };
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   useEffect(() => {
     const dialog = ref.current;
@@ -85,8 +88,8 @@ export function MobileNav({
                 {/* next/link, not <a>: a native hash navigation adds a history entry the router
                     cannot restore, so Back from a project page would leave the old page on screen. */}
                 <Link
-                  href={item.href}
-                  prefetch={prefetchFor(item.href)}
+                  href={navTarget(pathname, item.href, item.elsewhere)}
+                  prefetch={prefetchFor(navTarget(pathname, item.href, item.elsewhere))}
                   onClick={() => ref.current?.close()}
                   className="mobile-nav-link block py-4 text-2xl font-semibold tracking-[-0.03em]"
                 >

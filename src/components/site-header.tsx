@@ -20,7 +20,7 @@ export function navItems(locale: Locale, dict: Dictionary) {
   // "/#work" and "/th#work": no trailing slash on /th, which would 308 and reload the page.
   const anchor = (id: string) => (home === "/" ? `/#${id}` : `${home}#${id}`);
   return [
-    { href: anchor("work"), label: dict.nav.work },
+    { href: anchor("work"), elsewhere: localePath(locale, "/work"), label: dict.nav.work },
     { href: anchor("experience"), label: dict.nav.experience },
     { href: anchor("practice"), label: dict.nav.practice },
     { href: anchor("about"), label: dict.nav.about },
@@ -56,7 +56,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
             <ul className="flex items-center">
               {items.map((item) => (
                 <li key={item.href}>
-                  <NavLink href={item.href} className="nav-link">
+                  <NavLink href={item.href} elsewhere={item.elsewhere} className="nav-link">
                     {item.label}
                   </NavLink>
                 </li>

@@ -65,7 +65,12 @@ export function NotesBoard({
    * exact even while a note is mid-transition. A note's box at offset o = its home box + o.
    */
   const home = (el: HTMLElement) => ({ l: el.offsetLeft, t: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
-  const at = (b: ReturnType<typeof home>, o: Offset) => ({ l: b.l + o.x, t: b.t + o.y, r: b.l + o.x + b.w, b: b.t + o.y + b.h });
+  const at = (b: ReturnType<typeof home>, o: Offset) => ({
+    l: b.l + o.x,
+    t: b.t + o.y,
+    r: b.l + o.x + b.w,
+    b: b.t + o.y + b.h,
+  });
 
   /** How far the note may travel from its home slot and stay on the board. */
   const bounds = (el: HTMLElement): Bounds => {

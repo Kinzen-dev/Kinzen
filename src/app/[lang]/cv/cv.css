@@ -269,6 +269,16 @@
     padding-block: 2.5mm;
     break-inside: avoid;
   }
+  /* Rules sit under entries in print, so an entry that starts a page never opens with a stray
+     divider (review round 3). */
+  .cv-entry,
+  .cv-entry:first-child {
+    border-top: 0;
+    border-bottom: 0.2mm solid var(--rule);
+  }
+  .cv-entry:last-child {
+    border-bottom: 0;
+  }
 
   .cv-points {
     gap: 1mm;

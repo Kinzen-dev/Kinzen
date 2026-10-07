@@ -26,7 +26,9 @@
   border-radius: var(--radius-card);
   background: var(--nb-ground);
   color: var(--pastel-ink);
-  box-shadow: var(--shadow-soft), inset 0 0 0 1px var(--nb-edge);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 0 0 1px var(--nb-edge);
 }
 /* Light theme: the area pastels as they are. Dark theme: the token's own dark value read as muddy
    olive and brown on the warm ground, so each card takes a deep, clean jewel tone of the same hue
