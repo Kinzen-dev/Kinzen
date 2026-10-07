@@ -80,7 +80,17 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_DATE: new Date().toISOString(),
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Lab (preview branch wow/lab only): the speak-to-it prototype needs the microphone on
+      // /lab/play. A later rule with the same key wins.
+      {
+        source: "/:lang(th)?/lab/play",
+        headers: [
+          { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=(), interest-cohort=()" },
+        ],
+      },
+    ];
   },
   async redirects() {
     return [

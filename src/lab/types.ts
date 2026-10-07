@@ -13,5 +13,20 @@ export type LabDemo = {
   idea: string;
   /** One line: the core technique. */
   technique: string;
-  load: () => Promise<{ default: ComponentType<{ locale: Locale }> }>;
+  load: () => Promise<{ default: ComponentType<LabProps> }>;
 };
+
+/**
+ * Banner facts from site.ts (server-only), resolved by the lab page on the server and passed to
+ * every demo: demos are client components and must not import @/content.
+ */
+export type LabBanner = {
+  name: string;
+  role: string;
+  heroLine: string;
+  email: string;
+  linkedin: string;
+  cvHref: string;
+};
+
+export type LabProps = { locale: Locale; banner: LabBanner };
