@@ -149,12 +149,12 @@ test.describe("hero v3", () => {
   test("hidden phrases are fully invisible at rest, not a faint blurred copy", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
-    await page.waitForTimeout(1_000);
-    const vis = await page
-      .locator("[data-hero-kinetic] .cycler-item:not([data-on])")
-      .evaluateAll((els) => els.map((el) => getComputedStyle(el).visibility));
-    expect(vis.length).toBe(3);
-    expect(new Set(vis)).toEqual(new Set(["hidden"]));
+    // At rest (outside the 520 ms of a phrase change) every hidden phrase is visibility: hidden.
+    const vis = () =>
+      page
+        .locator("[data-hero-kinetic] .cycler-item:not([data-on])")
+        .evaluateAll((els) => els.map((el) => getComputedStyle(el).visibility));
+    await expect.poll(vis, { timeout: 8_000, intervals: [200] }).toEqual(["hidden", "hidden", "hidden"]);
   });
 
   test("the beam runs on the pill's own edge, never outside it", async ({ page }) => {
@@ -290,6 +290,43 @@ test.describe("hero v3", () => {
     });
     expect(cls, shifts?.join("\n")).toBe(0);
   });
+
+  for (const [width, height] of [
+    [844, 390],
+    [932, 430],
+  ] as const) {
+    test(`landscape phone ${width}x${height}: wordmark left, name + kinetic line + CTAs right, all in the first screen`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height });
+      for (const path of ["/", "/th"]) {
+        await page.goto(path);
+        await page.evaluate(() => document.fonts.ready);
+        const g = await page.evaluate(() => {
+          const r = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+          const ctas = [...document.querySelectorAll(".hero-cta")].map((e) => e.getBoundingClientRect());
+          const wm = r("[data-hero-wordmark]");
+          const st = r(".fx-stage");
+          return {
+            wmRight: wm.right,
+            wmBottom: wm.bottom,
+            stageBottom: st.bottom,
+            titleLeft: r(".hero-title").left,
+            kineticLeft: r("[data-hero-kinetic]").left,
+            ctaBottom: Math.max(...ctas.map((c) => c.bottom)),
+            ctaTop: Math.min(...ctas.map((c) => c.top)),
+            over: document.documentElement.scrollWidth - innerWidth,
+          };
+        });
+        expect(g.titleLeft, path).toBeGreaterThan(g.wmRight);
+        expect(g.kineticLeft, path).toBeGreaterThan(g.wmRight);
+        expect(g.ctaBottom, path).toBeLessThanOrEqual(height);
+        // The field's box covers the wordmark (it measures the DOM text inside it).
+        expect(g.stageBottom, path).toBeGreaterThan(g.wmBottom);
+        expect(g.over, path).toBeLessThanOrEqual(0);
+      }
+    });
+  }
 
   for (const width of [360, 390, 768, 1024, 1440, 1920]) {
     test(`no horizontal overflow at ${width}px (EN and TH)`, async ({ page }) => {

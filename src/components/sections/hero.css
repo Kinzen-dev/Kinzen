@@ -286,3 +286,73 @@
     transform: none !important;
   }
 }
+
+/* ------------------------------------------------------------------
+   Landscape phones (844x390, 932x430): two columns in the first screen.
+   The wordmark (smaller, 30svh) holds the left; name, kinetic line and
+   CTAs stack on the right under the header; the hero line and the chips
+   follow full width below. The content wrappers become display: contents
+   so their children take grid cells of the shell directly (plain divs,
+   no semantics lost). The particle field measures the DOM wordmark
+   wherever it lands; the stage box (fx.css) still covers it.
+   ------------------------------------------------------------------ */
+@media (orientation: landscape) and (max-height: 32rem) {
+  [data-hero] > .shell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: clamp(1.5rem, 4vw, 3rem);
+  }
+  /* The field's box covers the whole first screen here, so the wordmark (vertically centred on
+     the right column) and its dust halo are never clipped by the portrait-sized band. */
+  [data-hero] .fx-stage {
+    height: 100svh;
+  }
+  [data-hero] .hero-wordmark {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: center;
+    padding-top: 0;
+    font-size: min(calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24), 30svh) !important;
+  }
+  [data-hero] :is(.hero-body, .hero-head, .hero-act) {
+    display: contents;
+  }
+  [data-hero] .hero-title {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    margin-top: 0.75rem;
+  }
+  [data-hero] .hero-kinetic {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0.5rem;
+    font-size: clamp(1.5rem, 7.5svh, 2.25rem);
+  }
+  [data-hero] .hero-ctas {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: 1rem;
+    align-self: start;
+  }
+  [data-hero] .hero-line {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    max-width: none;
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  [data-hero] .hero-facts {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    margin-block: 1.5rem 3rem;
+  }
+  /* The short (phone) phrases: each fits one line in the right column. */
+  .kinetic-wide {
+    display: none;
+  }
+  .kinetic-phone {
+    display: inline;
+  }
+}
