@@ -119,7 +119,7 @@ export async function createGold3d(gpu: Gpu, geom0: Geom): Promise<GpuScene> {
     uDissolve: { value: 0 },
     uMelt: { value: 0 },
     uGlow: { value: 0 },
-    uHot: { value: goldColor.clone().lerp(new THREE.Color(1, 0.72, 0.3), 0.3) },
+    uHot: { value: goldColor.clone().lerp(new THREE.Color(1, 0.62, 0.18), 0.35) },
   };
   const material = new THREE.MeshPhysicalMaterial({
     color: goldColor.clone().lerp(new THREE.Color(1, 0.8, 0.45), 0.25),
@@ -172,7 +172,7 @@ kzRim = max(kzRim, (1.0 - smoothstep(0.0, 0.05, kzLine - vKz.y)) * step(0.001, u
       )
       .replace(
         "#include <emissivemap_fragment>",
-        "#include <emissivemap_fragment>\ntotalEmissiveRadiance += uHot * (kzRim * 1.5 + uGlow);",
+        "#include <emissivemap_fragment>\ntotalEmissiveRadiance += uHot * (kzRim * 0.9 + uGlow);",
       );
   };
   const group = new THREE.Group();
@@ -244,7 +244,7 @@ kzRim = max(kzRim, (1.0 - smoothstep(0.0, 0.05, kzLine - vKz.y)) * step(0.001, u
     const to: SceneId | null = role.mode === "out" ? role.to : null;
     uniforms.uReveal.value = role.mode === "in" ? smooth(ramp(into, 0.04, 0.88)) : 1;
     // Fresh from the dust the metal glows, then cools.
-    uniforms.uGlow.value = 0.45 * (1 - smooth(ramp(t, 0.8, 2.6)));
+    uniforms.uGlow.value = 0.2 * (1 - smooth(ramp(t, 0.8, 2.4)));
     uniforms.uMelt.value = to === "fluid" ? smooth(ramp(out, 0, 0.92)) : 0;
     uniforms.uDissolve.value = to && to !== "fluid" ? smooth(out) : 0;
 

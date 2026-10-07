@@ -1,4 +1,14 @@
-import { QUAD_VS, breathe, clearTarget, freeTarget, programAsync, rawState, target, texture, type Target } from "../kit/gl";
+import {
+  QUAD_VS,
+  breathe,
+  clearTarget,
+  freeTarget,
+  programAsync,
+  rawState,
+  target,
+  texture,
+  type Target,
+} from "../kit/gl";
 import { wordmarkBitmap } from "../kit/glyphs";
 import type { FrameCtx, Geom, Gpu, GpuScene, SceneId } from "../types";
 
@@ -143,13 +153,16 @@ const DISPLAY = `${FRAG_HEAD}
 uniform sampler2D uDye, uVel;
 uniform vec2 uTexel;
 uniform vec3 uGround, uGold;
-uniform float uTime, uOver, uFade;
+uniform float uTime, uOver, uFade, uMosaic;
+uniform vec2 uCell;
 void main(){
-  float d = texture(uDye, vUv).x;
-  float L = texture(uDye, vUv - vec2(uTexel.x, 0.0)).x;
-  float R = texture(uDye, vUv + vec2(uTexel.x, 0.0)).x;
-  float T = texture(uDye, vUv + vec2(0.0, uTexel.y)).x;
-  float B = texture(uDye, vUv - vec2(0.0, uTexel.y)).x;
+  // Settling into keys: the ink snaps to a grid of key-sized cells.
+  vec2 uv = mix(vUv, (floor(vUv / uCell) + 0.5) * uCell, uMosaic);
+  float d = texture(uDye, uv).x;
+  float L = texture(uDye, uv - vec2(uTexel.x, 0.0)).x;
+  float R = texture(uDye, uv + vec2(uTexel.x, 0.0)).x;
+  float T = texture(uDye, uv + vec2(0.0, uTexel.y)).x;
+  float B = texture(uDye, uv - vec2(0.0, uTexel.y)).x;
   // Ink as a thin liquid surface: its gradient is the normal, lit from the upper left.
   vec3 n = normalize(vec3(L - R, B - T, 0.16));
   vec3 l = normalize(vec3(-0.45, 0.6, 0.66));
@@ -540,6 +553,10 @@ export async function createFluid(gpu: Gpu, geom0: Geom): Promise<GpuScene> {
     // start dark), its ink holds while it settles and then fades.
     gl.uniform1f(P.show.u.uOver, role.mode === "out" ? 1 : 0);
     gl.uniform1f(P.show.u.uFade, 1 - ramp(out, 0.35, 1));
+    // Into the keys: cells of the keycap pitch (58 across the name on a laptop, 34 on a phone).
+    const pitch = s.w / (geom.phone ? 34 : 58);
+    gl.uniform2f(P.show.u.uCell, pitch / geom.cssW, pitch / geom.cssH);
+    gl.uniform1f(P.show.u.uMosaic, role.mode === "out" && role.to === "keycaps" ? smooth(ramp(out, 0.05, 0.4)) : 0);
     if (role.mode === "out") {
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);

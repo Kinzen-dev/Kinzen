@@ -107,6 +107,8 @@ type Debug = {
   renderer: string;
   gpu: boolean;
   running: boolean;
+  /** The wordmark ink box the GPU scenes draw into (stage layout px). */
+  slot: { x: number; y: number; w: number; h: number };
 };
 
 export function startSequence(els: StageEls): () => void {
@@ -147,6 +149,7 @@ export function startSequence(els: StageEls): () => void {
     renderer: "",
     gpu: false,
     running: false,
+    slot: { x: 0, y: 0, w: 0, h: 0 },
   };
   (window as Window & { __kzStage?: Debug }).__kzStage = debug;
 
@@ -193,6 +196,7 @@ export function startSequence(els: StageEls): () => void {
       Math.abs(slot.y - geom.slot.y) > 0.5 ||
       Math.abs(slot.w - geom.slot.w) > 0.5;
     Object.assign(geom, { cssW, cssH, slot });
+    debug.slot = { ...slot };
     return changed;
   };
   /** Canvas pixels for the scenes on stage: the lower quality of the two during a hand-over. */

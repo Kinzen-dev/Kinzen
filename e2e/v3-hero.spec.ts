@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 // Ticket v3-03: the hero (kinetic line, pill CTAs, glass chips, scale-down exit) and the numbers
-// strip. The particle field itself is covered by hero-fx.spec.ts.
+// strip. The stage (ink desk and the gold KINZEN scenes) is covered by hero-fx and v4-hero specs.
 
 const hero = (page: Page) => page.locator("[data-hero]");
 const scaleOf = (page: Page) =>
@@ -106,7 +106,13 @@ test.describe("hero v3", () => {
     for (let i = 0; i < 4; i++) {
       const c = await chips.nth(i).evaluate((el) => {
         const cs = getComputedStyle(el);
-        return [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft, parseFloat(cs.borderTopLeftRadius)] as const;
+        return [
+          cs.paddingTop,
+          cs.paddingRight,
+          cs.paddingBottom,
+          cs.paddingLeft,
+          parseFloat(cs.borderTopLeftRadius),
+        ] as const;
       });
       expect(new Set(c.slice(0, 4)).size).toBe(1);
       expect(c[4]).toBeGreaterThan(8);
@@ -219,42 +225,39 @@ test.describe("hero v3", () => {
     await expect.poll(() => scaleOf(page)).toBe(1);
   });
 
-  test("a resize while the hero is scaled refits the field onto the same layout box as at the top", async ({
+  test("a resize while the hero is scaled refits the stage onto the same layout box as at the top", async ({
     page,
   }) => {
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
     await page.goto("/");
-    await expect(hero(page)).toHaveAttribute("data-fx-tier", /^(off|still|lite|full)$/, { timeout: 10_000 });
-    test.skip((await hero(page).getAttribute("data-fx-tier")) === "off", "field is off on this renderer");
-    await expect(page.locator("html")).toHaveAttribute("data-fx", "on", { timeout: 10_000 });
-    type Ink = { x: number; y: number; w: number; h: number; src: string };
-    const ink = () => page.evaluate(() => (window as Window & { __kzFx?: { ink: Ink | null } }).__kzFx?.ink ?? null);
-    const refitDone = () => expect(page.locator(".fx-stage[data-refit]")).toHaveCount(0, { timeout: 5_000 });
+    type Slot = { x: number; y: number; w: number; h: number };
+    const slot = () =>
+      page.evaluate(
+        () => (window as Window & { __kzStage?: { slot: Slot; running: boolean } }).__kzStage?.slot ?? null,
+      );
+    await expect
+      .poll(() => page.evaluate(() => !!(window as Window & { __kzStage?: unknown }).__kzStage), { timeout: 10_000 })
+      .toBe(true);
     const size = page.viewportSize()!;
     const b = { width: size.width - 40, height: size.height };
 
-    // Scaled (mid exit), then resize: the field measures while the hero is transformed.
+    // Scaled (mid exit), then resize: the stage measures while the hero is transformed.
     await scrollTo(page, Math.round((await pastHero(page)) * 0.6));
     await expect.poll(() => scaleOf(page)).toBeLessThan(0.99);
     await page.setViewportSize(b);
     await page.waitForTimeout(400);
-    await refitDone();
-    const scaled = await ink();
+    const scaled = await slot();
 
     // The same size at the top (scale 1).
     await scrollTo(page, 0);
     await expect.poll(() => scaleOf(page)).toBe(1);
     await page.setViewportSize(size);
     await page.waitForTimeout(400);
-    await refitDone();
     await page.setViewportSize(b);
     await page.waitForTimeout(400);
-    await refitDone();
-    const top = await ink();
+    const top = await slot();
 
-    expect(scaled?.src).toBe(top?.src);
     for (const k of ["x", "y", "w", "h"] as const) expect(Math.abs(scaled![k] - top![k])).toBeLessThan(1);
-    await expect(page.locator("html")).toHaveAttribute("data-fx", "on");
   });
 
   test("no layout shift on load or while the phrases cycle", async ({ page }) => {
@@ -321,7 +324,7 @@ test.describe("hero v3", () => {
         expect(g.titleLeft, path).toBeGreaterThan(g.wmRight);
         expect(g.kineticLeft, path).toBeGreaterThan(g.wmRight);
         expect(g.ctaBottom, path).toBeLessThanOrEqual(height);
-        // The field's box covers the wordmark (it measures the DOM text inside it).
+        // The stage box covers the wordmark (the scenes measure the DOM wordmark inside it).
         expect(g.stageBottom, path).toBeGreaterThan(g.wmBottom);
         expect(g.over, path).toBeLessThanOrEqual(0);
       }
