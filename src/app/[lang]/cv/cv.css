@@ -146,7 +146,8 @@
   content: "";
   position: absolute;
   left: 0;
-  top: 0.8em;
+  /* Mid first line in either language and line-height (screen, print, Thai). */
+  top: calc(0.5lh + 0.05em);
   width: 0.625rem;
   height: 1px;
   background: var(--ink-3);
