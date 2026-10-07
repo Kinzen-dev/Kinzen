@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Dictionary } from "@/i18n/dictionaries";
+import type { YimwhanCopy } from "@/i18n/v3/yimwhan";
 import "./agent-demo.css";
 import { nobr } from "@/lib/thai-nodes";
 
-type Copy = Dictionary["demo"];
+type Copy = YimwhanCopy["demo"];
 type Scenario = Copy["scenarios"][number];
 
 /**
@@ -85,13 +85,19 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       setPaused(false);
       started.current = true; // and the first-view replay must never override their pick
       play(next);
-      // Phones: the window sits under the choices; bring it into view so the run is seen.
+      // Phones: the window sits under the choices. Scroll only as much as the run needs (its lower
+      // part is where the verdict and the safe reply land), and never so far that the choices leave
+      // the screen: at most until they reach the header.
       const win = rootRef.current?.querySelector<HTMLElement>(".agent-demo-window");
-      if (win) {
+      const picks = rootRef.current?.querySelector<HTMLElement>(".agent-demo-choices");
+      if (win && picks) {
+        const top = 80; // the floating header pill
         const r = win.getBoundingClientRect();
-        if (r.top > window.innerHeight * 0.6 || r.bottom < 0) {
-          const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-          win.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+        const room = picks.getBoundingClientRect().top - top - 8;
+        const dy = Math.max(0, Math.min(r.bottom - window.innerHeight + 12, room));
+        if (dy > 4) {
+          const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          window.scrollBy({ top: dy, behavior: still ? "auto" : "smooth" });
         }
       }
     },
@@ -139,6 +145,17 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       return () => cancelAnimationFrame(id);
     }
   }, [active, play]);
+
+  // Leaving the viewport mid-run: finish the run at once (blocked draft, safe reply sent), so the
+  // last state a visitor saw is never an unsafe draft that has not been blocked yet.
+  useEffect(() => {
+    if (inView || stage === FINAL || !started.current) return;
+    const id = requestAnimationFrame(() => {
+      setStage(FINAL);
+      setVeil(null);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [inView, stage]);
 
   // Reduced motion: whatever is selected shows its final transcript, no veil.
   useEffect(() => {
@@ -203,25 +220,35 @@ export function AgentDemo({ copy }: { copy: Copy }) {
     <div
       ref={rootRef}
       data-active={active}
-      className="agent-demo grid gap-8 border-t border-rule pt-8 md:grid-cols-12 md:grid-rows-[auto_1fr] md:gap-x-6"
+      className="agent-demo grid gap-8 md:grid-cols-12 md:grid-rows-[auto_1fr] md:gap-x-8"
     >
-      <div className="order-1 grid content-start gap-3 md:order-none md:col-span-4 md:row-start-1">
-        <h3 className="text-xl tracking-[-0.03em]">{nobr(copy.title)}</h3>
+      <div className="order-1 grid content-start gap-3 md:order-none md:col-span-5 md:row-start-1 xl:col-span-4">
+        <h4 id="agent-demo-heading" className="text-xl tracking-[-0.03em] text-balance">
+          {nobr(copy.title)}
+        </h4>
         <p className="max-w-[44ch] text-ink-2">{nobr(copy.intro)}</p>
       </div>
 
       <figure
-        className="agent-demo-window order-3 m-0 border border-rule-strong bg-surface md:order-none md:col-span-8 md:col-start-5 md:row-span-2 md:row-start-1"
+        className="agent-demo-window order-3 m-0 overflow-clip rounded-card border border-rule bg-surface shadow-lift md:order-none md:col-span-7 md:col-start-6 md:row-span-2 md:row-start-1 xl:col-span-8 xl:col-start-5"
         aria-labelledby="agent-demo-title"
       >
-        <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-rule px-4 py-3">
-          <span id="agent-demo-title" className="text-sm font-semibold whitespace-nowrap">
+        <figcaption className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-rule px-[var(--inset-card)] py-3">
+          <span id="agent-demo-title" className="flex items-center gap-3 text-sm font-semibold whitespace-nowrap">
+            <span className="agent-demo-lights" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
             {nobr(copy.windowTitle)}
           </span>
-          <span className="text-xs text-ink-2">{nobr(copy.label)}</span>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {!autoplay && !reduced ? <span className="agent-demo-paused">{nobr(copy.paused)}</span> : null}
+            <span className="text-xs text-ink-2">{nobr(copy.label)}</span>
+          </span>
         </figcaption>
 
-        <div className="agent-demo-stack p-4 md:p-6">
+        <div className="agent-demo-stack p-[var(--inset-card)]">
           {/* Sizers: every finished exchange, invisible, so the window keeps one height. */}
           {copy.scenarios.map((s) => (
             <div key={`sizer-${s.rule}`} className="agent-demo-sizer" aria-hidden="true">
@@ -240,7 +267,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       </figure>
 
       {/* Phones: choices sit above the window, so a tap changes what is just below it. */}
-      <div className="order-2 grid content-start gap-5 md:order-none md:col-span-4 md:row-start-2">
+      <div className="order-2 grid content-start gap-5 md:order-none md:col-span-5 md:row-start-2 xl:col-span-4">
         <div role="group" aria-labelledby="agent-demo-choose" className="grid gap-2">
           <p id="agent-demo-choose" className="flex items-baseline justify-between gap-4 text-sm text-ink-2">
             <span>{nobr(copy.choose)}</span>
@@ -248,21 +275,27 @@ export function AgentDemo({ copy }: { copy: Copy }) {
               {nobr(copy.keyHint)}
             </span>
           </p>
-          {copy.scenarios.map((s, i) => (
-            <button
-              key={s.rule}
-              type="button"
-              aria-pressed={scenario === i}
-              aria-keyshortcuts={String(i + 1)}
-              onClick={() => choose(i)}
-              className="agent-demo-choice grid min-h-11 grid-cols-[auto_1fr] items-baseline gap-3 border border-rule px-4 py-3 text-left transition-colors duration-200 hover:border-rule-strong"
-            >
-              <kbd className="readout" aria-hidden="true">
-                {i + 1}
-              </kbd>
-              <span>{s.choice}</span>
-            </button>
-          ))}
+          <div className="agent-demo-choices grid grid-cols-3 gap-2 md:grid-cols-1">
+            {copy.scenarios.map((s, i) => (
+              <button
+                key={s.rule}
+                type="button"
+                aria-pressed={scenario === i}
+                aria-keyshortcuts={String(i + 1)}
+                onClick={() => choose(i)}
+                className={`agent-demo-choice grid min-h-11 grid-cols-[auto_1fr] items-baseline gap-2 rounded-[var(--radius-sm)] border border-rule bg-surface px-3 py-3 text-left transition-colors duration-200 hover:border-rule-strong md:gap-3 md:px-4 ${scenario === i ? "beam" : ""}`}
+              >
+                <kbd className="readout" aria-hidden="true">
+                  {i + 1}
+                </kbd>
+                {/* Phones: a compact row of three, the short label shown; the full one stays the name. */}
+                <span className="agent-demo-short" aria-hidden="true">
+                  {nobr(s.short)}
+                </span>
+                <span className="agent-demo-long text-balance">{nobr(s.choice)}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {!reduced ? (
@@ -279,7 +312,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
                 setAutoplay(false);
               }
             }}
-            className="inline-flex h-10 w-fit items-center border border-rule px-4 text-sm text-ink-2 transition-colors duration-200 hover:border-rule-strong hover:text-ink"
+            className="inline-flex h-10 w-fit items-center rounded-full border border-rule px-[var(--inset-pill)] text-sm text-ink-2 transition-colors duration-200 hover:border-rule-strong hover:text-ink"
           >
             {paused || !autoplay ? copy.play : copy.pause}
           </button>
@@ -296,10 +329,10 @@ export function AgentDemo({ copy }: { copy: Copy }) {
 function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage: number; still?: boolean }) {
   const blocked = at(stage, "blocked");
   return (
-    <ol className={`agent-demo-transcript grid content-start gap-4 ${still ? "is-still" : ""}`}>
+    <ol className={`agent-demo-transcript flex flex-col gap-4 ${still ? "is-still" : ""}`}>
       <li className="agent-demo-msg agent-demo-patient">
         <span className="agent-demo-who">{nobr(copy.patient)}</span>
-        <p className="agent-demo-bubble border border-rule">{nobr(s.patient)}</p>
+        <p className="agent-demo-bubble bg-pastel-ai text-pastel-ink">{nobr(s.patient)}</p>
       </li>
 
       {at(stage, "typing") && !at(stage, "draft") ? <Typing label={copy.typing} /> : null}
@@ -320,14 +353,17 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
           </p>
           {at(stage, "checking") ? (
             <p className="agent-demo-guard" data-state={blocked ? "blocked" : "checking"}>
-              <span className="agent-demo-dot" aria-hidden="true" />
               {blocked ? (
-                <span>
-                  <strong className="font-semibold">{nobr(copy.blocked)}:</strong> {s.ruleLabel}{" "}
-                  <code className="readout">{s.rule}</code>
-                </span>
+                <>
+                  <strong className="agent-demo-verdict">{nobr(copy.blocked)}</strong>
+                  <span>{nobr(s.ruleLabel)}</span>
+                  <code className="readout agent-demo-code">{s.rule}</code>
+                </>
               ) : (
-                <span>{nobr(copy.checking)}</span>
+                <>
+                  <span className="agent-demo-dot" aria-hidden="true" />
+                  <span>{nobr(copy.checking)}</span>
+                </>
               )}
             </p>
           ) : null}
@@ -346,11 +382,13 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
       {/* What is still to come, drawn faintly so the reserved space reads as a pipeline, not a gap. */}
       {!still && !at(stage, "checking") ? (
         <li className="agent-demo-ghost" aria-hidden="true">
+          <span className="agent-demo-wait" />
           {nobr(copy.ghostGuard)}
         </li>
       ) : null}
       {!still && !at(stage, "typing-reply") ? (
         <li className="agent-demo-ghost agent-demo-reply" aria-hidden="true">
+          <span className="agent-demo-wait" />
           {nobr(copy.ghostReply)}
         </li>
       ) : null}

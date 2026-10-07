@@ -98,12 +98,28 @@ html[data-fx="on"] [data-hero-wordmark] {
   html:has([data-hero-wordmark]):not([data-hero-passed]) :is([data-masthead-mark], [data-masthead-name]) {
     opacity: 0;
   }
+  /* v3 glass pill: the brand slot is closed (no gap) until the hero wordmark has passed. */
+  /* Closed = also hidden (not just clipped): its box would otherwise overlap the controls for
+     hit testing and the 24px target-size rule. At the top of home there is no "home" to go to. */
+  html:has([data-hero-wordmark]):not([data-hero-passed]) .nav-brand {
+    grid-template-columns: 0fr;
+  }
+  html:has([data-hero-wordmark]):not([data-hero-passed]) .nav-brand-link {
+    visibility: hidden;
+    /* Hide only after the slot has closed; showing again is immediate. */
+    transition: visibility 0s linear var(--dur-3);
+  }
   /* A keyboard user on the home link always sees what it is. */
   html:has([data-hero-wordmark]):not([data-hero-passed])
     a:focus-visible
     :is([data-masthead-mark], [data-masthead-name]) {
     opacity: 1;
     transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-brand {
+    transition: none;
   }
 }
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {

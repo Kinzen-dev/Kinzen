@@ -24,32 +24,55 @@ export default function GlobalNotFound() {
   const en = getDictionary("en").notFound;
   const th = getDictionary("th").notFound;
 
+  // Thai first on /th URLs: decided before paint, so the order never jumps.
+  const order = `if(/^\\/th(\\/|$)/.test(location.pathname)){document.documentElement.lang="th";document.documentElement.dataset.nf="th"}`;
+
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable} ${notoThai.variable}`} suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <script dangerouslySetInnerHTML={{ __html: order }} />
       </head>
       <body>
-        <main className="shell grid min-h-dvh content-center gap-10 py-24">
-          <Doodle name="lost-robot" className="h-28 text-ink md:h-36" />
-          <p className="readout">404</p>
-          <div className="grid gap-4">
-            <h1 className="max-w-[16ch] text-2xl tracking-[-0.035em]">{en.title}</h1>
-            <p className="max-w-[46ch] text-ink-2">{en.body}</p>
-            <p>
-              <Link href="/" className="link text-lg">
-                {en.home}
-              </Link>
-            </p>
-          </div>
-          <div lang="th" className="grid gap-3 border-t border-rule pt-8">
-            <p className="text-xl font-semibold">{th.title}</p>
-            <p className="max-w-[46ch] text-ink-2">{th.body}</p>
-            <p>
-              <Link href="/th" className="link">
-                {th.home}
-              </Link>
-            </p>
+        <header className="shell flex items-center justify-between pt-6">
+          <Link href="/" className="font-semibold tracking-[-0.02em]">
+            KINZEN
+          </Link>
+          <span className="readout">404</span>
+        </header>
+        <main className="shell grid min-h-[calc(100dvh-5rem)] content-center py-16">
+          <div className="nf-card grid items-center gap-10 rounded-card border border-rule bg-surface p-[calc(2*var(--inset-card))] shadow-soft md:grid-cols-12 md:gap-6">
+            <div className="grid place-items-center md:col-span-4">
+              <div className="grid size-40 place-items-center rounded-full bg-pastel-tools md:size-56">
+                <Doodle name="lost-robot" className="h-24 text-pastel-ink md:h-32" />
+              </div>
+            </div>
+            <div className="nf-copy grid gap-8 md:col-span-7 md:col-start-6">
+              <div lang="en" className="nf-en grid gap-3">
+                <h1 className="max-w-[16ch] text-2xl tracking-[-0.035em]">{en.title}</h1>
+                <p className="max-w-[46ch] text-ink-2">{en.body}</p>
+                <p>
+                  <Link
+                    href="/"
+                    className="inline-flex h-11 items-center rounded-full bg-gold px-[var(--inset-btn)] text-sm font-semibold text-gold-ink"
+                  >
+                    {en.home}
+                  </Link>
+                </p>
+              </div>
+              <div lang="th" className="nf-th grid gap-3 border-t border-rule pt-8">
+                <p className="max-w-[16ch] text-2xl font-semibold tracking-[-0.02em]">{th.title}</p>
+                <p className="max-w-[46ch] text-ink-2">{th.body}</p>
+                <p>
+                  <Link
+                    href="/th"
+                    className="inline-flex h-11 items-center rounded-full border border-rule-strong px-[var(--inset-btn)] text-sm font-medium"
+                  >
+                    {th.home}
+                  </Link>
+                </p>
+              </div>
+            </div>
           </div>
         </main>
       </body>

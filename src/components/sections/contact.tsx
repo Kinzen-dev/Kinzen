@@ -1,14 +1,24 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { availability, links, t } from "@/content";
-import { localePath } from "@/lib/site-url";
+import { localePath, prefetchFor } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { BangkokTime, OffsetFromVisitor } from "../clock";
+import { getV3, type V3Copy } from "@/i18n/v3";
+import { Art } from "../art/art";
+import { doodleArt } from "../doodles/art.generated";
+import { BangkokClockDigits, OffsetFromVisitor } from "../clock";
 import { CopyEmail } from "../copy-email";
+import { KineticHeading } from "./kinetic-heading";
+import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
+import "./contact.css";
 
-export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionary; art?: ReactNode }) {
+/**
+ * Contact (v3): the closing dark scene. Kinetic heading, the address as a big link, a primary
+ * CTA with the border beam, King's portrait throwing a paper plane whose dashed path draws
+ * itself to Bangkok as the card scrolls in, the two ways to work together and the Bangkok clock as odometer digits.
+ */
+export function Contact({ locale, dict, v3 = getV3(locale) }: { locale: Locale; dict: Dictionary; v3?: V3Copy }) {
   const email = links.find((l) => l.kind === "email");
   const others = links.filter((l) => l.kind !== "email");
   const doors = availability
@@ -17,88 +27,121 @@ export function Contact({ locale, dict, art }: { locale: Locale; dict: Dictionar
         { key: "studio", label: dict.contact.studio, text: availability.studio },
       ].filter((d) => d.text)
     : [];
+  const heading = v3.contact.heading;
 
   return (
     <section id="contact" aria-labelledby="contact-title" className="shell pt-24 md:pt-32">
-      <div className="grid gap-10 border-t border-rule-strong pt-8 md:grid-cols-12 md:gap-6">
-        <div className="md:col-span-6">
-          {art ? <div className="mb-6 size-20 text-ink">{art}</div> : null}
-          <h2 id="contact-title" className="max-w-[18ch] text-2xl tracking-[-0.045em]">
-            {nobr(dict.contact.heading)}
-          </h2>
-          <p className="mt-5 max-w-[46ch] text-lg text-ink-2">{nobr(dict.contact.body)}</p>
+      <div data-scene="dark" className="scene-card contact-card">
+        <div className="contact-grid">
+          <div className="contact-main">
+            <p className="contact-eyebrow readout">
+              <span aria-hidden="true" className="contact-live" />
+              {nobr(dict.sections.contact)}
+            </p>
+            <KineticHeading
+              id="contact-title"
+              units={heading.units.map((u) => nobr(u))}
+              keyIndex={heading.key}
+              joiner={heading.joiner}
+              className="contact-heading"
+            />
+            <p className="mt-6 max-w-[44ch] text-lg text-ink-2">{nobr(dict.contact.body)}</p>
 
-          {email ? (
-            <div className="mt-10 grid gap-5">
-              <a
-                href={email.href}
-                className="link w-fit text-xl font-semibold tracking-[-0.03em] break-all decoration-2"
-              >
-                {email.label}
-              </a>
-              <div className="flex flex-wrap items-center gap-3">
-                <CopyEmail
-                  email={email.label}
+            {email ? (
+              <div className="mt-10 grid gap-6">
+                <a href={email.href} className="contact-email link">
+                  {email.label}
+                </a>
+                <div className="contact-actions">
+                  <a href={email.href} className="contact-cta beam">
+                    {nobr(dict.contact.emailMe)}
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 20 20"
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                    >
+                      <path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                  <CopyEmail
+                    email={email.label}
+                    labels={{
+                      copy: dict.contact.copyEmail,
+                      copied: dict.contact.copied,
+                      failed: dict.contact.copyFailed,
+                    }}
+                  />
+                  <Link
+                    href={localePath(locale, "/cv")}
+                    prefetch={prefetchFor(localePath(locale, "/cv"))}
+                    className="contact-btn"
+                  >
+                    {nobr(dict.hero.ctaCv)}
+                  </Link>
+                  {others.map((l) => (
+                    <a key={l.href} href={l.href} rel="me noopener" target="_blank" className="contact-btn">
+                      {l.label}
+                      <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="contact-side">
+            {/* King throws the plane; its dashed flight draws itself on scroll to the temple (Bangkok). */}
+            <div aria-hidden="true" className="contact-plane">
+              <Art name="portrait-paper-plane" className="contact-plane-figure" />
+              <svg viewBox="0 0 320 170" fill="none" focusable="false" className="contact-plane-trail">
+                <path
+                  d="M2 12C46 0 88 10 112 40c20 26 14 56-8 56s-24-30 0-40c40-16 110-6 148 40"
+                  pathLength={100}
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeDasharray="2.6 2.4"
+                  strokeLinecap="round"
+                />
+                <g transform="translate(236 80) scale(0.29)">
+                  <path fill="currentColor" d={doodleArt["temple-sun"].d} />
+                </g>
+              </svg>
+            </div>
+
+            <dl className="contact-clock">
+              <dt className="readout">{nobr(dict.contact.localTime)}</dt>
+              <dd className="contact-clock-digits">
+                <BangkokClockDigits locale={locale} />
+              </dd>
+              <dd className="mt-2 text-sm text-ink-2">
+                {nobr(dict.facts.bangkokTime)} ·{" "}
+                <OffsetFromVisitor
                   labels={{
-                    copy: dict.contact.copyEmail,
-                    copied: dict.contact.copied,
-                    failed: dict.contact.copyFailed,
+                    ahead: plain(dict.facts.aheadOfYou),
+                    behind: plain(dict.facts.behindYou),
+                    same: plain(dict.facts.sameAsYou),
+                    hours: dict.facts.hours,
                   }}
                 />
-                <Link
-                  href={localePath(locale, "/cv")}
-                  className="inline-flex h-11 items-center border border-rule-strong px-4 text-sm font-medium transition-colors duration-200 hover:bg-ink hover:text-ground"
-                >
-                  {nobr(dict.hero.ctaCv)}
-                </Link>
-                {others.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    rel="me noopener"
-                    target="_blank"
-                    className="inline-flex h-11 items-center border border-rule px-4 text-sm font-medium transition-colors duration-200 hover:border-rule-strong"
-                  >
-                    {l.label}
-                    <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </div>
+              </dd>
+            </dl>
+          </div>
 
-        {/* Right column: how to work together, then the local clock (no empty quadrant). */}
-        <div className="grid content-start gap-10 md:col-span-6 md:col-start-7">
           {doors.length > 0 ? (
-            <dl className="grid border-t border-l border-rule">
+            <dl className="contact-doors">
               {doors.map((d) => (
-                <div key={d.key} className="border-r border-b border-rule p-5">
+                <div key={d.key} className="contact-door">
                   <dt className="readout">
-                    {nobr(dict.contact.openTo)}: {d.label}
+                    {nobr(dict.contact.openTo)}: {nobr(d.label)}
                   </dt>
                   <dd className="mt-2 text-ink-2">{nobr(t(d.text!, locale))}</dd>
                 </div>
               ))}
             </dl>
           ) : null}
-
-          <dl>
-            <dt className="readout">{nobr(dict.contact.localTime)}</dt>
-            <dd className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
-              <BangkokTime locale={locale} />
-            </dd>
-            <dd className="mt-1 text-sm text-ink-2">
-              <OffsetFromVisitor
-                labels={{
-                  ahead: dict.facts.aheadOfYou,
-                  behind: dict.facts.behindYou,
-                  same: dict.facts.sameAsYou,
-                  hours: dict.facts.hours,
-                }}
-              />
-            </dd>
-          </dl>
         </div>
       </div>
     </section>

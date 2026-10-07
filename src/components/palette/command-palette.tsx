@@ -238,7 +238,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
         aria-haspopup="dialog"
         aria-label={plain(labels.trigger)}
         title={plain(`${labels.trigger} (Ctrl K, /)`)}
-        className="flex h-9 items-center gap-2 px-2 text-ink-2 transition-colors duration-200 hover:text-ink"
+        className="flex h-9 items-center gap-2 rounded-full px-2.5 text-ink-2 transition-colors duration-200 hover:bg-[color-mix(in_oklab,var(--ink)_7%,transparent)] hover:text-ink"
       >
         <svg
           viewBox="0 0 24 24"
@@ -259,6 +259,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
       <dialog
         ref={dialogRef}
         className="palette"
+        data-scene="page"
         aria-label={plain(labels.title)}
         onClick={(e) => {
           if (e.target === e.currentTarget) close();

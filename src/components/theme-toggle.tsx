@@ -66,7 +66,7 @@ export function ThemeToggle({ labels }: { labels: { toggle: string; light: strin
       onClick={toggle}
       aria-label={plain(theme ? label : labels.toggle)}
       title={plain(theme ? label : labels.toggle)}
-      className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors duration-200 hover:text-ink"
+      className="nav-icon grid text-ink-2 transition-colors duration-200 hover:text-ink"
     >
       <svg
         viewBox="0 0 24 24"

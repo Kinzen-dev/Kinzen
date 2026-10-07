@@ -1,0 +1,358 @@
+/* ------------------------------------------------------------------
+   Hero v3 (ticket v3-03): kinetic line, pill CTAs, glass fact chips and
+   the scale-down exit. The scene itself is data-scene="dark" (both themes).
+   ------------------------------------------------------------------ */
+
+/* Scale-down exit (hero-scale.tsx): GSAP scrubs `scale` and --hero-r. Registered and not
+   inherited, so a scroll frame restyles the hero box alone, never its subtree. */
+@property --hero-r {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+[data-hero] {
+  transform-origin: 50% 100%;
+  border-radius: calc(var(--radius-card) * var(--hero-r));
+}
+
+/* While motion is on, the scene is its own layer from the start: the scale-down only moves a
+   finished texture (no re-raster per frame, no half-updated tiles at the edges). */
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  [data-hero] {
+    will-change: transform;
+  }
+}
+
+/* ---------- name + kinetic line ---------- */
+.hero-title {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.75rem;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+.hero-kinetic {
+  margin-top: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
+  /* 30px on a 390 phone (every phrase in two lines at most), 72px at 1440. */
+  font-size: clamp(1.75rem, 0.9rem + 4vw, 4.625rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+:lang(th) .hero-kinetic {
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+}
+/* "I build" is one bright phrase in the same ink and weight as the rest of the line ("I" alone in a
+   grey read as a text cursor); the gold sweep on "build" and the underline on the phrase carry
+   the emphasis. */
+.hero-kinetic-lead {
+  color: var(--ink);
+}
+/* The Thai face arrives late (preload off), and "ผมสร้าง" at display size changes width when it
+   swaps in, which slid the whole phrase box sideways (CLS 0.0115 on /th at 1440). Its width is
+   pinned to its Noto Sans Thai measure (3.293em at every size), so the swap moves nothing. */
+:lang(th) .hero-kinetic-lead {
+  display: inline-block;
+  width: 3.3em;
+  white-space: nowrap;
+}
+.hero-kinetic-phrase {
+  --u-gap: 0.2em;
+  position: relative;
+  display: inline-block;
+  padding-bottom: var(--u-gap);
+  color: var(--ink);
+}
+/* Hidden phrases are fully gone at rest, not just at opacity 0: a blurred, composited copy could
+   still leave a faint smear beside the headline. visibility flips after the 520 ms fade-out and
+   at once when a phrase comes in. */
+.hero-kinetic .cycler-item:not([data-on]) {
+  visibility: hidden;
+  transition:
+    opacity 520ms var(--ease-out),
+    filter 520ms var(--ease-out),
+    translate 520ms var(--ease-out),
+    visibility 0s linear 520ms;
+}
+.hero-kinetic .cycler-item[data-on] {
+  visibility: visible;
+}
+
+/* Phone phrase set (one line each at 360 px) below 48rem, the full set above. */
+.kinetic-phone {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .kinetic-wide {
+    display: none;
+  }
+  .kinetic-phone {
+    display: inline;
+  }
+}
+/* Placed and stretched by hero-kinetic.tsx (transforms only) under the visible phrase's last line. */
+.hero-underline {
+  position: absolute;
+  left: 0;
+  top: calc(100% - var(--u-gap) - 0.36em);
+  width: 10em;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+.hero-underline .draw-path {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* ---------- CTAs: pills, 44px, symmetric --inset-btn ---------- */
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+.hero-cta:focus-visible {
+  border-radius: 999px;
+}
+.hero-cta-primary {
+  background: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 600;
+}
+.hero-cta-primary:hover {
+  background: color-mix(in oklab, var(--gold) 86%, white);
+}
+/* The beam runs ON the pill's edge: a pale glint travelling round the gold border (gold light on
+   a gold fill would vanish, and a ring floating outside read as a misregistered print). Above the
+   fill (z-index 0 inside the pill's isolation), never over the label (the ring is 1.5px). */
+.hero-cta-primary.beam::before {
+  inset: 0;
+  z-index: 0;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--beam),
+    transparent 0 60%,
+    color-mix(in oklab, white 40%, transparent) 78%,
+    color-mix(in oklab, white 92%, var(--gold)) 88%,
+    transparent 93%
+  );
+}
+.hero-cta-primary > * {
+  position: relative;
+  z-index: 1;
+}
+.hero-cta-primary:focus-visible {
+  outline-offset: 3px;
+}
+.hero-cta-primary svg {
+  transition: translate var(--dur-2) var(--ease-out);
+}
+.hero-cta-primary:hover svg {
+  translate: 3px 0;
+}
+.hero-cta-ghost {
+  border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
+  background: color-mix(in oklab, var(--ink) 5%, transparent);
+  color: var(--ink);
+}
+.hero-cta-ghost:hover {
+  border-color: color-mix(in oklab, var(--ink) 40%, transparent);
+  background: color-mix(in oklab, var(--ink) 11%, transparent);
+}
+
+/* Phones: the primary action takes the full row, the two secondaries share the next one (no
+   orphaned pill at 360 in Thai). From 48rem: one row. */
+.hero-ctas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.hero-ctas .hero-cta {
+  justify-content: center;
+}
+.hero-ctas .hero-cta-primary {
+  grid-column: 1 / -1;
+}
+@media (min-width: 48rem) {
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+/* ---------- glass fact chips ---------- */
+.hero-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+@media (min-width: 48rem) {
+  .hero-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.hero-chip {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: var(--inset-card);
+  border-radius: var(--radius-card);
+  border: 1px solid color-mix(in oklab, var(--ink) 12%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--ink) 9%, transparent),
+    color-mix(in oklab, var(--ink) 2.5%, transparent)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--ink) 12%, transparent),
+    0 16px 32px -24px oklch(0 0 0 / 0.7);
+}
+.hero-chip dt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  /* Two label lines reserved: a label that rewraps when the Thai font swaps in never changes the
+     chip's height (that moved the whole row, CLS 0.017 on /th). */
+  min-height: 2.8em;
+}
+.hero-live {
+  margin-top: 0.35em;
+}
+.hero-chip dd {
+  font-size: var(--text-base);
+  text-wrap: balance;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  /* Whole words only: a chip is sized so its longest word fits (min content width about 120px at
+     every breakpoint); never break inside one. */
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+}
+/* Live state (gold's job): the Bangkok clock is running. */
+.hero-live {
+  position: relative;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 999px;
+  background: var(--gold);
+  flex: none;
+}
+.hero-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--gold);
+  animation: hero-live 2.4s var(--ease-out) infinite;
+}
+@keyframes hero-live {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* A still ring 5px out would read as a focus ring: the filled pill is enough on its own. */
+  .hero-cta-primary.beam::before {
+    display: none;
+  }
+  .hero-live::after {
+    animation: none;
+    opacity: 0;
+  }
+  [data-hero] {
+    transform: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Landscape phones (844x390, 932x430): two columns in the first screen.
+   The wordmark (smaller, 30svh) holds the left; name, kinetic line and
+   CTAs stack on the right under the header; the hero line and the chips
+   follow full width below. The content wrappers become display: contents
+   so their children take grid cells of the shell directly (plain divs,
+   no semantics lost). The particle field measures the DOM wordmark
+   wherever it lands; the stage box (fx.css) still covers it.
+   ------------------------------------------------------------------ */
+@media (orientation: landscape) and (max-height: 32rem) {
+  [data-hero] > .shell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: clamp(1.5rem, 4vw, 3rem);
+  }
+  /* The field's box covers the whole first screen here, so the wordmark (vertically centred on
+     the right column) and its dust halo are never clipped by the portrait-sized band. */
+  [data-hero] .fx-stage {
+    height: 100svh;
+  }
+  [data-hero] .hero-wordmark {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: center;
+    padding-top: 0;
+    font-size: min(calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24), 30svh) !important;
+  }
+  [data-hero] :is(.hero-body, .hero-head, .hero-act) {
+    display: contents;
+  }
+  [data-hero] .hero-title {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    margin-top: 0.75rem;
+  }
+  [data-hero] .hero-kinetic {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0.5rem;
+    font-size: clamp(1.5rem, 7.5svh, 2.25rem);
+  }
+  [data-hero] .hero-ctas {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: 1rem;
+    align-self: start;
+  }
+  [data-hero] .hero-line {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    max-width: none;
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  [data-hero] .hero-facts {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    margin-block: 1.5rem 3rem;
+  }
+  /* The short (phone) phrases: each fits one line in the right column. */
+  .kinetic-wide {
+    display: none;
+  }
+  .kinetic-phone {
+    display: inline;
+  }
+}

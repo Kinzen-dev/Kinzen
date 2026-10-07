@@ -6,7 +6,7 @@ const PHONE = /\+66|0\d{2}[- ]?\d{3}[- ]?\d{4}/;
 
 async function openPalette(page: Page) {
   await page
-    .getByRole("button", { name: new RegExp(`^Open command palette$|${thai("เปิดเมนูคำสั่ง").source}`) })
+    .getByRole("button", { name: new RegExp(`^Open command palette$|${thai("เปิดช่องค้นหา").source}`) })
     .click();
   const dialog = page.getByRole("dialog", { name: new RegExp(`^Command palette$|${thai("เมนูคำสั่ง").source}`) });
   await expect(dialog).toBeVisible();

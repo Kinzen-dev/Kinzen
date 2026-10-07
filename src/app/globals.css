@@ -5,9 +5,14 @@
    action. Everything else is ink on ground. Light and dark come from
    light-dark(); <html data-theme> pins a choice, otherwise the system wins.
    ------------------------------------------------------------------ */
+/* Tokens are declared on every scene too: Chrome resolves light-dark() inside a custom property
+   where it is DECLARED, so a dark scene must re-declare them to get its own (dark) values. */
 :root {
   color-scheme: light dark;
-
+  --page-scheme: light dark;
+}
+:root,
+[data-scene] {
   --ground: light-dark(oklch(0.965 0.009 85), oklch(0.165 0.006 70));
   --surface: light-dark(oklch(0.985 0.006 85), oklch(0.2 0.006 70));
   --ink: light-dark(oklch(0.2 0.012 65), oklch(0.94 0.012 85));
@@ -27,16 +32,80 @@
   --dur-3: 480ms;
   --dur-4: 700ms;
 
+  /* v3: area pastels (card grounds, sticky notes, the shapes behind line art). light-dark()
+     resolves per element, so inside a dark scene they take their dark values. */
+  --pastel-ai: light-dark(oklch(0.93 0.045 165), oklch(0.33 0.045 165));
+  --pastel-commerce: light-dark(oklch(0.92 0.05 55), oklch(0.34 0.05 50));
+  --pastel-tools: light-dark(oklch(0.92 0.04 295), oklch(0.32 0.045 295));
+  --pastel-games: light-dark(oklch(0.95 0.065 95), oklch(0.36 0.055 90));
+  --pastel-ink: light-dark(oklch(0.24 0.015 65), oklch(0.95 0.012 85));
+
+  /* v3 shape and depth. */
+  --radius-card: clamp(1rem, 0.6rem + 1.2vw, 1.5rem);
+  --radius-sm: 0.75rem;
+  --shadow-soft:
+    0 1px 2px light-dark(oklch(0.2 0.02 65 / 0.05), oklch(0 0 0 / 0.3)),
+    0 12px 32px -12px light-dark(oklch(0.2 0.02 65 / 0.18), oklch(0 0 0 / 0.55));
+  --shadow-lift:
+    0 2px 4px light-dark(oklch(0.2 0.02 65 / 0.06), oklch(0 0 0 / 0.35)),
+    0 24px 48px -16px light-dark(oklch(0.2 0.02 65 / 0.22), oklch(0 0 0 / 0.6));
+
+  /* v3 spacing system (padding audit, 2026-10-07): one inset scale, symmetric on every box.
+     Any element with a visible tint or border keeps at least --inset-card on all four sides. */
+  --inset-card: 1rem; /* 24px from 48rem, below */
+  --inset-compact: 1rem;
+  --inset-btn: 1.25rem; /* buttons: 20px inline, 44px high */
+  --inset-pill: 1rem; /* pills: 16px inline, 36px high */
+
   --gutter: clamp(1rem, 0.6rem + 1.8vw, 2.5rem);
   --measure: 66ch;
-  --header-h: 3.5rem;
+  /* Floating pill: 12px top + 48px pill + 12px breathing room. */
+  --header-h: 4.5rem;
+}
+
+/* Dark scenes (Fastwork-style light/dark alternation, decision D6). Registered as <color> so
+   light-dark() resolves once at :root, by THEME, and the scene inherits the resolved colour:
+   navy ink in the light theme, a deeper navy in the dark theme (still distinct from its ground). */
+@property --night {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #12151f;
+}
+@property --night-surface {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1a1e2b;
+}
+@property --night-rule {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2a2f40;
+}
+:root {
+  --night: light-dark(oklch(0.215 0.035 266), oklch(0.125 0.022 266));
+  --night-surface: light-dark(oklch(0.255 0.035 266), oklch(0.165 0.024 266));
+  --night-rule: light-dark(oklch(0.34 0.03 266), oklch(0.26 0.024 266));
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
+  --page-scheme: light;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --page-scheme: dark;
+}
+/* Overlays that live inside a scene (header dialogs) still follow the PAGE theme. */
+[data-scene="page"] {
+  color-scheme: var(--page-scheme);
+}
+
+@media (min-width: 48rem) {
+  /* Scenes re-declare the tokens, so the desktop bump must reach them too. */
+  :root,
+  [data-scene] {
+    --inset-card: 1.5rem;
+  }
 }
 
 @theme inline {
@@ -49,6 +118,17 @@
   --color-rule-strong: var(--rule-strong);
   --color-gold: var(--gold);
   --color-gold-ink: var(--gold-ink);
+  --color-night: var(--night);
+  --color-pastel: var(--pastel);
+  --color-pastel-ai: var(--pastel-ai);
+  --color-pastel-commerce: var(--pastel-commerce);
+  --color-pastel-tools: var(--pastel-tools);
+  --color-pastel-games: var(--pastel-games);
+  --color-pastel-ink: var(--pastel-ink);
+  --radius-card: var(--radius-card);
+  --radius-sm: var(--radius-sm);
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
 
   --font-sans: var(--font-geist), var(--font-thai), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), var(--font-thai), ui-monospace, "SF Mono", Menlo, monospace;
@@ -98,6 +178,10 @@
      jumped the page ~460px every time anything in the header was clicked. */
   [id] {
     scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  /* Keyboard focus scrolls the focused control clear of the fixed pill too (and off the bottom). */
+  :where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])) {
+    scroll-margin-block: calc(var(--header-h) + 0.75rem) 1rem;
   }
 
   :lang(th) body {
@@ -228,7 +312,9 @@ html:has(dialog[open]) {
   animation: 160ms var(--ease-out) both vt-fade-out;
 }
 /* The header is the same on both pages: keep it still instead of cross-fading it. */
-[data-site-header] {
+/* On the pill, not the header: view-transition-name makes an element a backdrop root, which
+   left the pill's backdrop-filter blurring only the transparent header (no glass at all). */
+[data-site-header] .nav-pill {
   view-transition-name: site-header;
 }
 ::view-transition-group(site-header) {
@@ -289,4 +375,138 @@ html:has(dialog[open]) {
 /* Known Thai compounds stay on one line (lib/thai-nodes.ts). */
 .nobr {
   white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------
+   v3 scenes. <Scene tone="dark"> = a navy scene in both themes: every
+   token inside resolves with color-scheme dark, ground/surface/rule move
+   to the registered night colours. Light scenes are the page itself.
+   ------------------------------------------------------------------ */
+[data-scene="dark"] {
+  color-scheme: dark;
+  --ground: var(--night);
+  --surface: var(--night-surface);
+  --rule: var(--night-rule);
+  background: var(--ground);
+  color: var(--ink);
+}
+/* A scene card (rounded block that sits inside the page gutter). */
+.scene-card {
+  border-radius: var(--radius-card);
+  overflow: clip;
+}
+
+/* Paper grain over the whole page: very low contrast, never intercepts input. */
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 160px 160px;
+}
+@media print {
+  .grain {
+    display: none;
+  }
+}
+
+/* Pastel grounds by work area. */
+.pastel-ai {
+  --pastel: var(--pastel-ai);
+}
+.pastel-commerce {
+  --pastel: var(--pastel-commerce);
+}
+.pastel-tools {
+  --pastel: var(--pastel-tools);
+}
+.pastel-games {
+  --pastel: var(--pastel-games);
+}
+
+/* Gradient sweep: a slow gold light passing over one key word (loop). */
+.sweep {
+  background: linear-gradient(100deg, var(--ink) 0%, var(--ink) 38%, var(--gold) 50%, var(--ink) 62%, var(--ink) 100%) 0
+    0 / 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: sweep 4s var(--ease-in-out) infinite;
+}
+@keyframes sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* Border beam: a short gold light running round a CTA's border (loop). */
+@property --beam {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.beam {
+  position: relative;
+  isolation: isolate;
+}
+.beam::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--beam), transparent 0 70%, var(--gold) 85%, transparent 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: beam 3.2s linear infinite;
+}
+@keyframes beam {
+  to {
+    --beam: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep {
+    animation: none;
+    background: none;
+    color: var(--ink);
+  }
+  .beam::before {
+    animation: none;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+}
+
+/* 404: Thai first on /th URLs (html[data-nf="th"] is set before paint). */
+html[data-nf="th"] .nf-copy .nf-th {
+  order: -1;
+  border-top: 0;
+  padding-top: 0;
+}
+html[data-nf="th"] .nf-copy .nf-en {
+  border-top: 1px solid var(--rule);
+  padding-top: 2rem;
+}
+html[data-nf="th"] .nf-th a {
+  background: var(--gold);
+  color: var(--gold-ink);
+  border-color: transparent;
+  font-weight: 600;
+}
+html[data-nf="th"] .nf-en a {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  font-weight: 500;
 }

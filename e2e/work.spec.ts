@@ -2,8 +2,8 @@ import { thai } from "./thai";
 import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const rowButtons = (page: Page) => page.locator("#work tbody tr.ledger-row:not([data-filtered]) th button");
-const rowNames = (page: Page) => page.locator("#work tbody tr.ledger-row th button").allInnerTexts();
+const rowButtons = (page: Page) => page.locator("#index tbody tr.ledger-row:not([data-filtered]) th button");
+const rowNames = (page: Page) => page.locator("#index tbody tr.ledger-row th button").allInnerTexts();
 
 async function seriousViolations(page: Page) {
   // Entrance transitions fade text in; axe measuring a half-faded row reads low contrast.
@@ -20,10 +20,11 @@ async function seriousViolations(page: Page) {
     .map((v) => `${v.id}: ${v.nodes.length}`);
 }
 
+// The ledger lives on the /work index since v3 (the home page shows cards instead).
 test.describe("works ledger", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-    await page.locator("#work").scrollIntoViewIfNeeded();
+    await page.goto("/work");
+    await page.locator("#index").scrollIntoViewIfNeeded();
   });
 
   test("arrows move between rows, Enter opens in place, Esc closes", async ({ page }) => {
@@ -32,7 +33,7 @@ test.describe("works ledger", () => {
     expect(count).toBeGreaterThan(2);
 
     // Every visible row is reachable with Tab (arrows are a shortcut, not the only way).
-    await expect(page.locator('#work tbody th button[tabindex="0"]')).toHaveCount(count);
+    await expect(page.locator('#index tbody th button[tabindex="0"]')).toHaveCount(count);
 
     await buttons.first().focus();
     await page.keyboard.press("ArrowDown");
@@ -45,7 +46,7 @@ test.describe("works ledger", () => {
 
     await page.keyboard.press("Enter");
     await expect(buttons.first()).toHaveAttribute("aria-expanded", "true");
-    const panel = page.locator("#work .ledger-panel");
+    const panel = page.locator("#index .ledger-panel");
     await expect(panel).toBeVisible();
     await expect(panel.getByRole("link", { name: /Open project page/ })).toBeVisible();
 
@@ -58,9 +59,12 @@ test.describe("works ledger", () => {
     await expect(buttons.first()).toHaveAttribute("aria-expanded", "true");
   });
 
-  test("sorts by name and by year", async ({ page }) => {
+  test("sorts by name and by year", async ({ page, isMobile }) => {
     const sortBy = (label: RegExp) => page.getByRole("button", { name: label }).filter({ visible: true });
     const before = await rowNames(page);
+    // The index opens in a stated order: Year, newest first (ongoing work first).
+    expect(before).toEqual(["Helm", "Yimwhan AI", "Ronglen", "Cadence", "Visual QA harness", "AnyMind EC Platform"]);
+    if (!isMobile) await expect(page.locator("#index thead th").nth(3)).toHaveAttribute("aria-sort", "descending");
 
     await sortBy(/Sort by System/).click();
     const asc = await rowNames(page);
@@ -69,25 +73,25 @@ test.describe("works ledger", () => {
     expect(await rowNames(page)).toEqual([...asc].reverse());
 
     await sortBy(/Sort by Year/).click();
-    const byYear = await page.locator("#work tbody tr.ledger-row").evaluateAll((rows) => rows.length);
+    const byYear = await page.locator("#index tbody tr.ledger-row").evaluateAll((rows) => rows.length);
     expect(byYear).toBe(before.length);
   });
 
   test("area filters remove filtered rows from view and restore them", async ({ page }) => {
-    const table = page.locator("#work table");
+    const table = page.locator("#index table");
     const height = (await table.boundingBox())!.height;
-    const total = await page.locator("#work tbody tr.ledger-row").count();
+    const total = await page.locator("#index tbody tr.ledger-row").count();
 
     const filter = page.getByRole("button", { name: /^Developer tools/ });
     await filter.click();
     await expect(filter).toHaveAttribute("aria-pressed", "true");
-    await expect(page.locator("#work tbody tr.ledger-row")).toHaveCount(total);
+    await expect(page.locator("#index tbody tr.ledger-row")).toHaveCount(total);
     const shown = await rowButtons(page).count();
     expect(shown).toBeLessThan(total);
-    await expect(page.locator("#work tbody tr.ledger-row[data-filtered]")).toHaveCount(total - shown);
+    await expect(page.locator("#index tbody tr.ledger-row[data-filtered]")).toHaveCount(total - shown);
     // Filtered rows leave the layout entirely: no blank gaps where they were.
     expect((await table.boundingBox())!.height).toBeLessThan(height);
-    for (const row of await page.locator("#work tbody tr.ledger-row[data-filtered]").all()) {
+    for (const row of await page.locator("#index tbody tr.ledger-row[data-filtered]").all()) {
       await expect(row).toBeHidden();
     }
 
@@ -96,8 +100,8 @@ test.describe("works ledger", () => {
   });
 
   test("an opened row shows outcomes, the plate and the project link", async ({ page }) => {
-    await page.getByRole("button", { name: "Yimwhan AI" }).click();
-    const panel = page.locator("#work .ledger-panel");
+    await page.getByRole("button", { name: "Yimwhan AI", exact: true }).click();
+    const panel = page.locator("#index .ledger-panel");
     await expect(panel.getByText("Outcomes")).toBeVisible();
     await expect(panel.getByRole("img", { name: /KZ-01/ })).toBeAttached();
     await expect(panel.getByRole("link", { name: /Open project page/ })).toHaveAttribute("href", "/work/yimwhan-ai");
@@ -109,14 +113,92 @@ test.describe("works ledger", () => {
     await expect(panel).toHaveCount(0);
   });
 
-  test("Open project page navigates and the back link returns", async ({ page }) => {
-    await page.getByRole("button", { name: "Helm" }).click();
+  test("Open project page navigates and the back link returns to /work", async ({ page }) => {
+    await page.getByRole("button", { name: "Helm", exact: true }).click();
     await page.getByRole("link", { name: /Open project page/ }).click();
     await expect(page).toHaveURL(/\/work\/helm$/);
     await expect(page.getByRole("heading", { level: 1, name: "Helm" })).toBeVisible();
     await page.getByRole("link", { name: /All work/ }).click();
-    await expect(page).toHaveURL(/\/#work$/);
-    await expect(page.getByRole("button", { name: "Helm" })).toBeVisible();
+    await expect(page).toHaveURL(/\/work$/);
+    // A link is a fresh visit: the ledger starts closed, in the default order.
+    await expect(page.getByRole("button", { name: "Helm", exact: true })).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("a fresh visit (reload, link) starts in the default order; Back restores sort and open row", async ({
+    page,
+  }) => {
+    const curated = await rowNames(page);
+    await page
+      .getByRole("button", { name: /Sort by System/ })
+      .filter({ visible: true })
+      .click();
+    const sorted = await rowNames(page);
+    expect(sorted).not.toEqual(curated);
+    await page.getByRole("button", { name: "Helm", exact: true }).click();
+
+    // Reload = fresh visit.
+    await page.reload();
+    await expect.poll(() => rowNames(page)).toEqual(curated);
+    await expect(page.locator('#index [aria-expanded="true"]')).toHaveCount(0);
+
+    // Back/Forward = history traversal: the sorted order and the open row come back.
+    await page
+      .getByRole("button", { name: /Sort by System/ })
+      .filter({ visible: true })
+      .click();
+    await page.getByRole("button", { name: "Helm", exact: true }).click();
+    await page.getByRole("link", { name: /Open project page/ }).click();
+    await expect(page).toHaveURL(/\/work\/helm$/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/work$/);
+    await expect.poll(() => rowNames(page)).toEqual(sorted);
+    await expect(page.getByRole("button", { name: "Helm", exact: true })).toHaveAttribute("aria-expanded", "true");
+  });
+
+  test("Back from a project page restores the open row and the scroll position", async ({ page }) => {
+    await page.getByRole("button", { name: "Helm", exact: true }).click();
+    const y = await page.evaluate(() => window.scrollY);
+    expect(y).toBeGreaterThan(300);
+    await page.getByRole("link", { name: /Open project page/ }).click();
+    await expect(page).toHaveURL(/\/work\/helm$/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/work$/);
+    await expect(page.getByRole("button", { name: "Helm", exact: true })).toHaveAttribute("aria-expanded", "true");
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(y - 200);
+  });
+
+  test("an opened row is one tinted card with the same inset on both sides", async ({ page }) => {
+    await rowButtons(page).first().click();
+    const m = await page.evaluate(() => {
+      const row = document.querySelector("#index tr.ledger-row[data-open]")!;
+      const cells = [...row.children].filter((c) => c.getBoundingClientRect().width > 0);
+      const left = cells[0].getBoundingClientRect().left;
+      const right = cells[cells.length - 1].getBoundingClientRect().right;
+      const start = row.querySelector(".ledger-icon, .ledger-name")!.getBoundingClientRect().left;
+      const end = row.querySelector(".ledger-toggle")!.getBoundingClientRect().right;
+      const td = document.querySelector("#index .ledger-panel-row > td")!.getBoundingClientRect();
+      const panel = document.querySelector("#index .ledger-panel")!.getBoundingClientRect();
+      const heading = document.querySelector("#index-title")!.getBoundingClientRect().left;
+      const toolbar = document.querySelector("#index .ledger-toolbar")!.getBoundingClientRect();
+      const table = document.querySelector("#index table")!.getBoundingClientRect();
+      return {
+        tintOnGutter: [left - heading, toolbar.right - right],
+        tableOnGutter: [table.left - heading, toolbar.right - table.right],
+        rowL: start - left,
+        rowR: right - end,
+        panelL: panel.left - td.left,
+        panelR: td.right - panel.right,
+        edges: [td.left - left, right - td.right],
+      };
+    });
+    expect(m.rowL).toBeGreaterThanOrEqual(16);
+    expect(Math.abs(m.rowL - m.rowR)).toBeLessThanOrEqual(1);
+    expect(Math.abs(m.panelL - m.rowL)).toBeLessThanOrEqual(1);
+    expect(Math.abs(m.panelR - m.rowR)).toBeLessThanOrEqual(1);
+    expect(m.edges.map(Math.round)).toEqual([0, 0]);
+    // Rules and tints run exactly gutter to gutter (aligned with the heading); the inset is inside.
+    expect(m.tintOnGutter.map(Math.round)).toEqual([0, 0]);
+    expect(m.tableOnGutter.map(Math.round)).toEqual([0, 0]);
   });
 });
 

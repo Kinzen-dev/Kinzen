@@ -1,8 +1,34 @@
-/* "Code over prompts" demo: a real-DOM clinic inbox. Tokens only. */
+/* "Code over prompts" demo: a real-DOM clinic inbox. Tokens only. v3: rounded window,
+   pastel bubbles, a gold beam running round the chosen message. */
 
+/* The chosen message: a complete gold border, with the beam light running round it. */
 .agent-demo-choice[aria-pressed="true"] {
-  border-color: var(--rule-strong);
-  box-shadow: inset 3px 0 0 var(--ink);
+  border-color: color-mix(in oklch, var(--gold) 55%, transparent);
+  background: color-mix(in oklch, var(--gold) 9%, var(--surface));
+}
+
+.agent-demo-paused {
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--gold);
+  background: color-mix(in oklch, var(--gold) 14%, transparent);
+  white-space: nowrap;
+}
+.agent-demo-choice[aria-pressed="true"] .readout {
+  color: var(--gold);
+}
+
+.agent-demo-lights {
+  display: inline-flex;
+  gap: 0.375rem;
+}
+.agent-demo-lights i {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--rule);
 }
 
 @media (hover: none) {
@@ -43,7 +69,9 @@
   }
 }
 
+/* Fills the window (the sizers set its height), so the slots below can take the spare room. */
 .agent-demo-transcript {
+  min-height: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -57,7 +85,7 @@
 }
 .agent-demo-draft,
 .agent-demo-reply {
-  justify-self: end;
+  align-self: flex-end;
   justify-items: end;
 }
 
@@ -72,7 +100,14 @@
   /* No one-word last line ("ดีคะ" alone) in short chat bubbles. */
   text-wrap: pretty;
   padding: 0.625rem 0.875rem;
-  border-radius: 2px;
+  border-radius: 1rem;
+}
+.agent-demo-patient .agent-demo-bubble {
+  border-end-start-radius: 0.3rem;
+}
+.agent-demo-draft .agent-demo-bubble,
+.agent-demo-reply .agent-demo-bubble {
+  border-end-end-radius: 0.3rem;
 }
 
 .agent-demo-transcript:not(.is-still) > li {
@@ -96,34 +131,51 @@
 .agent-demo-draft[data-blocked] .agent-demo-bubble {
   color: var(--ink-2);
 }
+/* Blocked span: dimmed, a red wash and a red rule UNDER the text. Never a strike line through it:
+   that runs through Thai vowel marks and makes them unreadable. */
 .agent-demo-flag {
-  color: var(--ink);
-  background: var(--rule);
-  text-decoration-line: line-through;
-  text-decoration-thickness: 2px;
-  text-decoration-color: var(--ink);
+  --demo-red: oklch(0.72 0.17 25);
+  color: var(--ink-2);
+  background: color-mix(in oklch, var(--demo-red) 16%, transparent);
+  text-decoration: underline 2px var(--demo-red);
+  text-underline-offset: 0.42em;
+  text-decoration-skip-ink: none;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   padding-inline: 0.15em;
+  border-radius: 0.2em;
 }
 
+/* The verdict: a red "Blocked" pill, the rule in words, its id; whole pieces wrap, never words
+   stranded across lines. */
 .agent-demo-guard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
   margin: 0;
   font-size: var(--text-sm);
   line-height: 1.5;
-  text-align: right;
 }
-.agent-demo-guard .readout {
+.agent-demo-verdict {
+  padding: 0.0625rem 0.625rem;
+  border-radius: 999px;
+  font-weight: 600;
+  color: oklch(0.2 0.04 25);
+  background: oklch(0.72 0.17 25);
+}
+.agent-demo-code {
+  padding: 0.0625rem 0.5rem;
+  border-radius: 0.375rem;
+  background: color-mix(in oklch, var(--ink) 8%, transparent);
   white-space: nowrap;
 }
-
-/* Inline, so it hugs the first line of a right-aligned verdict however it wraps. */
 .agent-demo-dot {
   display: inline-block;
   width: 0.5rem;
   height: 0.5rem;
-  margin-inline-end: 0.5rem;
-  vertical-align: 0.05em;
+  border-radius: 50%;
   background: var(--ink);
 }
 .agent-demo-guard[data-state="checking"] .agent-demo-dot {
@@ -142,7 +194,8 @@
   gap: 0.3rem;
   padding: 0.75rem 0.875rem;
   border: 1px dashed var(--rule-strong);
-  border-radius: 2px;
+  border-radius: 1rem;
+  border-end-end-radius: 0.3rem;
 }
 .agent-demo-dots i {
   width: 0.375rem;
@@ -165,17 +218,63 @@
 }
 
 /* Placeholders for the stages still to come. */
+/* The slots share the spare height of the window, so it never shows a blank lower half while a
+   run is in progress (up to a point: beyond 8rem the slot stops growing). */
+/* Steps still to come read as in progress (a live dot, a quiet tint), not as empty boxes. */
 .agent-demo-ghost {
+  flex: 1 1 auto;
+  max-height: 6rem;
   display: flex;
   align-items: center;
+  gap: 0.625rem;
   min-height: 3.25rem;
   padding: 0.5rem 0.875rem;
-  border: 1px dashed var(--rule);
-  color: var(--ink-3);
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--ink) 5%, transparent);
+  color: var(--ink-2);
   font-size: var(--text-sm);
 }
+.agent-demo-wait {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: agent-demo-blink 900ms step-end infinite;
+}
+.agent-demo[data-active="false"] .agent-demo-wait {
+  animation-play-state: paused;
+}
+
+/* Choices: phones show a compact row of three short labels (the full text stays the accessible
+   name, visually hidden); from md the full labels in a column. */
+.agent-demo-short {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .agent-demo-choice {
+    position: relative;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    text-align: left;
+  }
+  .agent-demo-short {
+    display: block;
+    min-width: 0;
+    font-size: var(--text-sm);
+    line-height: 1.3;
+  }
+  .agent-demo-long {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
 .agent-demo-ghost.agent-demo-reply {
-  justify-self: end;
+  align-self: flex-end;
   width: min(100%, 22rem);
 }
 

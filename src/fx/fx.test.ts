@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { WORDMARK } from "./baked/wordmark";
 import { WORDMARK_EM } from "./baked/geometry";
 import { decodeMask, indexMask } from "./targets/mask";
@@ -73,21 +73,41 @@ describe("target sampling", () => {
   it("scatters the opening dust evenly over the box: no core, nearly at rest", () => {
     const box = { x0: -12, y0: -4, x1: 12, y1: 5 };
     const n = 20000;
+    // Seeded: the assertions are statistical, a fixed draw makes them deterministic (it flaked).
+    let seed = 42;
+    const rand = vi.spyOn(Math, "random").mockImplementation(() => {
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    });
     const b = scatterSeed({ N: n, box });
+    rand.mockRestore();
     // A 6 x 3 grid of cells: an even field puts about n / 18 in each, a burst would pile into one.
     const cells = new Array(18).fill(0);
+    // One assertion per property, not per particle: 120k expect() calls took ~8 s and timed out.
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity,
+      maxV = 0;
     for (let i = 0; i < n; i++) {
       const x = b.pos[i * 4],
         y = b.pos[i * 4 + 1];
-      expect(x).toBeGreaterThanOrEqual(box.x0);
-      expect(x).toBeLessThanOrEqual(box.x1);
-      expect(y).toBeGreaterThanOrEqual(box.y0);
-      expect(y).toBeLessThanOrEqual(box.y1);
-      expect(Math.hypot(b.vel[i * 4], b.vel[i * 4 + 1])).toBeLessThan(0.3);
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+      maxV = Math.max(maxV, Math.hypot(b.vel[i * 4], b.vel[i * 4 + 1]));
       const cx = Math.min(5, Math.floor(((x - box.x0) / (box.x1 - box.x0)) * 6));
       const cy = Math.min(2, Math.floor(((y - box.y0) / (box.y1 - box.y0)) * 3));
       cells[cy * 6 + cx]++;
     }
+    expect(minX).toBeGreaterThanOrEqual(box.x0);
+    expect(maxX).toBeLessThanOrEqual(box.x1);
+    expect(minY).toBeGreaterThanOrEqual(box.y0);
+    expect(maxY).toBeLessThanOrEqual(box.y1);
+    expect(maxV).toBeLessThan(0.3);
     expect(Math.max(...cells) / (n / 18)).toBeLessThan(1.25);
     expect(Math.min(...cells) / (n / 18)).toBeGreaterThan(0.75);
   });

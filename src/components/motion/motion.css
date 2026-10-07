@@ -1,6 +1,8 @@
 /* ------------------------------------------------------------------
-   The site's one entrance: "proof pull". Opacity and a 2px blur clear
-   together, 240ms, 80ms stagger inside a group, played once.
+   The site's one entrance: blur-to-sharp. Opacity, an 8px blur and a 14px
+   rise clear together, 480ms ease-out, 60ms stagger inside a group, played
+   once per page per visit (v3). Short enough that nothing reads as lagging
+   half-blurred at normal scroll speed (review round 2).
 
    Opt in with:
      data-reveal        the element itself enters
@@ -14,30 +16,32 @@
   :root[data-reveal-ready] [data-reveal]:not([data-revealed]),
   :root[data-reveal-ready] [data-reveal-group]:not([data-revealed]) > * {
     opacity: 0;
-    filter: blur(2px);
+    filter: blur(8px);
+    translate: 0 14px;
   }
 
   [data-reveal][data-revealed],
   [data-reveal-group][data-revealed] > * {
     transition:
-      opacity var(--dur-2) var(--ease-out),
-      filter var(--dur-2) var(--ease-out);
+      opacity var(--dur-3) var(--ease-out),
+      filter var(--dur-3) var(--ease-out),
+      translate var(--dur-3) var(--ease-out);
   }
 
   [data-reveal-group][data-revealed] > :nth-child(2) {
-    transition-delay: 80ms;
+    transition-delay: 60ms;
   }
   [data-reveal-group][data-revealed] > :nth-child(3) {
-    transition-delay: 160ms;
+    transition-delay: 120ms;
   }
   [data-reveal-group][data-revealed] > :nth-child(4) {
-    transition-delay: 240ms;
+    transition-delay: 180ms;
   }
   [data-reveal-group][data-revealed] > :nth-child(5) {
-    transition-delay: 320ms;
+    transition-delay: 240ms;
   }
   [data-reveal-group][data-revealed] > :nth-child(n + 6) {
-    transition-delay: 400ms;
+    transition-delay: 300ms;
   }
 }
 
@@ -46,5 +50,6 @@
   [data-reveal-group] > * {
     opacity: 1 !important;
     filter: none !important;
+    translate: none !important;
   }
 }

@@ -269,6 +269,16 @@
     padding-block: 2.5mm;
     break-inside: avoid;
   }
+  /* Rules sit under entries in print, so an entry that starts a page never opens with a stray
+     divider (review round 3). */
+  .cv-entry,
+  .cv-entry:first-child {
+    border-top: 0;
+    border-bottom: 0.2mm solid var(--rule);
+  }
+  .cv-entry:last-child {
+    border-bottom: 0;
+  }
 
   .cv-points {
     gap: 1mm;
@@ -310,5 +320,15 @@
 @media print {
   .cv-project-link {
     text-decoration: none !important;
+  }
+}
+
+/* Print pagination: a section title never ends a page alone, and an entry never splits. */
+@media print {
+  .cv-h2 {
+    break-after: avoid-page;
+  }
+  .cv-entry {
+    break-inside: avoid-page;
   }
 }

@@ -1,7 +1,8 @@
 /* ------------------------------------------------------------------
-   Command palette. Solid surface, real 1px rules, no glass, no shadow.
-   Desktop: a centred panel in the upper third. Mobile: a full-width
-   sheet from the top edge, clear of the on-screen keyboard.
+   Command palette (v3 shapes). Solid surface, rounded card, soft lift,
+   a dimmed and blurred scrim. Desktop: a centred panel in the upper third.
+   Mobile: an inset rounded sheet near the top, clear of the on-screen
+   keyboard, with the page dimmed behind it.
    ------------------------------------------------------------------ */
 .palette {
   position: fixed;
@@ -11,9 +12,11 @@
   max-width: none;
   max-height: min(34rem, 76dvh);
   padding: 0;
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
   background: var(--surface);
   color: var(--ink);
+  box-shadow: var(--shadow-lift);
   overflow: hidden;
 }
 
@@ -22,15 +25,15 @@
 }
 
 .palette::backdrop {
-  background: color-mix(in oklab, var(--ground) 78%, transparent);
+  background: oklch(0.15 0.02 266 / 0.45);
+  backdrop-filter: blur(3px);
 }
 
 @media (max-width: 39.99rem) {
   .palette {
-    margin: 0;
-    width: 100%;
-    max-height: 88dvh;
-    border-width: 0 0 1px;
+    margin: 0.75rem auto auto;
+    width: calc(100% - 2 * var(--gutter));
+    max-height: min(80dvh, 34rem);
   }
 }
 

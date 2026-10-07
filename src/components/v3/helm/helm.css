@@ -1,0 +1,1570 @@
+/* ==================================================================
+   Helm scene (ticket v3-05). Light scene: copy + tools-lavender panel
+   holding a Helm window mockup. StickyStage writes data-step (0..4)
+   and --p (0..1) on .helm-stage; --b = --p x 5 is the beat position
+   (beat N runs from N to N+1). Everything below is drawn from them and
+   scrubbed by scroll, so every scroll tick of every beat moves something.
+   Motion = transform / opacity only (typing = a cover sliding off the
+   text in character steps, a paused animation seeked by scroll), plus a
+   few paint-only SVG strokes.
+   ================================================================== */
+
+.helm-scene {
+  /* The pinned stage already clears the floating nav (padding below), which is also the gap
+     after the scene above: no extra margin, so the two scenes read as one story. */
+  margin-top: 0;
+}
+.helm-stage {
+  --b: calc(var(--p, 1) * 5);
+}
+/* Until HelmArm marks the stage, beats switch instantly and nothing plays: the server's last beat
+   is replaced by the real one without a cross-fade. */
+.helm-stage:not([data-armed]) *,
+.helm-stage:not([data-armed]) *::before,
+.helm-stage:not([data-armed]) *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ---------- layout ---------- */
+.helm-layout {
+  display: grid;
+  height: 100%;
+  align-content: start;
+  gap: 1.25rem;
+  padding-block: calc(var(--header-h) + 1.25rem) 1.25rem;
+}
+@media (min-width: 56rem) {
+  .helm-layout {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    align-items: center;
+    column-gap: clamp(2rem, 1rem + 3vw, 4.5rem);
+    padding-block: calc(var(--header-h) + 1.5rem) 2rem;
+  }
+}
+
+/* ---------- copy column ---------- */
+.helm-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.helm-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+:lang(th) .helm-kicker {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: var(--text-xs);
+}
+.helm-kicker i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+.helm-title {
+  margin-top: 0.75rem;
+  font-size: var(--text-2xl);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 600;
+  padding-bottom: 0.08em; /* descender room for the sweep's clipped text */
+}
+.helm-art {
+  position: relative;
+  flex: none;
+  width: clamp(6rem, 3rem + 10vw, 12.5rem);
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+/* A lavender wash behind the line art ties it to the panel. */
+.helm-art::before {
+  content: "";
+  position: absolute;
+  inset: 12% 8% 4% 10%;
+  border-radius: 46% 54% 52% 48% / 55% 45% 55% 45%;
+  background: var(--pastel);
+  z-index: -1;
+}
+.helm-art > .doodle {
+  display: block;
+}
+.helm-lede {
+  margin-top: 1rem;
+  max-width: 38ch;
+  color: var(--ink-2);
+}
+
+/* Beats: one at a time, stacked in one grid cell (no reflow between beats). */
+.helm-beats {
+  display: grid;
+  margin-top: clamp(1.25rem, 0.5rem + 2vw, 2.25rem);
+}
+.helm-beat {
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  opacity: 0;
+  translate: 0 0.6rem;
+  filter: blur(4px);
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    translate var(--dur-3) var(--ease-out),
+    filter var(--dur-3) var(--ease-out);
+}
+.helm-stage[data-step="0"] .helm-beat[data-beat="0"],
+.helm-stage[data-step="1"] .helm-beat[data-beat="1"],
+.helm-stage[data-step="2"] .helm-beat[data-beat="2"],
+.helm-stage[data-step="3"] .helm-beat[data-beat="3"],
+.helm-stage[data-step="4"] .helm-beat[data-beat="4"] {
+  opacity: 1;
+  translate: 0 0;
+  filter: none;
+}
+.helm-beat-n {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.helm-beat-title {
+  font-size: var(--text-lg);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.helm-beat-body {
+  max-width: 40ch;
+  color: var(--ink-2);
+}
+
+.helm-progress {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 1.25rem;
+  max-width: 20rem;
+}
+.helm-progress i {
+  position: relative;
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--rule);
+  overflow: clip;
+}
+.helm-progress i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform-origin: left;
+  scale: clamp(0, calc(var(--p, 1) * 5 - var(--i)), 1) 1;
+}
+
+.helm-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  margin-top: clamp(1.25rem, 0.5rem + 2vw, 2rem);
+}
+.helm-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.helm-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.helm-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--ground);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+.helm-cta span {
+  transition: translate var(--dur-2) var(--ease-out);
+}
+.helm-cta:hover {
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+.helm-cta:hover span {
+  translate: 0.2rem 0;
+}
+.helm-cta:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ---------- lavender panel ---------- */
+.helm-panel {
+  position: relative;
+  margin: 0;
+  padding: clamp(0.75rem, 0.2rem + 2.2vw, 2.5rem);
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(color-mix(in oklch, var(--pastel-ink) 13%, transparent) 1px, transparent 1.6px) 0 0 / 18px 18px,
+    var(--pastel);
+}
+.helm-window-wrap {
+  container: hw / inline-size;
+  margin-inline: auto;
+}
+@media (min-width: 56rem) {
+  /* Short desktop windows: the mockup gives up width before it overflows the stage. */
+  .helm-window-wrap {
+    max-width: calc((100svh - var(--header-h) - 9rem) * 1.6);
+  }
+}
+@media (min-width: 40rem) and (max-width: 55.99rem) and (min-height: 600px) {
+  /* Tablet portrait: the window gives up width so copy + window fit one screen. */
+  .helm-window-wrap {
+    max-width: calc((100svh - var(--header-h) - 25rem) / 0.86);
+  }
+}
+.helm-caption {
+  text-wrap: balance;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--pastel-ink);
+  text-align: center;
+}
+@media (min-width: 56rem) {
+  .helm-caption {
+    margin-top: 1rem;
+  }
+}
+
+/* ---------- phone: compress the copy so the window keeps its room ---------- */
+@media (max-width: 55.99rem) {
+  .helm-lede {
+    margin-top: 0.5rem;
+    font-size: var(--text-sm);
+  }
+  .helm-beats {
+    margin-top: 1rem;
+  }
+  .helm-beat-title {
+    font-size: 1.0625rem;
+  }
+  .helm-beat-body {
+    font-size: var(--text-sm);
+  }
+  .helm-progress {
+    margin-top: 0.75rem;
+    max-width: none;
+  }
+  .helm-meta {
+    display: none;
+  }
+  .helm-title {
+    margin-top: 0.5rem;
+  }
+}
+@media (max-width: 55.99rem) and (max-height: 760px) {
+  .helm-lede,
+  .helm-kicker {
+    display: none;
+  }
+  .helm-title {
+    margin-top: 0;
+  }
+}
+
+/* ---------- phone landscape: story text beside the window, always on screen ---------- */
+@media (orientation: landscape) and (max-height: 540px) {
+  .helm-layout {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 1.5rem;
+    padding-block: calc(var(--header-h) + 0.25rem) 0.75rem;
+  }
+  .helm-kicker,
+  .helm-art,
+  .helm-lede,
+  .helm-meta {
+    display: none;
+  }
+  .helm-title {
+    margin-top: 0;
+    font-size: 2rem;
+  }
+  .helm-beats {
+    margin-top: 0.75rem;
+  }
+  .helm-progress {
+    display: flex;
+    margin-top: 0.75rem;
+  }
+  .helm-panel {
+    padding: 0.5rem;
+  }
+  .helm-window-wrap {
+    width: calc((100svh - var(--header-h) - 4.6rem) * 1.16);
+  }
+  .helm-caption {
+    margin-top: 0.4rem;
+    padding-inline: calc(var(--inset-card) - 0.5rem);
+  }
+}
+
+/* ==================================================================
+   The window (Helm "Instrument Dusk" palette; same in both themes,
+   like the real app). Sized in em from the container: the whole
+   mockup scales as one picture.
+   ================================================================== */
+.hw {
+  --hw-ground: hsl(264 24% 7%);
+  --hw-ground-2: hsl(263 21% 9%);
+  --hw-s1: hsl(261 19% 11%);
+  --hw-s2: hsl(259 17% 14%);
+  --hw-s3: hsl(257 15% 18%);
+  --hw-pane: hsl(263 22% 8.5%);
+  --hw-line: hsl(256 14% 22%);
+  --hw-line-2: hsl(256 13% 28%);
+  --hw-ink: hsl(42 30% 92%);
+  --hw-ink-2: hsl(44 12% 75%);
+  --hw-ink-3: hsl(255 9% 64%);
+  --hw-faint: hsl(255 8% 58%);
+  --hw-amber: hsl(38 92% 61%);
+  --hw-glow: hsl(38 92% 61% / 0.16);
+  --hw-green: hsl(151 46% 56%);
+  --hw-banner: hsl(140 25% 60%);
+  --hw-indigo: hsl(248 70% 74%);
+  --hw-cyan: hsl(186 72% 55%);
+  --hw-magenta: hsl(322 58% 62%);
+  --hw-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Beat 5: the merge lands late in the beat (toast, MERGED tag). */
+  --tv: clamp(0, (var(--b) - 4.58) * 8, 1);
+  /* ...then a green sheen sweeps the rack for the rest of the beat. */
+  --zo: clamp(0, (var(--b) - 4.7) / 0.28, 1);
+
+  position: relative;
+  display: grid;
+  grid-template-rows: 3.2em minmax(0, 1fr) 3.3em;
+  aspect-ratio: 16 / 10;
+  overflow: clip;
+  border-radius: 1em;
+  /* Smallest text in the window is 0.8em: 13.4px keeps every glyph at 10.5px or more. */
+  font-size: clamp(13.4px, 1.66cqi, 15px);
+  line-height: 1.35;
+  color: var(--hw-ink);
+  background:
+    radial-gradient(120% 90% at 82% -10%, var(--hw-glow), transparent 60%),
+    radial-gradient(70% 60% at 0% 110%, hsl(258 40% 30% / 0.22), transparent 70%), var(--hw-ground);
+  box-shadow:
+    0 0 0 1px hsl(256 14% 24%),
+    0 2px 6px hsl(260 40% 10% / 0.18),
+    0 36px 70px -30px hsl(262 50% 18% / 0.55);
+  user-select: none;
+}
+.hw p {
+  margin: 0;
+}
+.hw b {
+  font-weight: inherit;
+}
+.hw-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+.hw-swap {
+  display: inline-grid;
+}
+.hw-swap > [data-show] {
+  grid-area: 1 / 1;
+  opacity: 0;
+  translate: 0 0.35em;
+  transition:
+    opacity 200ms var(--hw-ease),
+    translate 320ms var(--hw-ease);
+}
+.helm-stage[data-step="0"] .hw [data-show="empty"],
+.helm-stage:not([data-step="0"]) .hw [data-show="open"],
+.helm-stage:is([data-step="0"], [data-step="1"]) .hw [data-show="idle"],
+.helm-stage:is([data-step="2"], [data-step="3"]) .hw [data-show="working"],
+.helm-stage[data-step="4"] .hw [data-show="done"],
+.helm-stage:not([data-step="3"]) .hw [data-show="all"],
+.helm-stage[data-step="3"] .hw [data-show="peer"],
+.helm-stage:is([data-step="0"], [data-step="1"]) .hw [data-show="placeholder"],
+.helm-stage:not([data-step="0"], [data-step="1"]) .hw [data-show="typed"] {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Thai labels: the text face, no caps tracking (a monospace face has no Thai). */
+.hw:lang(th) :is(.hw-label, .hw-count, .hw-tag, .hw-state, .hw-composer, .hw-toast-meta) {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---------- titlebar ---------- */
+.hw-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  padding-inline: 1em;
+  background: linear-gradient(var(--hw-s1), var(--hw-ground-2));
+  border-bottom: 1px solid var(--hw-line);
+}
+.hw-lights {
+  display: flex;
+  gap: 0.5em;
+}
+.hw-lights i {
+  width: 0.85em;
+  height: 0.85em;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+.hw-lights i:nth-child(2) {
+  background: #febc2e;
+}
+.hw-lights i:nth-child(3) {
+  background: #28c840;
+}
+.hw-vesper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.25em 0.65em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 999px;
+  font-size: 0.82em;
+  color: var(--hw-ink-2);
+}
+.hw-lamp {
+  width: 0.62em;
+  height: 0.62em;
+  flex: none;
+  border-radius: 50%;
+  background: var(--hw-amber);
+  box-shadow: 0 0 0.6em var(--hw-amber);
+  animation: hw-breathe 2.4s ease-in-out infinite;
+}
+.hw-crumb {
+  margin-inline: auto;
+  font-size: 0.82em;
+  color: var(--hw-ink-3);
+}
+.hw-crumb b {
+  margin-inline: 0.3em;
+  color: var(--hw-faint);
+}
+.hw-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  color: var(--hw-ink-3);
+}
+.hw-kbd {
+  padding: 0.1em 0.45em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 0.35em;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--hw-ink-3);
+}
+
+/* ---------- body: rail + rack ---------- */
+.hw-body {
+  display: grid;
+  grid-template-columns: 13em minmax(0, 1fr);
+  min-height: 0;
+}
+.hw-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  padding: 1em 0.8em;
+  background: var(--hw-s1);
+  border-right: 1px solid var(--hw-line);
+  min-width: 0;
+}
+.hw-label {
+  padding-inline: 0.45em;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hw-ink-3);
+}
+.hw-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding-inline: 0.4em;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--hw-ink-3);
+}
+.hw-count .hw-swap {
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  border-radius: 999px;
+  background: var(--hw-s3);
+  color: var(--hw-ink);
+}
+.hw-spaces {
+  display: grid;
+  gap: 0.2em;
+  margin: 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+.hw-space {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  min-width: 0;
+  height: 2.5em;
+  padding-inline: 0.6em;
+  border-radius: 0.6em;
+  font-size: 0.9em;
+  color: var(--hw-ink-2);
+}
+.hw-space.is-active {
+  background: var(--hw-s3);
+  color: var(--hw-ink);
+  box-shadow: inset 0.2em 0 0 var(--hw-amber);
+}
+.hw-glyph {
+  position: relative;
+  width: 0.6em;
+  height: 0.6em;
+  flex: none;
+  border-radius: 50%;
+  background: var(--hue);
+  box-shadow: 0 0 0 0.25em color-mix(in oklch, var(--hue) 22%, transparent);
+}
+.hw-glyph::after {
+  content: "";
+  position: absolute;
+  inset: -0.3em;
+  border-radius: 50%;
+  border: 1px solid var(--hue);
+  opacity: 0;
+}
+.helm-stage:is([data-step="2"], [data-step="3"]) .hw-space.is-active .hw-glyph::after {
+  animation: hw-glyph 1.8s var(--hw-ease) infinite;
+}
+.hw-tag {
+  margin-left: auto;
+  justify-items: end;
+  font-family: var(--font-mono);
+  font-size: 0.89em; /* inside .hw-space (0.9em): 0.8em of the window */
+  letter-spacing: 0.04em;
+  color: var(--hw-ink-3);
+}
+.hw-tag [data-show="working"] {
+  color: var(--hue);
+}
+.hw-tag [data-show="done"] {
+  color: var(--hw-green);
+}
+/* Beat 5: the workspace reads WORKING until the merge lands, then MERGED. */
+.helm-stage[data-step="4"] .hw-tag > [data-show="working"] {
+  opacity: calc(1 - var(--tv));
+  translate: none;
+}
+.helm-stage[data-step="4"] .hw-tag > [data-show="done"] {
+  opacity: var(--tv);
+  translate: none;
+}
+.hw-mission {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: auto;
+  padding: 0.6em 0.8em;
+  border: 1px dashed var(--hw-line-2);
+  border-radius: 0.6em;
+  font-size: 0.82em;
+  color: var(--hw-ink-3);
+}
+.hw-mission b {
+  color: var(--hw-amber);
+}
+
+/* ---------- rack ---------- */
+.hw-rack {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.6em;
+  padding: 0.7em;
+  min-height: 0;
+}
+
+/* After the merge (beat 5, .70-.98) a soft green light passes across the rack. */
+.hw-rack::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    hsl(151 46% 56% / 0.16) 45%,
+    hsl(151 60% 75% / 0.22) 50%,
+    hsl(151 46% 56% / 0.16) 55%,
+    transparent 70%
+  );
+  translate: calc(-100% + var(--zo) * 200%) 0;
+  opacity: calc(clamp(0, var(--zo) * 12, 1) * clamp(0, (1 - var(--zo)) * 12, 1));
+}
+
+/* ---------- launcher (beat 1): fills itself in as the visitor scrolls ---------- */
+.hw-launch {
+  /* Beat 1 timeline: path types .04-.28, Space lights .28-.36, a cursor walks 1 -> 2 -> 4
+     (.36-.58), 4 is picked, Create is pressed (.64) and the workspace builds (.72-.98). */
+  --mode: clamp(0, (var(--b) - 0.28) * 12, 1);
+  --cur: clamp(0, (var(--b) - 0.36) / 0.22, 1);
+  --pick: clamp(0, (var(--b) - 0.58) * 16, 1);
+  --press: clamp(0, (var(--b) - 0.64) * 12, 1);
+  --build: clamp(0, (var(--b) - 0.72) / 0.26, 1);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  justify-items: stretch;
+  gap: 0.85em;
+  width: min(30em, 100% - 2em);
+  margin: auto;
+  height: fit-content;
+  padding: 1.2em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 0.9em;
+  background: var(--hw-s1);
+  box-shadow: 0 1.2em 2.6em -1.2em hsl(260 50% 3% / 0.8);
+  transition:
+    opacity 260ms var(--hw-ease),
+    scale 420ms var(--hw-ease);
+}
+.helm-stage[data-step="0"] .hw-launch {
+  translate: 0 calc((1 - clamp(0, var(--b), 1)) * 1.2em);
+}
+.helm-stage[data-step="1"] .hw-launch {
+  /* Gone by 1.06; the first pane only starts at 1.08, so no frame shows both. Scrubbed, so no
+     transition (a transition would lag behind the scroll and overlap the panes). */
+  transition: none;
+  opacity: calc(1 - clamp(0, (var(--b) - 1) * 16, 1));
+  scale: calc(1 + clamp(0, (var(--b) - 1) * 16, 1) * 0.03);
+}
+.helm-stage:not([data-step="0"], [data-step="1"]) .hw-launch {
+  opacity: 0;
+}
+.hw-launch::after {
+  --lsh: clamp(0, (var(--b) - 0.06) / 0.62, 1);
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: linear-gradient(105deg, transparent 25%, hsl(38 92% 61% / 0.14) 50%, transparent 75%);
+  translate: calc(-100% + var(--lsh) * 200%) 0;
+  opacity: calc(clamp(0, var(--lsh) * 8, 1) * clamp(0, (1 - var(--lsh)) * 8, 1));
+}
+.hw-launch {
+  overflow: clip;
+}
+.hw-launch-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 600;
+}
+.hw-launch-title .hw-icon {
+  color: var(--hw-amber);
+}
+.hw-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6em;
+}
+.hw-mode {
+  display: grid;
+  gap: 0.15em;
+  padding: 0.6em 0.75em;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.6em;
+  font-size: 0.8em;
+  color: var(--hw-ink-3);
+}
+.hw-mode b {
+  font-weight: 600 !important;
+  color: var(--hw-ink-2);
+}
+.hw-mode.is-on {
+  position: relative;
+}
+.hw-mode.is-on::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid hsl(38 92% 61% / 0.6);
+  border-radius: inherit;
+  background: hsl(38 92% 61% / 0.07);
+  opacity: var(--mode);
+}
+.hw-path {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.55em 0.75em;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.55em;
+  background: var(--hw-ground);
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  white-space: nowrap;
+}
+.hw-path > b {
+  color: var(--hw-amber);
+}
+.hw-launch-label {
+  padding-inline: 0;
+  margin-bottom: -0.3em;
+}
+.hw-tiles {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5em;
+}
+.hw-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  padding-block: 0.55em;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.55em;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  color: var(--hw-ink-3);
+}
+.hw-tile-grid {
+  width: 0.95em;
+  height: 0.95em;
+  border: 1.5px solid currentColor;
+  border-radius: 0.2em;
+  opacity: 0.7;
+}
+.hw-tile-grid[data-n="2"] {
+  background: linear-gradient(90deg, transparent 45%, currentColor 45% 55%, transparent 55%);
+}
+.hw-tile-grid[data-n="4"],
+.hw-tile-grid[data-n="6"] {
+  background:
+    linear-gradient(90deg, transparent 45%, currentColor 45% 55%, transparent 55%),
+    linear-gradient(transparent 45%, currentColor 45% 55%, transparent 55%);
+}
+/* The pointer walking across the tiles (one tile wide, two steps: 1 -> 2 -> 4). */
+.hw-tile-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc((100% - 1.5em) / 4);
+  height: 100%;
+  border: 1px dashed hsl(38 92% 61% / 0.8);
+  border-radius: 0.55em;
+  translate: calc(var(--cur) * 2 * (100% + 0.5em)) 0;
+  opacity: calc(clamp(0, (var(--b) - 0.34) * 20, 1) * (1 - var(--pick)));
+  pointer-events: none;
+}
+/* The picked tile: an amber layer whose opacity follows the scroll. */
+.hw-tile[data-pick]::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1.5px solid var(--hw-amber);
+  border-radius: inherit;
+  background: hsl(38 92% 61% / 0.12);
+  opacity: var(--pick);
+}
+.hw-tile[data-pick] {
+  color: color-mix(in oklch, var(--hw-amber) calc(var(--pick) * 100%), var(--hw-ink-3));
+}
+.hw-create {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  padding: 0.6em 1em;
+  border-radius: 0.6em;
+  background: linear-gradient(hsl(38 92% 63%), hsl(35 88% 54%));
+  color: hsl(258 40% 9%);
+  font-size: 0.86em;
+  font-weight: 600;
+  scale: calc(1 - var(--press) * 0.03);
+}
+.hw-create::after {
+  content: "";
+  position: absolute;
+  inset: -0.35em;
+  border-radius: 0.85em;
+  box-shadow: 0 0 0 0.25em hsl(38 92% 61% / 0.35);
+  opacity: var(--press);
+}
+.hw-create::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: hsl(45 100% 82% / 0.6);
+  transform-origin: left;
+  scale: var(--build) 1;
+}
+.hw-create .hw-kbd {
+  font-size: 0.93em; /* inside the 0.86em button */
+  border-color: hsl(258 40% 9% / 0.35);
+  color: hsl(258 40% 9% / 0.75);
+}
+
+/* ---------- panes ---------- */
+.hw-pane {
+  --v: 0;
+  --v4: 0;
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: clip;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.8em;
+  background: var(--hw-pane);
+  opacity: var(--v);
+  translate: 0 calc((1 - var(--v)) * -0.8em);
+  transition:
+    border-color 200ms var(--hw-ease),
+    box-shadow 320ms var(--hw-ease);
+}
+/* Beat 2: the panes spawn one after another while the visitor scrolls. */
+.helm-stage[data-step="1"] .hw-pane {
+  --v: clamp(0, (var(--b) - 1.08 - var(--i) * 0.13) * 6, 1);
+  --boot: clamp(0, (var(--b) - 1.5 - var(--i) * 0.1) / 0.14, 1);
+}
+.helm-stage:is([data-step="2"], [data-step="3"], [data-step="4"]) .hw-pane {
+  --v: 1;
+}
+/* Beat 5: each pane's check lands in turn (--done is its moment inside the beat). */
+.helm-stage[data-step="4"] .hw-pane {
+  --v4: clamp(0, (var(--b) - 4 - var(--done)) * 25, 1);
+}
+/* A light passing across each pane, scrubbed, so a long stretch of scroll never sits still:
+   indigo as the pane boots (beat 2) and while it works (beat 3), green as its check lands (beat
+   5). Screen-blended over the content, so text and typing covers lighten alike. */
+.hw-pane {
+  --sh: 0;
+  --sh-c: hsl(248 70% 74% / 0.2);
+}
+.hw-pane::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: linear-gradient(105deg, transparent 22%, var(--sh-c) 50%, transparent 78%);
+  translate: calc(-100% + var(--sh) * 200%) 0;
+  opacity: calc(clamp(0, var(--sh) * 8, 1) * clamp(0, (1 - var(--sh)) * 8, 1));
+}
+.helm-stage[data-step="1"] .hw-pane {
+  --sh: clamp(0, (var(--b) - 1.45 - var(--i) * 0.1) / 0.3, 1);
+}
+.helm-stage[data-step="2"] .hw-pane {
+  --sh: clamp(0, (var(--b) - 2.04 - var(--i) * 0.16) / 0.48, 1);
+}
+.helm-stage[data-step="4"] .hw-pane {
+  --sh: clamp(0, (var(--b) - 3.92 - var(--done)) / 0.24, 1);
+  --sh-c: hsl(151 55% 62% / 0.24);
+}
+/* Atlas holds focus while the crew works. */
+.helm-stage:is([data-step="2"], [data-step="3"]) .hw-pane[data-pane="atlas"] {
+  border-color: var(--hw-amber);
+  box-shadow:
+    0 0 0 1px var(--hw-amber),
+    0 0 1.6em -0.2em hsl(38 92% 61% / 0.35);
+}
+/* A ring layer: amber on Sable when the note lands (beat 4), green on each verified pane (beat 5). */
+.hw-pane::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid var(--hw-amber);
+  box-shadow: inset 0 0 1.4em -0.4em hsl(38 92% 61% / 0.45);
+  opacity: 0;
+  pointer-events: none;
+}
+.helm-stage[data-step="3"] .hw-pane[data-pane="sable"]::after {
+  opacity: clamp(0, (var(--b) - 3.7) * 10, 1);
+}
+.helm-stage[data-step="4"] .hw-pane::after {
+  border-color: hsl(151 46% 56% / 0.7);
+  box-shadow: none;
+  opacity: var(--v4);
+}
+
+.hw-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+  min-width: 0;
+  height: 2.6em;
+  padding-inline: 0.75em;
+}
+.hw-sign {
+  font-size: 0.95em;
+  font-weight: 600 !important;
+}
+.hw-state {
+  justify-items: start;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  letter-spacing: 0.05em;
+}
+.hw-state > b {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.25em 0.6em;
+  border-radius: 0.4em;
+  border: 1px solid var(--hw-line-2);
+  color: var(--hw-ink-3);
+  white-space: nowrap;
+}
+.hw-state [data-show="working"] {
+  border-color: transparent;
+  background: hsl(248 70% 74% / 0.16);
+  color: var(--hw-indigo);
+}
+.hw-state [data-show="done"] {
+  border-color: hsl(151 46% 56% / 0.45);
+  background: hsl(151 46% 56% / 0.12);
+  color: var(--hw-green);
+}
+.helm-stage[data-step="4"] .hw-pane .hw-state > [data-show="working"] {
+  opacity: calc(1 - var(--v4));
+  translate: none;
+}
+.helm-stage[data-step="4"] .hw-pane .hw-state > [data-show="done"] {
+  opacity: var(--v4);
+  translate: none;
+}
+.hw-state .hw-icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+.hw-engine {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  margin-left: auto;
+  padding: 0.22em 0.75em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--hw-ink-2);
+  white-space: nowrap;
+}
+.hw-engine[data-live] {
+  border-color: hsl(38 92% 61% / 0.55);
+  background: hsl(38 92% 61% / 0.1);
+  color: var(--hw-amber);
+}
+.hw-engine i {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: currentColor;
+}
+.hw-head-icon {
+  width: 1em;
+  height: 1em;
+  color: var(--hw-faint);
+}
+
+/* Boot (beat 2): each pane's strip fills in turn once it has spawned. */
+.hw-boot {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--hw-indigo), hsl(295 50% 64%));
+  transform-origin: left;
+  scale: var(--boot, 0) 1;
+  opacity: 0;
+}
+.helm-stage[data-step="1"] .hw-boot {
+  opacity: 0.9;
+}
+/* Activity strip: a hue gradient runs along it while the pane works; green once verified. */
+.hw-strip {
+  position: relative;
+  height: 2px;
+  overflow: clip;
+  background: linear-gradient(90deg, var(--hw-line), transparent 80%);
+}
+.hw-strip::before,
+.hw-strip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.hw-strip::after {
+  background: linear-gradient(90deg, transparent, var(--hw-indigo) 40%, hsl(295 50% 64%) 60%, transparent);
+  translate: -100% 0;
+}
+.hw-strip::before {
+  background: linear-gradient(90deg, hsl(151 46% 56% / 0.8), transparent 85%);
+}
+.helm-stage:is([data-step="2"], [data-step="3"], [data-step="4"]) .hw-strip::after {
+  opacity: calc(1 - var(--v4));
+  animation: hw-run 2.6s linear infinite;
+  animation-delay: calc(var(--i) * -0.7s);
+}
+.helm-stage[data-step="4"] .hw-strip::before {
+  opacity: var(--v4);
+}
+
+/* Terminal. */
+.hw-term {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 0;
+  overflow: clip;
+  padding: 0.7em 0.9em;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  line-height: 1.55;
+  color: var(--hw-ink);
+}
+.hw-prompt {
+  position: relative;
+  overflow: clip;
+  white-space: nowrap;
+  color: var(--hw-ink-3);
+}
+.hw-prompt b {
+  color: var(--hw-amber);
+}
+.hw-line-pair {
+  display: contents;
+}
+.hw-line {
+  position: relative;
+  display: none;
+  max-width: 100%;
+  overflow: clip;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.hw-line[data-tone="ok"] {
+  color: var(--hw-green);
+}
+.hw-line[data-tone="note"] {
+  color: var(--hw-amber);
+}
+.hw-line[data-tone="dim"] {
+  color: var(--hw-ink-3);
+}
+.helm-stage[data-step="2"] .hw-line[data-at="2"],
+.helm-stage[data-step="3"] .hw-line:is([data-at="2"], [data-at="3"]),
+.helm-stage[data-step="4"] .hw-line {
+  display: block;
+}
+.hw-line[data-variant="short"] {
+  display: none !important;
+}
+/* Typing, scrubbed: a cover in the background colour slides off the text one character per
+   step; its left edge is the caret. The animation is paused and seeked by scroll: --k is how far
+   this line is through its own window [a, a + len] of beat `at`. Without a running animation
+   (no JS, reduced motion, before arming) the cover rests off the text. */
+.hw-line,
+.hw-prompt,
+.hw-typed {
+  --k: clamp(0, (var(--b) - var(--at) - var(--a)) / var(--len), 1);
+}
+.hw-typed {
+  position: relative;
+  display: inline-block;
+  overflow: clip;
+  vertical-align: bottom;
+  --cover: var(--hw-ground);
+}
+.hw-line::after,
+.hw-prompt::after,
+.hw-typed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--cover, var(--hw-pane));
+  border-left: 0.55em solid transparent;
+  translate: calc(100% + 0.6em) 0;
+  animation: hw-type 1s steps(var(--chars)) paused both;
+  animation-delay: calc(var(--k) * -1s);
+}
+.hw-caret {
+  display: block;
+  width: 0.55em;
+  height: 1.2em;
+  margin-top: 0.15em;
+  background: var(--hw-amber);
+  animation: hw-blink 1.05s steps(1) infinite;
+}
+
+/* ---------- message in flight (beat 4), seeked by scroll ---------- */
+.hw-flight {
+  --fk: clamp(0, (var(--b) - 3.22) / 0.48, 1);
+  position: absolute;
+  inset: 0.7em;
+  z-index: 2;
+  container-type: size;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 260ms var(--hw-ease);
+}
+.helm-stage[data-step="3"] .hw-flight {
+  opacity: 1;
+}
+.hw-arc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: clamp(0, (var(--b) - 3.16) * 12, 1);
+}
+.hw-arc path {
+  fill: none;
+  stroke: var(--hw-amber);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 2 6;
+}
+.helm-stage[data-step="3"] .hw-arc path {
+  animation: hw-march 0.9s linear infinite;
+}
+.hw-note {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  gap: 0.2em;
+  padding: 0.55em 0.8em;
+  border-radius: 0.5em;
+  background: oklch(0.93 0.045 295);
+  color: oklch(0.26 0.03 295);
+  font-size: 0.8em;
+  line-height: 1.3;
+  white-space: nowrap;
+  box-shadow:
+    0 1px 0 hsl(260 40% 10% / 0.2),
+    0 0.8em 1.6em -0.6em hsl(260 50% 5% / 0.7);
+  translate: calc(46cqw - 50%) calc(28cqh - 50%);
+  rotate: -4deg;
+  opacity: 0;
+  animation: hw-fly 1s linear paused both;
+  animation-delay: calc(var(--fk) * -1s);
+}
+.hw-note-route {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+.hw-note-route b {
+  color: oklch(0.55 0.13 60);
+}
+.hw-note-body {
+  font-weight: 600;
+}
+
+/* ---------- merge toast (beat 5), scrubbed ---------- */
+.hw-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 1.4em;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.55em 0.9em;
+  border: 1px solid hsl(151 46% 56% / 0.45);
+  border-radius: 999px;
+  background: hsl(259 17% 14% / 0.96);
+  box-shadow: 0 1em 2em -1em hsl(260 50% 4% / 0.8);
+  font-size: 0.86em;
+  white-space: nowrap;
+  opacity: var(--tv);
+  translate: -50% calc((1 - var(--tv)) * 1em);
+}
+.helm-stage:not([data-step="4"]) .hw-toast {
+  opacity: 0;
+}
+.hw-toast .hw-icon {
+  width: 1.5em;
+  height: 1.5em;
+  padding: 0.25em;
+  border-radius: 50%;
+  background: var(--hw-green);
+  color: var(--hw-ground);
+}
+.hw-toast b {
+  font-family: var(--font-mono);
+  color: var(--hw-green);
+}
+.hw-toast-meta {
+  padding-left: 0.6em;
+  border-left: 1px solid var(--hw-line-2);
+  color: var(--hw-ink-3);
+}
+
+/* ---------- command bar ---------- */
+.hw-command {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding-inline: 1em;
+  border-top: 1px solid var(--hw-line);
+  background: var(--hw-ground-2);
+}
+.hw-route {
+  display: inline-flex;
+  padding: 0.25em 0.75em;
+  border: 1px solid var(--hw-line-2);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--hw-ink-2);
+  white-space: nowrap;
+}
+.hw-route [data-show="peer"] {
+  color: var(--hw-amber);
+}
+.hw-composer {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  flex: 0 1 30em;
+  min-width: 0;
+  padding: 0.45em 0.8em;
+  border: 1px solid var(--hw-line);
+  border-radius: 0.55em;
+  background: var(--hw-ground);
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  white-space: nowrap;
+  overflow: clip;
+}
+.hw-composer > b {
+  color: var(--hw-amber);
+}
+.hw-composer [data-show="placeholder"] {
+  color: var(--hw-faint);
+}
+
+/* ==================================================================
+   Phone composition: simplified, not shrunk. No rail, no command bar,
+   no tiny chips; short terminal lines; nothing under 10.5px.
+   ================================================================== */
+@container hw (max-width: 48rem) {
+  .hw {
+    aspect-ratio: 1 / 0.86;
+    font-size: clamp(13px, 3.9cqi, 15px);
+    grid-template-rows: 2.8em minmax(0, 1fr);
+  }
+  .hw-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hw-rail,
+  .hw-command,
+  .hw-crumb,
+  .hw-tools,
+  .hw-head-icon,
+  .hw-state,
+  .hw-caret,
+  .hw-engine i,
+  .hw-toast-meta,
+  .hw-modes,
+  .hw-launch-label,
+  .hw-create .hw-kbd {
+    display: none !important;
+  }
+  .hw-titlebar {
+    padding-inline: 0.8em;
+  }
+  .hw-vesper {
+    margin-left: auto;
+  }
+  .hw-rack {
+    gap: 0.45em;
+    padding: 0.5em;
+  }
+  .hw-flight {
+    inset: 0.5em;
+  }
+  .hw-head {
+    gap: 0.35em;
+    height: 2.4em;
+    padding-inline: 0.6em;
+  }
+  .hw-engine {
+    padding: 0.2em 0.42em;
+    font-size: 0.82em;
+  }
+  .hw-term {
+    padding: 0.45em 0.6em;
+    font-size: 0.82em;
+    line-height: 1.45;
+  }
+  .hw-note {
+    font-size: 0.84em;
+  }
+  .hw-note-route {
+    font-size: 1em;
+  }
+  /* The merge lands in the titlebar, between the lights and the Vesper chip: the rack is too short
+     on a phone for a toast that would not cover the bottom row's last line. */
+  .hw-toast {
+    left: 6em;
+    bottom: calc(100% + 0.32em);
+    gap: 0.45em;
+    padding: 0.2em 0.7em;
+    font-size: 0.84em;
+    translate: 0 calc((1 - var(--tv)) * 0.6em);
+  }
+  .hw-toast-branch {
+    display: none;
+  }
+  .hw-toast .hw-icon {
+    width: 1.3em;
+    height: 1.3em;
+  }
+  .hw-launch {
+    gap: 0.7em;
+    width: calc(100% - 1.6em);
+    padding: 1em;
+  }
+  .hw-path,
+  .hw-tile {
+    font-size: 0.86em;
+  }
+}
+/* Phone-width window: short wording, no prompt line (a tablet-width compact window keeps the
+   full lines). */
+@container hw (max-width: 30rem) {
+  .hw-prompt,
+  .hw-line[data-variant="full"] {
+    display: none !important;
+  }
+  .helm-stage[data-step="2"] .hw-line[data-variant="short"][data-at="2"],
+  .helm-stage[data-step="3"] .hw-line[data-variant="short"]:is([data-at="2"], [data-at="3"]),
+  .helm-stage[data-step="4"] .hw-line[data-variant="short"] {
+    display: block !important;
+  }
+}
+
+/* ---------- keyframes ---------- */
+@keyframes hw-breathe {
+  0%,
+  100% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes hw-glyph {
+  from {
+    opacity: 0.9;
+    scale: 0.94;
+  }
+  to {
+    opacity: 0;
+    scale: 1.6;
+  }
+}
+@keyframes hw-run {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 100% 0;
+  }
+}
+@keyframes hw-type {
+  0% {
+    translate: 0 0;
+    border-left-color: transparent;
+  }
+  0.1% {
+    border-left-color: var(--hw-amber);
+  }
+  100% {
+    translate: calc(100% + 0.6em) 0;
+    border-left-color: var(--hw-amber);
+  }
+}
+@keyframes hw-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes hw-march {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+/* The note follows the arc M46 28 Q78 8 70 54 (rack percentages), sampled every t = 1/8, then is
+   absorbed into Sable's pane. Seeked by scroll (linear in time = linear in scroll). */
+@keyframes hw-fly {
+  0% {
+    translate: calc(46cqw - 50%) calc(28cqh - 50%);
+    rotate: -8deg;
+    scale: 0.6;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+    scale: 1;
+  }
+  10.5% {
+    translate: calc(53.6cqw - 50%) calc(24.1cqh - 50%);
+    rotate: -6deg;
+  }
+  21% {
+    translate: calc(59.5cqw - 50%) calc(22.1cqh - 50%);
+    rotate: -3deg;
+  }
+  31.5% {
+    translate: calc(64.4cqw - 50%) calc(22.1cqh - 50%);
+    rotate: 0deg;
+  }
+  42% {
+    translate: calc(68cqw - 50%) calc(24.5cqh - 50%);
+    rotate: 3deg;
+  }
+  52.5% {
+    translate: calc(70.4cqw - 50%) calc(28.6cqh - 50%);
+    rotate: 4deg;
+  }
+  63% {
+    translate: calc(71.5cqw - 50%) calc(35.1cqh - 50%);
+    rotate: 2deg;
+  }
+  73.5% {
+    translate: calc(71.4cqw - 50%) calc(43.6cqh - 50%);
+    rotate: 0deg;
+  }
+  84% {
+    translate: calc(70cqw - 50%) calc(54cqh - 50%);
+    rotate: -3deg;
+    scale: 1;
+    opacity: 1;
+  }
+  100% {
+    translate: calc(70cqw - 50%) calc(57cqh - 50%);
+    rotate: 0deg;
+    scale: 0.4;
+    opacity: 0;
+  }
+}
+
+/* ==================================================================
+   Reduced motion: StickyStage puts the stage in normal flow at the
+   last step. Show every beat as a list and the finished window; the
+   hand-off reads from the two terminal lines.
+   ================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .helm-scene {
+    margin-top: clamp(4rem, 3rem + 5vw, 8rem);
+  }
+  .helm-layout {
+    height: auto;
+    padding-block: 0;
+    align-items: start;
+  }
+  .helm-beats {
+    gap: 1.25rem;
+  }
+  .helm-beat {
+    grid-area: auto;
+    opacity: 1;
+    translate: none;
+    filter: none;
+  }
+  .helm-progress {
+    display: none;
+  }
+  .helm-meta {
+    display: flex;
+  }
+  .helm-lede {
+    display: block;
+  }
+  .hw-flight {
+    display: none;
+  }
+  .hw-lamp,
+  .hw-caret,
+  .hw-strip::after,
+  .hw-arc path {
+    animation: none !important;
+  }
+  .hw-line::after,
+  .hw-typed::after {
+    display: none;
+  }
+}

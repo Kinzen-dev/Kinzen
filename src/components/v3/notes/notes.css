@@ -1,0 +1,203 @@
+/* ------------------------------------------------------------------
+   "How I work" board: pastel sticky notes with a tape strip, resting at a
+   slight tilt on a dotted board. A note's place = its grid slot plus
+   (--x, --y), written by the drag code; only transform changes.
+   ------------------------------------------------------------------ */
+.notes-board {
+  position: relative;
+  padding: clamp(1.75rem, 1rem + 3vw, 4rem) clamp(1.25rem, 0.5rem + 3vw, 4rem);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--ink-3) 38%, transparent) 1px, transparent 1.5px) 0 0 /
+      22px 22px,
+    var(--surface);
+}
+
+.notes-list {
+  display: grid;
+  gap: 1.75rem;
+  justify-items: center;
+}
+@media (min-width: 48rem) {
+  .notes-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1.25rem, 3vw, 3rem);
+    align-items: start;
+    padding-bottom: 2rem;
+  }
+  /* A pinned-up board, not a table: the middle note sits lower, the last a touch lower. */
+  .notes-list > :nth-child(3n + 2) {
+    margin-top: 2.5rem;
+  }
+  .notes-list > :nth-child(3n) {
+    margin-top: 0.75rem;
+  }
+}
+
+.note {
+  --x: 0px;
+  --y: 0px;
+  --drag-tilt: 0deg;
+  --lift: 1;
+  position: relative;
+  width: 100%;
+  max-width: 23rem;
+  padding: var(--inset-card);
+  padding-top: calc(var(--inset-card) + 0.5rem);
+  border-radius: 0.375rem;
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  box-shadow:
+    0 1px 1px light-dark(oklch(0.2 0.02 65 / 0.08), oklch(0 0 0 / 0.35)),
+    0 14px 24px -14px light-dark(oklch(0.2 0.02 65 / 0.35), oklch(0 0 0 / 0.7));
+  transform: translate(var(--x), var(--y)) rotate(calc(var(--tilt) + var(--drag-tilt))) scale(var(--lift));
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    transform 640ms cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow var(--dur-2) var(--ease-out);
+  touch-action: auto;
+}
+.note:focus-visible {
+  outline-offset: 5px;
+  border-radius: 0.375rem;
+}
+/* Paper curl: a soft shade in the bottom right corner. */
+.note::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-bottom-right-radius: inherit;
+  background: linear-gradient(135deg, transparent 50%, light-dark(oklch(0.2 0.02 65 / 0.07), oklch(0 0 0 / 0.22)) 50%);
+  pointer-events: none;
+}
+.note-tape {
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  width: 5.5rem;
+  height: 1.5rem;
+  translate: -50% 0;
+  rotate: -4deg;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 6px, light-dark(oklch(1 0 0 / 0.25), oklch(1 0 0 / 0.05)) 6px 12px),
+    light-dark(oklch(0.99 0.01 85 / 0.62), oklch(0.85 0.02 85 / 0.2));
+  box-shadow: 0 1px 2px light-dark(oklch(0.2 0.02 65 / 0.12), oklch(0 0 0 / 0.3));
+  clip-path: polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 50%);
+}
+.note:nth-child(even) .note-tape {
+  rotate: 5deg;
+}
+.note-art {
+  height: 4.5rem;
+}
+.note h3 {
+  color: var(--pastel-ink);
+}
+
+/* Mouse and pen: the notes can be picked up. */
+@media (hover: hover) and (pointer: fine) {
+  .note {
+    cursor: grab;
+    touch-action: none;
+  }
+  .note:hover {
+    --lift: 1.02;
+  }
+  .note[data-dragging] {
+    cursor: grabbing;
+  }
+}
+/* Picked up (mouse, pen or a held finger): the paper lifts off the board. */
+.note[data-dragging] {
+  --lift: 1.05;
+  transition: box-shadow var(--dur-2) var(--ease-out);
+  box-shadow:
+    0 2px 4px light-dark(oklch(0.2 0.02 65 / 0.1), oklch(0 0 0 / 0.4)),
+    0 30px 48px -18px light-dark(oklch(0.2 0.02 65 / 0.42), oklch(0 0 0 / 0.8));
+}
+
+.notes-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1rem;
+}
+.notes-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+.notes-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.25rem;
+  margin-inline-start: auto;
+  padding-inline: var(--inset-pill);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out),
+    opacity var(--dur-2) var(--ease-out);
+}
+.notes-reset:hover {
+  background: var(--ink);
+  color: var(--ground);
+}
+.notes-reset[data-idle] {
+  border-color: var(--rule);
+  color: var(--ink-2);
+}
+/* Something moved: the way back is the obvious next action. */
+.notes-reset:not([data-idle]) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+.notes-reset:not([data-idle]):hover {
+  background: color-mix(in oklch, var(--ink) 86%, var(--ground));
+}
+.notes-hint-fine {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .notes-hint-fine {
+    display: inline;
+  }
+  .notes-hint-touch {
+    display: none;
+  }
+}
+/* Touch only: nothing to put back until a note has moved (keyboard), so no idle button. */
+@media not ((hover: hover) and (pointer: fine)) {
+  .notes-reset[data-idle] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note {
+    transition: none;
+  }
+}
+@media print {
+  .note {
+    transform: none !important;
+    box-shadow: none;
+  }
+  .notes-bar {
+    display: none;
+  }
+}
