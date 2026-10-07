@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Locale } from "@/content/schema";
 import { nobr } from "@/lib/thai-nodes";
+import type { LabProps } from "../../types";
 import { Banner } from "../b-banner/banner";
 import { useFpsProbe, useReducedMotion, watchVisible } from "../b-banner/hooks";
 import "./voice-ribbon.css";
@@ -361,6 +362,6 @@ function Voice({ locale }: { locale: Locale }) {
   );
 }
 
-export default function VoiceRibbon({ locale }: { locale: Locale }) {
-  return <Banner id="vr" locale={locale} stage={<Voice locale={locale} />} />;
+export default function VoiceRibbon({ locale, banner }: LabProps) {
+  return <Banner banner={banner} id="vr" locale={locale} stage={<Voice locale={locale} />} />;
 }

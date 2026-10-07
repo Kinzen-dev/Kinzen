@@ -3,9 +3,8 @@ import type { ReactNode, Ref } from "react";
 import type { Locale } from "@/content/schema";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getV3 } from "@/i18n/v3";
-import { localePath } from "@/lib/site-url";
 import { nobr } from "@/lib/thai-nodes";
-import { bannerCopy, EMAIL, LINKEDIN } from "./copy";
+import type { LabBanner } from "../../types";
 import "@/components/sections/hero.css";
 import "./banner.css";
 
@@ -18,6 +17,7 @@ import "./banner.css";
  */
 export function Banner({
   locale,
+  banner,
   stage,
   layout = "split",
   id,
@@ -25,6 +25,8 @@ export function Banner({
   lineSlot,
 }: {
   locale: Locale;
+  /** Facts from site.ts, resolved on the server by the lab page. */
+  banner: LabBanner;
   stage: ReactNode;
   layout?: "split" | "overlay";
   id: string;
@@ -34,7 +36,6 @@ export function Banner({
 }) {
   const dict = getDictionary(locale);
   const hero = getV3(locale).hero;
-  const copy = bannerCopy(locale);
   const titleId = `${id}-title`;
   const lead = `${hero.lead}${hero.join}${hero.key}`;
 
@@ -48,7 +49,7 @@ export function Banner({
             KINZEN
           </p>
           <h1 id={titleId} className="hero-title hb-title">
-            <span>{nobr(copy.name)}</span> <span className="text-ink-2">{nobr(copy.role)}</span>
+            <span>{nobr(banner.name)}</span> <span className="text-ink-2">{nobr(banner.role)}</span>
           </h1>
           <p className="hb-display">
             <span>{nobr(lead)}</span>
@@ -57,11 +58,11 @@ export function Banner({
             <span className="hb-phrase hb-phrase-phone">{nobr(hero.phrasesPhone[0] ?? "")}</span>
           </p>
           <p className="hb-line" data-hb-line>
-            {nobr(copy.heroLine)}
+            {nobr(banner.heroLine)}
           </p>
           {lineSlot}
           <div className="hero-ctas hb-ctas">
-            <a href={EMAIL.href} className="hero-cta hero-cta-primary beam">
+            <a href={banner.email} className="hero-cta hero-cta-primary beam">
               {nobr(dict.hero.ctaEmail)}
               <svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="none">
                 <path
@@ -73,11 +74,11 @@ export function Banner({
                 />
               </svg>
             </a>
-            <Link href={localePath(locale, "/cv")} prefetch={false} className="hero-cta hero-cta-ghost">
+            <Link href={banner.cvHref} prefetch={false} className="hero-cta hero-cta-ghost">
               {nobr(dict.hero.ctaCv)}
             </Link>
-            <a href={LINKEDIN.href} rel="me noopener" target="_blank" className="hero-cta hero-cta-ghost">
-              {LINKEDIN.label}
+            <a href={banner.linkedin} rel="me noopener" target="_blank" className="hero-cta hero-cta-ghost">
+              LinkedIn
               <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
             </a>
           </div>

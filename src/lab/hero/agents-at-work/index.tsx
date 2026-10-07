@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import type { Locale } from "@/content/schema";
+import type { LabProps } from "../../types";
 import { Banner } from "../b-banner/banner";
-import { bannerCopy } from "../b-banner/copy";
+import { stripJoiners } from "@/lib/thai-plain";
 import { useFpsProbe, useReducedMotion, watchVisible } from "../b-banner/hooks";
 import "./agents-at-work.css";
 
@@ -90,12 +91,11 @@ function rng(seed: number) {
   };
 }
 
-function Workspace({ locale }: { locale: Locale }) {
+function Workspace({ locale, heroLine }: { locale: Locale; heroLine: string }) {
   const root = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const panes = PANES[locale];
   const status = STATUS[locale];
-  const heroLine = bannerCopy(locale).heroLinePlain;
   useFpsProbe("agents-at-work");
 
   useEffect(() => {
@@ -399,12 +399,13 @@ function Workspace({ locale }: { locale: Locale }) {
   );
 }
 
-export default function AgentsAtWork({ locale }: { locale: Locale }) {
+export default function AgentsAtWork({ locale, banner }: LabProps) {
   return (
     <Banner
+      banner={banner}
       id="aw"
       locale={locale}
-      stage={<Workspace locale={locale} />}
+      stage={<Workspace locale={locale} heroLine={stripJoiners(banner.heroLine)} />}
       lineSlot={
         <p className="aw-commit" data-aw-commit aria-hidden="true">
           <span className="aw-commit-dot" />
