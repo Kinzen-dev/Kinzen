@@ -85,13 +85,19 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       setPaused(false);
       started.current = true; // and the first-view replay must never override their pick
       play(next);
-      // Phones: the window sits under the choices; bring it into view so the run is seen.
+      // Phones: the window sits under the choices. Bring it into view so the run is seen, and if
+      // it is taller than the room, its lower part: that is where the verdict and the safe reply land.
       const win = rootRef.current?.querySelector<HTMLElement>(".agent-demo-window");
       if (win) {
         const r = win.getBoundingClientRect();
-        if (r.top > window.innerHeight * 0.6 || r.bottom < 0) {
-          const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-          win.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+        const top = 80; // the floating header pill
+        const room = window.innerHeight - top;
+        let dy = 0;
+        if (r.height > room - 16 || r.bottom > window.innerHeight) dy = r.bottom - window.innerHeight + 12;
+        if (r.height <= room - 16 && r.top - dy < top) dy = r.top - top - 8;
+        if (Math.abs(dy) > 4) {
+          const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          window.scrollBy({ top: dy, behavior: still ? "auto" : "smooth" });
         }
       }
     },
@@ -236,7 +242,10 @@ export function AgentDemo({ copy }: { copy: Copy }) {
             </span>
             {nobr(copy.windowTitle)}
           </span>
-          <span className="text-xs text-ink-2">{nobr(copy.label)}</span>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {!autoplay && !reduced ? <span className="agent-demo-paused">{nobr(copy.paused)}</span> : null}
+            <span className="text-xs text-ink-2">{nobr(copy.label)}</span>
+          </span>
         </figcaption>
 
         <div className="agent-demo-stack p-[var(--inset-card)]">
@@ -338,14 +347,17 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
           </p>
           {at(stage, "checking") ? (
             <p className="agent-demo-guard" data-state={blocked ? "blocked" : "checking"}>
-              <span className="agent-demo-dot" aria-hidden="true" />
               {blocked ? (
-                <span>
-                  <strong className="font-semibold">{nobr(copy.blocked)}:</strong> {s.ruleLabel}{" "}
-                  <code className="readout">{s.rule}</code>
-                </span>
+                <>
+                  <strong className="agent-demo-verdict">{nobr(copy.blocked)}</strong>
+                  <span>{nobr(s.ruleLabel)}</span>
+                  <code className="readout agent-demo-code">{s.rule}</code>
+                </>
               ) : (
-                <span>{nobr(copy.checking)}</span>
+                <>
+                  <span className="agent-demo-dot" aria-hidden="true" />
+                  <span>{nobr(copy.checking)}</span>
+                </>
               )}
             </p>
           ) : null}

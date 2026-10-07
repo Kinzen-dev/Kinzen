@@ -46,7 +46,10 @@ test.describe("v3 Yimwhan scene", () => {
     await expect(page.locator("#yimwhan .yw-rows")).toHaveAttribute("data-on", "");
     await scrollTrack(page, 0.02);
     await expect(grid).toHaveAttribute("data-step", "0");
-    await expect(page.locator("#yimwhan .yw-msg-reply")).not.toHaveAttribute("data-on", "");
+    // Both compositions follow the beat: the full one cumulatively, the compact one card by card.
+    await expect(page.locator("#yimwhan .yw-full .yw-msg-reply")).not.toHaveAttribute("data-on", "");
+    await expect(page.locator("#yimwhan .yw-panel").first()).toHaveAttribute("data-on", "true");
+    await expect(page.locator("#yimwhan .yw-panel[data-on]")).toHaveCount(1);
   });
 
   test("reduced motion shows all five beats as a static sequence", async ({ page }) => {
@@ -120,6 +123,9 @@ test.describe("v3 Yimwhan scene", () => {
     [390, 844],
     [360, 780],
     [844, 390],
+    [768, 1024],
+    [1024, 768],
+    [1440, 900],
   ] as const) {
     test(`mockup text is at least 10.5px at ${w}x${h}`, async ({ page }) => {
       await page.setViewportSize({ width: w, height: h });
