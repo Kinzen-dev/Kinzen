@@ -1242,9 +1242,22 @@
   .hw-note-route {
     font-size: 1em;
   }
+  /* The merge lands in the titlebar, between the lights and the Vesper chip: the rack is too short
+     on a phone for a toast that would not cover the bottom row's last line. */
   .hw-toast {
-    bottom: 0.8em;
+    left: 6em;
+    bottom: calc(100% + 0.32em);
+    gap: 0.45em;
+    padding: 0.2em 0.7em;
     font-size: 0.84em;
+    translate: 0 calc((1 - var(--tv)) * 0.6em);
+  }
+  .hw-toast-branch {
+    display: none;
+  }
+  .hw-toast .hw-icon {
+    width: 1.3em;
+    height: 1.3em;
   }
   .hw-launch {
     gap: 0.7em;

@@ -46,7 +46,7 @@ const PANES: Pane[] = [
     lines: [
       { text: "● Read src/slots/picker.ts", at: 2, phone: false },
       { text: "● Edit picker.ts  +18 −4", short: "● edit picker.ts", at: 2 },
-      { text: "● Run tests  12 passed", short: "● 12 tests pass", at: 2, tone: "ok" },
+      { text: "● Run tests  12 passed", at: 2, tone: "ok", phone: false },
       { text: "→ Sable: picker ready for review", short: "→ Sable: review", at: 3, tone: "note", a: 0.02, len: 0.2 },
       check(0),
     ],
@@ -318,7 +318,11 @@ export function HelmWindow() {
           <div className="hw-toast">
             <Icon d={ICON.check} />
             <span>
-              Merged <b>feat/slot-picker</b> into main
+              Merged{" "}
+              <span className="hw-toast-branch">
+                <b>feat/slot-picker</b>{" "}
+              </span>
+              into main
             </span>
             <span className="hw-toast-meta">4 of 4 checks</span>
           </div>
