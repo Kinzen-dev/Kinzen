@@ -117,7 +117,38 @@ test.describe("works ledger", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Helm" })).toBeVisible();
     await page.getByRole("link", { name: /All work/ }).click();
     await expect(page).toHaveURL(/\/work$/);
-    // The ledger comes back as it was left: the Helm row is still open.
+    // A link is a fresh visit: the ledger starts closed, in the curated order.
+    await expect(page.getByRole("button", { name: "Helm", exact: true })).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("a fresh visit (reload, link) starts in the curated order; Back restores sort and open row", async ({
+    page,
+  }) => {
+    const curated = await rowNames(page);
+    await page
+      .getByRole("button", { name: /Sort by System/ })
+      .filter({ visible: true })
+      .click();
+    const sorted = await rowNames(page);
+    expect(sorted).not.toEqual(curated);
+    await page.getByRole("button", { name: "Helm", exact: true }).click();
+
+    // Reload = fresh visit.
+    await page.reload();
+    await expect.poll(() => rowNames(page)).toEqual(curated);
+    await expect(page.locator('#index [aria-expanded="true"]')).toHaveCount(0);
+
+    // Back/Forward = history traversal: the sorted order and the open row come back.
+    await page
+      .getByRole("button", { name: /Sort by System/ })
+      .filter({ visible: true })
+      .click();
+    await page.getByRole("button", { name: "Helm", exact: true }).click();
+    await page.getByRole("link", { name: /Open project page/ }).click();
+    await expect(page).toHaveURL(/\/work\/helm$/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/work$/);
+    await expect.poll(() => rowNames(page)).toEqual(sorted);
     await expect(page.getByRole("button", { name: "Helm", exact: true })).toHaveAttribute("aria-expanded", "true");
   });
 
