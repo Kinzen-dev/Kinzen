@@ -188,6 +188,10 @@ export const COMPOUNDS = [
   "ฝั่งตะวันตก",
   "ผ่านกฎ",
   "เข้าชม",
+  "ตอบกลับ",
+  "คำตอบสุดท้าย",
+  "อวดอ้าง",
+  "ในการทดสอบนี้",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });
