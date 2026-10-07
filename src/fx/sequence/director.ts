@@ -248,9 +248,10 @@ export function startSequence(els: StageEls): () => void {
     live.set(id, entry);
   };
   const ready = (id: SceneId) => !isGpu(id) || !!live.get(id)?.scene;
-  /** Keep the scene on stage and its neighbours; free the rest. */
+  /** Keep the scene on stage and its neighbours (two ahead from the desk); free the rest. */
   const prune = () => {
     const keep = new Set<SceneId>([cur, nextOf(cur), prevOf(cur)]);
+    if (cur === "desk" || cur === nextOf("desk")) keep.add(nextOf(nextOf("desk")));
     if (next) keep.add(next);
     for (const [id, entry] of live) {
       if (keep.has(id)) continue;
@@ -294,6 +295,7 @@ export function startSequence(els: StageEls): () => void {
     samples = [];
     judged = 0;
     primed = false;
+    threeAhead = false;
     debug.history.push(cur);
     if (debug.history.length > 40) debug.history.shift();
     fitCanvas();
@@ -304,7 +306,16 @@ export function startSequence(els: StageEls): () => void {
 
   /** During the desk's hold, hand its ink to the next scene ahead of time (an idle task, not a frame). */
   let primed = false;
+  let threeAhead = false;
   const primeNext = () => {
+    // The metal is the one heavy build of the loop (the three.js module, its studio light,
+    // shaders): build it while the finished drawing holds still, two steps ahead, so its cost
+    // never lands in a moving scene.
+    if (!threeAhead && gpu && cur === "desk" && !next && t > DRAW_S + 0.2) {
+      threeAhead = true;
+      const ahead = nextOf(nextOf(cur));
+      if (ahead === "gold3d" || ahead === "keycaps") ensure(ahead);
+    }
     if (primed || cur !== "desk" || next || !desk || t < DRAW_S + 0.4) return;
     const s = live.get(nextOf(cur) as GpuSceneId)?.scene;
     if (!s?.prime) return;

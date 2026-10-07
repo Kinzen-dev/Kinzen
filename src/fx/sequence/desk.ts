@@ -40,6 +40,7 @@ export type Desk = {
 export async function createDesk(svg: SVGSVGElement): Promise<Desk> {
   const [{ gsap }, { DrawSVGPlugin }] = await Promise.all([loadMotion(), import("gsap/DrawSVGPlugin")]);
   gsap.registerPlugin(DrawSVGPlugin);
+  performance.mark("kz-desk-build");
   const shown = parseFloat(getComputedStyle(svg).opacity) > 0.5;
   const q = <T extends Element>(sel: string) => Array.from(svg.querySelectorAll<T>(sel));
   const strokes = q<SVGPathElement>("[data-stroke]");
@@ -287,6 +288,7 @@ export async function createDesk(svg: SVGSVGElement): Promise<Desk> {
     return out;
   };
 
+  performance.measure("kz-desk-build", "kz-desk-build");
   return {
     shown,
     set,
