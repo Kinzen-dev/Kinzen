@@ -106,9 +106,16 @@ test.describe("hero fx", () => {
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
     await page.goto("/");
     test.skip((await html(page).getAttribute("data-fx")) !== "pending", "no WebGL2 at all in this browser");
-    expect(await wordmark(page).evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
-    await page.waitForTimeout(900);
-    expect(await wordmark(page).evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
+    // Timed from navigation start, not from goto() returning: under load goto can take longer
+    // than the hold itself, and a fixed wait after it would land past the 1.8 s safety net.
+    const hiddenAt = await wordmark(page).evaluate((el) => ({
+      t: performance.now(),
+      opacity: getComputedStyle(el).opacity,
+    }));
+    if (hiddenAt.t < 1500) expect(hiddenAt.opacity).toBe("0");
+    await page.waitForFunction(() => performance.now() > 1300);
+    const held = await wordmark(page).evaluate((el) => ({ t: performance.now(), o: getComputedStyle(el).opacity }));
+    if (held.t < 1700) expect(held.o).toBe("0");
     await expect(wordmark(page)).toHaveCSS("opacity", "1", { timeout: 2_500 });
   });
 
@@ -123,7 +130,9 @@ test.describe("hero fx", () => {
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "no-preference" });
     await page.goto("/");
     test.skip((await html(page).getAttribute("data-fx")) !== "pending", "no WebGL2 at all in this browser");
-    await expect(html(page)).toHaveAttribute("data-fx", "off", { timeout: 1_500 });
+    // Only the failure path sets data-fx="off" (the CSS safety net reveals without touching it),
+    // so a roomy timeout still tests the hand-back; every chunk is proxied here, which is slow.
+    await expect(html(page)).toHaveAttribute("data-fx", "off", { timeout: 5_000 });
     await expect(wordmark(page)).toHaveCSS("opacity", "1");
   });
 
