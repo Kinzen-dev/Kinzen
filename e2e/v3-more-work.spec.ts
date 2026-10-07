@@ -169,3 +169,21 @@ test.describe("/work index", () => {
     await expect(page.getByRole("link", { name: thai("ผลงานทั้งหมด") })).toHaveAttribute("href", "/th/work");
   });
 });
+
+test("keyboard focus on a home card brings the whole card into view, clear of the nav pill", async ({ page }) => {
+  await page.goto("/");
+  const links = page.locator("#work .mw-link");
+  // Reach the first card link with Tab from the "All systems" link just above it.
+  await page.getByRole("link", { name: "All systems" }).focus();
+  await page.keyboard.press("Tab");
+  await expect(links.first()).toBeFocused();
+  await page.waitForTimeout(300);
+  const m = await page.evaluate(() => {
+    // The slot, not the card: the card itself may still be settling from the scatter.
+    const card = document.querySelector("#work .mw-slot")!.getBoundingClientRect();
+    const pill = document.querySelector("[data-site-header]")!.getBoundingClientRect();
+    return { cardTop: card.top, pillBottom: pill.bottom, cardBottom: card.bottom, vh: innerHeight };
+  });
+  expect(m.cardTop).toBeGreaterThanOrEqual(m.pillBottom);
+  expect(m.cardBottom).toBeLessThanOrEqual(m.vh);
+});

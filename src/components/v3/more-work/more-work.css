@@ -9,6 +9,8 @@
 .mw-slot {
   display: flex;
   min-width: 0;
+  /* Clear of the floating nav pill when a focused card scrolls into view. */
+  scroll-margin-block: calc(var(--header-h) + 1rem) 1rem;
 }
 
 /* Phones: one row that scrolls sideways, bleeding to the screen edges; the next card peeks. */

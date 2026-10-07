@@ -145,13 +145,16 @@ test.describe("works ledger", () => {
       const td = document.querySelector("#index .ledger-panel-row > td")!.getBoundingClientRect();
       const panel = document.querySelector("#index .ledger-panel")!.getBoundingClientRect();
       const heading = document.querySelector("#index-title")!.getBoundingClientRect().left;
+      const toolbar = document.querySelector("#index .ledger-toolbar")!.getBoundingClientRect();
+      const table = document.querySelector("#index table")!.getBoundingClientRect();
       return {
+        tintOnGutter: [left - heading, toolbar.right - right],
+        tableOnGutter: [table.left - heading, toolbar.right - table.right],
         rowL: start - left,
         rowR: right - end,
         panelL: panel.left - td.left,
         panelR: td.right - panel.right,
         edges: [td.left - left, right - td.right],
-        alignedWithHeading: start - heading,
       };
     });
     expect(m.rowL).toBeGreaterThanOrEqual(16);
@@ -159,8 +162,9 @@ test.describe("works ledger", () => {
     expect(Math.abs(m.panelL - m.rowL)).toBeLessThanOrEqual(1);
     expect(Math.abs(m.panelR - m.rowR)).toBeLessThanOrEqual(1);
     expect(m.edges.map(Math.round)).toEqual([0, 0]);
-    // At rest the text still sits on the section's grid line.
-    expect(Math.abs(m.alignedWithHeading)).toBeLessThanOrEqual(1);
+    // Rules and tints run exactly gutter to gutter (aligned with the heading); the inset is inside.
+    expect(m.tintOnGutter.map(Math.round)).toEqual([0, 0]);
+    expect(m.tableOnGutter.map(Math.round)).toEqual([0, 0]);
   });
 });
 

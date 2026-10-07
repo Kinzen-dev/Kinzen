@@ -105,15 +105,14 @@
   }
 
   /* Tinted rows (hover, open) and the open panel are one card with ONE inset on both sides
-     (padding audit finding 1). The table bleeds that inset into the gutter, so at rest the text
-     still sits on the shell grid lines (aligned with the heading and the pills) while a tint has
-     the same room left and right. Never wider than the gutter: the card never leaves the screen. */
+     (padding audit finding 1). The table and every rule stay on the shell gutter; the first and
+     last cells carry the card inset all the time, so a tint never shifts the text and has exactly
+     the same room left and right. */
   .ledger {
-    --ledger-inset: min(var(--inset-card), var(--gutter));
+    --ledger-inset: var(--inset-card);
   }
   .ledger-table {
-    width: calc(100% + 2 * var(--ledger-inset));
-    margin-inline: calc(-1 * var(--ledger-inset));
+    width: 100%;
     overflow-wrap: break-word;
     /* Separate borders: rules live on the cells, so tinted cells can round their corners. */
     border-collapse: separate;
@@ -306,38 +305,35 @@
   }
 }
 
-/* First and last cells: the bleed inset, so text lands on the shell grid lines and every tint
-   (hover, open row, panel) has the same inset on both sides. */
+/* First and last cells: the card inset, so every tint (hover, open row, panel) has the same
+   inset on both sides and the rules run exactly gutter to gutter. */
 .ledger-table tr > :is(th, td):first-child {
   padding-inline-start: var(--ledger-inset);
 }
 .ledger-table tr > :is(th, td):last-child {
   padding-inline-end: var(--ledger-inset);
 }
-/* Rounded tints once the gutter is wider than the inset (the card no longer meets the screen
-   edge). Hover: a small pill row; open: one card from the row to the bottom of its panel. */
-@media (min-width: 64rem) {
-  /* Only while tinted: at rest the rule would bend up into the rounded corner. */
-  .ledger-row:not([data-filtered], [data-open]):hover > :first-child {
-    border-start-start-radius: var(--radius-sm);
-    border-end-start-radius: var(--radius-sm);
-  }
-  .ledger-row:not([data-filtered], [data-open]):hover > :last-child {
-    border-start-end-radius: var(--radius-sm);
-    border-end-end-radius: var(--radius-sm);
-  }
-  .ledger-row[data-open] > :first-child {
-    border-start-start-radius: var(--radius-card);
-    border-end-start-radius: 0;
-  }
-  .ledger-row[data-open] > :last-child {
-    border-start-end-radius: var(--radius-card);
-    border-end-end-radius: 0;
-  }
-  .ledger-panel-row > td {
-    border-end-start-radius: var(--radius-card);
-    border-end-end-radius: var(--radius-card);
-  }
+/* Rounded tints. Hover: a small pill row; open: one card from the row to the bottom of its panel. */
+/* Only while tinted: at rest the rule would bend up into the rounded corner. */
+.ledger-row:not([data-filtered], [data-open]):hover > :first-child {
+  border-start-start-radius: var(--radius-sm);
+  border-end-start-radius: var(--radius-sm);
+}
+.ledger-row:not([data-filtered], [data-open]):hover > :last-child {
+  border-start-end-radius: var(--radius-sm);
+  border-end-end-radius: var(--radius-sm);
+}
+.ledger-row[data-open] > :first-child {
+  border-start-start-radius: var(--radius-card);
+  border-end-start-radius: 0;
+}
+.ledger-row[data-open] > :last-child {
+  border-start-end-radius: var(--radius-card);
+  border-end-end-radius: 0;
+}
+.ledger-panel-row > td {
+  border-end-start-radius: var(--radius-card);
+  border-end-end-radius: var(--radius-card);
 }
 @media (min-width: 48rem) {
   /* Fixed columns from tablet up: opening a row must never re-flow the columns sideways.
