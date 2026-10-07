@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { Locale } from "@/content/schema";
 import { LOCALES, localePath, neutralPath } from "@/lib/site-url";
-import { plain } from "@/lib/thai";
+import { plain } from "@/lib/thai-plain";
 
 export function LanguageSwitch({
   locale,

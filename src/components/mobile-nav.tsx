@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { navTarget } from "./nav-link";
-import { plain } from "@/lib/thai";
+import { plain } from "@/lib/thai-plain";
 import { prefetchFor } from "@/lib/site-url";
 
 /**
