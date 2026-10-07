@@ -7,15 +7,21 @@ const en = {
   title: "In numbers",
   production: { label: "years building production systems", note: "since 2019" },
   techLead: { label: "years as Tech Lead for AnyMind Group's EC Platform", note: "2022 to 2026" },
-  replayed: { label: "real customer messages replayed through the guard; every one passed", note: "Yimwhan AI" },
-  caught: { label: "raw model violations caught by the code filters", note: "Yimwhan AI" },
+  replayed: {
+    label: "real customer messages in a replay test; all final replies passed the configured checks",
+    note: "Yimwhan AI, July 2026",
+  },
+  caught: { label: "rule violations in raw model drafts, caught by the code filters", note: "Yimwhan AI, July 2026" },
 };
 export type NumbersCopy = typeof en;
 const th: NumbersCopy = {
   title: "ผลงานเป็นตัวเลข",
   production: { label: "ปีที่ทำระบบใช้งานจริง", note: "ตั้งแต่ปี 2019" },
   techLead: { label: "ปีที่เป็น Tech Lead ดูแล EC Platform ของ AnyMind Group", note: "ปี 2022 ถึง 2026" },
-  replayed: { label: "ข้อความจริงจากลูกค้าที่นำมารันซ้ำผ่านชุดตรวจ ผ่านครบทุกข้อความ", note: "Yimwhan AI" },
-  caught: { label: "ครั้งที่ตัวกรองในโค้ดดักคำตอบดิบจากโมเดลที่ผิดกฎไว้ได้", note: "Yimwhan AI" },
+  replayed: {
+    label: "ข้อความจริงจากลูกค้าที่นำมาทดสอบซ้ำ คำตอบหลังผ่านตัวกรองผ่านเกณฑ์ครบทุกข้อความในชุดทดสอบนี้",
+    note: "Yimwhan AI ก.ค. 2026",
+  },
+  caught: { label: "ครั้งที่ตัวกรองในโค้ดตรวจพบและบล็อกร่างคำตอบจากโมเดลที่ไม่ผ่านกฎ", note: "Yimwhan AI ก.ค. 2026" },
 };
 export const numbers = { en, th };

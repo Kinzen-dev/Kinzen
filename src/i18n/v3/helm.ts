@@ -26,7 +26,7 @@ const en = {
     },
     {
       title: "Checks turn green",
-      body: "Each pane reports its own check, and the change merges once every one of them passes.",
+      body: "Each pane reports its own checks, and they are reviewed before the change merges.",
     },
   ],
   builtWith: "Built with",
@@ -79,8 +79,8 @@ const th: HelmCopy = {
       body: "agent ตัวหนึ่งส่งโน้ตถึงอีกตัวได้ด้วยการเรียกชื่อ ผมไม่ต้องคอยส่งต่อเอง",
     },
     {
-      title: "เช็คผ่านครบ งานก็ merge",
-      body: "ทุกช่องรายงานผลเช็คของตัวเอง พอผ่านครบทุกช่อง โค้ดที่แก้ก็ merge เข้าไป",
+      title: "ตรวจผ่านแล้วจึง merge",
+      body: "แต่ละช่องรายงานผลการตรวจ เพื่อใช้ตรวจสอบก่อนรวมโค้ดที่แก้ไข",
     },
   ],
   builtWith: "สร้างด้วย",

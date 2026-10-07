@@ -28,6 +28,10 @@ export function Contact({ locale, dict, v3 = getV3(locale) }: { locale: Locale; 
       ].filter((d) => d.text)
     : [];
   const heading = v3.contact.heading;
+  // Project enquiries go to the studio (its own /en or /th); role enquiries stay direct email (C07).
+  const studioUrl = availability?.studioUrl
+    ? (locale === "th" && availability.studioUrl.th) || availability.studioUrl.en
+    : null;
 
   return (
     <section id="contact" aria-labelledby="contact-title" className="shell pt-24 md:pt-32">
@@ -138,6 +142,18 @@ export function Contact({ locale, dict, v3 = getV3(locale) }: { locale: Locale; 
                     {nobr(dict.contact.openTo)}: {nobr(d.label)}
                   </dt>
                   <dd className="mt-2 text-ink-2">{nobr(t(d.text!, locale))}</dd>
+                  {d.key === "employment" ? (
+                    <dd className="mt-3 text-sm font-medium">{nobr(dict.contact.roleRoute)}</dd>
+                  ) : studioUrl ? (
+                    <dd className="mt-3 text-sm font-medium">
+                      {nobr(dict.contact.studioRoute)}{" "}
+                      <a href={studioUrl} rel="noopener" target="_blank" className="link">
+                        {studioUrl.replace(/^https:\/\//, "").replace(/\/(en|th)$/, "")}
+                        <span aria-hidden="true"> ↗</span>
+                        <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
+                      </a>
+                    </dd>
+                  ) : null}
                 </div>
               ))}
             </dl>

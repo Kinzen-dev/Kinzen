@@ -1,0 +1,10 @@
+/* Case-end contact (C06): the email button is the filled one; hover swaps it to an outline. */
+.case-cta-primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+.case-cta-primary:hover {
+  background: transparent;
+  color: var(--ink);
+}
