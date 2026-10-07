@@ -4,6 +4,7 @@ import { skillItems, skills, t } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getV3, type V3Copy } from "@/i18n/v3";
 import { Marquee } from "@/motion/marquee";
+import { MarqueeGroup } from "@/motion/marquee-group";
 import { SectionHeader } from "./section-header";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
@@ -17,6 +18,11 @@ const GROUP_TINT: Record<string, string> = {
   testing: "plain",
   integrations: "pastel-commerce",
   ai: "pastel-ai",
+};
+/** The marquee pause control (audit TECH-11 wording, TH per the audit's suggestion). */
+const MOTION_LABELS: Record<Locale, { pause: string; resume: string }> = {
+  en: { pause: "Pause motion", resume: "Resume motion" },
+  th: { pause: "หยุดภาพเคลื่อนไหว", resume: "เล่นภาพเคลื่อนไหวต่อ" },
 };
 /** Which groups ride which marquee row (the rows run in opposite directions). */
 const ROWS = [
@@ -64,7 +70,8 @@ function stackList(items: string[]) {
 /**
  * Tools (v3): two marquee rows of the stack in pastel chips, running in opposite directions,
  * then the same stack grouped by job in compact cards. The marquees are decoration (the cards
- * carry the content for assistive tech); under reduced motion they become wrapped, still chips.
+ * carry the content for assistive tech) with a visible pause button; under reduced motion they
+ * become wrapped, still chips.
  */
 export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; dict: Dictionary; v3?: V3Copy }) {
   const byId = new Map(skills.map((g) => [g.id, g]));
@@ -83,7 +90,10 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
         <SectionHeader id="skills" title={plain(dict.sections.skills)} intro={v3.tools.intro} />
       </div>
 
-      <div aria-hidden="true" className="tools-marquees">
+      <MarqueeGroup
+        className="tools-marquees"
+        labels={{ pause: nobr(MOTION_LABELS[locale].pause), resume: nobr(MOTION_LABELS[locale].resume) }}
+      >
         {rows.map((row, i) => (
           <Marquee
             key={i}
@@ -97,7 +107,7 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
             ))}
           />
         ))}
-      </div>
+      </MarqueeGroup>
 
       <div className="shell">
         <dl data-reveal-group className="tools-groups">
