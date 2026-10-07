@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 /**
  * The Helm window mockup: real app structure (titlebar, workspace rail, launcher, 2x2 rack of
@@ -8,9 +8,10 @@ import type { CSSProperties } from "react";
  *
  * Everything is drawn in helm.css from the stage's `data-step` and its scroll position `--b`
  * (0..5, one unit per beat), so something moves on every scroll tick of every beat:
- *   0 the launcher fills in (folder typed, 4 panes picked, Create pressed),
- *   1 the four panes spawn one by one, 2 agents type in parallel at their own pace,
- *   3 Atlas writes a note that flies to Sable, 4 checks go green pane by pane and the merge lands.
+ *   0 the launcher fills in (folder typed, Space chosen, a cursor walks to 4, Create pressed,
+ *     the workspace builds), 1 the four panes spawn one by one and boot (strip fills, prompt
+ *     types), 2 agents type in parallel at their own pace, 3 Atlas writes a note that flies to
+ *     Sable, 4 checks go green pane by pane, the merge lands and the rack settles back.
  * A terminal line types over the window [a, a + len] of its own beat (`data-at`).
  */
 
@@ -33,7 +34,7 @@ const check = (i: number): Line => ({
   short: "✓ passed",
   at: 4,
   tone: "ok",
-  a: 0.06 + i * 0.13,
+  a: 0.04 + i * 0.14,
   len: 0.1,
 });
 
@@ -89,7 +90,7 @@ const PANES: Pane[] = [
   },
 ];
 
-/** Step 2: every pane starts almost at once and types at its own pace; all finish by 0.84. */
+/** Step 2: every pane starts almost at once and types at its own pace; all finish by 0.95. */
 function step2Windows() {
   const gap = 220;
   const plan = PANES.map((pane, i) => {
@@ -104,7 +105,7 @@ function step2Windows() {
     });
     return { start, total: t - gap, spans };
   });
-  const scale = Math.min(...plan.map((p) => (0.84 - p.start) / p.total));
+  const scale = Math.min(...plan.map((p) => (0.95 - p.start) / p.total));
   return plan.map((p) => p.spans.map((s) => (s ? { a: p.start + s.from * scale, len: s.dur * scale } : null)));
 }
 const STEP2 = step2Windows();
@@ -123,7 +124,6 @@ const ICON = {
   bell: "M4 11V7.5a4 4 0 0 1 8 0V11l1 1.5H3L4 11ZM6.5 14h3",
   gear: "M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.6 3.6l1.1 1.1M11.3 11.3l1.1 1.1M3.6 12.4l1.1-1.1M11.3 4.7l1.1-1.1",
   expand: "M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9",
-  close: "M4 4l8 8M12 4l-8 8",
   check: "M3.5 8.5 6.5 11.5 12.5 4.5",
   sparkle: "M8 2v3M8 11v3M2 8h3M11 8h3M4.2 4.2l1.6 1.6M10.2 10.2l1.6 1.6M4.2 11.8l1.6-1.6M10.2 5.8l1.6-1.6",
 };
@@ -136,10 +136,13 @@ function Typed({
   a,
   len,
   className,
+  children,
   ...rest
 }: {
   as?: "p" | "span";
   text: string;
+  /** Rich rendering of `text` (same characters); `text` sets the typing steps. */
+  children?: ReactNode;
   at: number;
   a: number;
   len: number;
@@ -154,7 +157,7 @@ function Typed({
       {...rest}
       style={vars({ "--chars": [...text].length, "--at": at, "--a": a.toFixed(3), "--len": len.toFixed(3) })}
     >
-      {text}
+      {children ?? text}
     </Tag>
   );
 }
@@ -233,10 +236,18 @@ export function HelmWindow() {
             </div>
             <p className="hw-path">
               <b>cd</b>
-              <Typed as="span" text="~/projects/orchard" at={0} a={0.06} len={0.3} className="hw-typed hw-path-typed" />
+              <Typed
+                as="span"
+                text="~/projects/orchard"
+                at={0}
+                a={0.04}
+                len={0.24}
+                className="hw-typed hw-path-typed"
+              />
             </p>
             <p className="hw-label hw-launch-label">How many terminals?</p>
             <div className="hw-tiles">
+              <i className="hw-tile-cursor" />
               {["1", "2", "4", "6"].map((n) => (
                 <span key={n} className="hw-tile" data-pick={n === "4" || undefined}>
                   <span className="hw-tile-grid" data-n={n} />
@@ -254,7 +265,7 @@ export function HelmWindow() {
               key={pane.sign}
               className="hw-pane"
               data-pane={pane.sign.toLowerCase()}
-              style={vars({ "--i": i, "--done": (0.16 + i * 0.13).toFixed(2) })}
+              style={vars({ "--i": i, "--done": (0.14 + i * 0.14).toFixed(2) })}
             >
               <div className="hw-head">
                 <b className="hw-sign">{pane.sign}</b>
@@ -263,7 +274,7 @@ export function HelmWindow() {
                   <b data-show="working">WORKING</b>
                   <b data-show="done">
                     <Icon d={ICON.check} />
-                    VERIFIED
+                    PASSED
                   </b>
                 </span>
                 <span className="hw-engine" data-live={i === 0 || undefined}>
@@ -271,14 +282,14 @@ export function HelmWindow() {
                   {i === 0 ? <i /> : null}
                 </span>
                 <Icon d={ICON.expand} className="hw-head-icon" />
-                <Icon d={ICON.close} className="hw-head-icon" />
               </div>
-              <div className="hw-strip" />
+              <div className="hw-strip">
+                <i className="hw-boot" />
+              </div>
               <div className="hw-term">
-                <p className="hw-banner">helm · orchard</p>
-                <p className="hw-prompt">
+                <Typed className="hw-prompt" text={`orchard ❯ ${pane.cmd}`} at={1} a={0.52 + i * 0.1} len={0.12}>
                   orchard <b>❯</b> {pane.cmd}
-                </p>
+                </Typed>
                 {pane.lines.map((line, n) => {
                   const w = line.at === 2 ? STEP2[i]?.[n] : { a: line.a ?? 0, len: line.len ?? 0.1 };
                   const timing = { at: line.at, a: w?.a ?? 0, len: w?.len ?? 0.1 };

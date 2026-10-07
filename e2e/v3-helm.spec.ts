@@ -89,6 +89,26 @@ test.describe("v3 Helm scene", () => {
     });
   }
 
+  for (const [width, route] of [
+    [1024, "/"],
+    [1100, "/th"],
+    [1180, "/"],
+    [1180, "/th"],
+  ] as const) {
+    test(`the step counter stays on one line at ${width}px (${route})`, async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width, height: 800 } });
+      const page = await ctx.newPage();
+      await page.goto(route);
+      const heights = await page
+        .locator(".helm-beat-n")
+        .evaluateAll((els) =>
+          els.map((e) => e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight || "16")),
+        );
+      for (const h of heights) expect(h).toBeLessThan(1.5);
+      await ctx.close();
+    });
+  }
+
   for (const theme of ["light", "dark"]) {
     test(`axe clean in the ${theme} theme, in every beat`, async ({ page }) => {
       test.setTimeout(150_000);

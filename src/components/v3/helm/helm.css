@@ -10,7 +10,9 @@
    ================================================================== */
 
 .helm-scene {
-  margin-top: clamp(4rem, 3rem + 5vw, 8rem);
+  /* The pinned stage already clears the floating nav (padding below), which is also the gap
+     after the scene above: no extra margin, so the two scenes read as one story. */
+  margin-top: 0;
 }
 .helm-stage {
   --b: calc(var(--p, 1) * 5);
@@ -28,16 +30,16 @@
 .helm-layout {
   display: grid;
   height: 100%;
-  align-content: center;
+  align-content: start;
   gap: 1.25rem;
-  padding-block: calc(var(--header-h) + 0.5rem) 1.25rem;
+  padding-block: calc(var(--header-h) + 1.25rem) 1.25rem;
 }
 @media (min-width: 56rem) {
   .helm-layout {
     grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
     align-items: center;
     column-gap: clamp(2rem, 1rem + 3vw, 4.5rem);
-    padding-block: calc(var(--header-h) + 1rem) 2rem;
+    padding-block: calc(var(--header-h) + 1.5rem) 2rem;
   }
 }
 
@@ -137,6 +139,7 @@
   filter: none;
 }
 .helm-beat-n {
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.06em;
@@ -249,6 +252,12 @@
     max-width: calc((100svh - var(--header-h) - 9rem) * 1.6);
   }
 }
+@media (min-width: 40rem) and (max-width: 55.99rem) and (min-height: 600px) {
+  /* Tablet portrait: the window gives up width so copy + window fit one screen. */
+  .helm-window-wrap {
+    max-width: calc((100svh - var(--header-h) - 25rem) / 0.86);
+  }
+}
 .helm-caption {
   margin-top: 0.75rem;
   font-size: 0.75rem;
@@ -327,10 +336,11 @@
     padding: 0.5rem;
   }
   .helm-window-wrap {
-    width: calc((100svh - var(--header-h) - 3.75rem) * 1.16);
+    width: calc((100svh - var(--header-h) - 4.6rem) * 1.16);
   }
   .helm-caption {
     margin-top: 0.4rem;
+    padding-inline: calc(var(--inset-card) - 0.5rem);
   }
 }
 
@@ -361,7 +371,9 @@
   --hw-magenta: hsl(322 58% 62%);
   --hw-ease: cubic-bezier(0.22, 1, 0.36, 1);
   /* Beat 5: the merge lands late in the beat (toast, MERGED tag). */
-  --tv: clamp(0, (var(--b) - 4.68) * 8, 1);
+  --tv: clamp(0, (var(--b) - 4.58) * 8, 1);
+  /* ...then a green sheen sweeps the rack for the rest of the beat. */
+  --zo: clamp(0, (var(--b) - 4.7) / 0.28, 1);
 
   position: relative;
   display: grid;
@@ -369,7 +381,8 @@
   aspect-ratio: 16 / 10;
   overflow: clip;
   border-radius: 1em;
-  font-size: clamp(7.5px, 1.6cqi, 14px);
+  /* Smallest text in the window is 0.8em: 13.4px keeps every glyph at 10.5px or more. */
+  font-size: clamp(13.4px, 1.66cqi, 15px);
   line-height: 1.35;
   color: var(--hw-ink);
   background:
@@ -480,14 +493,14 @@
   border: 1px solid var(--hw-line-2);
   border-radius: 0.35em;
   font-family: var(--font-mono);
-  font-size: 0.72em;
+  font-size: 0.8em;
   color: var(--hw-ink-3);
 }
 
 /* ---------- body: rail + rack ---------- */
 .hw-body {
   display: grid;
-  grid-template-columns: 12.5em minmax(0, 1fr);
+  grid-template-columns: 13em minmax(0, 1fr);
   min-height: 0;
 }
 .hw-rail {
@@ -502,8 +515,8 @@
 .hw-label {
   padding-inline: 0.45em;
   font-family: var(--font-mono);
-  font-size: 0.66em;
-  letter-spacing: 0.16em;
+  font-size: 0.8em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--hw-ink-3);
 }
@@ -513,7 +526,7 @@
   gap: 0.5em;
   padding-inline: 0.4em;
   font-family: var(--font-mono);
-  font-size: 0.74em;
+  font-size: 0.8em;
   color: var(--hw-ink-3);
 }
 .hw-count .hw-swap {
@@ -572,8 +585,8 @@
   margin-left: auto;
   justify-items: end;
   font-family: var(--font-mono);
-  font-size: 0.66em;
-  letter-spacing: 0.1em;
+  font-size: 0.89em; /* inside .hw-space (0.9em): 0.8em of the window */
+  letter-spacing: 0.04em;
   color: var(--hw-ink-3);
 }
 .hw-tag [data-show="working"] {
@@ -617,10 +630,34 @@
   min-height: 0;
 }
 
+/* After the merge (beat 5, .70-.98) a soft green light passes across the rack. */
+.hw-rack::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    hsl(151 46% 56% / 0.16) 45%,
+    hsl(151 60% 75% / 0.22) 50%,
+    hsl(151 46% 56% / 0.16) 55%,
+    transparent 70%
+  );
+  translate: calc(-100% + var(--zo) * 200%) 0;
+  opacity: calc(clamp(0, var(--zo) * 12, 1) * clamp(0, (1 - var(--zo)) * 12, 1));
+}
+
 /* ---------- launcher (beat 1): fills itself in as the visitor scrolls ---------- */
 .hw-launch {
-  --pick: clamp(0, (var(--b) - 0.42) * 12, 1);
-  --press: clamp(0, (var(--b) - 0.7) * 10, 1);
+  /* Beat 1 timeline: path types .04-.28, Space lights .28-.36, a cursor walks 1 -> 2 -> 4
+     (.36-.58), 4 is picked, Create is pressed (.64) and the workspace builds (.72-.98). */
+  --mode: clamp(0, (var(--b) - 0.28) * 12, 1);
+  --cur: clamp(0, (var(--b) - 0.36) / 0.22, 1);
+  --pick: clamp(0, (var(--b) - 0.58) * 16, 1);
+  --press: clamp(0, (var(--b) - 0.64) * 12, 1);
+  --build: clamp(0, (var(--b) - 0.72) / 0.26, 1);
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -640,9 +677,30 @@
     opacity 260ms var(--hw-ease),
     scale 420ms var(--hw-ease);
 }
-.helm-stage:not([data-step="0"]) .hw-launch {
+.helm-stage[data-step="0"] .hw-launch {
+  translate: 0 calc((1 - clamp(0, var(--b), 1)) * 1.2em);
+}
+.helm-stage[data-step="1"] .hw-launch {
+  opacity: calc(1 - clamp(0, (var(--b) - 1) * 10, 1));
+  scale: calc(1 + clamp(0, (var(--b) - 1) * 10, 1) * 0.03);
+}
+.helm-stage:not([data-step="0"], [data-step="1"]) .hw-launch {
   opacity: 0;
-  scale: 0.97;
+}
+.hw-launch::after {
+  --lsh: clamp(0, (var(--b) - 0.06) / 0.62, 1);
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: linear-gradient(105deg, transparent 25%, hsl(38 92% 61% / 0.14) 50%, transparent 75%);
+  translate: calc(-100% + var(--lsh) * 200%) 0;
+  opacity: calc(clamp(0, var(--lsh) * 8, 1) * clamp(0, (1 - var(--lsh)) * 8, 1));
+}
+.hw-launch {
+  overflow: clip;
 }
 .hw-launch-title {
   display: flex;
@@ -672,8 +730,16 @@
   color: var(--hw-ink-2);
 }
 .hw-mode.is-on {
-  border-color: hsl(38 92% 61% / 0.6);
+  position: relative;
+}
+.hw-mode.is-on::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid hsl(38 92% 61% / 0.6);
+  border-radius: inherit;
   background: hsl(38 92% 61% / 0.07);
+  opacity: var(--mode);
 }
 .hw-path {
   display: flex;
@@ -695,6 +761,7 @@
   margin-bottom: -0.3em;
 }
 .hw-tiles {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5em;
@@ -728,6 +795,19 @@
     linear-gradient(90deg, transparent 45%, currentColor 45% 55%, transparent 55%),
     linear-gradient(transparent 45%, currentColor 45% 55%, transparent 55%);
 }
+/* The pointer walking across the tiles (one tile wide, two steps: 1 -> 2 -> 4). */
+.hw-tile-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc((100% - 1.5em) / 4);
+  height: 100%;
+  border: 1px dashed hsl(38 92% 61% / 0.8);
+  border-radius: 0.55em;
+  translate: calc(var(--cur) * 2 * (100% + 0.5em)) 0;
+  opacity: calc(clamp(0, (var(--b) - 0.34) * 20, 1) * (1 - var(--pick)));
+  pointer-events: none;
+}
 /* The picked tile: an amber layer whose opacity follows the scroll. */
 .hw-tile[data-pick]::before {
   content: "";
@@ -743,6 +823,7 @@
 }
 .hw-create {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -763,7 +844,18 @@
   box-shadow: 0 0 0 0.25em hsl(38 92% 61% / 0.35);
   opacity: var(--press);
 }
+.hw-create::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: hsl(45 100% 82% / 0.6);
+  transform-origin: left;
+  scale: var(--build) 1;
+}
 .hw-create .hw-kbd {
+  font-size: 0.93em; /* inside the 0.86em button */
   border-color: hsl(258 40% 9% / 0.35);
   color: hsl(258 40% 9% / 0.75);
 }
@@ -781,15 +873,15 @@
   border-radius: 0.8em;
   background: var(--hw-pane);
   opacity: var(--v);
-  translate: 0 calc((1 - var(--v)) * -0.6em);
-  scale: calc(0.96 + var(--v) * 0.04);
+  translate: 0 calc((1 - var(--v)) * -0.8em);
   transition:
     border-color 200ms var(--hw-ease),
     box-shadow 320ms var(--hw-ease);
 }
 /* Beat 2: the panes spawn one after another while the visitor scrolls. */
 .helm-stage[data-step="1"] .hw-pane {
-  --v: clamp(0, (var(--b) - 1.06 - var(--i) * 0.15) * 6, 1);
+  --v: clamp(0, (var(--b) - 1.04 - var(--i) * 0.13) * 6, 1);
+  --boot: clamp(0, (var(--b) - 1.5 - var(--i) * 0.1) / 0.14, 1);
 }
 .helm-stage:is([data-step="2"], [data-step="3"], [data-step="4"]) .hw-pane {
   --v: 1;
@@ -797,6 +889,34 @@
 /* Beat 5: each pane's check lands in turn (--done is its moment inside the beat). */
 .helm-stage[data-step="4"] .hw-pane {
   --v4: clamp(0, (var(--b) - 4 - var(--done)) * 25, 1);
+}
+/* A light passing across each pane, scrubbed, so a long stretch of scroll never sits still:
+   indigo as the pane boots (beat 2) and while it works (beat 3), green as its check lands (beat
+   5). Screen-blended over the content, so text and typing covers lighten alike. */
+.hw-pane {
+  --sh: 0;
+  --sh-c: hsl(248 70% 74% / 0.2);
+}
+.hw-pane::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: linear-gradient(105deg, transparent 22%, var(--sh-c) 50%, transparent 78%);
+  translate: calc(-100% + var(--sh) * 200%) 0;
+  opacity: calc(clamp(0, var(--sh) * 8, 1) * clamp(0, (1 - var(--sh)) * 8, 1));
+}
+.helm-stage[data-step="1"] .hw-pane {
+  --sh: clamp(0, (var(--b) - 1.45 - var(--i) * 0.1) / 0.3, 1);
+}
+.helm-stage[data-step="2"] .hw-pane {
+  --sh: clamp(0, (var(--b) - 2.04 - var(--i) * 0.16) / 0.48, 1);
+}
+.helm-stage[data-step="4"] .hw-pane {
+  --sh: clamp(0, (var(--b) - 3.92 - var(--done)) / 0.24, 1);
+  --sh-c: hsl(151 55% 62% / 0.24);
 }
 /* Atlas holds focus while the crew works. */
 .helm-stage:is([data-step="2"], [data-step="3"]) .hw-pane[data-pane="atlas"] {
@@ -840,8 +960,8 @@
 .hw-state {
   justify-items: start;
   font-family: var(--font-mono);
-  font-size: 0.58em;
-  letter-spacing: 0.11em;
+  font-size: 0.8em;
+  letter-spacing: 0.05em;
 }
 .hw-state > b {
   display: inline-flex;
@@ -872,8 +992,8 @@
   translate: none;
 }
 .hw-state .hw-icon {
-  width: 1.4em;
-  height: 1.4em;
+  width: 1.1em;
+  height: 1.1em;
 }
 .hw-engine {
   display: inline-flex;
@@ -884,7 +1004,7 @@
   border: 1px solid var(--hw-line-2);
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 0.7em;
+  font-size: 0.8em;
   color: var(--hw-ink-2);
   white-space: nowrap;
 }
@@ -905,6 +1025,18 @@
   color: var(--hw-faint);
 }
 
+/* Boot (beat 2): each pane's strip fills in turn once it has spawned. */
+.hw-boot {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--hw-indigo), hsl(295 50% 64%));
+  transform-origin: left;
+  scale: var(--boot, 0) 1;
+  opacity: 0;
+}
+.helm-stage[data-step="1"] .hw-boot {
+  opacity: 0.9;
+}
 /* Activity strip: a hue gradient runs along it while the pane works; green once verified. */
 .hw-strip {
   position: relative;
@@ -944,14 +1076,14 @@
   overflow: clip;
   padding: 0.7em 0.9em;
   font-family: var(--font-mono);
-  font-size: 0.8em;
-  line-height: 1.65;
+  font-size: 0.82em;
+  line-height: 1.55;
   color: var(--hw-ink);
 }
-.hw-banner {
-  color: var(--hw-banner);
-}
 .hw-prompt {
+  position: relative;
+  overflow: clip;
+  white-space: nowrap;
   color: var(--hw-ink-3);
 }
 .hw-prompt b {
@@ -990,6 +1122,7 @@
    this line is through its own window [a, a + len] of beat `at`. Without a running animation
    (no JS, reduced motion, before arming) the cover rests off the text. */
 .hw-line,
+.hw-prompt,
 .hw-typed {
   --k: clamp(0, (var(--b) - var(--at) - var(--a)) / var(--len), 1);
 }
@@ -1001,6 +1134,7 @@
   --cover: var(--hw-ground);
 }
 .hw-line::after,
+.hw-prompt::after,
 .hw-typed::after {
   content: "";
   position: absolute;
@@ -1076,7 +1210,6 @@
 }
 .hw-note-route {
   font-family: var(--font-mono);
-  font-size: 0.8em;
   letter-spacing: 0.04em;
   opacity: 0.75;
 }
@@ -1142,7 +1275,7 @@
   border: 1px solid var(--hw-line-2);
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 0.72em;
+  font-size: 0.8em;
   color: var(--hw-ink-2);
   white-space: nowrap;
 }
@@ -1160,7 +1293,7 @@
   border-radius: 0.55em;
   background: var(--hw-ground);
   font-family: var(--font-mono);
-  font-size: 0.76em;
+  font-size: 0.8em;
   white-space: nowrap;
   overflow: clip;
 }
@@ -1175,7 +1308,7 @@
    Phone composition: simplified, not shrunk. No rail, no command bar,
    no tiny chips; short terminal lines; nothing under 10.5px.
    ================================================================== */
-@container hw (max-width: 36rem) {
+@container hw (max-width: 48rem) {
   .hw {
     aspect-ratio: 1 / 0.86;
     font-size: clamp(13px, 3.9cqi, 15px);
@@ -1190,24 +1323,13 @@
   .hw-tools,
   .hw-head-icon,
   .hw-state,
-  .hw-banner,
-  .hw-prompt,
   .hw-caret,
   .hw-engine i,
   .hw-toast-meta,
   .hw-modes,
   .hw-launch-label,
-  .hw-create .hw-kbd,
-  .hw-line[data-variant="full"] {
+  .hw-create .hw-kbd {
     display: none !important;
-  }
-  .hw-line[data-variant="short"] {
-    display: none;
-  }
-  .helm-stage[data-step="2"] .hw-line[data-variant="short"][data-at="2"],
-  .helm-stage[data-step="3"] .hw-line[data-variant="short"]:is([data-at="2"], [data-at="3"]),
-  .helm-stage[data-step="4"] .hw-line[data-variant="short"] {
-    display: block !important;
   }
   .hw-titlebar {
     padding-inline: 0.8em;
@@ -1228,7 +1350,7 @@
     padding-inline: 0.6em;
   }
   .hw-engine {
-    padding: 0.2em 0.5em;
+    padding: 0.2em 0.42em;
     font-size: 0.82em;
   }
   .hw-term {
@@ -1267,6 +1389,19 @@
   .hw-path,
   .hw-tile {
     font-size: 0.86em;
+  }
+}
+/* Phone-width window: short wording, no prompt line (a tablet-width compact window keeps the
+   full lines). */
+@container hw (max-width: 30rem) {
+  .hw-prompt,
+  .hw-line[data-variant="full"] {
+    display: none !important;
+  }
+  .helm-stage[data-step="2"] .hw-line[data-variant="short"][data-at="2"],
+  .helm-stage[data-step="3"] .hw-line[data-variant="short"]:is([data-at="2"], [data-at="3"]),
+  .helm-stage[data-step="4"] .hw-line[data-variant="short"] {
+    display: block !important;
   }
 }
 
@@ -1382,6 +1517,9 @@
    hand-off reads from the two terminal lines.
    ================================================================== */
 @media (prefers-reduced-motion: reduce) {
+  .helm-scene {
+    margin-top: clamp(4rem, 3rem + 5vw, 8rem);
+  }
   .helm-layout {
     height: auto;
     padding-block: 0;
