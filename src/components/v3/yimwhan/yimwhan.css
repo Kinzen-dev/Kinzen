@@ -647,7 +647,7 @@
   margin-inline-start: auto;
   font-family: var(--font-mono);
   font-size: 0.68em;
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 .yw-row-sum {
   min-width: 0;
@@ -843,8 +843,9 @@
   text-decoration: line-through 2px var(--yw-red);
   border-radius: 0.2em;
 }
-.yw-stage-grid[data-step="4"] .yw-msg-draft {
-  opacity: 0.5;
+/* Beat 5: the draft stays as the record of what was stopped; its frame goes quiet. */
+.yw-stage-grid[data-step="4"] .yw-msg-draft .yw-bubble {
+  border-color: var(--rule);
 }
 
 .yw-guard {
@@ -1133,7 +1134,12 @@
   color: oklch(0.7 0.01 85);
 }
 
-/* Off screen: the loops hold still. */
+/* Off screen: beat changes snap (the runtime sets the first beat while the scene is still below
+   the fold, and nothing should be caught half-faded), and the loops hold still. */
+.yw-stage-grid:not([data-live]),
+.yw-stage-grid:not([data-live]) * {
+  transition: none !important;
+}
 .yw-stage-grid:not([data-live]) :is(.yw-pulse, .yw-wave i, .yw-lb-typing i, .yw-rec, .yw-status-chip .yw-dot) {
   animation-play-state: paused;
 }
