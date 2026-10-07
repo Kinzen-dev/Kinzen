@@ -24,12 +24,52 @@ function buildCommit(): string {
   }
 }
 
+const csp = (directives: Record<string, string[]>) =>
+  Object.entries(directives)
+    .map(([name, sources]) => [name, ...sources].join(" "))
+    .join("; ");
+
+/**
+ * CSP, enforced part: directives no page needs to break. Every page is prerendered, so there is
+ * no per-request nonce, and Next's inline flight scripts and the theme script need 'unsafe-inline'.
+ */
+const ENFORCED = {
+  "object-src": ["'none'"],
+  "base-uri": ["'self'"],
+  "frame-ancestors": ["'none'"],
+  "form-action": ["'self'"],
+};
+
+/**
+ * CSP, report-only part: the full origin inventory. Everything is same-origin, including Vercel
+ * Web Analytics and Speed Insights (scripts and intake under first-party paths). frame-ancestors
+ * is enforced above (browsers ignore it in a report-only policy). Dev adds 'unsafe-eval' for
+ * React's dev tooling.
+ */
+const REPORT_ONLY = {
+  "default-src": ["'self'"],
+  "script-src": ["'self'", "'unsafe-inline'", ...(process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : [])],
+  "style-src": ["'self'", "'unsafe-inline'"],
+  "img-src": ["'self'"],
+  "font-src": ["'self'"],
+  "connect-src": ["'self'"],
+  "worker-src": ["'self'"],
+  "manifest-src": ["'self'"],
+  "media-src": ["'self'"],
+  "frame-src": ["'none'"],
+  "object-src": ["'none'"],
+  "base-uri": ["'self'"],
+  "form-action": ["'self'"],
+};
+
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "Content-Security-Policy", value: csp(ENFORCED) },
+  { key: "Content-Security-Policy-Report-Only", value: csp(REPORT_ONLY) },
 ];
 
 const nextConfig: NextConfig = {
