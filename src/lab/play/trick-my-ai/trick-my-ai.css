@@ -399,3 +399,8 @@
   border-radius: 0.25rem;
   box-shadow: inset 0 -1px 0 var(--pa-green);
 }
+/* Nothing typed yet: the checks wait instead of claiming a pass. */
+.tm[data-state="idle"] .tm-check-icon {
+  background: color-mix(in oklch, var(--ink) 8%, transparent);
+  color: var(--ink-3);
+}

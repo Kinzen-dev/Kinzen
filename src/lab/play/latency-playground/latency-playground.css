@@ -242,11 +242,7 @@
 }
 /* Speaking: the reply is being heard. */
 .lp-ghost[data-speak] .lp-seg {
-  background: repeating-linear-gradient(
-    90deg,
-    var(--c) 0 3px,
-    color-mix(in oklch, var(--c) 35%, transparent) 3px 7px
-  );
+  background: repeating-linear-gradient(90deg, var(--c) 0 3px, color-mix(in oklch, var(--c) 35%, transparent) 3px 7px);
   box-shadow: none;
 }
 .lp-tick {

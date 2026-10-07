@@ -75,7 +75,8 @@ const COPY = {
     clinic: "Clinic AI",
     recording: (s: string) => `Recording ${s} s, transcribed when you let go`,
     utterance: "Hi, my back tooth hurts when I chew. Can I come in this week?",
-    reply: "Thanks for calling. A dentist should check that tooth in person. I can book you for Tuesday at ten. Shall I hold that slot?",
+    reply:
+      "Thanks for calling. A dentist should check that tooth in person. I can book you for Tuesday at ten. Shall I hold that slot?",
     ttfw: "Time to first word",
     compare: "Try both pipelines to compare.",
     sec: (ms: number) => `${(ms / 1000).toFixed(2)} s`,
@@ -183,7 +184,8 @@ export default function LatencyPlayground({ locale }: { locale: Locale }) {
       void audio.current.ctx.resume();
       return;
     }
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const Ctx =
+      window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     const ctx = new Ctx();
     const a = { ctx, buffer: null as AudioBuffer | null, source: null as AudioBufferSourceNode | null };
@@ -242,7 +244,8 @@ export default function LatencyPlayground({ locale }: { locale: Locale }) {
     const plan = PLANS[runMode];
     setSpoken(utterance.length);
     setPhase("running");
-    if (wave.current) wave.current.querySelectorAll<HTMLElement>("i").forEach((b) => (b.style.transform = "scaleY(0.15)"));
+    if (wave.current)
+      wave.current.querySelectorAll<HTMLElement>("i").forEach((b) => (b.style.transform = "scaleY(0.15)"));
     // Audio, scheduled on the audio clock for the first-word moment.
     const a = audio.current;
     if (a?.buffer && soundRef.current) {
@@ -348,7 +351,9 @@ export default function LatencyPlayground({ locale }: { locale: Locale }) {
             onContextMenu={(e) => e.preventDefault()}
           >
             <span className="lp-mic-dot" aria-hidden="true" />
-            {nobr(phase === "talking" ? c.talking : phase === "running" ? c.working : phase === "done" ? c.again : c.hold)}
+            {nobr(
+              phase === "talking" ? c.talking : phase === "running" ? c.working : phase === "done" ? c.again : c.hold,
+            )}
           </button>
           <div className="lp-wave" ref={wave} aria-hidden="true">
             {Array.from({ length: 28 }, (_, i) => (

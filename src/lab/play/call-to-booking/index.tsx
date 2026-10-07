@@ -48,8 +48,7 @@ const COPY = {
   th: {
     eyebrow: "ห้องทดลอง · ลองเล่น",
     title: "สายโทรเข้ากลายเป็นใบจองคิว",
-    instruction:
-      "ลากแถบเลื่อนไปตามบทสนทนาทางโทรศัพท์ แล้วดูชื่อ อาการ และเวลาที่สะดวก ลอยออกมาเติมลงในใบจองคิว",
+    instruction: "ลากแถบเลื่อนไปตามบทสนทนาทางโทรศัพท์ แล้วดูชื่อ อาการ และเวลาที่สะดวก ลอยออกมาเติมลงในใบจองคิว",
     note: "สายโทร คลินิก และคนไข้เป็นเรื่องสมมติ บทสนทนาเตรียมไว้ในหน้านี้ ไม่มีการถอดเสียง บันทึก หรือส่งข้อมูลออกไป",
     head: "สายโทรเข้า · คลินิกทันตกรรมแสงจันทร์ (สมมติ)",
     who: { ai: "AI ของคลินิก", caller: "ผู้โทร" },
@@ -81,7 +80,8 @@ const WAVE = Array.from({ length: 64 }, (_, i) =>
   Math.round(18 + 70 * Math.abs(Math.sin(i * 0.9) * Math.cos(i * 0.23) * (i % 9 < 6 ? 1 : 0.35))),
 );
 
-const clock = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const clock = (s: number) =>
+  `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 type Gsap = Awaited<ReturnType<typeof loadMotion>>["gsap"];
 
@@ -159,7 +159,12 @@ function buildTimeline(gsap: Gsap, root: HTMLElement, fly: HTMLElement) {
   });
   const [draft, ready] = q<HTMLElement>(".cb-status > *");
   tl.to(draft, { opacity: 0, y: -8, duration: 0.3 }, t);
-  tl.fromTo(ready, { opacity: 0, y: 8, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(2)" }, t + 0.1);
+  tl.fromTo(
+    ready,
+    { opacity: 0, y: 8, scale: 0.9 },
+    { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(2)" },
+    t + 0.1,
+  );
   tl.set({}, {}, t + 0.8);
   return tl;
 }

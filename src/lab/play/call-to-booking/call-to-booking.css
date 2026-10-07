@@ -87,6 +87,8 @@
   :lang(th) .cb-line {
     display: block;
     padding: 0;
+    font-size: var(--text-xs);
+    line-height: 1.6;
   }
   .cb-who {
     display: inline;
@@ -111,10 +113,17 @@
   .cb-row dd {
     font-size: var(--text-xs);
   }
+  /* The scrubber stays under the thumb while the card and the call scroll past. */
   .cb-scrub {
+    position: sticky;
+    z-index: 6;
+    bottom: 0;
     flex-wrap: nowrap;
     align-items: center;
-    padding-top: 0.75rem;
+    margin-inline: calc(-1 * var(--inset-card));
+    padding: 0.625rem var(--inset-card) calc(0.625rem + env(safe-area-inset-bottom));
+    background: color-mix(in oklch, var(--ground) 92%, transparent);
+    backdrop-filter: blur(10px);
   }
   .cb-range .pa-label,
   .cb-time {

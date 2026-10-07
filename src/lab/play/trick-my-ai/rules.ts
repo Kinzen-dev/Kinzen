@@ -170,7 +170,10 @@ export type Verdict = {
 export function judge(text: string): Verdict {
   const hits = scan(text);
   const fired = RULES.filter((r) => hits.some((h) => h.rule === r.id)).map((r) => r.id);
-  const score = Math.min(100, fired.reduce((s, id) => s + ruleById(id).weight, 0));
+  const score = Math.min(
+    100,
+    fired.reduce((s, id) => s + ruleById(id).weight, 0),
+  );
   return { hits, fired, score, pass: hits.length === 0 };
 }
 

@@ -28,7 +28,9 @@ describe("lab reply guard", () => {
   });
 
   it("joins one rule's neighbouring hits into one phrase", () => {
-    const th = judge("น่าจะเป็นฟันผุค่ะ กินยาไอบูโพรเฟน 400 มก. ทุก 6 ชั่วโมงก็ดีขึ้นค่ะ").hits.filter((h) => h.rule === "dosing-gate");
+    const th = judge("น่าจะเป็นฟันผุค่ะ กินยาไอบูโพรเฟน 400 มก. ทุก 6 ชั่วโมงก็ดีขึ้นค่ะ").hits.filter(
+      (h) => h.rule === "dosing-gate",
+    );
     expect(th.map((h) => h.text)).toEqual(["กินยาไอบูโพรเฟน 400 มก. ทุก 6 ชั่วโมง"]);
     const en = judge("Take 400 mg ibuprofen every 6 hours.").hits.map((h) => h.text);
     expect(en).toEqual(["400 mg ibuprofen every 6 hours"]);

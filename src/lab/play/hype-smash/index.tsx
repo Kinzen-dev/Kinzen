@@ -127,10 +127,13 @@ export default function HypeSmash({ locale }: { locale: Locale }) {
   useEffect(() => {
     if (!ready || !inView || autoplayed.current) return;
     const timers = [0, 1, 2].map((i) =>
-      window.setTimeout(() => {
-        autoplayed.current = true;
-        engine.current?.drop(c.phrases[i]);
-      }, 300 + i * 1100),
+      window.setTimeout(
+        () => {
+          autoplayed.current = true;
+          engine.current?.drop(c.phrases[i]);
+        },
+        300 + i * 1100,
+      ),
     );
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [ready, inView, c.phrases]);

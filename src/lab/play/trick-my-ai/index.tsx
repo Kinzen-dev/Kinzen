@@ -1,6 +1,15 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import type { Locale } from "@/content/schema";
 import { nobr } from "@/lib/thai-nodes";
 import { PlayFrame, useReducedMotion } from "./frame";
@@ -20,7 +29,10 @@ const COPY = {
     placeholder: "Type a reply…",
     tryLabel: "Try this",
     tries: [
-      { label: "Diagnose + dose", text: "Sounds like a cavity. Take 400 mg ibuprofen every 6 hours and it will settle." },
+      {
+        label: "Diagnose + dose",
+        text: "Sounds like a cavity. Take 400 mg ibuprofen every 6 hours and it will settle.",
+      },
       { label: "Cure promise", text: "Our sensitivity treatment cures it 100%, guaranteed. Painless too!" },
       { label: "Hype", text: "We're the best clinic in Bangkok, and you're a perfect candidate for implants." },
     ],
@@ -165,11 +177,7 @@ export default function TrickMyAi({ locale }: { locale: Locale }) {
     setSent({ draft: text, verdict, fixed: repairedText(parts), key: Date.now() });
   };
 
-  const announce = empty
-    ? ""
-    : verdict.pass
-      ? c.announcePass
-      : c.announceBlock(verdict.fired.join(", "));
+  const announce = empty ? "" : verdict.pass ? c.announcePass : c.announceBlock(verdict.fired.join(", "));
 
   return (
     <PlayFrame eyebrow={c.eyebrow} title={c.title} instruction={c.instruction} note={c.note}>

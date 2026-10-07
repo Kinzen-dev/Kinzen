@@ -39,6 +39,7 @@ export function addBubble(chat: HTMLElement, text: string, side: "in" | "out"): 
 export function createSmash(els: SmashEls, gsap: Gsap, Flip: typeof FlipType, hooks: SmashHooks) {
   const { stage, layer, bar, chat } = els;
   const ctx = gsap.context(() => {}, stage);
+  const liveTags = new Set<HTMLElement>();
 
   const rel = (r: DOMRect) => {
     const s = stage.getBoundingClientRect();
@@ -92,9 +93,17 @@ export function createSmash(els: SmashEls, gsap: Gsap, Flip: typeof FlipType, ho
     layer.appendChild(tag);
     const tw = tag.offsetWidth;
     tag.style.left = `${Math.min(Math.max(8, cx - tw / 2), stage.clientWidth - tw - 8)}px`;
-    tag.style.top = `${b.y + b.h - 34}px`;
+    // Tags from hits close together stack instead of covering each other.
+    const lift = 30 * liveTags.size;
+    liveTags.add(tag);
+    tag.style.top = `${b.y + b.h - 34 - lift}px`;
     gsap
-      .timeline({ onComplete: () => tag.remove() })
+      .timeline({
+        onComplete: () => {
+          liveTags.delete(tag);
+          tag.remove();
+        },
+      })
       .from(tag, { y: 14, scale: 0.7, opacity: 0, duration: 0.35, ease: "back.out(2)" })
       .to(tag, { y: -42, opacity: 0, duration: 1.1, ease: "power1.in" }, "+=0.7");
     // The bar takes the hit.
@@ -121,6 +130,10 @@ export function createSmash(els: SmashEls, gsap: Gsap, Flip: typeof FlipType, ho
     Flip.from(state, { duration: 0.5, ease: "power3.out", absolute: false });
     const to = rel(bubble.getBoundingClientRect());
     const from = rel(block.getBoundingClientRect());
+    const look = getComputedStyle(bubble);
+    // The block takes the bubble's type and wrapping, so its text never spills while it shrinks.
+    block.style.overflow = "hidden";
+    block.style.whiteSpace = "normal";
     gsap
       .timeline({
         onComplete: () => {
@@ -135,7 +148,19 @@ export function createSmash(els: SmashEls, gsap: Gsap, Flip: typeof FlipType, ho
         duration: 0.55,
         ease: "power3.inOut",
       })
-      .to(block, { borderRadius: "1.125rem 0.375rem 1.125rem 1.125rem", backgroundColor: "#06c755", color: "#0b1a10", duration: 0.55 }, 0)
+      .to(
+        block,
+        {
+          borderRadius: "1.125rem 0.375rem 1.125rem 1.125rem",
+          backgroundColor: "#06c755",
+          color: "#0b1a10",
+          fontSize: look.fontSize,
+          lineHeight: look.lineHeight,
+          padding: look.padding,
+          duration: 0.55,
+        },
+        0,
+      )
       .to(bubble, { opacity: 1, duration: 0.2 }, 0.42)
       .to(block, { opacity: 0, duration: 0.2 }, 0.45);
   }
