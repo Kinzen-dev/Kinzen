@@ -203,25 +203,32 @@ export function AgentDemo({ copy }: { copy: Copy }) {
     <div
       ref={rootRef}
       data-active={active}
-      className="agent-demo grid gap-8 border-t border-rule pt-8 md:grid-cols-12 md:grid-rows-[auto_1fr] md:gap-x-6"
+      className="agent-demo grid gap-8 md:grid-cols-12 md:grid-rows-[auto_1fr] md:gap-x-8"
     >
       <div className="order-1 grid content-start gap-3 md:order-none md:col-span-4 md:row-start-1">
-        <h3 className="text-xl tracking-[-0.03em]">{nobr(copy.title)}</h3>
+        <h4 id="agent-demo-heading" className="text-xl tracking-[-0.03em]">
+          {nobr(copy.title)}
+        </h4>
         <p className="max-w-[44ch] text-ink-2">{nobr(copy.intro)}</p>
       </div>
 
       <figure
-        className="agent-demo-window order-3 m-0 border border-rule-strong bg-surface md:order-none md:col-span-8 md:col-start-5 md:row-span-2 md:row-start-1"
+        className="agent-demo-window order-3 m-0 overflow-clip rounded-card border border-rule bg-surface shadow-lift md:order-none md:col-span-8 md:col-start-5 md:row-span-2 md:row-start-1"
         aria-labelledby="agent-demo-title"
       >
-        <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-rule px-4 py-3">
-          <span id="agent-demo-title" className="text-sm font-semibold whitespace-nowrap">
+        <figcaption className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-rule px-[var(--inset-card)] py-3">
+          <span id="agent-demo-title" className="flex items-center gap-3 text-sm font-semibold whitespace-nowrap">
+            <span className="agent-demo-lights" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
             {nobr(copy.windowTitle)}
           </span>
           <span className="text-xs text-ink-2">{nobr(copy.label)}</span>
         </figcaption>
 
-        <div className="agent-demo-stack p-4 md:p-6">
+        <div className="agent-demo-stack p-[var(--inset-card)]">
           {/* Sizers: every finished exchange, invisible, so the window keeps one height. */}
           {copy.scenarios.map((s) => (
             <div key={`sizer-${s.rule}`} className="agent-demo-sizer" aria-hidden="true">
@@ -255,7 +262,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
               aria-pressed={scenario === i}
               aria-keyshortcuts={String(i + 1)}
               onClick={() => choose(i)}
-              className="agent-demo-choice grid min-h-11 grid-cols-[auto_1fr] items-baseline gap-3 border border-rule px-4 py-3 text-left transition-colors duration-200 hover:border-rule-strong"
+              className={`agent-demo-choice grid min-h-11 grid-cols-[auto_1fr] items-baseline gap-3 rounded-[var(--radius-sm)] border border-rule bg-surface px-4 py-3 text-left transition-colors duration-200 hover:border-rule-strong ${scenario === i ? "beam" : ""}`}
             >
               <kbd className="readout" aria-hidden="true">
                 {i + 1}
@@ -279,7 +286,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
                 setAutoplay(false);
               }
             }}
-            className="inline-flex h-10 w-fit items-center border border-rule px-4 text-sm text-ink-2 transition-colors duration-200 hover:border-rule-strong hover:text-ink"
+            className="inline-flex h-10 w-fit items-center rounded-full border border-rule px-[var(--inset-pill)] text-sm text-ink-2 transition-colors duration-200 hover:border-rule-strong hover:text-ink"
           >
             {paused || !autoplay ? copy.play : copy.pause}
           </button>
@@ -299,7 +306,7 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
     <ol className={`agent-demo-transcript grid content-start gap-4 ${still ? "is-still" : ""}`}>
       <li className="agent-demo-msg agent-demo-patient">
         <span className="agent-demo-who">{nobr(copy.patient)}</span>
-        <p className="agent-demo-bubble border border-rule">{nobr(s.patient)}</p>
+        <p className="agent-demo-bubble bg-pastel-ai text-pastel-ink">{nobr(s.patient)}</p>
       </li>
 
       {at(stage, "typing") && !at(stage, "draft") ? <Typing label={copy.typing} /> : null}

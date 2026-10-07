@@ -1,8 +1,23 @@
-/* "Code over prompts" demo: a real-DOM clinic inbox. Tokens only. */
+/* "Code over prompts" demo: a real-DOM clinic inbox. Tokens only. v3: rounded window,
+   pastel bubbles, a gold beam running round the chosen message. */
 
 .agent-demo-choice[aria-pressed="true"] {
-  border-color: var(--rule-strong);
-  box-shadow: inset 3px 0 0 var(--ink);
+  border-color: transparent;
+  background: color-mix(in oklch, var(--gold) 9%, var(--surface));
+}
+.agent-demo-choice[aria-pressed="true"] .readout {
+  color: var(--gold);
+}
+
+.agent-demo-lights {
+  display: inline-flex;
+  gap: 0.375rem;
+}
+.agent-demo-lights i {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--rule);
 }
 
 @media (hover: none) {
@@ -72,7 +87,14 @@
   /* No one-word last line ("ดีคะ" alone) in short chat bubbles. */
   text-wrap: pretty;
   padding: 0.625rem 0.875rem;
-  border-radius: 2px;
+  border-radius: 1rem;
+}
+.agent-demo-patient .agent-demo-bubble {
+  border-end-start-radius: 0.3rem;
+}
+.agent-demo-draft .agent-demo-bubble,
+.agent-demo-reply .agent-demo-bubble {
+  border-end-end-radius: 0.3rem;
 }
 
 .agent-demo-transcript:not(.is-still) > li {
@@ -105,6 +127,7 @@
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   padding-inline: 0.15em;
+  border-radius: 0.2em;
 }
 
 .agent-demo-guard {
@@ -124,6 +147,7 @@
   height: 0.5rem;
   margin-inline-end: 0.5rem;
   vertical-align: 0.05em;
+  border-radius: 2px;
   background: var(--ink);
 }
 .agent-demo-guard[data-state="checking"] .agent-demo-dot {
@@ -142,7 +166,8 @@
   gap: 0.3rem;
   padding: 0.75rem 0.875rem;
   border: 1px dashed var(--rule-strong);
-  border-radius: 2px;
+  border-radius: 1rem;
+  border-end-end-radius: 0.3rem;
 }
 .agent-demo-dots i {
   width: 0.375rem;
@@ -171,6 +196,7 @@
   min-height: 3.25rem;
   padding: 0.5rem 0.875rem;
   border: 1px dashed var(--rule);
+  border-radius: 1rem;
   color: var(--ink-3);
   font-size: var(--text-sm);
 }
