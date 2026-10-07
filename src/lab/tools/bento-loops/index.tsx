@@ -148,7 +148,7 @@ function AiStage({ c }: { c: Copy }) {
             </svg>
             <span className="bl-bars">
               {Array.from({ length: 18 }, (_, i) => (
-                <i key={i} data-x="bar" style={{ height: `${30 + 60 * Math.abs(Math.sin(i * 1.7))}%` }} />
+                <i key={i} data-x="bar" style={{ height: `${Math.round(30 + 60 * Math.abs(Math.sin(i * 1.7)))}%` }} />
               ))}
             </span>
             <span className="bl-dur">0:04</span>

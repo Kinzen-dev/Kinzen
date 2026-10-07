@@ -108,15 +108,15 @@ const ai: Builder = (gsap, root, light) => {
   // 3. The model answers.
   step(2, "+=0.2");
   tl.call(light, [["Anthropic API", "Gemini on Vertex AI"]]);
-  tl.fromTo(dots, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.25 });
+  tl.fromTo(dots, { autoAlpha: 0, y: 6, scale: 1 }, { autoAlpha: 1, y: 0, duration: 0.25 });
   tl.fromTo(
     Array.from(dots.children),
     { y: 0 },
     { y: -3, duration: 0.28, stagger: 0.12, repeat: 3, yoyo: true, ease: "sine.inOut" },
     "<",
   );
-  tl.to(dots, { autoAlpha: 0, duration: 0.2 });
-  tl.fromTo(reply, { autoAlpha: 0, y: 8 }, rise, "<");
+  tl.to(dots, { autoAlpha: 0, scale: 0.9, duration: 0.18, ease: "power2.in" });
+  tl.fromTo(reply, { autoAlpha: 0, y: 8 }, rise, ">");
   typeIn(tl, replyText, "<0.1", 30);
 
   // 4. The evals check the reply before it goes out.
