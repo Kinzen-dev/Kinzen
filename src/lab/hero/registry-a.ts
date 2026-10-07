@@ -9,4 +9,11 @@ export const demos: LabDemo[] = [
     technique: "WebGL2 GPGPU: 65k particles in float textures (MRT step), spring + curl noise + pointer forces, left-to-right sorted morph targets.",
     load: () => import("./particles-alive"),
   },
+  {
+    id: "gold-ink-water",
+    title: "Gold ink in water",
+    idea: "KINZEN poured as gold dye into navy water: the cursor stirs it into wisps, and calm water gathers the ink back into the name.",
+    technique: "WebGL2 Stable Fluids (own compact rewrite after PavelDoGreat, MIT): vorticity, Jacobi pressure, plus an unprojected gather flow and refill toward the letter mask.",
+    load: () => import("./gold-ink-water"),
+  },
 ];
