@@ -16,6 +16,11 @@ const th: HeroCopy = {
   lead: "ผม",
   key: "สร้าง",
   join: "",
-  phrases: ["ผู้ช่วย AI รับสายและตอบแชท LINE", "แพลตฟอร์ม Shopify", "พื้นที่ทำงานของ AI agent", "เครื่องมือสำหรับนักพัฒนา"],
+  phrases: [
+    "ผู้ช่วย AI รับสายและตอบแชท LINE",
+    "แพลตฟอร์ม Shopify",
+    "พื้นที่ทำงานของ AI agent",
+    "เครื่องมือสำหรับนักพัฒนา",
+  ],
 };
 export const hero = { en, th };

@@ -18,19 +18,8 @@ import "./contact.css";
  * Contact (v3): the closing dark scene. Kinetic heading, the address as a big link, a primary
  * CTA with the border beam, King's portrait throwing a paper plane whose dashed path draws
  * itself to Bangkok as the card scrolls in, the two ways to work together and the Bangkok clock as odometer digits.
- * `art` is accepted and ignored (the plane scene replaced the envelope doodle).
  */
-export function Contact({
-  locale,
-  dict,
-  v3 = getV3(locale),
-}: {
-  locale: Locale;
-  dict: Dictionary;
-  v3?: V3Copy;
-  /** @deprecated v3: the paper-plane scene replaces it. */
-  art?: ReactNode;
-}) {
+export function Contact({ locale, dict, v3 = getV3(locale) }: { locale: Locale; dict: Dictionary; v3?: V3Copy }) {
   const email = links.find((l) => l.kind === "email");
   const others = links.filter((l) => l.kind !== "email");
   const doors = availability
@@ -67,7 +56,14 @@ export function Contact({
                 <div className="flex flex-wrap items-center gap-3">
                   <a href={email.href} className="contact-cta beam">
                     {nobr(dict.contact.emailMe)}
-                    <svg aria-hidden="true" viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.75">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 20 20"
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                    >
                       <path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </a>

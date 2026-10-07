@@ -14,7 +14,17 @@ const UNDERLINE = "M6 17 C 120 9 250 6 390 9 C 470 11 540 13 594 9 M520 21 C 548
  * frame. Every phrase change remounts the stroke so it draws again. Reduced motion: the cycler
  * holds the first phrase and the stroke is drawn from the start.
  */
-export function HeroKinetic({ lead, word, join, phrases }: { lead: ReactNode; word: ReactNode; join: string; phrases: ReactNode[] }) {
+export function HeroKinetic({
+  lead,
+  word,
+  join,
+  phrases,
+}: {
+  lead: ReactNode;
+  word: ReactNode;
+  join: string;
+  phrases: ReactNode[];
+}) {
   const box = useRef<HTMLSpanElement>(null);
   const line = useRef<HTMLSpanElement>(null);
   const [n, setN] = useState(0);
@@ -68,7 +78,15 @@ export function HeroKinetic({ lead, word, join, phrases }: { lead: ReactNode; wo
       <span ref={box} className="hero-kinetic-phrase">
         <TextCycler phrases={phrases} ms={2800} />
         <span ref={line} className="hero-underline" aria-hidden="true">
-          <DrawPath key={n} d={UNDERLINE} viewBox="0 0 600 28" strokeWidth={5} ms={650} delay={160} className="text-gold" />
+          <DrawPath
+            key={n}
+            d={UNDERLINE}
+            viewBox="0 0 600 28"
+            strokeWidth={5}
+            ms={650}
+            delay={160}
+            className="text-gold"
+          />
         </span>
       </span>
     </p>

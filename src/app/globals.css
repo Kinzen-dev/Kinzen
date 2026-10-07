@@ -101,7 +101,9 @@
 }
 
 @media (min-width: 48rem) {
-  :root {
+  /* Scenes re-declare the tokens, so the desktop bump must reach them too. */
+  :root,
+  [data-scene] {
     --inset-card: 1.5rem;
   }
 }

@@ -7,7 +7,12 @@ import { numberFacts } from "./facts";
 import "./numbers.css";
 
 /** One pastel per card, in reading order (decorative grounds, not area claims). */
-const PASTEL = { production: "pastel-games", techLead: "pastel-commerce", replayed: "pastel-ai", caught: "pastel-tools" };
+const PASTEL = {
+  production: "pastel-games",
+  techLead: "pastel-commerce",
+  replayed: "pastel-ai",
+  caught: "pastel-tools",
+};
 
 /**
  * Numbers strip (ticket v3-03): a light scene right after the hero. Four facts already in content,

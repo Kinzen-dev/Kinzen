@@ -1,6 +1,15 @@
 "use client";
 
-import { useCallback, useId, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import "./notes.css";
 
 export type Note = { id: string; pastel: string; tilt: number; body: ReactNode };
@@ -160,13 +169,31 @@ export function NotesBoard({
       </div>
       <div className="notes-bar">
         <p className="notes-hint">
-          <svg aria-hidden="true" viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M7.5 9V3.8a1.3 1.3 0 0 1 2.6 0V9m0-1.2V2.9a1.3 1.3 0 0 1 2.6 0v5.3m0-.6V4.4a1.3 1.3 0 0 1 2.6 0v6.7c0 3.6-2.3 6.4-5.6 6.4-2.3 0-3.6-1-4.9-3.1L2.6 11a1.3 1.3 0 0 1 2.1-1.5l2.8 2.6" strokeLinecap="round" strokeLinejoin="round" />
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            className="size-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path
+              d="M7.5 9V3.8a1.3 1.3 0 0 1 2.6 0V9m0-1.2V2.9a1.3 1.3 0 0 1 2.6 0v5.3m0-.6V4.4a1.3 1.3 0 0 1 2.6 0v6.7c0 3.6-2.3 6.4-5.6 6.4-2.3 0-3.6-1-4.9-3.1L2.6 11a1.3 1.3 0 0 1 2.1-1.5l2.8 2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           {labels.hint}
         </p>
         <button type="button" className="notes-reset" data-idle={moved ? undefined : ""} onClick={reset}>
-          <svg aria-hidden="true" viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            className="size-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
             <path d="M4 10a6 6 0 1 0 1.8-4.3M4 3.5v3h3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           {labels.reset}

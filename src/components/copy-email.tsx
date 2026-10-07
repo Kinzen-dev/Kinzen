@@ -26,7 +26,14 @@ export function CopyEmail({
   }
 
   const icon = (done: boolean) => (
-    <svg viewBox="0 0 20 20" className="size-4 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      viewBox="0 0 20 20"
+      className="size-4 shrink-0"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
       {done ? <path d="m4.5 10.5 3.5 3.5 7.5-8" /> : <path d="M7 7V4.5h8.5V13H13M4.5 7H13v8.5H4.5Z" />}
     </svg>
   );

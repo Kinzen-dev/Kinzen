@@ -79,7 +79,13 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
                 <a href={email.href} className="hero-cta hero-cta-primary beam">
                   {nobr(dict.hero.ctaEmail)}
                   <svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="none">
-                    <path d="M3 8h9M8.5 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M3 8h9M8.5 4l4 4-4 4"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </a>
               ) : null}

@@ -18,22 +18,9 @@ const NOTE_LOOK: Record<string, { art: ArtName; pastel: string; tilt: number }> 
 
 /**
  * How King works with AI agents, as draggable sticky notes (v3). The interactive guard demo
- * that used to sit here now lives in the Yimwhan scene; `demo` and `icons` are accepted and
- * ignored until page.tsx stops passing them.
+ * that used to sit here now lives in the Yimwhan scene.
  */
-export function Practice({
-  locale,
-  dict,
-  v3 = getV3(locale),
-}: {
-  locale: Locale;
-  dict: Dictionary;
-  v3?: V3Copy;
-  /** @deprecated v3: the demo moved to the Yimwhan scene. */
-  demo?: ReactNode;
-  /** @deprecated v3: each note carries its own drawing. */
-  icons?: Partial<Record<string, ReactNode>>;
-}) {
+export function Practice({ locale, dict, v3 = getV3(locale) }: { locale: Locale; dict: Dictionary; v3?: V3Copy }) {
   const notes: Note[] = practices.map((p) => {
     const look = NOTE_LOOK[p.id] ?? { art: "note-ship-small", pastel: "pastel-tools", tilt: 1 };
     return {

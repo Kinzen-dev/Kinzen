@@ -80,11 +80,8 @@
   height: 1.5rem;
   translate: -50% 0;
   rotate: -4deg;
-  background: repeating-linear-gradient(
-      90deg,
-      transparent 0 6px,
-      light-dark(oklch(1 0 0 / 0.25), oklch(1 0 0 / 0.05)) 6px 12px
-    ),
+  background:
+    repeating-linear-gradient(90deg, transparent 0 6px, light-dark(oklch(1 0 0 / 0.25), oklch(1 0 0 / 0.05)) 6px 12px),
     light-dark(oklch(0.99 0.01 85 / 0.62), oklch(0.85 0.02 85 / 0.2));
   box-shadow: 0 1px 2px light-dark(oklch(0.2 0.02 65 / 0.12), oklch(0 0 0 / 0.3));
   clip-path: polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 50%);

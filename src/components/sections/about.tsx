@@ -23,7 +23,10 @@ export function About({ locale, dict, offClockArt }: { locale: Locale; dict: Dic
 
         <div className="grid content-start gap-5 md:col-span-7 md:col-start-6 lg:col-span-6 lg:col-start-7">
           {tList(profile.bioLong, locale).map((para, i) => (
-            <p key={para.slice(0, 24)} className={i === 0 ? "max-w-[60ch] text-xl tracking-[-0.02em]" : "max-w-[60ch] text-lg text-ink-2"}>
+            <p
+              key={para.slice(0, 24)}
+              className={i === 0 ? "max-w-[60ch] text-xl tracking-[-0.02em]" : "max-w-[60ch] text-lg text-ink-2"}
+            >
               {nobr(para)}
             </p>
           ))}

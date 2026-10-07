@@ -137,7 +137,7 @@ export function CardDeck({
         data-reveal-group={reveal || undefined}
       >
         {cards.map((card, i) => (
-          <li key={i} className="mw-slot" data-wide={(i % 4 === 0 || i % 4 === 3) || undefined}>
+          <li key={i} className="mw-slot" data-wide={i % 4 === 0 || i % 4 === 3 || undefined}>
             {card}
           </li>
         ))}
