@@ -10,6 +10,10 @@
 }
 .tools-marquee {
   --marquee-gap: 0.75rem;
+  --fade: clamp(2.5rem, 1rem + 8vw, 10rem);
+  /* Full-bleed rows: a fixed-width fade at both viewport edges (a percentage fade is too thin on a
+     phone and the chips read as cut off). */
+  mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent);
 }
 .tool-chip {
   display: inline-flex;
@@ -31,6 +35,7 @@
 /* Reduced motion: the rows are wrapped, still chips inside the gutter. */
 @media (prefers-reduced-motion: reduce) {
   .tools-marquee {
+    mask-image: none;
     padding-inline: var(--gutter);
     max-width: 96rem;
     margin-inline: auto;

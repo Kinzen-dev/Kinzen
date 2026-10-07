@@ -52,7 +52,7 @@ export function Contact({ locale, dict, v3 = getV3(locale) }: { locale: Locale; 
                 <a href={email.href} className="contact-email link">
                   {email.label}
                 </a>
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="contact-actions">
                   <a href={email.href} className="contact-cta beam">
                     {nobr(dict.contact.emailMe)}
                     <svg
@@ -98,10 +98,11 @@ export function Contact({ locale, dict, v3 = getV3(locale) }: { locale: Locale; 
               <Art name="portrait-paper-plane" className="contact-plane-figure" />
               <svg viewBox="0 0 320 170" fill="none" focusable="false" className="contact-plane-trail">
                 <path
-                  d="M2 12C46 0 88 10 112 40c20 26 14 56-8 56s-24-30 0-40c36-14 86-4 124 36"
+                  d="M2 12C46 0 88 10 112 40c20 26 14 56-8 56s-24-30 0-40c40-16 110-6 148 40"
+                  pathLength={100}
                   stroke="currentColor"
                   strokeWidth="2.5"
-                  strokeDasharray="7 9"
+                  strokeDasharray="2.6 2.4"
                   strokeLinecap="round"
                 />
                 <g transform="translate(236 80) scale(0.29)">
