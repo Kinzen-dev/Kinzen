@@ -1,0 +1,307 @@
+/* v3 project pages (ticket v3-09): the cards' language on one page. Area pastel hero card, glass
+   fact chips, numbered outcome cards, stack pills, link buttons, framed plate, pastel next card.
+   Every tinted or bordered box has the same inset on both sides. */
+
+.pj {
+  /* Big cards get double the card inset (48px desktop, 32px phone). */
+  --pj-inset: calc(var(--inset-card) * 2);
+}
+
+/* ---------- hero card ---------- */
+.pj-hero {
+  display: grid;
+  gap: var(--inset-card);
+  padding: var(--pj-inset);
+  border-radius: var(--radius-card);
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  box-shadow: var(--shadow-soft);
+}
+@media (min-width: 64rem) {
+  .pj-hero {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+    column-gap: var(--pj-inset);
+    min-height: 28rem;
+  }
+}
+.pj-hero-text {
+  display: grid;
+  align-content: space-between;
+  gap: 2rem;
+  height: 100%;
+}
+.pj-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding-inline: var(--inset-pill);
+  border: 1px solid color-mix(in oklch, var(--pastel-ink) 25%, transparent);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+.pj-back:hover {
+  background: var(--pastel-ink);
+  color: var(--pastel);
+}
+.pj-title {
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl--line-height);
+  letter-spacing: -0.045em;
+}
+.pj-tagline {
+  max-width: 44ch;
+  margin-top: 1rem;
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  color: color-mix(in oklch, var(--pastel-ink) 82%, var(--pastel));
+}
+.pj-hero-art {
+  display: grid;
+  place-items: center;
+  /* Paper light behind the ink, as on the cards. */
+  background: radial-gradient(
+    60% 65% at 50% 55%,
+    light-dark(oklch(1 0 0 / 0.55), oklch(1 0 0 / 0.07)),
+    transparent 72%
+  );
+}
+.pj-art-ink {
+  width: 100%;
+  max-height: 100%;
+  color: var(--pastel-ink);
+}
+.pj-hero-art .pj-art-ink {
+  max-width: 30rem;
+}
+/* Phones: the scene first, smaller, so the title still lands in the first screen. */
+@media (max-width: 63.999rem) {
+  /* Flex, not grid: the art's 100% height needs a definite box to resolve against. */
+  .pj-hero-art {
+    order: -1;
+    display: flex;
+    justify-content: center;
+    height: clamp(9rem, 30vw, 14rem);
+  }
+  .pj-hero-art .pj-art-ink {
+    width: auto;
+    height: 100%;
+  }
+}
+
+/* ---------- fact chips (same glass as the hero facts) ---------- */
+.pj-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+}
+@media (min-width: 48rem) {
+  .pj-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.pj-fact {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: var(--inset-card);
+  border: 1px solid color-mix(in oklab, var(--ink) 12%, transparent);
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--ink) 7%, transparent),
+    color-mix(in oklab, var(--ink) 2%, transparent)
+  );
+}
+.pj-fact dd {
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- sections ---------- */
+.pj-section {
+  display: grid;
+  /* minmax(0): the plate's wide drawing scrolls inside its card, never widens the page. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  margin-top: clamp(4rem, 3rem + 3vw, 6rem);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+@media (min-width: 48rem) {
+  .pj-section:not(.pj-section-wide) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 1.5rem;
+  }
+}
+.pj-h2 {
+  font-size: var(--text-xl);
+  line-height: var(--text-xl--line-height);
+  letter-spacing: -0.035em;
+}
+
+/* Outcomes: numbered soft cards on a pale wash of the project's pastel. */
+.pj-outcomes {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+}
+.pj-outcome {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  padding: var(--inset-card);
+  border-radius: var(--radius-card);
+  background: color-mix(in oklch, var(--pastel) 55%, var(--ground));
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+}
+.pj-num {
+  min-width: 2ch;
+  padding-top: 0.2em;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+/* Stack: pills. */
+.pj-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  gap: 0.5rem;
+  list-style: none;
+}
+.pj-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding-inline: var(--inset-pill);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+:lang(th) .pj-pill {
+  font-family: var(--font-sans);
+}
+
+/* Links: pill buttons. */
+.pj-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  gap: 0.75rem;
+  list-style: none;
+}
+.pj-linkbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
+}
+.pj-linkbtn:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+.pj-ext {
+  color: var(--gold);
+}
+
+/* Architecture plate, framed as a card. The plate's own scroller keeps the inset on phones. */
+.pj-plate {
+  min-width: 0;
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--ground);
+  box-shadow: var(--shadow-soft);
+}
+
+/* ---------- next project ---------- */
+.pj-next-wrap {
+  margin-top: clamp(5rem, 4rem + 4vw, 8rem);
+}
+.pj-next {
+  display: grid;
+  gap: var(--inset-card);
+  padding: var(--pj-inset);
+  border-radius: var(--radius-card);
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  box-shadow: var(--shadow-soft);
+  transition:
+    translate var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out);
+}
+@media (min-width: 48rem) {
+  .pj-next {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
+    align-items: center;
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pj-next:hover {
+    translate: 0 -6px;
+    box-shadow: var(--shadow-lift);
+  }
+}
+.pj-next:focus-visible {
+  outline-offset: 4px;
+}
+.pj-next-text {
+  display: grid;
+  gap: 0.75rem;
+}
+.pj-next-label {
+  color: inherit;
+}
+.pj-next-name {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: var(--text-2xl--line-height);
+  letter-spacing: -0.045em;
+}
+.pj-next-tagline {
+  max-width: 52ch;
+  color: color-mix(in oklch, var(--pastel-ink) 82%, var(--pastel));
+}
+.pj-next-art {
+  display: grid;
+  place-items: center;
+}
+.pj-next-art .pj-art-ink {
+  max-width: 18rem;
+}
+@media (max-width: 47.999rem) {
+  .pj-next-art {
+    order: -1;
+    display: flex;
+    height: 7.5rem;
+  }
+  .pj-next-art .pj-art-ink {
+    width: auto;
+    height: 100%;
+  }
+}

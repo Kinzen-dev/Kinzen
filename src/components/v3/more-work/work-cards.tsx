@@ -9,7 +9,7 @@ import { CardDeck } from "./card-deck";
 import "./more-work.css";
 
 /** Scene illustration per project (v3 ink art). */
-const ART: Record<string, ArtName> = {
+export const PROJECT_ART: Record<string, ArtName> = {
   "proj-yimwhan": "scene-yimwhan-desk",
   "proj-anymind-ec": "scene-storefront",
   "proj-helm": "scene-helm-crew",
@@ -54,7 +54,7 @@ export function WorkCards({
   const cards = rows.map((row) => (
     <article key={row.id} className={`mw-card pastel-${row.area}`}>
       <div className="mw-art" aria-hidden="true">
-        {ART[row.id] ? <Art name={ART[row.id]} className="mw-art-ink" /> : null}
+        {PROJECT_ART[row.id] ? <Art name={PROJECT_ART[row.id]} className="mw-art-ink" /> : null}
       </div>
       <div className="mw-body">
         <p className="mw-meta">
