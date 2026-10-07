@@ -21,7 +21,6 @@
   /* Opaque enough that text scrolling under it never reads through (review of the v3 build). */
   background: color-mix(in oklab, var(--ground) 88%, transparent);
   backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   box-shadow: var(--shadow-soft);
   transition:
     padding var(--dur-3) var(--ease-out),
