@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
-import { loadMotion } from "@/motion/gsap";
 
 /** Where each card starts in the collage, by its grid column (left / right) and row. */
 const SCATTER = [
@@ -11,13 +10,18 @@ const SCATTER = [
   { x: -80, y: 160, rotation: -6 },
 ];
 
+const MOTION_DESKTOP = "(min-width: 64rem) and (prefers-reduced-motion: no-preference)";
+
 /**
  * Layout and motion for the project cards (client: the scatter and the carousel dots).
  *
- * - From 64rem: a 12-column bento, rows alternate 7/5 and 5/7. With `scatter`, each card starts
- *   rotated and pulled toward the middle, then settles into its slot as the slot scrolls in
- *   (ScrollTrigger scrub on transform only; the slot is the trigger, so measuring never sees the
- *   moving card). Reduced motion or no JS: the even grid, nothing moves.
+ * - From 64rem: a 12-column bento, rows alternate 7/5 and 5/7. With `scatter`, each card that is
+ *   still below the fold starts rotated and pulled toward the middle, and the moment its slot
+ *   enters the viewport it settles into place in one short, time-based move (CSS transition on
+ *   transform; the untransformed slot is what is observed). Not a scrub: wherever the visitor
+ *   stops scrolling, the cards come to rest as the even grid. Keyboard focus settles a card at
+ *   once. Cards already on screen (Back, a hash link) are never armed. Reduced motion or no JS:
+ *   the even grid, nothing moves.
  * - 48 to 64rem: two equal columns.
  * - Phones: a scroll-snap carousel with the next card peeking, dots underneath, arrow keys move
  *   between cards.
@@ -42,41 +46,31 @@ export function CardDeck({
   const list = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState(0);
 
-  // Collage entrance (desktop, motion allowed).
+  // Collage entrance (desktop, motion allowed): arm the cards below the fold, settle on entry.
   useEffect(() => {
     const ul = list.current;
-    if (!scatter || !ul) return;
-    let revert: (() => void) | null = null;
-    let cancelled = false;
-    void loadMotion().then(({ gsap }) => {
-      if (cancelled) return;
-      const mm = gsap.matchMedia();
-      mm.add("(min-width: 64rem) and (prefers-reduced-motion: no-preference)", () => {
-        const slots = [...ul.children] as HTMLElement[];
-        slots.forEach((slot, i) => {
-          const card = slot.firstElementChild as HTMLElement | null;
-          if (!card) return;
-          const from = SCATTER[i % SCATTER.length];
-          gsap.fromTo(
-            card,
-            { x: from.x, y: from.y, rotation: from.rotation, scale: 0.92 },
-            {
-              x: 0,
-              y: 0,
-              rotation: 0,
-              scale: 1,
-              ease: "none",
-              scrollTrigger: { trigger: slot, start: "top bottom", end: "center 70%", scrub: 0.6 },
-            },
-          );
-        });
-      });
-      revert = () => mm.revert();
+    if (!scatter || !ul || !window.matchMedia(MOTION_DESKTOP).matches) return;
+    const slots = [...ul.children] as HTMLElement[];
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const slot = entry.target as HTMLElement;
+        if (slot.dataset.scatter === "armed") slot.dataset.scatter = "settle";
+        io.unobserve(slot);
+      }
     });
-    return () => {
-      cancelled = true;
-      revert?.();
-    };
+    slots.forEach((slot, i) => {
+      const r = slot.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) return; // on screen already: stays put
+      const from = SCATTER[i % SCATTER.length];
+      slot.style.setProperty("--sx", `${from.x}px`);
+      slot.style.setProperty("--sy", `${from.y}px`);
+      slot.style.setProperty("--sr", `${from.rotation}deg`);
+      slot.style.setProperty("--sd", `${(i % 2) * 90}ms`);
+      slot.dataset.scatter = "armed";
+      io.observe(slot);
+    });
+    return () => io.disconnect();
   }, [scatter]);
 
   // Carousel position -> active dot. Only does work while the list actually scrolls sideways.
@@ -132,7 +126,11 @@ export function CardDeck({
   const onFocus = (event: FocusEvent<HTMLUListElement>) => {
     const target = event.target as HTMLElement;
     if (!target.matches(":focus-visible")) return;
-    target.closest<HTMLElement>(".mw-slot")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    const slot = target.closest<HTMLElement>(".mw-slot");
+    if (!slot) return;
+    // A card reached by keyboard is at rest at once (no settle under a focus ring).
+    if (slot.dataset.scatter) slot.dataset.scatter = "done";
+    slot.scrollIntoView({ block: "nearest", inline: "nearest" });
   };
 
   return (

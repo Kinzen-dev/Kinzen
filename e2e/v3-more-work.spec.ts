@@ -77,6 +77,42 @@ test.describe("more work on home", () => {
     expect(Math.abs(boxes[1].right - boxes[3].right)).toBeLessThan(1);
   });
 
+  test("desktop: wherever the visitor stops, the cards rest as the grid (no tilted overlap)", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "desktop collage");
+    await page.goto("/");
+    // Stop with the second row only just in view, then wait without scrolling.
+    await page.evaluate(() => {
+      const slot = document.querySelectorAll("#work .mw-slot")[2].getBoundingClientRect();
+      window.scrollBy(0, slot.top - innerHeight * 0.85);
+    });
+    await page.waitForTimeout(1600);
+    const m = await page.evaluate(() => {
+      const cards = [...document.querySelectorAll("#work .mw-card")];
+      const rects = cards.map((c) => c.getBoundingClientRect());
+      const overlap = rects.some((a, i) =>
+        rects.some((b, j) => j > i && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom),
+      );
+      return { transforms: cards.map((c) => getComputedStyle(c).transform), overlap };
+    });
+    expect(m.overlap).toBe(false);
+    expect(m.transforms.every((t) => t === "none")).toBe(true);
+  });
+
+  test("desktop: a card reached by keyboard is at rest at once", async ({ page, isMobile }) => {
+    test.skip(isMobile, "desktop collage");
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const last = page.locator("#work .mw-link").last();
+    expect(await last.evaluate((a) => a.closest(".mw-slot")!.getAttribute("data-scatter"))).toBe("armed");
+    await page.getByRole("link", { name: "All systems" }).focus();
+    for (let i = 0; i < 4; i++) await page.keyboard.press("Tab");
+    await expect(last).toBeFocused();
+    expect(await last.evaluate((a) => getComputedStyle(a.closest(".mw-card")!).transform)).toBe("none");
+  });
+
   test("phone: a swipeable carousel with a peeking card, dots and arrow keys", async ({ page, isMobile }) => {
     test.skip(!isMobile, "phone layout");
     await page.goto("/");

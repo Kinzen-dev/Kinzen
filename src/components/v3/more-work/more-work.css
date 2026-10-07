@@ -56,9 +56,17 @@
   .mw-slot[data-wide] {
     grid-column: span 7;
   }
+  /* Collage entrance: armed below the fold, one short settle when the slot enters (card-deck.tsx). */
   @media (prefers-reduced-motion: no-preference) {
-    .mw-deck[data-scatter] .mw-card {
+    .mw-slot[data-scatter="armed"] > .mw-card {
+      transform: translate(var(--sx), var(--sy)) rotate(var(--sr)) scale(0.92);
       will-change: transform;
+    }
+    .mw-slot[data-scatter="settle"] > .mw-card {
+      transition:
+        transform 900ms cubic-bezier(0.22, 1, 0.36, 1) var(--sd, 0ms),
+        translate var(--dur-2) var(--ease-out),
+        box-shadow var(--dur-2) var(--ease-out);
     }
   }
 }

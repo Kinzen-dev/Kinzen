@@ -52,13 +52,14 @@ function sortRows(rows: LedgerRow[], sort: Sort) {
   });
 }
 
+/** The index opens sorted by Year, newest first (a visible, announced order; no hidden curation). */
+const DEFAULT_SORT: Sort = { key: "year", dir: "desc" };
+
 function nextSort(current: Sort, key: SortKey): Sort {
-  // Names start A to Z; years start newest first.
+  // Names start A to Z; years start newest first; each further press flips the direction.
   const first = key === "name" ? "asc" : "desc";
-  // Third press returns to the curated order.
   if (!current || current.key !== key) return { key, dir: first };
-  if (current.dir === first) return { key, dir: first === "asc" ? "desc" : "asc" };
-  return null;
+  return { key, dir: current.dir === "asc" ? "desc" : "asc" };
 }
 
 function SortGlyph({ dir }: { dir: "asc" | "desc" | null }) {
@@ -99,7 +100,7 @@ export interface LedgerProps {
 }
 
 export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: LedgerProps) {
-  const [sort, setSort] = useState<Sort>(null);
+  const [sort, setSort] = useState<Sort>(DEFAULT_SORT);
   const [filter, setFilter] = useState<LedgerRow["area"] | "all">("all");
   const [openId, setOpenId] = useState<string | null>(null);
   const [, setFocusId] = useState<string | null>(null);
@@ -109,7 +110,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
   // (engines differ: Chromium lands on the #work heading, WebKit replays a pre-restore offset).
   // The open row, filter and sort are kept for this tab (session storage, never sent anywhere)
   // and restored ONLY on Back/Forward; a fresh visit (link, palette, typed URL, reload) starts in
-  // the curated order.
+  // the default order (Year, newest first).
   const restored = useRef(false);
   useEffect(() => {
     const key = `kz-ledger:${window.location.pathname}`;
@@ -125,7 +126,7 @@ export function Ledger({ rows, labels, areas, plates, icons, renderIcon }: Ledge
         if (saved && traversal) {
           // Restoring persisted UI state after hydration is a sync from an external store.
           /* eslint-disable react-hooks/set-state-in-effect */
-          setSort(saved.sort);
+          setSort(saved.sort ?? DEFAULT_SORT);
           setFilter(saved.filter);
           const reopen = saved.openId && rows.some((r) => r.id === saved.openId) ? saved.openId : null;
           setOpenId(reopen);
