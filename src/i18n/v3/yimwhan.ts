@@ -77,9 +77,9 @@ const en = {
     draftAfter: " Tomorrow at 10:00 is free.",
     guard: "Guard",
     checks: [
-      { rule: "no-diagnosis", label: "Makes a diagnosis", pass: false },
-      { rule: "no-drug-or-dose", label: "Names a medicine or dose", pass: true },
-      { rule: "no-outcome-promise", label: "Promises a result", pass: true },
+      { rule: "no_diagnose", label: "Makes a diagnosis", pass: false },
+      { rule: "dosing-gate", label: "Names a medicine or dose", pass: true },
+      { rule: "efficacy_claim", label: "Promises a result", pass: true },
     ],
     blocked: "Blocked",
     reply:
@@ -157,9 +157,9 @@ const th: YimwhanCopy = {
     draftAfter: " พรุ่งนี้ 10:00 มีคิวว่างนะคะ",
     guard: "ชุดตรวจ",
     checks: [
-      { rule: "no-diagnosis", label: "วินิจฉัยโรค", pass: false },
-      { rule: "no-drug-or-dose", label: "ระบุชื่อยาหรือขนาดยา", pass: true },
-      { rule: "no-outcome-promise", label: "รับประกันผลการรักษา", pass: true },
+      { rule: "no_diagnose", label: "วินิจฉัยโรค", pass: false },
+      { rule: "dosing-gate", label: "ระบุชื่อยาหรือขนาดยา", pass: true },
+      { rule: "efficacy_claim", label: "รับประกันผลการรักษา", pass: true },
     ],
     blocked: "ถูกบล็อก",
     reply:

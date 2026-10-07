@@ -188,9 +188,7 @@ test.describe("hero fx", () => {
     }
   });
 
-  test("theme switch keeps the field running: the hero stays a dark scene in both themes", async ({
-    page,
-  }) => {
+  test("theme switch keeps the field running: the hero stays a dark scene in both themes", async ({ page }) => {
     await darkHome(page);
     await expect(html(page)).toHaveAttribute("data-fx", "on", { timeout: 10_000 });
     for (const theme of ["light", "dark"]) {

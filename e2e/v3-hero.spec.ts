@@ -71,7 +71,9 @@ test.describe("hero v3", () => {
     expect(await scaleOf(page)).toBe(1);
   });
 
-  test("CTAs: pills in the Contact order (email, CV, LinkedIn), 44px, the email one with the beam", async ({ page }) => {
+  test("CTAs: pills in the Contact order (email, CV, LinkedIn), 44px, the email one with the beam", async ({
+    page,
+  }) => {
     await page.goto("/");
     const ctas = hero(page).locator(".hero-cta");
     await expect(ctas).toHaveCount(3);
@@ -82,7 +84,12 @@ test.describe("hero v3", () => {
     for (let i = 0; i < 3; i++) {
       const box = await ctas.nth(i).evaluate((el) => {
         const cs = getComputedStyle(el);
-        return { h: el.getBoundingClientRect().height, pl: cs.paddingLeft, pr: cs.paddingRight, r: parseFloat(cs.borderTopLeftRadius) };
+        return {
+          h: el.getBoundingClientRect().height,
+          pl: cs.paddingLeft,
+          pr: cs.paddingRight,
+          r: parseFloat(cs.borderTopLeftRadius),
+        };
       });
       expect(box.h).toBeGreaterThanOrEqual(44);
       expect(box.pl).toBe(box.pr);
@@ -97,7 +104,13 @@ test.describe("hero v3", () => {
     for (let i = 0; i < 4; i++) {
       const c = await chips.nth(i).evaluate((el) => {
         const cs = getComputedStyle(el);
-        return [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft, parseFloat(cs.borderTopLeftRadius)] as const;
+        return [
+          cs.paddingTop,
+          cs.paddingRight,
+          cs.paddingBottom,
+          cs.paddingLeft,
+          parseFloat(cs.borderTopLeftRadius),
+        ] as const;
       });
       expect(new Set(c.slice(0, 4)).size).toBe(1);
       expect(c[4]).toBeGreaterThan(8);
@@ -122,7 +135,9 @@ test.describe("hero v3", () => {
     await expect(page.locator("html")).not.toHaveAttribute("data-hero-passed", "");
   });
 
-  test("Back to home mid-page: the scale matches the restored scroll, then returns to 1 at the top", async ({ page }) => {
+  test("Back to home mid-page: the scale matches the restored scroll, then returns to 1 at the top", async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
     const y = await pastHero(page);
@@ -228,7 +243,10 @@ test.describe("numbers strip", () => {
     for (let i = 0; i < 4; i++) {
       const c = await cards.nth(i).evaluate((el) => {
         const cs = getComputedStyle(el);
-        return { pad: new Set([cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft]).size, bg: cs.backgroundColor };
+        return {
+          pad: new Set([cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft]).size,
+          bg: cs.backgroundColor,
+        };
       });
       expect(c.pad).toBe(1);
       expect(c.bg).not.toBe("rgba(0, 0, 0, 0)");

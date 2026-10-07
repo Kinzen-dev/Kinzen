@@ -9,7 +9,7 @@ export const FORBIDDEN: { pattern: RegExp; reason: string }[] = [
   { pattern: /—/, reason: "no em dashes anywhere" },
   { pattern: /\+66|0\d{2}[- ]?\d{3}[- ]?\d{4}/, reason: "no phone numbers on the public site" },
   {
-    pattern: /no-outcome-promise/,
-    reason: "not a real Yimwhan rule id (recon 2026-10-07); show real guard names or plain words",
+    pattern: /no-outcome-promise|no-diagnosis|no-drug-or-dose/,
+    reason: "not real Yimwhan rule ids (recon 2026-10-07); real: efficacy_claim, no_diagnose, dosing-gate",
   },
 ];
