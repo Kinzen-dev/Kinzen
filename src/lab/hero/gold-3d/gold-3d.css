@@ -1,0 +1,30 @@
+/* A tall track so scrolling past the banner drives the camera dolly; the banner stays pinned. */
+.g3d-track {
+  height: 230svh;
+}
+.g3d {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+/* A warm haze behind the letters, so the metal has something to sit in. */
+.g3d-host {
+  background: radial-gradient(
+    60% 42% at 50% 30%,
+    color-mix(in oklab, var(--gold) 13%, transparent),
+    transparent 70%
+  );
+}
+/* The copy steps back as the camera flies in (--dolly is 0..1, set by the engine). */
+.g3d .a-copy > :not(.a-wordmark-pad) {
+  opacity: calc(1 - var(--dolly, 0) * 3);
+  translate: 0 calc(var(--dolly, 0) * 4rem);
+}
+@media (prefers-reduced-motion: reduce) {
+  .g3d-track {
+    height: auto;
+  }
+  .g3d {
+    position: relative;
+  }
+}

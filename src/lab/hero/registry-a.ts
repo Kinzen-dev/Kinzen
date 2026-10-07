@@ -10,6 +10,13 @@ export const demos: LabDemo[] = [
     load: () => import("./particles-alive"),
   },
   {
+    id: "gold-3d",
+    title: "3D gold",
+    idea: "KINZEN as brushed-gold metal letters that lean toward the cursor under a slow light sweep; scrolling flies the camera through the name.",
+    technique: "three.js: letters extruded from contours traced off the shipped wordmark mask, anisotropic physical metal, PMREM studio env, scroll-linked dolly.",
+    load: () => import("./gold-3d"),
+  },
+  {
     id: "gold-ink-water",
     title: "Gold ink in water",
     idea: "KINZEN poured as gold dye into navy water: the cursor stirs it into wisps, and calm water gathers the ink back into the name.",
