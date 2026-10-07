@@ -23,4 +23,11 @@ export const demos: LabDemo[] = [
     technique: "WebGL2 Stable Fluids (own compact rewrite after PavelDoGreat, MIT): vorticity, Jacobi pressure, plus an unprojected gather flow and refill toward the letter mask.",
     load: () => import("./gold-ink-water"),
   },
+  {
+    id: "keycap-field",
+    title: "Keycap wave field",
+    idea: "A field of navy keycaps where the raised, gold-lit keys spell KINZEN; the cursor presses keys and the ripple rolls outward and settles.",
+    technique: "three.js InstancedMesh (one per key) with soft shadows; a damped 2D wave equation per key; keys picked by projecting each one onto the wordmark mask.",
+    load: () => import("./keycap-field"),
+  },
 ];
