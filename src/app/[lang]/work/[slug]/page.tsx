@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ViewTransition } from "react";
-import { getProject, projects, t, tPlain } from "@/content";
+import { ViewTransition, type ReactNode } from "react";
+import { getProject, projects, t, tList, tPlain } from "@/content";
 import type { Locale } from "@/content/schema";
 import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
 import { alternates, localePath, prefetchFor } from "@/lib/site-url";
@@ -19,6 +19,7 @@ import { getV3 } from "@/i18n/v3";
 import "@/components/v3/project/project.css";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
+import { CaseCta } from "@/components/case-cta";
 
 export const dynamicParams = false;
 
@@ -39,7 +40,11 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/work/[slug
     url: localePath(locale, `${path}/og.png`),
     width: 1200,
     height: 630,
-    alt: dict.work.ogAlt.replace("{name}", project.name),
+    // Solo builds say "built by"; team work names the role instead (TH-57).
+    alt:
+      project.role.en === "Solo build"
+        ? dict.work.ogAlt.replace("{name}", project.name)
+        : dict.work.ogAltLed.replace("{name}", project.name).replace("{role}", tPlain(project.role, locale)),
   };
   return {
     title: project.name,
@@ -197,32 +202,40 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
             {nobr(dict.work.caseStudy.heading)}
           </h2>
           <div className="pj-body grid gap-8">
-            <div>
-              <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.problem)}</h3>
-              <p className="mt-2 text-lg">{nobr(t(caseStudy.problem, locale))}</p>
-            </div>
-            <div>
-              <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.approach)}</h3>
+            <CaseBlock label={dict.work.caseStudy.context}>
+              <p className="mt-2 text-lg">{nobr(t(caseStudy.context, locale))}</p>
+            </CaseBlock>
+            {caseStudy.scope && (
+              <CaseBlock label={dict.work.caseStudy.scope}>
+                <p className="mt-2">{nobr(t(caseStudy.scope, locale))}</p>
+              </CaseBlock>
+            )}
+            <CaseBlock label={dict.work.caseStudy.approach}>
               <ul className="mt-2 grid gap-3">
-                {(locale === "th" && caseStudy.approach.th ? caseStudy.approach.th : caseStudy.approach.en).map((a) => (
+                {tList(caseStudy.approach, locale).map((a) => (
                   <li key={a} className="flex gap-3">
                     <span aria-hidden="true" className="mt-[0.8em] h-px w-3 shrink-0 bg-ink-3" />
-                    <span>{a}</span>
+                    <span>{nobr(a)}</span>
                   </li>
                 ))}
               </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.result)}</h3>
+            </CaseBlock>
+            {caseStudy.validation && (
+              <CaseBlock label={dict.work.caseStudy.validation}>
+                <p className="mt-2">{nobr(t(caseStudy.validation, locale))}</p>
+              </CaseBlock>
+            )}
+            <CaseBlock label={dict.work.caseStudy.result}>
               <p className="mt-2">{nobr(t(caseStudy.result, locale))}</p>
-            </div>
-            <div>
-              <h3 className="text-sm font-normal text-ink-3">{nobr(dict.work.caseStudy.limits)}</h3>
+            </CaseBlock>
+            <CaseBlock label={dict.work.caseStudy.limits}>
               <p className="mt-2 text-ink-2">{nobr(t(caseStudy.limits, locale))}</p>
-            </div>
+            </CaseBlock>
           </div>
         </section>
       )}
+
+      <CaseCta locale={locale} dict={dict} />
 
       {next.id !== project.id && (
         <nav aria-label={plain(dict.project.next)} className="pj-next-wrap">
@@ -245,6 +258,15 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
 
       <JsonLd data={projectJsonLd(project, locale)} />
     </article>
+  );
+}
+
+function CaseBlock({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <h3 className="text-sm font-normal text-ink-3">{nobr(label)}</h3>
+      {children}
+    </div>
   );
 }
 

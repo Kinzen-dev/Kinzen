@@ -173,6 +173,18 @@ export const COMPOUNDS = [
   "ชุดตรวจความปลอดภัย",
   "ความเป็นส่วนตัว",
   "ไม่ใช้คุกกี้",
+  // Audit round a-01 (2026-10-07): breaks seen in the rewritten copy.
+  "ทดสอบซ้ำ",
+  "การประเมิน",
+  "การย้าย",
+  "การอัปเกรด",
+  "ด้านบน",
+  "ไม่ต่ำกว่า",
+  "เป็นเวลา",
+  "เป็นอิสระ",
+  "ฝั่งตะวันตก",
+  "ผ่านกฎ",
+  "เข้าชม",
 ].sort((a, b) => b.length - a.length);
 
 const segmenter = new Intl.Segmenter("th", { granularity: "word" });

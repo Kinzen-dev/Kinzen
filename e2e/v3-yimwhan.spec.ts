@@ -42,7 +42,7 @@ test.describe("v3 Yimwhan scene", () => {
         .toBe(String(i));
     }
     // Last beat: the active beat is the logged reply, the case row is in the queue.
-    await expect(page.locator("#yimwhan .yw-beat[data-on] h4")).toHaveText("A safe reply goes out, and is logged");
+    await expect(page.locator("#yimwhan .yw-beat[data-on] h4")).toHaveText("The checked reply goes out, and is logged");
     await expect(page.locator("#yimwhan .yw-rows")).toHaveAttribute("data-on", "");
     await scrollTrack(page, 0.02);
     await expect(grid).toHaveAttribute("data-step", "0");

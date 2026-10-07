@@ -18,7 +18,7 @@ const en = {
       fact: "Built with Fastify, Twilio and the LINE Messaging API.",
     },
     {
-      title: "Every word becomes text",
+      title: "Speech becomes text",
       text: "Chats arrive as text and calls are turned into text as the patient speaks, so staff read one conversation.",
       fact: "Calls run through real-time speech-to-text.",
     },
@@ -28,24 +28,25 @@ const en = {
       fact: "Prompts stay thin; the rules live in code.",
     },
     {
-      title: "The guard blocks the unsafe line",
+      title: "The guard blocks a draft that breaks a rule",
       text: "Code reads every draft before it goes out. This one makes a diagnosis, so that sentence is blocked.",
-      stat: "In a replay of 500 real customer messages, the code filters caught 37 raw model violations.",
+      stat: "In a July 2026 replay of 500 real customer messages, the code filters caught 37 rule violations in raw model drafts.",
     },
     {
-      title: "A safe reply goes out, and is logged",
-      text: "The patient gets a safe answer and an offer to book. Staff see the whole conversation in the back office.",
+      title: "The checked reply goes out, and is logged",
+      text: "The patient gets a reply that passed the rules and an offer to book. Staff see the whole conversation in the back office.",
       fact: "In production on a dedicated phone number since July 2026, with gated releases and one-step rollback.",
     },
   ],
   finaleEyebrow: "Try it yourself",
-  /** The interactive guard demo (finale). Rule ids are real names from the product's safety layer. */
+  /** The guard demo (finale): prepared text replayed on a script, no model call. Rule ids are real
+   *  names from the product's rule layer. */
   demo: {
-    title: "Watch the guard work",
+    title: "See an example of the reply check",
     ghostGuard: "Guard check",
     ghostReply: "Reply to the patient",
     intro:
-      "Pick a patient message. The model writes a draft, a guard in code checks it against the clinic's rules, and only a safe reply reaches the patient.",
+      "Pick a sample message to see a model draft, the rule it breaks and the adjusted reply. This example replays prepared text; it does not call a model or contact a real patient.",
     label: "Scripted illustration. Not live patient data.",
     choose: "Patient message",
     keyHint: "or press 1, 2, 3",
@@ -54,14 +55,14 @@ const en = {
     draft: "Model draft",
     draftNote: "not sent",
     typing: "Model is drafting a reply",
-    typingReply: "Writing the safe reply",
+    typingReply: "Writing the checked reply",
     checking: "Guard is checking the draft",
     blocked: "Blocked",
     sent: "Sent to patient",
     pause: "Pause auto-play",
     play: "Resume auto-play",
     paused: "Auto-play paused",
-    announce: "Draft blocked by the rule: {rule}. Safe reply sent: {reply}",
+    announce: "Draft blocked by the rule: {rule}. Reply that passed the checks: {reply}",
     scenarios: [
       {
         choice: "Toothache, asks for a painkiller",
@@ -134,7 +135,8 @@ const en = {
       { time: "19:47", channel: "Call", name: "Patient E", summary: "Confirmed a check-up for Friday", status: "Done" },
     ],
     conversation: "Conversation",
-    transcript: "Live transcript",
+    /** Header of the patient's LINE message (a chat, so not a transcript). */
+    transcript: "Patient message",
     patient: "Patient A",
     patientTime: "22:41",
     message: "My wisdom tooth is swollen and it hurts to chew. Is it infected? Can I come in tomorrow?",
@@ -147,9 +149,10 @@ const en = {
     draftAfter: " Tomorrow at 10:00 is free.",
     guard: "Guard",
     checks: [
-      { rule: "no_diagnose", label: "Makes a diagnosis", pass: false },
-      { rule: "dosing-gate", label: "Names a medicine or dose", pass: true },
-      { rule: "efficacy_claim", label: "Promises a result", pass: true },
+      /** Checklist rows name the requirement, so a tick means the draft met it. */
+      { rule: "no_diagnose", label: "No diagnosis", pass: false },
+      { rule: "dosing-gate", label: "No medicine or dose", pass: true },
+      { rule: "efficacy_claim", label: "No promised result", pass: true },
     ],
     blocked: "Blocked",
     passed: "2 other checks passed",
@@ -186,9 +189,9 @@ const th: YimwhanCopy = {
       fact: "สร้างด้วย Fastify, Twilio และ LINE Messaging API",
     },
     {
-      title: "ทุกคำกลายเป็นข้อความ",
+      title: "แปลงเสียงพูดเป็นข้อความ",
       text: "แชทเข้ามาเป็นข้อความอยู่แล้ว ส่วนสายโทรถอดเป็นข้อความระหว่างที่คนไข้พูด พนักงานจึงอ่านเป็นบทสนทนาเดียว",
-      fact: "สายโทรผ่านระบบถอดเสียงพูดเป็นข้อความแบบทันที",
+      fact: "สายโทรผ่านระบบถอดเสียงแบบเรียลไทม์",
     },
     {
       title: "โมเดลร่างคำตอบ",
@@ -196,23 +199,23 @@ const th: YimwhanCopy = {
       fact: "เขียน prompt ให้สั้น แล้วย้ายกฎไปไว้ในโค้ด",
     },
     {
-      title: "ชุดตรวจบล็อกประโยคที่ไม่ปลอดภัย",
+      title: "ชุดตรวจบล็อกร่างที่ไม่ผ่านกฎ",
       text: "โค้ดอ่านทุกร่างก่อนส่งออก ร่างนี้วินิจฉัยโรค ประโยคนั้นเลยถูกบล็อก",
-      stat: "ตอนนำข้อความจริงจากลูกค้า 500 ข้อความมารันซ้ำ ตัวกรองในโค้ดดักคำตอบดิบจากโมเดลที่ผิดกฎได้ 37 ครั้ง",
+      stat: "ตอนทดสอบซ้ำด้วยข้อความจริงจากลูกค้า 500 ข้อความเมื่อกรกฎาคม 2026 ตัวกรองในโค้ดบล็อกร่างคำตอบที่ไม่ผ่านกฎได้ 37 ครั้ง",
     },
     {
-      title: "ส่งคำตอบที่ปลอดภัย แล้วบันทึกไว้",
-      text: "คนไข้ได้คำตอบที่ปลอดภัย พร้อมข้อเสนอให้จองคิว พนักงานเห็นบทสนทนาทั้งหมดในระบบหลังบ้าน",
+      title: "ส่งคำตอบที่ผ่านกฎ แล้วบันทึกไว้",
+      text: "คนไข้ได้รับคำตอบที่ผ่านกฎ พร้อมข้อเสนอให้จองคิว พนักงานเห็นบทสนทนาทั้งหมดในระบบหลังบ้าน",
       fact: "รันบนเบอร์โทรเฉพาะมาตั้งแต่กรกฎาคม 2026 ทุก release ผ่านด่านตรวจ และย้อนกลับได้ในขั้นตอนเดียว",
     },
   ],
   finaleEyebrow: "ลองเล่นเอง",
   demo: {
-    title: "ลองดูชุดตรวจทำงานจริง",
+    title: "ลองดูตัวอย่างการตรวจคำตอบ",
     ghostGuard: "ชุดตรวจ",
     ghostReply: "คำตอบถึงคนไข้",
     intro:
-      "เลือกข้อความจากคนไข้ดู โมเดลจะร่างคำตอบ ชุดตรวจในโค้ดเช็คร่างกับกฎของคลินิก และมีแค่คำตอบที่ปลอดภัยเท่านั้นที่ส่งถึงคนไข้",
+      "เลือกข้อความตัวอย่างเพื่อดูร่างคำตอบ ข้อที่ไม่ผ่านกฎ และคำตอบที่ปรับแล้ว ตัวอย่างนี้จำลองลำดับการทำงานด้วยข้อความที่เตรียมไว้ ไม่ได้เรียกโมเดลหรือติดต่อคนไข้จริง",
     label: "ตัวอย่างจำลอง ไม่ใช่ข้อมูลคนไข้จริง",
     choose: "ข้อความจากคนไข้",
     keyHint: "หรือกด 1, 2, 3",
@@ -221,14 +224,14 @@ const th: YimwhanCopy = {
     draft: "ร่างจากโมเดล",
     draftNote: "ยังไม่ส่ง",
     typing: "โมเดลกำลังร่างคำตอบ",
-    typingReply: "กำลังเขียนคำตอบที่ปลอดภัย",
-    checking: "ชุดตรวจกำลังเช็คร่างคำตอบ",
+    typingReply: "กำลังเขียนคำตอบที่ผ่านกฎ",
+    checking: "ชุดตรวจกำลังตรวจร่างคำตอบ",
     blocked: "ถูกบล็อก",
     sent: "ส่งถึงคนไข้แล้ว",
     pause: "หยุดเล่นอัตโนมัติ",
     play: "เล่นอัตโนมัติต่อ",
     paused: "หยุดเล่นอัตโนมัติแล้ว",
-    announce: "ร่างถูกบล็อกด้วยกฎ: {rule} ส่งคำตอบที่ปลอดภัยแทน: {reply}",
+    announce: "ร่างถูกบล็อกด้วยกฎ: {rule} คำตอบที่ผ่านกฎ: {reply}",
     scenarios: [
       {
         choice: "ปวดฟัน ขอชื่อยาแก้ปวด",
@@ -239,7 +242,7 @@ const th: YimwhanCopy = {
         draftAfter: " แล้วอาการน่าจะดีขึ้นค่ะ",
         rule: "dosing-gate",
         ruleLabel: "ระบุชื่อยาและขนาดยา",
-        reply: "ขอให้หายปวดไว ๆ นะคะ เรื่องยาต้องให้คุณหมอเป็นผู้แนะนำค่ะ ให้ช่วยเช็คคิวว่างที่เร็วที่สุดให้ไหมคะ",
+        reply: "ขอให้หายปวดไว ๆ นะคะ เรื่องยาต้องให้คุณหมอแนะนำค่ะ ต้องการให้ช่วยดูคิวว่างที่เร็วที่สุดไหมคะ",
       },
       {
         choice: "เหงือกมีเลือดออก ถามว่าเป็นอะไร",
@@ -287,7 +290,7 @@ const th: YimwhanCopy = {
       { time: "19:47", channel: "โทร", name: "คุณอี", summary: "ยืนยันนัดตรวจฟันวันศุกร์", status: "เสร็จ" },
     ],
     conversation: "บทสนทนา",
-    transcript: "ถอดข้อความสด",
+    transcript: "ข้อความจากคนไข้",
     patient: "คุณเอ",
     patientTime: "22:41",
     message: "ฟันคุดบวม เคี้ยวแล้วเจ็บมากค่ะ แบบนี้ติดเชื้อหรือเปล่าคะ พรุ่งนี้เข้าไปได้ไหมคะ",
@@ -299,9 +302,9 @@ const th: YimwhanCopy = {
     draftAfter: " พรุ่งนี้ 10:00 มีคิวว่างนะคะ",
     guard: "ชุดตรวจ",
     checks: [
-      { rule: "no_diagnose", label: "วินิจฉัยโรค", pass: false },
-      { rule: "dosing-gate", label: "ระบุชื่อยาหรือขนาดยา", pass: true },
-      { rule: "efficacy_claim", label: "รับประกันผลการรักษา", pass: true },
+      { rule: "no_diagnose", label: "ไม่วินิจฉัยโรค", pass: false },
+      { rule: "dosing-gate", label: "ไม่ระบุชื่อยาหรือขนาดยา", pass: true },
+      { rule: "efficacy_claim", label: "ไม่รับประกันผลการรักษา", pass: true },
     ],
     blocked: "ถูกบล็อก",
     passed: "อีก 2 ข้อผ่าน",
@@ -313,7 +316,7 @@ const th: YimwhanCopy = {
     reply:
       "เจ็บแบบนี้ไม่สบายตัวเลยนะคะ สาเหตุที่บวมต้องให้คุณหมอตรวจก่อนถึงจะบอกได้ค่ะ พรุ่งนี้ 10:00 มีคิวว่าง ให้จองไว้เลยไหมคะ",
     sent: "ส่งถึงคนไข้แล้ว",
-    status: ["ข้อความใหม่", "กำลังถอดข้อความ", "กำลังร่าง", "กำลังตรวจ", "บันทึกแล้ว"],
+    status: ["ข้อความใหม่", "กำลังถอดเสียง", "กำลังร่าง", "กำลังตรวจ", "บันทึกแล้ว"],
     assistant: "ผู้ช่วยคลินิก",
     today: "วันนี้",
     greeting: "สวัสดีค่ะ ผู้ช่วยของคลินิกตัวอย่างยินดีให้บริการค่ะ มีอะไรให้ช่วยไหมคะ",

@@ -69,6 +69,16 @@ export const profile = z.object({
     visibility,
     employment: localized.optional(),
     studio: localized.optional(),
+    /** The studio's site for project enquiries, per locale (role enquiries stay direct email). */
+    studioUrl: z
+      .object({
+        en: z.string().regex(/^https:\/\//),
+        th: z
+          .string()
+          .regex(/^https:\/\//)
+          .optional(),
+      })
+      .optional(),
   }),
 });
 export type Profile = z.infer<typeof profile>;
@@ -88,9 +98,12 @@ export const experience = z.object({
 });
 export type Experience = z.infer<typeof experience>;
 
+/** Context, my part in it, how the work ran, how it was checked, what came of it and the limits. */
 export const caseStudy = z.object({
-  problem: localized,
+  context: localized,
+  scope: localized.optional(),
   approach: localizedList,
+  validation: localized.optional(),
   result: localized,
   limits: localized,
 });
