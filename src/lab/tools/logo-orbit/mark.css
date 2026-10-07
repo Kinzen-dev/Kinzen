@@ -1,0 +1,9 @@
+/* Lab tools (b): a brand mark in the theme tone; its brand colour shows when an ancestor is lit. */
+.lt-mark {
+  flex: none;
+  fill: var(--ink);
+  transition: fill 0.5s var(--ease-out);
+}
+[data-lit] .lt-mark {
+  fill: var(--brand);
+}
