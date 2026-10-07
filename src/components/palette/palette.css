@@ -21,3 +21,7 @@
 .palette-kbd-chord > span[data-on] {
   visibility: visible;
 }
+/* On the header's translucent pill ink-3 falls under 4.5:1 in the light theme. */
+.palette-kbd-chord {
+  color: var(--ink-2);
+}

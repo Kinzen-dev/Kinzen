@@ -39,7 +39,7 @@ export function LanguageSwitch({
             hrefLang={target}
             lang={target}
             aria-current={target === locale ? "true" : undefined}
-            className={`relative inline-grid h-9 min-w-9 place-items-center rounded-full px-1.5 ${target === locale ? "text-ink" : "text-ink-3 transition-colors duration-200 hover:bg-[color-mix(in_oklab,var(--ink)_7%,transparent)] hover:text-ink"}`}
+            className={`relative inline-grid h-9 min-w-9 place-items-center rounded-full px-1.5 ${target === locale ? "text-ink" : "text-ink-2 transition-colors duration-200 hover:bg-[color-mix(in_oklab,var(--ink)_7%,transparent)] hover:text-ink"}`}
           >
             {target === "en" ? "EN" : "TH"}
             <span className="sr-only"> {labels[target]}</span>
