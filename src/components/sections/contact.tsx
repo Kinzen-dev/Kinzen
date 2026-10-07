@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { availability, links, t } from "@/content";
 import { localePath } from "@/lib/site-url";

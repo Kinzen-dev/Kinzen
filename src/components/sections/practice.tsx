@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { practices, t } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
