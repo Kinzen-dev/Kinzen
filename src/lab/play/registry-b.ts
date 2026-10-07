@@ -9,4 +9,11 @@ export const demos: LabDemo[] = [
     technique: "CPU springs on typed arrays drawn as additive WebGL2 points; targets sampled from a canvas text render or the baked wordmark mask.",
     load: () => import("./particle-playground"),
   },
+  {
+    id: "assemble-system",
+    title: "Assemble the system",
+    idea: "Drag LINE, speech to text, TypeScript, model, guard and reply into a clinic assistant; a packet runs it end to end.",
+    technique: "Pointer-captured drag plus tap-to-place, GSAP Flip into sockets, MotionPath-style packet on a measured SVG wire, Physics2D sparks.",
+    load: () => import("./assemble-system"),
+  },
 ];
