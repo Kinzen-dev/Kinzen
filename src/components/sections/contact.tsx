@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Locale } from "@/content/schema";
 import { availability, links, t } from "@/content";
-import { localePath } from "@/lib/site-url";
+import { localePath, prefetchFor } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getV3, type V3Copy } from "@/i18n/v3";
 import { Art } from "../art/art";
@@ -74,7 +74,11 @@ export function Contact({ locale, dict, v3 = getV3(locale) }: { locale: Locale; 
                       failed: dict.contact.copyFailed,
                     }}
                   />
-                  <Link href={localePath(locale, "/cv")} className="contact-btn">
+                  <Link
+                    href={localePath(locale, "/cv")}
+                    prefetch={prefetchFor(localePath(locale, "/cv"))}
+                    className="contact-btn"
+                  >
                     {nobr(dict.hero.ctaCv)}
                   </Link>
                   {others.map((l) => (

@@ -18,9 +18,10 @@
   padding: 0.375rem;
   border: 1px solid color-mix(in oklab, var(--rule) 70%, transparent);
   border-radius: 999px;
-  background: color-mix(in oklab, var(--ground) 72%, transparent);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  /* Opaque enough that text scrolling under it never reads through (review of the v3 build). */
+  background: color-mix(in oklab, var(--ground) 88%, transparent);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   box-shadow: var(--shadow-soft);
   transition:
     padding var(--dur-3) var(--ease-out),
@@ -31,10 +32,14 @@
     background: var(--ground);
   }
 }
-/* Over the dark hero (home, before the wordmark passes) the pill is dark glass; it turns light
-   with the page. The header re-declares the tokens (data-scene), so color-scheme flips them. */
+/* Over any dark scene the pill is dark glass, over the page light glass (NavTone writes
+   html[data-nav-tone]). Before it runs, the home hero (a dark scene at the top) sets the tone.
+   The header re-declares the tokens (data-scene), so color-scheme flips them. */
+html[data-nav-tone="dark"] .site-header {
+  color-scheme: dark;
+}
 @media (scripting: enabled) {
-  html:has([data-hero-wordmark]):not([data-hero-passed]) .site-header {
+  html:not([data-nav-tone]):has([data-hero-wordmark]):not([data-hero-passed]) .site-header {
     color-scheme: dark;
   }
 }

@@ -16,8 +16,8 @@ const content: SiteContentInput = {
     handle: "Kinzen",
     role: { en: "Senior Full-Stack Engineer", th: "วิศวกร full-stack ระดับ senior" },
     heroLine: {
-      en: "I build production software end to end: TypeScript backends, Shopify platforms, and AI voice and LINE products with guardrails written in code.",
-      th: "ผมสร้างซอฟต์แวร์ที่ใช้งานจริงครบทั้งระบบ: ระบบหลังบ้านด้วย TypeScript แพลตฟอร์ม Shopify และผลิตภัณฑ์ AI รับสายและตอบแชท LINE ที่มีกฎกำกับเขียนไว้ในโค้ด",
+      en: "Production software, end to end: TypeScript backends, Shopify platforms, and AI voice and LINE products with guardrails written in code.",
+      th: "ซอฟต์แวร์ที่ใช้งานจริงครบทั้งระบบ: ระบบหลังบ้านด้วย TypeScript แพลตฟอร์ม Shopify และผลิตภัณฑ์ AI รับสายและตอบแชท LINE ที่มีกฎกำกับเขียนไว้ในโค้ด",
     },
     oneLiner: {
       en: "Senior full-stack engineer and founder of Vesperwerk. Seven years shipping production TypeScript systems, from Shopify commerce platforms to AI voice and LINE products.",

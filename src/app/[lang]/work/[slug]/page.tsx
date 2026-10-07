@@ -5,7 +5,7 @@ import { ViewTransition } from "react";
 import { getProject, projects, t, tPlain } from "@/content";
 import type { Locale } from "@/content/schema";
 import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
-import { alternates, localePath } from "@/lib/site-url";
+import { alternates, localePath, prefetchFor } from "@/lib/site-url";
 import { JsonLd, projectJsonLd } from "@/lib/json-ld";
 import { ProjectPlate, getPlateSpec } from "@/components/plates";
 import { StatusMark } from "@/components/sections/work";
@@ -79,7 +79,11 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
   return (
     <article className="shell pt-8 md:pt-14">
       <p>
-        <Link href={localePath(locale, "/work")} className="link text-sm text-ink-2">
+        <Link
+          href={localePath(locale, "/work")}
+          prefetch={prefetchFor(localePath(locale, "/work"))}
+          className="link text-sm text-ink-2"
+        >
           <span aria-hidden="true">← </span>
           {nobr(dict.project.back)}
         </Link>

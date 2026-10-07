@@ -3,7 +3,7 @@ import { projects } from "@/content";
 import type { Locale } from "@/content/schema";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { V3Copy } from "@/i18n/v3";
-import { localePath } from "@/lib/site-url";
+import { localePath, prefetchFor } from "@/lib/site-url";
 import { nobr } from "@/lib/thai-nodes";
 import { WorkCards } from "./work-cards";
 
@@ -26,7 +26,11 @@ export function MoreWork({ locale, dict, v3 }: { locale: Locale; dict: Dictionar
           <p className="mw-intro">{nobr(copy.intro)}</p>
         </div>
         <div className="mw-all-wrap">
-          <Link href={localePath(locale, "/work")} className="mw-all">
+          <Link
+            href={localePath(locale, "/work")}
+            prefetch={prefetchFor(localePath(locale, "/work"))}
+            className="mw-all"
+          >
             {nobr(copy.allSystems)}
             <span aria-hidden="true" className="mw-arrow">
               →

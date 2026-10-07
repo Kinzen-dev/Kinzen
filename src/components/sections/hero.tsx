@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
 import { links, profile, projects, t, yearsInProduction } from "@/content";
-import { localePath } from "@/lib/site-url";
+import { localePath, prefetchFor } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { BangkokTime } from "../clock";
 import { nobr } from "@/lib/thai-nodes";
@@ -89,7 +89,11 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
                   </svg>
                 </a>
               ) : null}
-              <Link href={localePath(locale, "/cv")} className="hero-cta hero-cta-ghost">
+              <Link
+                href={localePath(locale, "/cv")}
+                prefetch={prefetchFor(localePath(locale, "/cv"))}
+                className="hero-cta hero-cta-ghost"
+              >
                 {nobr(dict.hero.ctaCv)}
               </Link>
               {linkedin ? (
