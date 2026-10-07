@@ -23,4 +23,11 @@ export const demos: LabDemo[] = [
     technique: "One 2D canvas: low-res float mask with brush stamps, bleed and slow heal, noise-thresholded edge, blueprint drawn source-in plus a gold rim.",
     load: () => import("./under-the-hood"),
   },
+  {
+    id: "speak-to-it",
+    title: "Speak to it",
+    idea: "Talk like a clinic assistant (EN or TH); a live transcript is checked against what an assistant must never say.",
+    technique: "Browser Web Speech API behind an explained mic button, Web Audio level ribbon, client-side regex rule check; scripted say-voice fallback.",
+    load: () => import("./speak-to-it"),
+  },
 ];
