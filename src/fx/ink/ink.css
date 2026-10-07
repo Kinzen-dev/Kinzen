@@ -28,11 +28,18 @@
 .ink-art {
   fill: currentColor;
 }
-/* Phones: the drawing starts at the gutter, clear of the stage controls at the top right. */
+/* Phones: the drawing starts at the gutter, clear of the stage controls at the top right; in
+   portrait (the grown band, hero.css) it starts under the controls' row instead. */
 @media (max-width: 47.99rem) {
   .ink-svg {
     left: 0;
     translate: none;
+  }
+}
+@media (max-width: 47.99rem) and (orientation: portrait) {
+  .ink-svg {
+    top: 3rem;
+    height: calc(100% - 3rem);
   }
 }
 /* Mask strokes: wide enough to uncover a traced ink line from its contour (art lines are ~4-5 units). */

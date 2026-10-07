@@ -191,4 +191,34 @@ test.describe("v4 hero sequence", () => {
       expect(bad.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
     });
   }
+
+  for (const [width, height] of [
+    [390, 844],
+    [375, 667],
+  ] as const) {
+    test(`portrait phone ${width}x${height}: the band grows for the desk, the Email CTA stays in the first screen`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height });
+      for (const path of ["/", "/th"]) {
+        await page.goto(path);
+        await page.evaluate(() => document.fonts.ready);
+        const g = await page.evaluate(() => {
+          const r = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+          return {
+            cta: r(".hero-cta-primary").bottom,
+            desk: r("[data-ink-desk]"),
+            controlsRow: r("[data-hero-wordmark]").top + 48,
+            over: document.documentElement.scrollWidth - innerWidth,
+          };
+        });
+        expect(g.cta, path).toBeLessThanOrEqual(height);
+        // A readable picture: at least about two thirds of the phone's width.
+        expect(g.desk.width, path).toBeGreaterThan(width * 0.6);
+        // The drawing starts under the controls' row.
+        expect(g.desk.top, path).toBeGreaterThanOrEqual(g.controlsRow - 1);
+        expect(g.over, path).toBeLessThanOrEqual(0);
+      }
+    });
+  }
 });
