@@ -566,7 +566,9 @@ const content: SiteContentInput = {
     {
       kind: "linkedin",
       label: "LinkedIn",
-      href: "https://www.linkedin.com/in/kittipong-khonthong-161021213",
+      // LinkedIn changed the public URL to the Thai name (the old slug 404s since 2026-10-07).
+      // Percent-encoded so every browser, crawler and JSON-LD reader gets the same URL.
+      href: "https://www.linkedin.com/in/%E0%B8%81%E0%B8%A4%E0%B8%95%E0%B8%B4%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C-%E0%B8%81%E0%B9%89%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B8%AD%E0%B8%87-161021213",
       visibility: "public",
     },
     { kind: "github", label: "GitHub", href: "https://github.com/Kinzen-dev", visibility: "hidden" },
