@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Locale } from "@/content/schema";
+import type { LabProps } from "../../types";
 import { Banner } from "../b-banner/banner";
 import { useFpsProbe, useReducedMotion, watchVisible } from "../b-banner/hooks";
 import "./live-system.css";
@@ -458,6 +459,6 @@ function StillPackets({ lay }: { lay: Layout }) {
   );
 }
 
-export default function LiveSystem({ locale }: { locale: Locale }) {
-  return <Banner id="ls" locale={locale} stage={<LiveSystemStage locale={locale} />} />;
+export default function LiveSystem({ locale, banner }: LabProps) {
+  return <Banner banner={banner} id="ls" locale={locale} stage={<LiveSystemStage locale={locale} />} />;
 }

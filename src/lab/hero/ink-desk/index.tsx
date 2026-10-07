@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
-import type { Locale } from "@/content/schema";
 import { loadMotion } from "@/motion/gsap";
+import type { LabProps } from "../../types";
 import { Banner } from "../b-banner/banner";
 import { useFpsProbe, useReducedMotion, watchVisible } from "../b-banner/hooks";
 import { CONTOURS, VIEW, type Group } from "./art-data";
@@ -326,6 +326,6 @@ function InkDesk() {
   );
 }
 
-export default function InkDeskDemo({ locale }: { locale: Locale }) {
-  return <Banner id="ink" locale={locale} stage={<InkDesk />} />;
+export default function InkDeskDemo({ locale, banner }: LabProps) {
+  return <Banner banner={banner} id="ink" locale={locale} stage={<InkDesk />} />;
 }
