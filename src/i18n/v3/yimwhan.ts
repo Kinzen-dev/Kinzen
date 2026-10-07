@@ -30,7 +30,7 @@ const en = {
     {
       title: "The guard blocks a draft that breaks a rule",
       text: "Code reads every draft before it goes out. This one makes a diagnosis, so that sentence is blocked.",
-      stat: "In a July 2026 replay of 500 real customer messages, the code filters caught 37 rule violations in raw model drafts.",
+      stat: "In a July 2026 replay of 500 real customer messages, the code filters caught 37 rule violations in raw model drafts, mostly overstated claims.",
     },
     {
       title: "The checked reply goes out, and is logged",
@@ -201,7 +201,7 @@ const th: YimwhanCopy = {
     {
       title: "ชุดตรวจบล็อกร่างที่ไม่ผ่านกฎ",
       text: "โค้ดอ่านทุกร่างก่อนส่งออก ร่างนี้วินิจฉัยโรค ประโยคนั้นเลยถูกบล็อก",
-      stat: "ตอนทดสอบซ้ำด้วยข้อความจริงจากลูกค้า 500 ข้อความเมื่อกรกฎาคม 2026 ตัวกรองในโค้ดบล็อกร่างคำตอบที่ไม่ผ่านกฎได้ 37 ครั้ง",
+      stat: "ตอนทดสอบซ้ำด้วยข้อความจริงจากลูกค้า 500 ข้อความเมื่อกรกฎาคม 2026 ตัวกรองในโค้ดบล็อกร่างคำตอบที่ไม่ผ่านกฎได้ 37 ครั้ง ส่วนใหญ่เป็นคำอวดอ้างเกินจริง",
     },
     {
       title: "ส่งคำตอบที่ผ่านกฎ แล้วบันทึกไว้",
