@@ -171,11 +171,11 @@
   align-self: end;
   align-content: start;
   gap: 0.6rem;
-  /* Entry waits for the exit: the two headings never overlap (no ghost of the previous one). */
+  /* Crossfade with a positional swap: the outgoing beat slides away while the incoming one slides
+     in, overlapping by ~120ms, so the column is never empty. No blur (it left a ghost). */
   transition:
-    opacity 420ms var(--yw-ease) 160ms,
-    translate 520ms var(--yw-ease) 120ms,
-    filter 420ms var(--yw-ease) 160ms;
+    opacity 300ms cubic-bezier(0.2, 0.7, 0.3, 1) 60ms,
+    translate 420ms var(--yw-ease) 60ms;
 }
 @media (min-width: 64rem), (min-width: 40rem) and (max-height: 32rem) {
   .yw-beat {
@@ -185,14 +185,14 @@
 }
 .yw-beat:not([data-on]) {
   opacity: 0;
-  translate: 0 0.75rem;
-  filter: blur(6px);
+  translate: 0 1rem;
   pointer-events: none;
-  transition-duration: 150ms;
-  transition-delay: 0ms;
+  transition:
+    opacity 180ms ease-out,
+    translate 260ms var(--yw-ease);
 }
 .yw-beat[data-past] {
-  translate: 0 -0.75rem;
+  translate: 0 -1rem;
 }
 .yw-progress {
   display: flex;
@@ -472,17 +472,50 @@
   opacity: 0;
 }
 
-/* Anything that arrives on a later beat keeps its box and fades/rises in. */
-.yw-mock [data-at] {
-  transition:
-    opacity 560ms var(--yw-ease),
-    translate 560ms var(--yw-ease),
-    scale 560ms var(--yw-ease);
+/* Scroll-linked reveals. Each element carries --k, the scroll position (in beats, 0..5) where it
+   starts; --r runs 0..1 over the next fifth of a beat, straight from the stage's --p. Opacity and
+   transform only, no timers: the mockup moves with every pixel of scroll and runs backwards when
+   the visitor scrolls up. Every box keeps its size, so nothing re-flows. */
+.yw-r,
+.yw-pop,
+.yw-rows,
+.yw-badge {
+  --r: clamp(0, calc((var(--p) * 5 - var(--k)) * 5), 1);
 }
-.yw-mock [data-at]:not([data-on]) {
+.yw-r {
+  opacity: var(--r);
+  translate: 0 calc((1 - var(--r)) * 0.7em);
+}
+.yw-pop {
+  opacity: var(--r);
+  scale: calc(0.8 + 0.2 * var(--r));
+}
+/* Typing: one word or phrase at a time, faster ramp. */
+.yw-w {
+  --r: clamp(0, calc((var(--p) * 5 - var(--k)) * 12), 1);
+  opacity: var(--r);
+}
+/* The guard reading the draft: a gold line lights under each word in turn. */
+.yw-fw {
+  position: relative;
+}
+.yw-fw::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -0.12em;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--gold);
+  transform-origin: left center;
+  --s: clamp(0, calc((var(--p) * 5 - var(--ks)) * 12), 1);
+  opacity: var(--s);
+  scale: var(--s) 1;
+}
+.yw-lb-typing {
+  transition: opacity 300ms ease-out;
+}
+.yw-lb-typing:not([data-on]) {
   opacity: 0;
-  translate: 0 0.8em;
-  scale: 0.97;
 }
 
 /* Conversation pieces (full and compact) */
@@ -570,23 +603,17 @@
    Thai vowel marks and makes them unreadable). */
 .yw-flag {
   color: var(--ink);
-  background-image: linear-gradient(var(--gold), var(--gold));
-  background-repeat: no-repeat;
-  background-position: 0 100%;
-  background-size: 0% 2px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   border-radius: 0.2em;
   transition:
-    background-size 1100ms linear 300ms,
     background-color 400ms ease-out,
     color 400ms ease-out;
 }
-.yw-stage-grid:is([data-step="2"], [data-step="3"], [data-step="4"]) .yw-flag {
-  background-size: 100% 2px;
+.yw-stage-grid:is([data-step="3"], [data-step="4"]) .yw-fw::after {
+  display: none;
 }
 .yw-stage-grid:is([data-step="3"], [data-step="4"]) .yw-flag {
-  background-image: none;
   background-color: color-mix(in oklch, var(--yw-red) 16%, transparent);
   color: var(--ink-2);
   text-decoration: underline 2px var(--yw-red);
@@ -631,14 +658,6 @@
   border-radius: 0.5em;
   font-size: max(var(--fmin), 0.8em);
   color: var(--ink-2);
-  transition:
-    opacity 400ms var(--yw-ease),
-    translate 400ms var(--yw-ease);
-  transition-delay: calc(var(--i, 0) * 140ms + 250ms);
-}
-.yw-guard[data-at]:not([data-on]) .yw-check {
-  opacity: 0;
-  translate: -0.6em 0;
 }
 .yw-check:not([data-pass]) {
   color: var(--ink);
@@ -889,13 +908,8 @@
   height: 0.55em;
   border-radius: 50%;
   background: var(--yw-red);
-  transition:
-    opacity 300ms var(--yw-ease),
-    scale 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.yw-badge:not([data-on]) {
-  opacity: 0;
-  scale: 0;
+  opacity: var(--r);
+  scale: var(--r);
 }
 .yw-queue {
   display: flex;
@@ -945,18 +959,11 @@
   height: var(--row);
   padding-inline: 1em;
   border-bottom: 1px solid var(--rule);
-  transition:
-    translate 650ms var(--yw-ease),
-    opacity 450ms var(--yw-ease),
-    background-color 1.4s ease-out;
+  /* Beat 5: the new case pushes the queue down with the scroll. */
+  translate: 0 calc((var(--r) - 1) * var(--row));
 }
-.yw-rows:not([data-on]) .yw-row {
-  translate: 0 calc(var(--row) * -1);
-}
-.yw-rows:not([data-on]) .yw-row[data-new] {
-  opacity: 0;
-}
-.yw-rows[data-on] .yw-row[data-new] {
+.yw-rows .yw-row[data-new] {
+  opacity: var(--r);
   background: color-mix(in oklch, var(--yw-mint) 9%, transparent);
 }
 .yw-pane {
