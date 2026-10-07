@@ -1,0 +1,32 @@
+/* Lab tool marks: theme tone by default, brand colour when lit (King's decision, SPEC-v4 item 2). */
+.lm {
+  --tone: color-mix(in oklch, var(--ink) 58%, transparent);
+  flex: none;
+  width: 1em;
+  height: 1em;
+  fill: var(--tone);
+  border-radius: 0.22em;
+  transition:
+    fill 0.35s var(--ease-out),
+    background-color 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out);
+}
+.lm-practice {
+  fill: color-mix(in oklch, var(--ink) 40%, transparent);
+}
+[data-on] .lm,
+.lm[data-on] {
+  fill: var(--brand, var(--ink));
+}
+[data-on] .lm-practice {
+  fill: var(--gold);
+}
+/* Lit marks that would vanish on the surface sit on a contrasting tile (as the site's chips do). */
+[data-on] .lm[data-badge="light"] {
+  background: light-dark(oklch(0.24 0.015 65), transparent);
+  box-shadow: 0 0 0 0.16em light-dark(oklch(0.24 0.015 65), transparent);
+}
+[data-on] .lm[data-badge="dark"] {
+  background: light-dark(transparent, oklch(0.95 0.012 85));
+  box-shadow: 0 0 0 0.16em light-dark(transparent, oklch(0.95 0.012 85));
+}
