@@ -397,11 +397,11 @@ const content: SiteContentInput = {
         },
         result: {
           en: "Stores for brands including Mizuno Thailand were delivered on this platform, with the integrations, the Dev Dashboard migration and the January 2026 Admin API upgrade listed above. Across my career I have worked on 20+ Shopify stores.",
-          th: "ส่งมอบร้านค้าให้แบรนด์ต่าง ๆ รวมถึง Mizuno Thailand บนแพลตฟอร์มนี้ พร้อมงานเชื่อมต่อ การย้ายไป Dev Dashboard และการอัปเกรดไปใช้ Admin API เวอร์ชันมกราคม 2026 ตามรายการด้านบน ตลอดการทำงานของผม ผมทำร้านค้าบน Shopify มาแล้วไม่ต่ำกว่า 20 ร้าน",
+          th: "ส่งมอบร้านค้าให้แบรนด์ต่าง ๆ รวมถึง Mizuno Thailand บนแพลตฟอร์มนี้ พร้อมงานเชื่อมต่อ การย้ายไป Dev Dashboard และการอัปเกรดไปใช้ Admin API เวอร์ชันมกราคม 2026 ตามรายการด้านบน ตลอดการทำงานที่ผ่านมา ผมทำร้านค้าบน Shopify มาแล้วไม่ต่ำกว่า 20 ร้าน",
         },
         limits: {
-          en: "Client work: this page names only brands that are already public, and gives no store traffic, revenue or team figures.",
-          th: "เป็นงานของลูกค้า หน้านี้จึงระบุเฉพาะแบรนด์ที่เปิดเผยได้ และไม่มีตัวเลขยอดเข้าชม รายได้ หรือขนาดทีม",
+          en: "Client work: this page names two brands only, and gives no store traffic, revenue or team figures.",
+          th: "เป็นงานของลูกค้า หน้านี้จึงระบุชื่อแบรนด์ไว้เพียงสองแบรนด์ และไม่มีตัวเลขยอดเข้าชม รายได้ หรือขนาดทีม",
         },
       },
       caseStudyVisibility: "public",
