@@ -1,18 +1,19 @@
-import Link from "next/link";
-import { links } from "@/content";
+import { availability, links } from "@/content";
 import type { Locale } from "@/content/schema";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { localePath, prefetchFor } from "@/lib/site-url";
 import { nobr } from "@/lib/thai-nodes";
 import "./case-cta.css";
 
 /**
- * The end of every case, before Next project (audit C06): one compact way to talk about similar
- * work. Email opens the visitor's mail app (nothing is sent for them); the CV keeps the locale.
+ * The end of every case, before Next project (audit C06): two doors, like the home contact.
+ * Roles go to email (opens the visitor's mail app, nothing is sent for them); projects go to the
+ * studio site in the page's language, in a new tab.
  */
 export function CaseCta({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const email = links.find((l) => l.kind === "email");
-  const cv = localePath(locale, "/cv");
+  const studioUrl = availability?.studioUrl
+    ? (locale === "th" && availability.studioUrl.th) || availability.studioUrl.en
+    : null;
   return (
     <section aria-labelledby="case-cta-title" className="pj-section case-cta" data-case-cta>
       <h2 id="case-cta-title" className="pj-h2">
@@ -26,11 +27,17 @@ export function CaseCta({ locale, dict }: { locale: Locale; dict: Dictionary }) 
             </a>
           </li>
         ) : null}
-        <li>
-          <Link href={cv} prefetch={prefetchFor(cv)} className="pj-linkbtn">
-            {nobr(dict.hero.ctaCv)}
-          </Link>
-        </li>
+        {studioUrl ? (
+          <li>
+            <a href={studioUrl} className="pj-linkbtn" rel="noopener" target="_blank">
+              {nobr(dict.project.cta.studio)}
+              <span aria-hidden="true" className="pj-ext">
+                ↗
+              </span>
+              <span className="sr-only"> {nobr(dict.a11y.newTab)}</span>
+            </a>
+          </li>
+        ) : null}
       </ul>
     </section>
   );

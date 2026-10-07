@@ -22,7 +22,7 @@ const en = {
     description:
       "Public work by Kittipong (King) Khonthong: AI products, commerce platforms, developer tools and games.",
     heading: "All work",
-    intro: "Everything I can show publicly: browse the cards above, or use the index below to filter and sort.",
+    intro: "Everything I can show publicly: browse the cards below, or use the index further down to filter and sort.",
     cards: "Up close",
     index: "Index",
   },
@@ -44,7 +44,7 @@ const th: MoreWorkCopy = {
     description:
       "ผลงานที่เปิดเผยได้ของกฤติพงษ์ ก้อนทอง (คิง) ทั้งผลิตภัณฑ์ AI แพลตฟอร์มอีคอมเมิร์ซ เครื่องมือนักพัฒนา และเกม",
     heading: "ผลงานทั้งหมด",
-    intro: "รวมผลงานที่เปิดเผยได้ เลือกดูจากการ์ดด้านบน หรือใช้ตารางด้านล่างเพื่อกรองและเรียงลำดับ",
+    intro: "รวมผลงานที่เปิดเผยได้ เลือกดูจากการ์ดด้านล่าง หรือใช้ตารางท้ายหน้าเพื่อกรองและเรียงลำดับ",
     cards: "ดูผลงานแต่ละชิ้น",
     index: "ตารางรวม",
   },
