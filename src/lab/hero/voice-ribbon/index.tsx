@@ -199,11 +199,12 @@ function Voice({ locale }: { locale: Locale }) {
         if (!row) continue;
         const p = Math.min(1, Math.max(0, (now - q.start) / (q.end - q.start)));
         const n = now < q.start ? 0 : Math.ceil(parts[i].length * p);
-        if (n !== shown[i]) {
+        const state = n === 0 ? "wait" : p < 1 ? "live" : "done";
+        if (n !== shown[i] || state !== row.dataset.state) {
           shown[i] = n;
           const text = row.querySelector<HTMLElement>(".vr-text");
           if (text) text.textContent = parts[i].slice(0, n).join("");
-          row.dataset.state = n === 0 ? "wait" : p < 1 ? "live" : "done";
+          row.dataset.state = state;
           // Phones show one line: the newest one that has started.
           const current = rows.reduce((k, r2, j) => (r2.dataset.state === "wait" ? k : j), -1);
           rows.forEach((r2, j) => r2.toggleAttribute("data-current", j === current));

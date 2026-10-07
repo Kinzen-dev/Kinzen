@@ -221,6 +221,8 @@
     display: none;
   }
   .aw-pane[data-active] .aw-body {
+    /* The newest lines stay in view; older ones roll off the top. */
+    justify-content: flex-end;
     animation: aw-open 420ms var(--ease-out);
   }
 }
@@ -234,6 +236,7 @@
   opacity: 0;
 }
 .aw-line {
+  flex-shrink: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   min-height: 1.6em;
@@ -362,14 +365,26 @@
   font-family: var(--font-mono);
 }
 .aw .hb-line {
-  background: linear-gradient(100deg, var(--ink-2) 0%, var(--ink-2) 40%, var(--gold) 50%, var(--ink-2) 60%, var(--ink-2) 100%)
-    100% 0 / 300% 100%;
+  /* Longhands: the CSS pipeline adds an sRGB fallback for oklch(), and a repeated `background`
+     shorthand after the clip would reset background-clip. */
+  background-image: linear-gradient(
+    100deg,
+    var(--ink-2) 0%,
+    var(--ink-2) 36%,
+    var(--gold) 46%,
+    oklch(0.97 0.05 85) 50%,
+    var(--gold) 54%,
+    var(--ink-2) 64%,
+    var(--ink-2) 100%
+  );
+  background-position: 100% 0;
+  background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 .aw .hb-line.aw-landed {
-  animation: aw-land 1.6s var(--ease-in-out) both;
+  animation: aw-land 2.6s cubic-bezier(0.45, 0, 0.55, 1) both;
 }
 @keyframes aw-land {
   to {
@@ -379,7 +394,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .aw .hb-line {
-    background: none;
+    background-image: none;
     color: var(--ink-2);
   }
   .aw-caret,

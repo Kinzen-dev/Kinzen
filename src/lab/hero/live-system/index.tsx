@@ -86,8 +86,8 @@ function layoutFor(w: number, h: number): Layout {
   // A wide flow in a squarish stage (the desktop column) is pulled towards the middle band.
   const k = tall ? 1 : Math.min(1, 0.6 / (h / w));
   const r = Math.max(16, Math.min(30, Math.min(w, h) * 0.04));
-  // Narrow stages: pull both ends in a little so the end halos clear the screen edge.
-  const pad = !tall && w < 600 ? w * 0.03 : 0;
+  // Pull both ends in so the end halos (1.7 r) clear the stage edge.
+  const pad = tall ? 0 : Math.max(w * 0.03, r * 2.2 - w * 0.09);
   const at = Object.fromEntries(
     Object.entries(f).map(([id, [x, y]]) => [id, [pad + x * (w - 2 * pad), (0.5 + (y - 0.5) * k) * h]]),
   ) as Layout["at"];
@@ -203,10 +203,9 @@ function LiveSystemStage({ locale }: { locale: Locale }) {
     const flash = (id: NodeId, cls: string, ms = 700) => {
       const n = nodeEl(id);
       if (!n) return;
+      // Restart the CSS animation: off now, on two frames later (no forced layout mid-frame).
       n.classList.remove(cls);
-      // Restart the CSS animation on the same element.
-      void n.getBoundingClientRect();
-      n.classList.add(cls);
+      requestAnimationFrame(() => requestAnimationFrame(() => n.classList.add(cls)));
       window.setTimeout(() => n.classList.remove(cls), ms);
     };
     const showTag = (text: string, kind: "deny" | "pass") => {
@@ -214,8 +213,7 @@ function LiveSystemStage({ locale }: { locale: Locale }) {
       tagText.textContent = text;
       tagEl.dataset.kind = kind;
       tagEl.classList.remove("on");
-      void tagEl.getBoundingClientRect();
-      tagEl.classList.add("on");
+      requestAnimationFrame(() => requestAnimationFrame(() => tagEl.classList.add("on")));
     };
 
     const spawn = () => {
@@ -397,7 +395,9 @@ function LiveSystemStage({ locale }: { locale: Locale }) {
           </g>
           {(Object.keys(lay.at) as NodeId[]).map((id, i) => {
             const [x, y] = lay.at[id];
-            const below = !(lay.tall && (id === "reply" || id === "guard" || id === "model"));
+            const side = lay.tall && (id === "reply" || id === "guard" || id === "model");
+            // In the wide flow "Speech to text" sits above its node, clear of "Phone call" beside it.
+            const above = !lay.tall && id === "stt";
             return (
               <g
                 key={id}
@@ -412,9 +412,9 @@ function LiveSystemStage({ locale }: { locale: Locale }) {
                 <path className="ls-icon" d={ICONS[id]} transform={`scale(${lay.r / 17})`} />
                 <text
                   className="ls-label"
-                  x={below ? 0 : lay.r * 1.7}
-                  y={below ? lay.r * 1.35 + 18 : 4}
-                  textAnchor={below ? "middle" : "start"}
+                  x={side ? lay.r * 1.7 : 0}
+                  y={side ? 4 : above ? -(lay.r * 1.35 + 9) : lay.r * 1.35 + 18}
+                  textAnchor={side ? "start" : "middle"}
                 >
                   {labels[id]}
                 </text>
