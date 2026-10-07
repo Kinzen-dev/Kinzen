@@ -114,12 +114,15 @@
 
 /* ---------- sticky stage ---------- */
 .yw-stage {
-  padding: calc(var(--header-h) + 0.75rem) var(--yw-pad) 1.25rem;
+  padding: calc(var(--header-h) + 0.25rem) var(--yw-pad) 1rem;
 }
 .yw-stage-grid {
+  /* Scroll position inside the current beat (0..1), continuous: the meter under the title and the
+     mockup drift read it, so every pixel of scroll shows. */
+  --bp: clamp(0, calc(var(--p) * 5 - var(--step)), 1);
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: 1.25rem;
+  gap: 1rem;
   height: 100%;
 }
 @media (min-width: 64rem) {
@@ -133,42 +136,73 @@
     gap: clamp(2rem, 4vw, 4.5rem);
   }
 }
-
-/* Phones in landscape: side by side, or the mockup shrinks to a stamp. */
+/* Phones in landscape: side by side. */
 @media (min-width: 40rem) and (max-height: 32rem) {
   .yw-stage {
     padding-block: calc(var(--header-h) + 0.25rem) 0.75rem;
   }
   .yw-stage-grid {
-    grid-template-columns: minmax(15rem, 5fr) minmax(0, 6fr);
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
     grid-template-rows: minmax(0, 1fr);
     align-items: center;
     gap: 1.5rem;
   }
-  .yw-copy {
-    order: 0;
-  }
-  .yw-mock-area {
-    place-items: center;
-  }
 }
 
 /* ---------- beat copy ---------- */
-.yw-copy {
+.yw-beats {
   order: 2;
+  display: grid;
   min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-@media (min-width: 64rem) {
-  .yw-copy {
+@media (min-width: 64rem), (min-width: 40rem) and (max-height: 32rem) {
+  .yw-beats {
     order: 0;
   }
+}
+.yw-beat {
+  grid-area: 1 / 1;
+  display: grid;
+  /* Stacked layouts: every beat sits on the bottom edge, right under the mockup's label, so the
+     shorter beats never leave a band of empty navy under their caption. */
+  align-self: end;
+  align-content: start;
+  gap: 0.6rem;
+  /* Entry waits for the exit: the two headings never overlap (no ghost of the previous one). */
+  transition:
+    opacity 420ms var(--yw-ease) 160ms,
+    translate 520ms var(--yw-ease) 120ms,
+    filter 420ms var(--yw-ease) 160ms;
+}
+@media (min-width: 64rem), (min-width: 40rem) and (max-height: 32rem) {
+  .yw-beat {
+    align-self: center;
+    gap: 0.75rem;
+  }
+}
+.yw-beat:not([data-on]) {
+  opacity: 0;
+  translate: 0 0.75rem;
+  filter: blur(6px);
+  pointer-events: none;
+  transition-duration: 150ms;
+  transition-delay: 0ms;
+}
+.yw-beat[data-past] {
+  translate: 0 -0.75rem;
 }
 .yw-progress {
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-bottom: 0.25rem;
 }
 .yw-count {
+  flex: none;
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   line-height: 1;
@@ -180,11 +214,15 @@
 }
 .yw-segs {
   display: flex;
+  flex: 1 1 auto;
   gap: 0.375rem;
+  min-width: 0;
+  max-width: 14rem;
 }
 .yw-seg {
   position: relative;
-  width: clamp(1.5rem, 3.4vw, 2.75rem);
+  flex: 1 1 0;
+  min-width: 0.75rem;
   height: 4px;
   border-radius: 999px;
   background: var(--rule);
@@ -198,35 +236,7 @@
   transform-origin: left center;
   scale: clamp(0, calc(var(--p) * 5 - var(--i)), 1) 1;
 }
-.yw-beats {
-  display: grid;
-  margin: 1.25rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-.yw-beat {
-  grid-area: 1 / 1;
-  display: grid;
-  align-content: start;
-  gap: 0.75rem;
-  /* Entry waits for the exit: the two headings never overlap (no ghost of the previous one). */
-  transition:
-    opacity 420ms var(--yw-ease) 160ms,
-    translate 520ms var(--yw-ease) 120ms,
-    filter 420ms var(--yw-ease) 160ms;
-}
-.yw-beat:not([data-on]) {
-  opacity: 0;
-  translate: 0 0.75rem;
-  filter: blur(6px);
-  pointer-events: none;
-  transition-duration: 150ms;
-  transition-delay: 0ms;
-}
-.yw-beat[data-past] {
-  translate: 0 -0.75rem;
-}
-/* The counter above says the step; the per-beat label is for screen readers and the static view. */
+/* The counter says the step; the per-beat label is for screen readers and the static view. */
 .yw-beat-n {
   position: absolute;
   width: 1px;
@@ -240,11 +250,6 @@
   font-size: var(--text-xl);
   line-height: var(--text-xl--line-height);
   letter-spacing: -0.03em;
-}
-/* Scroll position inside the current beat (0..1), continuous: the meter under the title and the
-   mockup drift read it, so every pixel of scroll shows. */
-.yw-stage-grid {
-  --bp: clamp(0, calc(var(--p) * 5 - var(--step)), 1);
 }
 .yw-beat-meter {
   position: relative;
@@ -277,12 +282,6 @@
   line-height: var(--text-sm--line-height);
 }
 @media (max-width: 63.99rem) {
-  .yw-beats {
-    margin-top: 0.875rem;
-  }
-  .yw-beat {
-    gap: 0.5rem;
-  }
   .yw-beat-title {
     font-size: var(--text-lg);
     line-height: var(--text-lg--line-height);
@@ -297,24 +296,27 @@
   }
 }
 
-/* ---------- mockup area ---------- */
+/* ---------- mockup area ----------
+   One container (yw) decides the composition: the full one when the room fits it at a readable
+   size, the compact one otherwise. Every mockup text has a 10.5px floor (max() below). */
 .yw-mock-area {
+  --fmin: 10.5px;
   position: relative;
+  min-width: 0;
   min-height: 0;
   height: 100%;
   container: yw / size;
   display: grid;
   place-items: end center;
 }
-@media (min-width: 64rem) {
+@media (min-width: 64rem), (min-width: 40rem) and (max-height: 32rem) {
   .yw-mock-area {
     place-items: center;
   }
 }
-/* The composition: --w x --h em, one font size scales all of it to the room it gets. */
 .yw-frame {
-  --w: 60;
-  --h: 50;
+  --w: 52;
+  --h: 44;
   position: relative;
   font-size: min(calc(100cqw / var(--w)), calc(100cqh / var(--h)));
   width: calc(var(--w) * 1em);
@@ -328,7 +330,7 @@
 }
 .yw-illus-at {
   position: absolute;
-  top: 39.5em;
+  top: 35.4em;
   right: 0;
 }
 .yw-illus {
@@ -341,13 +343,8 @@
   white-space: nowrap;
   color: var(--ink-2);
 }
-@media (max-width: 39.99rem) {
-  .yw-stage {
-    padding-top: calc(var(--header-h) + 0.25rem);
-  }
-}
 
-/* Shared bits */
+/* ---------- shared bits ---------- */
 .yw-dot {
   display: inline-block;
   flex: none;
@@ -374,8 +371,18 @@
 }
 .yw-mono {
   font-family: var(--font-mono);
-  font-size: 0.92em;
   letter-spacing: 0;
+}
+.yw-lights {
+  display: inline-flex;
+  flex: none;
+  gap: 0.45em;
+}
+.yw-lights i {
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  background: var(--rule);
 }
 .yw-chip {
   display: inline-flex;
@@ -383,7 +390,7 @@
   gap: 0.45em;
   padding: 0.3em 0.75em;
   border-radius: 999px;
-  font-size: 0.78em;
+  font-size: max(var(--fmin), 0.8em);
   white-space: nowrap;
 }
 .yw-chip-ok {
@@ -392,10 +399,11 @@
 }
 .yw-tag {
   display: inline-flex;
+  flex: none;
   align-items: center;
   padding: 0.1em 0.5em;
   border-radius: 0.4em;
-  font-size: 0.72em;
+  font-size: max(var(--fmin), 0.74em);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -406,6 +414,62 @@
 .yw-tag[data-ch="call"] {
   color: oklch(0.2 0.03 200);
   background: oklch(0.8 0.09 200);
+}
+.yw-pane-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  min-width: 0;
+  font-size: max(var(--fmin), 0.95em);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.yw-pane-title .yw-tag {
+  font-size: max(var(--fmin), 0.76em);
+}
+.yw-status {
+  display: inline-grid;
+  justify-items: end;
+  margin-inline-start: auto;
+}
+.yw-status-chip {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.3em 0.75em;
+  border-radius: 999px;
+  font-size: max(var(--fmin), 0.76em);
+  white-space: nowrap;
+  color: var(--gold);
+  background: color-mix(in oklch, var(--gold) 14%, transparent);
+  transition:
+    opacity 300ms var(--yw-ease),
+    scale 300ms var(--yw-ease);
+}
+.yw-status-chip:not([data-on]) {
+  opacity: 0;
+  scale: 0.9;
+}
+.yw-status-chip:is([data-n="1"], [data-n="2"], [data-n="3"]) .yw-dot {
+  animation: yw-pulse 1s ease-in-out infinite;
+}
+.yw-status-chip[data-n="4"] {
+  color: var(--yw-green);
+  background: color-mix(in oklch, var(--yw-green) 15%, transparent);
+}
+/* Two states in one cell (incoming call / on a call; caller / caption): one box, no re-flow. */
+.yw-swap {
+  display: inline-grid;
+  min-width: 0;
+}
+.yw-swap > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+  transition: opacity 300ms ease-out;
+}
+.yw-swap > :not([data-show]) {
+  opacity: 0;
 }
 
 /* Anything that arrives on a later beat keeps its box and fades/rises in. */
@@ -421,164 +485,250 @@
   scale: 0.97;
 }
 
-/* ---------- back office window ---------- */
-.yw-win {
-  position: absolute;
-  top: 0;
-  right: 0;
-  /* Depth: window and phone drift at different rates with the scroll. */
-  translate: 0 calc((0.5 - var(--p)) * 2em);
-  width: 50em;
-  height: 38em;
-  display: grid;
-  grid-template-rows: 2.75em minmax(0, 1fr);
-  border: 1px solid var(--rule);
-  border-radius: 1.1em;
-  background: var(--surface);
-  box-shadow:
-    0 0.1em 0.2em oklch(0 0 0 / 0.3),
-    0 2.5em 5em -1.5em oklch(0 0 0 / 0.6);
-  overflow: clip;
-  color: var(--ink);
+/* Conversation pieces (full and compact) */
+.yw-hist {
+  display: contents;
 }
-.yw-win-bar {
-  display: flex;
-  align-items: center;
-  gap: 1em;
-  padding-inline: 1em;
-  border-bottom: 1px solid var(--rule);
-}
-.yw-lights {
-  display: inline-flex;
-  gap: 0.45em;
-}
-.yw-lights i {
-  width: 0.7em;
-  height: 0.7em;
-  border-radius: 50%;
-  background: var(--rule);
-}
-.yw-win-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8em;
+.yw-day {
+  align-self: center;
+  padding: 0.15em 0.75em;
+  border-radius: 999px;
+  font-size: max(var(--fmin), 0.72em);
+  background: color-mix(in oklch, var(--ink) 9%, transparent);
   color: var(--ink-2);
 }
-.yw-win-body {
+.yw-msg {
   display: grid;
-  grid-template-columns: 9.5em 15.5em minmax(0, 1fr);
-  min-height: 0;
+  gap: 0.35em;
+  max-width: 90%;
+  justify-items: start;
 }
-
-.yw-side {
-  display: grid;
-  align-content: start;
-  gap: 0.2em;
-  padding: 1em 0.7em;
-  background: color-mix(in oklch, var(--ground) 55%, var(--surface));
-  border-right: 1px solid var(--rule);
+.yw-msg-draft,
+.yw-msg-reply,
+.yw-msg-ai {
+  align-self: flex-end;
+  justify-items: end;
 }
-.yw-brand {
-  display: flex;
+.yw-who {
+  display: inline-flex;
   align-items: center;
-  gap: 0.55em;
-  margin-bottom: 0.9em;
-  padding: 0.45em 0.5em;
-  border: 1px solid var(--rule);
-  border-radius: 0.7em;
-}
-.yw-brand-mark {
-  display: grid;
-  place-items: center;
-  width: 1.6em;
-  height: 1.6em;
-  flex: none;
-  border-radius: 0.5em;
-  background: var(--pastel);
-  color: var(--yw-mint);
-  font-weight: 700;
-  font-size: 0.85em;
-}
-.yw-brand-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.75em;
-  font-weight: 600;
-}
-.yw-nav {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.6em;
-  padding: 0.5em 0.6em;
-  border-radius: 0.6em;
-  font-size: 0.8em;
+  gap: 0.4em;
+  font-size: max(var(--fmin), 0.74em);
   color: var(--ink-3);
   white-space: nowrap;
 }
-.yw-nav[data-active] {
-  background: color-mix(in oklch, var(--ink) 9%, transparent);
-  color: var(--ink);
+.yw-who-sent {
+  color: var(--yw-green);
 }
-.yw-badge {
-  margin-inline-start: auto;
+.yw-rec {
   width: 0.55em;
   height: 0.55em;
   border-radius: 50%;
   background: var(--yw-red);
-  transition:
-    opacity 300ms var(--yw-ease),
-    scale 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.yw-badge:not([data-on]) {
-  opacity: 0;
-  scale: 0;
+.yw-stage-grid[data-step="1"] .yw-rec {
+  animation: yw-pulse 1s ease-in-out infinite;
 }
-
-.yw-queue {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  padding: 1em 1em 0;
-  border-right: 1px solid var(--rule);
+.yw-faint {
+  color: var(--ink-3);
 }
-.yw-kicker {
-  font-size: 0.66em;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--yw-mint);
+.yw-bubble {
+  display: block;
+  padding: 0.6em 0.85em;
+  border-radius: 0.95em;
+  font-size: max(var(--fmin), 0.86em);
+  line-height: 1.5;
+  text-wrap: pretty;
 }
-.yw-h {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5em;
-  margin: 0.15em 0 0.8em;
-  font-size: 1.1em;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
+.yw-msg-patient .yw-bubble {
+  border-end-start-radius: 0.3em;
+  background: var(--pastel);
+  color: var(--ink);
+  transition: box-shadow 400ms ease-out;
 }
-.yw-live {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-  font-size: 0.62em;
-  font-weight: 500;
-  letter-spacing: 0;
+/* Beat 2: the transcript is live (mint ring, recording dot). */
+.yw-stage-grid[data-step="1"] .yw-msg-patient .yw-bubble {
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--yw-mint) 55%, transparent);
+}
+.yw-msg-old .yw-bubble {
+  font-size: max(var(--fmin), 0.8em);
+  background: color-mix(in oklch, var(--ink) 7%, transparent);
+  color: var(--ink-2);
+  border-end-start-radius: 0.3em;
+}
+.yw-msg-old.yw-msg-ai .yw-bubble {
+  border-end-start-radius: 0.95em;
+  border-end-end-radius: 0.3em;
+}
+.yw-msg-draft .yw-bubble {
+  border: 1px dashed color-mix(in oklch, var(--ink) 40%, transparent);
+  border-end-end-radius: 0.3em;
   color: var(--ink-2);
 }
+/* The span the guard reads: beat 3 a gold scan line runs under it; from beat 4 it is blocked:
+   dimmed, a red wash and a red rule UNDER the text (never through it: a strike line runs through
+   Thai vowel marks and makes them unreadable). */
+.yw-flag {
+  color: var(--ink);
+  background-image: linear-gradient(var(--gold), var(--gold));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border-radius: 0.2em;
+  transition:
+    background-size 1100ms linear 300ms,
+    background-color 400ms ease-out,
+    color 400ms ease-out;
+}
+.yw-stage-grid:is([data-step="2"], [data-step="3"], [data-step="4"]) .yw-flag {
+  background-size: 100% 2px;
+}
+.yw-stage-grid:is([data-step="3"], [data-step="4"]) .yw-flag {
+  background-image: none;
+  background-color: color-mix(in oklch, var(--yw-red) 16%, transparent);
+  color: var(--ink-2);
+  text-decoration: underline 2px var(--yw-red);
+  text-underline-offset: 0.42em;
+  text-decoration-skip-ink: none;
+}
+.yw-guard {
+  display: grid;
+  gap: 0.35em;
+  padding: 0.75em 0.9em;
+  border: 1px solid var(--rule);
+  border-radius: 0.9em;
+  background: color-mix(in oklch, var(--ground) 45%, var(--surface));
+}
+.yw-guard-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  margin-bottom: 0.15em;
+  font-size: max(var(--fmin), 0.82em);
+  font-weight: 600;
+  color: var(--yw-mint);
+}
+.yw-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  margin-inline-start: auto;
+  padding: 0.15em 0.65em;
+  border-radius: 999px;
+  font-size: max(var(--fmin), 0.9em);
+  color: oklch(0.2 0.04 25);
+  background: var(--yw-red);
+  white-space: nowrap;
+}
+.yw-check {
+  display: grid;
+  grid-template-columns: 1.5em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.3em 0.5em;
+  border-radius: 0.5em;
+  font-size: max(var(--fmin), 0.8em);
+  color: var(--ink-2);
+  transition:
+    opacity 400ms var(--yw-ease),
+    translate 400ms var(--yw-ease);
+  transition-delay: calc(var(--i, 0) * 140ms + 250ms);
+}
+.yw-guard[data-at]:not([data-on]) .yw-check {
+  opacity: 0;
+  translate: -0.6em 0;
+}
+.yw-check:not([data-pass]) {
+  color: var(--ink);
+  background: color-mix(in oklch, var(--yw-red) 16%, transparent);
+}
+.yw-check-icon {
+  display: grid;
+  place-items: center;
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+  border-radius: 50%;
+  font-weight: 700;
+  color: oklch(0.2 0.04 150);
+  background: var(--yw-green);
+}
+.yw-check:not([data-pass]) .yw-check-icon {
+  color: oklch(0.2 0.04 25);
+  background: var(--yw-red);
+}
+.yw-check .yw-mono {
+  color: var(--ink-3);
+}
+.yw-check:not([data-pass]) .yw-mono {
+  color: var(--yw-red);
+}
+.yw-msg-reply .yw-bubble {
+  border-end-end-radius: 0.3em;
+  background: var(--ink);
+  color: var(--ground);
+}
+.yw-tick {
+  letter-spacing: -0.2em;
+}
 
+/* Rows (queue) */
+.yw-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-content: center;
+  column-gap: 0.6em;
+  row-gap: 0.2em;
+}
+.yw-row-top {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+.yw-row-name {
+  font-size: max(var(--fmin), 0.84em);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.yw-row-time {
+  margin-inline-start: auto;
+  font-family: var(--font-mono);
+  font-size: max(var(--fmin), 0.74em);
+  color: var(--ink-2);
+}
+.yw-row-sum {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: max(var(--fmin), 0.78em);
+  color: var(--ink-2);
+}
+.yw-pill {
+  align-self: center;
+  padding: 0.1em 0.6em;
+  border-radius: 999px;
+  font-size: max(var(--fmin), 0.72em);
+  white-space: nowrap;
+  color: var(--ink-2);
+  background: color-mix(in oklch, var(--ink) 8%, transparent);
+}
+.yw-pill[data-state="new"] {
+  color: oklch(0.2 0.04 150);
+  background: var(--yw-green);
+  font-weight: 600;
+}
+
+/* Call strip */
 .yw-call {
   display: grid;
-  gap: 0.5em;
-  margin-bottom: 0.8em;
-  padding: 0.75em 0.85em;
+  gap: 0.45em;
+  padding: 0.7em 0.85em;
   border-radius: 0.8em;
   background: var(--pastel);
 }
@@ -586,7 +736,7 @@
   display: flex;
   align-items: center;
   gap: 0.45em;
-  font-size: 0.75em;
+  font-size: max(var(--fmin), 0.8em);
   font-weight: 600;
   color: var(--yw-mint);
 }
@@ -595,12 +745,25 @@
   font-family: var(--font-mono);
   font-weight: 400;
   color: var(--ink-2);
+  transition: opacity 300ms ease-out;
+}
+.yw-call:not([data-on]) .yw-call-time {
+  opacity: 0;
+}
+.yw-call:not([data-on]) .yw-call-head .yw-icon {
+  animation: yw-pulse 900ms ease-in-out infinite;
+}
+.yw-call-body {
+  display: grid;
+  grid-template-columns: 4.2em minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75em;
 }
 .yw-wave {
   display: flex;
   align-items: center;
-  gap: 0.18em;
-  height: 1.5em;
+  gap: 0.15em;
+  height: 1.3em;
 }
 .yw-wave i {
   flex: 1;
@@ -629,32 +792,156 @@
     scale: 1 0.65;
   }
 }
+.yw-caller,
 .yw-caption {
-  font-size: 0.75em;
-  line-height: 1.45;
+  font-size: max(var(--fmin), 0.8em);
+  line-height: 1.4;
   color: var(--ink);
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 1100ms linear 150ms;
 }
-.yw-call[data-on] .yw-caption {
-  clip-path: inset(0 0 0 0);
+.yw-caller {
+  font-family: var(--font-mono);
+  color: var(--ink-2);
 }
 
+/* ================= full composition (52 x 44 em) ================= */
+.yw-full {
+  position: absolute;
+  inset: 0;
+}
+.yw-win {
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* Depth: window and phone drift at different rates with the scroll. */
+  translate: 0 calc((0.5 - var(--p)) * 2em);
+  width: 41em;
+  height: 34em;
+  display: grid;
+  grid-template-rows: 2.75em minmax(0, 1fr);
+  border: 1px solid var(--rule);
+  border-radius: 1.1em;
+  background: var(--surface);
+  box-shadow:
+    0 0.1em 0.2em oklch(0 0 0 / 0.3),
+    0 2.5em 5em -1.5em oklch(0 0 0 / 0.6);
+  overflow: clip;
+  color: var(--ink);
+}
+.yw-win-bar {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  padding-inline: 1em;
+  border-bottom: 1px solid var(--rule);
+}
+.yw-win-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: max(var(--fmin), 0.82em);
+  color: var(--ink-2);
+}
+.yw-win-body {
+  display: grid;
+  grid-template-columns: 3.5em 14.5em minmax(0, 1fr);
+  min-height: 0;
+}
+.yw-rail {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 0.35em;
+  padding-block: 0.9em;
+  background: color-mix(in oklch, var(--ground) 55%, var(--surface));
+  border-right: 1px solid var(--rule);
+}
+.yw-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.1em;
+  height: 2.1em;
+  margin-bottom: 0.5em;
+  border-radius: 0.6em;
+  background: var(--pastel);
+  color: var(--yw-mint);
+  font-weight: 700;
+}
+.yw-rail-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.3em;
+  height: 2.3em;
+  border-radius: 0.6em;
+  color: var(--ink-3);
+}
+.yw-rail-item[data-active] {
+  background: color-mix(in oklch, var(--ink) 10%, transparent);
+  color: var(--ink);
+}
+.yw-badge {
+  position: absolute;
+  top: 0.3em;
+  right: 0.3em;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--yw-red);
+  transition:
+    opacity 300ms var(--yw-ease),
+    scale 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.yw-badge:not([data-on]) {
+  opacity: 0;
+  scale: 0;
+}
+.yw-queue {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 1em 1em 0;
+  border-right: 1px solid var(--rule);
+}
+.yw-kicker {
+  font-size: max(var(--fmin), 0.7em);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--yw-mint);
+}
+.yw-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  margin: 0.15em 0 0.8em;
+  font-size: 1.1em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.yw-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: max(var(--fmin), 0.68em);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink-2);
+}
+.yw-queue .yw-call {
+  margin-bottom: 0.8em;
+}
 .yw-rows {
-  --row: 4.3em;
+  --row: 4.4em;
   position: relative;
   flex: 1;
   min-height: 0;
   overflow: hidden; /* not clip: axe treats clip as visible */
   margin-inline: -1em;
 }
-.yw-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto auto;
-  align-content: center;
-  column-gap: 0.6em;
-  row-gap: 0.25em;
+.yw-rows .yw-row {
   height: var(--row);
   padding-inline: 1em;
   border-bottom: 1px solid var(--rule);
@@ -672,342 +959,45 @@
 .yw-rows[data-on] .yw-row[data-new] {
   background: color-mix(in oklch, var(--yw-mint) 9%, transparent);
 }
-.yw-row-top {
-  display: flex;
-  align-items: center;
-  gap: 0.45em;
-  min-width: 0;
-  grid-column: 1 / -1;
-}
-.yw-row-name {
-  font-size: 0.8em;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.yw-row-time {
-  margin-inline-start: auto;
-  font-family: var(--font-mono);
-  font-size: 0.68em;
-  color: var(--ink-2);
-}
-.yw-row-sum {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.72em;
-  color: var(--ink-2);
-}
-.yw-pill {
-  align-self: center;
-  padding: 0.12em 0.6em;
-  border-radius: 999px;
-  font-size: 0.66em;
-  white-space: nowrap;
-  color: var(--ink-3);
-  background: color-mix(in oklch, var(--ink) 8%, transparent);
-}
-.yw-pill[data-state="new"] {
-  color: oklch(0.2 0.04 150);
-  background: var(--yw-green);
-  font-weight: 600;
-}
-
-/* Conversation pane */
 .yw-pane {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
-  padding: 1em 1.2em 0;
+  padding: 0.9em 1.1em 0;
 }
 .yw-pane-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 0.75em;
-  padding-bottom: 0.8em;
+  padding-bottom: 0.75em;
   border-bottom: 1px solid var(--rule);
 }
-.yw-pane-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55em;
-  font-size: 0.95em;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.yw-status {
-  display: inline-grid;
-  justify-items: end;
-}
-.yw-status-chip {
-  grid-area: 1 / 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45em;
-  padding: 0.3em 0.75em;
-  border-radius: 999px;
-  font-size: 0.72em;
-  white-space: nowrap;
-  color: var(--gold);
-  background: color-mix(in oklch, var(--gold) 14%, transparent);
-  transition:
-    opacity 300ms var(--yw-ease),
-    scale 300ms var(--yw-ease);
-}
-.yw-status-chip:not([data-on]) {
-  opacity: 0;
-  scale: 0.9;
-}
-.yw-status-chip:is([data-n="1"], [data-n="2"], [data-n="3"]) .yw-dot {
-  animation: yw-pulse 1s ease-in-out infinite;
-}
-.yw-status-chip[data-n="4"] {
-  color: var(--yw-green);
-  background: color-mix(in oklch, var(--yw-green) 15%, transparent);
-}
-
 .yw-feed-view {
   position: relative;
   min-height: 0;
   overflow: hidden; /* not clip: axe treats clip as visible */
-  /* Soft top edge once the transcript starts scrolling. */
-  mask-image: linear-gradient(to bottom, transparent 0, #000 1em);
+  /* Older messages scroll up under a deliberate soft edge, like any chat. */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 3.5em);
 }
 .yw-feed {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.9em;
-  padding: 1em 0 1em;
+  gap: 0.8em;
+  padding-bottom: 1em;
   translate: 0 var(--shift, 0px);
   transition: translate 700ms var(--yw-ease);
 }
-/* Slots for what is still to come: a quiet dashed outline with the item's name, so the pane
-   reads as a pipeline being filled, never as empty space. */
-.yw-hold {
-  position: relative;
-  display: grid;
-}
-.yw-hold[data-end] {
-  align-self: flex-end;
-  max-width: 88%;
-}
-.yw-hold > .yw-msg {
-  max-width: none;
-}
-.yw-hold::before {
-  content: attr(data-label);
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed color-mix(in oklch, var(--ink) 22%, transparent);
-  border-radius: 0.95em;
-  font-size: 0.7em;
-  color: var(--ink-3);
-  transition: opacity 300ms ease-out;
-}
-.yw-hold[data-on]::before {
-  opacity: 0;
-}
-.yw-msg {
-  display: grid;
-  gap: 0.35em;
-  max-width: 88%;
-  justify-items: start;
-}
-.yw-msg-draft,
-.yw-msg-reply {
-  align-self: flex-end;
-  justify-items: end;
-}
-.yw-who {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-  font-size: 0.68em;
-  color: var(--ink-3);
-  white-space: nowrap;
-}
-.yw-rec {
-  width: 0.55em;
-  height: 0.55em;
-  border-radius: 50%;
-  background: var(--yw-red);
-}
-.yw-stage-grid[data-step="1"] .yw-rec {
-  animation: yw-pulse 1s ease-in-out infinite;
-}
-.yw-faint {
-  color: var(--ink-3);
-}
-.yw-bubble {
-  display: block;
-  padding: 0.6em 0.85em;
-  border-radius: 0.95em;
-  font-size: 0.82em;
-  line-height: 1.5;
-}
-.yw-msg-patient .yw-bubble {
-  position: relative;
-  border-end-start-radius: 0.3em;
-  background: var(--pastel);
-  color: var(--ink);
-}
-/* Beat 1: the message is in, not yet read (placeholder lines). Beat 2: the words land line by
-   line, as if being transcribed. */
-.yw-msg-patient .yw-bubble::before {
-  content: "";
-  position: absolute;
-  inset: 0.75em 0.85em;
-  background: repeating-linear-gradient(
-    to bottom,
-    color-mix(in oklch, var(--ink) 22%, transparent) 0 0.55em,
-    transparent 0.55em 1.23em
-  );
-  border-radius: 0.3em;
-  transition: opacity 300ms ease-out;
-  animation: yw-pulse 1.4s ease-in-out infinite;
-}
-.yw-words {
-  display: block;
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path 1000ms steps(5, end) 150ms;
-}
-.yw-stage-grid:not([data-step="0"]) .yw-words {
-  clip-path: inset(0 0 0 0);
-}
-.yw-stage-grid:not([data-step="0"]) .yw-msg-patient .yw-bubble::before {
-  opacity: 0;
-  animation: none;
-}
-.yw-msg-draft .yw-bubble {
-  border: 1px dashed color-mix(in oklch, var(--ink) 40%, transparent);
-  border-end-end-radius: 0.3em;
-  color: var(--ink-2);
-  transition: opacity 500ms var(--yw-ease);
-}
-.yw-flag {
-  color: var(--ink);
-  background-image: linear-gradient(var(--gold), var(--gold));
-  background-repeat: no-repeat;
-  background-position: 0 100%;
-  background-size: 0% 2px;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-  transition:
-    background-size 1100ms linear 300ms,
-    background-color 400ms ease-out,
-    color 400ms ease-out;
-}
-/* Beat 3: the guard reads the draft (gold scan). Beat 4: the span is struck out. */
-.yw-stage-grid:is([data-step="2"], [data-step="3"], [data-step="4"]) .yw-flag {
-  background-size: 100% 2px;
-}
-.yw-stage-grid:is([data-step="3"], [data-step="4"]) .yw-flag {
-  background-image: none;
-  background-color: color-mix(in oklch, var(--yw-red) 22%, transparent);
-  text-decoration: line-through 2px var(--yw-red);
-  border-radius: 0.2em;
-}
-/* Beat 5: the draft stays as the record of what was stopped; its frame goes quiet. */
-.yw-stage-grid[data-step="4"] .yw-msg-draft .yw-bubble {
-  border-color: var(--rule);
-}
 
-.yw-guard {
-  display: grid;
-  gap: 0.35em;
-  padding: 0.75em 0.9em;
-  border: 1px solid var(--rule);
-  border-radius: 0.9em;
-  background: color-mix(in oklch, var(--ground) 45%, var(--surface));
-}
-.yw-guard-head {
-  display: flex;
-  align-items: center;
-  gap: 0.45em;
-  margin-bottom: 0.2em;
-  font-size: 0.78em;
-  font-weight: 600;
-  color: var(--yw-mint);
-}
-.yw-verdict {
-  margin-inline-start: auto;
-  padding: 0.15em 0.65em;
-  border-radius: 999px;
-  font-size: 0.92em;
-  color: oklch(0.2 0.04 25);
-  background: var(--yw-red);
-  white-space: nowrap;
-}
-.yw-check {
-  display: grid;
-  grid-template-columns: 1.4em minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.5em;
-  padding: 0.3em 0.5em;
-  border-radius: 0.5em;
-  font-size: 0.74em;
-  color: var(--ink-2);
-  transition:
-    opacity 400ms var(--yw-ease),
-    translate 400ms var(--yw-ease);
-  transition-delay: calc(var(--i) * 140ms + 250ms);
-}
-.yw-guard:not([data-on]) .yw-check {
-  opacity: 0;
-  translate: -0.6em 0;
-}
-.yw-check:not([data-pass]) {
-  color: var(--ink);
-  background: color-mix(in oklch, var(--yw-red) 16%, transparent);
-}
-.yw-check-icon {
-  display: grid;
-  place-items: center;
-  width: 1.4em;
-  height: 1.4em;
-  border-radius: 50%;
-  font-size: 0.85em;
-  font-weight: 700;
-  color: oklch(0.2 0.04 150);
-  background: var(--yw-green);
-}
-.yw-check:not([data-pass]) .yw-check-icon {
-  color: oklch(0.2 0.04 25);
-  background: var(--yw-red);
-}
-.yw-check .yw-mono {
-  color: var(--ink-3);
-}
-.yw-check:not([data-pass]) .yw-mono {
-  color: var(--yw-red);
-}
-
-.yw-msg-reply .yw-bubble {
-  border-end-end-radius: 0.3em;
-  background: var(--ink);
-  color: var(--ground);
-}
-.yw-msg-reply .yw-who {
-  color: var(--yw-green);
-}
-.yw-tick {
-  letter-spacing: -0.2em;
-}
-
-/* ---------- patient's phone ---------- */
+/* Patient's phone */
 .yw-phone {
   position: absolute;
   left: 0;
   bottom: 0;
-  translate: 0 calc((0.35 - var(--p)) * 6em);
-  width: 15.5em;
-  height: 32em;
+  translate: 0 calc((0.35 - var(--p)) * 3em);
+  width: 15em;
+  height: 30em;
   padding: 0.45em;
   border-radius: 2.5em;
   background: oklch(0.13 0.01 265);
@@ -1040,8 +1030,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.35em 1.5em 0;
-  font-size: 0.66em;
+  padding: 0.35em 1.4em 0;
+  font-size: max(var(--fmin), 0.7em);
   font-weight: 600;
 }
 .yw-sb-icons {
@@ -1085,16 +1075,12 @@
   background: var(--pastel);
   color: var(--yw-mint);
 }
-.yw-avatar .yw-icon {
-  width: 1.1em;
-  height: 1.1em;
-}
 .yw-line-name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.8em;
+  font-size: max(var(--fmin), 0.82em);
   font-weight: 600;
 }
 .yw-chat-view {
@@ -1102,32 +1088,29 @@
   min-height: 0;
   overflow: hidden; /* not clip: axe treats clip as visible */
   padding-inline: 0.65em;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 2.5em);
 }
 .yw-chat {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.55em;
-  padding-bottom: 0.7em;
+  padding: 0.6em 0 0.7em;
   translate: 0 var(--shift, 0px);
   transition: translate 650ms var(--yw-ease);
 }
-.yw-day {
-  align-self: center;
-  margin-block: 0.6em 0.2em;
-  padding: 0.15em 0.7em;
-  border-radius: 999px;
-  font-size: 0.62em;
+.yw-chat .yw-day {
   background: oklch(1 0 0 / 0.08);
   color: oklch(0.85 0.01 85);
 }
 .yw-lb {
-  font-size: 0.74em;
+  font-size: max(var(--fmin), 0.76em);
   line-height: 1.45;
+  text-wrap: pretty;
 }
 .yw-lb-ai {
   align-self: flex-start;
-  max-width: 82%;
+  max-width: 84%;
   padding: 0.55em 0.8em;
   border-radius: 1.1em;
   border-end-start-radius: 0.35em;
@@ -1138,7 +1121,7 @@
   display: flex;
   align-items: flex-end;
   gap: 0.4em;
-  max-width: 92%;
+  max-width: 94%;
 }
 .yw-lb-text {
   padding: 0.55em 0.8em;
@@ -1151,9 +1134,9 @@
   display: grid;
   justify-items: end;
   flex: none;
-  font-size: 0.78em;
+  font-size: max(var(--fmin), 0.7em);
   line-height: 1.3;
-  color: oklch(0.8 0.01 85);
+  color: oklch(0.82 0.01 85);
 }
 .yw-read {
   transition: opacity 300ms ease-out;
@@ -1200,9 +1183,152 @@
   flex: 1;
   padding: 0.3em 0.8em;
   border-radius: 999px;
-  font-size: 0.68em;
+  font-size: max(var(--fmin), 0.7em);
   background: oklch(1 0 0 / 0.07);
-  color: oklch(0.7 0.01 85);
+  color: oklch(0.72 0.01 85);
+}
+
+/* ================= compact composition: one card per beat ================= */
+.yw-cmp {
+  display: none;
+}
+@container yw (max-width: 597px) or (max-height: 505px) {
+  .yw-frame {
+    font-size: clamp(14.5px, min(calc(100cqw / 22), calc(100cqh / 21)), 21px);
+    width: min(100cqw, 24em);
+    height: min(100cqh, 32em);
+  }
+  .yw-full {
+    display: none;
+  }
+  .yw-illus-at {
+    top: auto;
+    bottom: 0;
+    right: 50%;
+    translate: 50% 0;
+  }
+  .yw-cmp {
+    position: absolute;
+    inset: 0 0 2.4rem;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    border: 1px solid var(--rule);
+    border-radius: 1.1em;
+    background: var(--surface);
+    box-shadow:
+      0 0.1em 0.2em oklch(0 0 0 / 0.3),
+      0 2em 4em -1.5em oklch(0 0 0 / 0.6);
+    overflow: clip;
+    color: var(--ink);
+  }
+  .yw-cmp-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    min-width: 0;
+    padding: 0.65em 0.9em;
+    border-bottom: 1px solid var(--rule);
+  }
+  .yw-cmp-stage {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* A beat's card. Items wrap into a second, clipped column when the room is short: whatever
+     shows is always whole (never a sliced line), and the first items are the punchline. */
+  .yw-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: flex-start;
+    gap: 0.7em 3em;
+    padding: 0.9em;
+    overflow: hidden;
+    transition:
+      opacity 380ms var(--yw-ease) 120ms,
+      translate 480ms var(--yw-ease) 80ms;
+  }
+  .yw-panel > * {
+    flex: none;
+    width: 100%;
+    max-width: none;
+  }
+  .yw-panel > .yw-msg-draft,
+  .yw-panel > .yw-msg-reply {
+    width: 92%;
+  }
+  .yw-panel > .yw-msg-patient {
+    width: 92%;
+  }
+  .yw-panel:not([data-on]) {
+    opacity: 0;
+    translate: 0 0.8em;
+    transition-duration: 150ms;
+    transition-delay: 0ms;
+  }
+  .yw-panel[data-past]:not([data-on]) {
+    translate: 0 -0.8em;
+  }
+  .yw-note {
+    display: grid;
+    gap: 0.4em;
+    padding: 0.7em 0.85em;
+    border-radius: 0.9em;
+    background: var(--pastel);
+  }
+  .yw-note .yw-row-time {
+    margin-inline-start: auto;
+  }
+  .yw-note-text {
+    font-size: max(var(--fmin), 0.86em);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .yw-row-mini {
+    padding: 0.55em 0.2em;
+    border-bottom: 1px solid var(--rule);
+  }
+  .yw-msg-short .yw-clamp {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .yw-passed {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding-inline: 0.9em;
+    font-size: max(var(--fmin), 0.8em);
+    color: var(--ink-2);
+  }
+  .yw-verdict-row {
+    display: flex;
+  }
+  .yw-verdict-row .yw-verdict {
+    margin-inline-start: 0;
+  }
+  .yw-logged {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.55em 0.75em;
+    border-radius: 0.7em;
+    background: color-mix(in oklch, var(--yw-green) 12%, transparent);
+  }
+  .yw-logged-text {
+    margin-inline-start: auto;
+    font-size: max(var(--fmin), 0.76em);
+    color: var(--yw-green);
+    white-space: nowrap;
+  }
+  /* In a card, the checks show at once (no stagger) and the flag is already in its beat state. */
+  .yw-panel .yw-check {
+    transition: none;
+  }
 }
 
 /* Off screen: beat changes snap (the runtime sets the first beat while the scene is still below
@@ -1211,127 +1337,16 @@
 .yw-stage-grid:not([data-live]) * {
   transition: none !important;
 }
-.yw-stage-grid:not([data-live]) :is(.yw-pulse, .yw-wave i, .yw-lb-typing i, .yw-rec, .yw-status-chip .yw-dot) {
+.yw-stage-grid:not([data-live])
+  :is(.yw-pulse, .yw-wave i, .yw-lb-typing i, .yw-rec, .yw-icon, .yw-status-chip .yw-dot) {
   animation-play-state: paused;
-}
-.yw-stage-grid:not([data-live]) .yw-bubble::before {
-  animation-play-state: paused;
-}
-
-/* ---------- compact composition (phones, landscape phones, any short or narrow room) ----------
-   Fewer things, bigger: the back office pane alone (plus the live call strip when there is
-   height for it), sized so no mockup text drops under ~10.5px. Shrinking the full composition
-   instead made 7px text (review round 1). */
-@container yw (max-width: 34rem) or (max-height: 25rem) {
-  .yw-frame {
-    --w: 22;
-    font-size: max(14.5px, min(calc(100cqw / 22), calc(100cqh / 17)));
-    width: min(100cqw, 22em);
-    height: 100cqh;
-  }
-  .yw-illus-at {
-    top: auto;
-    bottom: 0;
-    right: 50%;
-    translate: 50% 0;
-  }
-  .yw-win {
-    inset: 0 0 2.6rem;
-    width: auto;
-    height: auto;
-    translate: none;
-  }
-  .yw-win-body {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-  .yw-side,
-  .yw-phone,
-  .yw-win-clinic,
-  .yw-queue > :not(.yw-call),
-  .yw-check[data-pass] .yw-mono {
-    display: none;
-  }
-  .yw-queue {
-    padding: 0.75em 0.9em 0;
-    border-right: 0;
-  }
-  .yw-call {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    column-gap: 0.8em;
-    margin: 0;
-    padding: 0.6em 0.8em;
-  }
-  .yw-call-head {
-    grid-column: 1 / -1;
-    font-size: 0.76em;
-  }
-  .yw-call-time {
-    font-size: 1em;
-  }
-  .yw-wave {
-    width: 4em;
-    height: 1.2em;
-  }
-  .yw-caption {
-    font-size: 0.78em;
-  }
-  .yw-pane {
-    padding: 0.75em 0.9em 0;
-  }
-  .yw-pane-head {
-    padding-bottom: 0.6em;
-  }
-  .yw-feed {
-    gap: 0.7em;
-    padding-block: 0.75em;
-  }
-  .yw-who,
-  .yw-status-chip,
-  .yw-tag,
-  .yw-hold::before {
-    font-size: 0.74em;
-  }
-  .yw-chip {
-    font-size: 0.76em;
-  }
-  .yw-bubble {
-    font-size: 0.86em;
-  }
-  .yw-check,
-  .yw-guard-head {
-    font-size: 0.8em;
-  }
-  .yw-check-icon {
-    font-size: 0.92em;
-  }
-  .yw-msg,
-  .yw-hold[data-end] {
-    max-width: 94%;
-  }
-  .yw-pane-title .yw-tag {
-    font-size: 0.78em;
-  }
-  .yw-verdict .yw-mono {
-    font-size: 1em;
-  }
-}
-/* Short rooms (landscape phones, small phones): the conversation alone. */
-@container yw (max-height: 25rem) {
-  .yw-queue {
-    display: none;
-  }
-  .yw-win-body {
-    grid-template-rows: minmax(0, 1fr);
-  }
 }
 
 /* ---------- finale ---------- */
 .yw-finale {
   display: grid;
   gap: 1.25rem;
-  padding: clamp(2.5rem, 6vw, 5rem) var(--yw-pad) var(--yw-pad);
+  padding: clamp(2rem, 5vw, 5rem) var(--yw-pad) var(--yw-pad);
 }
 
 /* ---------- reduced motion: a composed static sequence ---------- */
@@ -1344,15 +1359,16 @@
     align-items: start;
     grid-template-rows: auto;
   }
-  .yw-progress {
+  .yw-progress,
+  .yw-beat-meter {
     display: none;
   }
   .yw-beats {
     gap: 1.75rem;
-    margin: 0;
   }
   .yw-beat {
     grid-area: auto;
+    align-self: start;
   }
   .yw-beat:not([data-on]),
   .yw-beat[data-past] {
@@ -1360,13 +1376,6 @@
     translate: none;
     filter: none;
     pointer-events: auto;
-  }
-  .yw-beat-meter {
-    display: none;
-  }
-  .yw-win,
-  .yw-phone {
-    translate: none;
   }
   .yw-beat-n {
     position: static;
@@ -1376,26 +1385,25 @@
     clip-path: none;
     color: var(--gold);
   }
+  .yw-win,
+  .yw-phone {
+    translate: none;
+  }
   .yw-mock-area {
     height: auto;
-    aspect-ratio: 60 / 50;
-  }
-  .yw-copy {
-    order: 2;
+    aspect-ratio: 52 / 44;
   }
 }
 @media (prefers-reduced-motion: reduce) and (min-width: 64rem) {
-  .yw-copy {
-    order: 0;
-  }
   /* Position, not motion: the finished mockup stays beside the list while it is read. */
   .yw-mock-area {
     position: sticky;
     top: calc(var(--header-h) + 1rem);
   }
 }
-@media (prefers-reduced-motion: reduce) and (max-width: 39.99rem) {
+@media (prefers-reduced-motion: reduce) and (max-width: 63.99rem) {
   .yw-mock-area {
-    aspect-ratio: 30 / 39;
+    aspect-ratio: auto;
+    height: min(30rem, 80svh);
   }
 }

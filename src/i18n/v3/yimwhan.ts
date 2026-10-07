@@ -56,6 +56,7 @@ const en = {
     sent: "Sent to patient",
     pause: "Pause auto-play",
     play: "Resume auto-play",
+    paused: "Auto-play paused",
     announce: "Draft blocked by the rule: {rule}. Safe reply sent: {reply}",
     scenarios: [
       {
@@ -102,6 +103,8 @@ const en = {
     cases: "Cases",
     queue: "Case queue",
     call: "On a call",
+    incoming: "Incoming call",
+    caller: "08x-xxx-0001",
     callTime: "01:12",
     caption: "Can I move my cleaning to Saturday?",
     rows: [
@@ -140,6 +143,12 @@ const en = {
       { rule: "efficacy_claim", label: "Promises a result", pass: true },
     ],
     blocked: "Blocked",
+    passed: "2 other checks passed",
+    logged: "Case logged for staff",
+    history: [
+      { day: "12 Sep", question: "Are you open on Sundays?", answer: "Yes, Sundays 10:00 to 16:00." },
+      { day: "3 Oct", question: "Can I pay by card?", answer: "Yes, we take cards and bank transfers." },
+    ],
     reply:
       "Sorry it hurts. Only the dentist can say what is causing the swelling, after an exam. Tomorrow at 10:00 is free. Shall I book it?",
     sent: "Sent to patient",
@@ -205,6 +214,7 @@ const th: YimwhanCopy = {
     sent: "ส่งถึงคนไข้แล้ว",
     pause: "หยุดเล่นอัตโนมัติ",
     play: "เล่นอัตโนมัติต่อ",
+    paused: "หยุดเล่นอัตโนมัติแล้ว",
     announce: "ร่างถูกบล็อกด้วยกฎ: {rule} ส่งคำตอบที่ปลอดภัยแทน: {reply}",
     scenarios: [
       {
@@ -249,6 +259,8 @@ const th: YimwhanCopy = {
     cases: "เคส",
     queue: "คิวเคส",
     call: "กำลังคุยสาย",
+    incoming: "สายเข้า",
+    caller: "08x-xxx-0001",
     callTime: "01:12",
     caption: "ขอเลื่อนนัดขูดหินปูนเป็นวันเสาร์ได้ไหมครับ",
     rows: [
@@ -275,6 +287,12 @@ const th: YimwhanCopy = {
       { rule: "efficacy_claim", label: "รับประกันผลการรักษา", pass: true },
     ],
     blocked: "ถูกบล็อก",
+    passed: "อีก 2 ข้อผ่าน",
+    logged: "บันทึกเคสให้พนักงานแล้ว",
+    history: [
+      { day: "12 ก.ย.", question: "วันอาทิตย์คลินิกเปิดไหมคะ", answer: "เปิดค่ะ วันอาทิตย์ 10:00 ถึง 16:00 น." },
+      { day: "3 ต.ค.", question: "จ่ายด้วยบัตรได้ไหมคะ", answer: "ได้ค่ะ รับทั้งบัตรและโอนผ่านธนาคารค่ะ" },
+    ],
     reply:
       "เจ็บแบบนี้ไม่สบายตัวเลยนะคะ สาเหตุที่บวมต้องให้คุณหมอตรวจก่อนถึงจะบอกได้ค่ะ พรุ่งนี้ 10:00 มีคิวว่าง ให้จองไว้เลยไหมคะ",
     sent: "ส่งถึงคนไข้แล้ว",

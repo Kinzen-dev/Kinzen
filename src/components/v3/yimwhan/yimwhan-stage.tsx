@@ -13,10 +13,11 @@ const on = (step: number, from: number) => (step >= from ? "" : undefined);
 
 /**
  * The five-beat story. Scroll progress picks the beat (StickyStage); each beat flips data
- * attributes and CSS transitions do the motion (transform and opacity only). Elements that appear
- * later keep their space from the start, and the chat and transcript are re-aimed with a
- * translate, so nothing on the page ever re-flows while the visitor scrolls (CLS 0).
- * The mockups are decorative (aria-hidden); the beat list beside them is the real text.
+ * attributes and CSS transitions do the motion (transform and opacity only), so nothing on the page
+ * re-flows while the visitor scrolls (CLS 0). Two compositions share the beat state, chosen by a
+ * container query on the room the mockup gets: the full one (back office window with queue and
+ * conversation, plus the patient's LINE phone) and a compact one (one card per beat, whole items
+ * only, nothing under 10.5px). The mockups are decorative (aria-hidden); the beat list is the text.
  */
 export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
   const [step, setStep] = useState(LAST);
@@ -25,6 +26,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
   const feedRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
   const m = copy.mock;
+  const failed = m.checks.find((c) => !c.pass);
 
   // Looping details (waveform, typing dots, live dots) run only while the stage is on screen.
   // The beat also follows the stage's own data-step, which StickyStage sets when the runtime
@@ -47,12 +49,12 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
     };
   }, []);
 
-  // Keep the newest item in view: transcript scrolls up once it fills its pane; the phone chat
-  // sits on its bottom edge like a real chat. Measured on beat change and resize only.
+  // Full composition: the transcript and the phone chat sit on their bottom edge like real chats,
+  // the newest item last. Measured on beat change and resize only.
   useLayoutEffect(() => {
     const aim = () => {
-      fit(feedRef.current, step, "top");
-      fit(chatRef.current, step, "bottom");
+      fit(feedRef.current, step);
+      fit(chatRef.current, step);
     };
     aim();
     const ro = new ResizeObserver(aim);
@@ -60,6 +62,94 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
     if (chatRef.current) ro.observe(chatRef.current);
     return () => ro.disconnect();
   }, [step]);
+
+  const status = (
+    <span className="yw-status">
+      {m.status.map((s, i) => (
+        <span key={s} className="yw-status-chip" data-on={i === step || undefined} data-n={i}>
+          <span className="yw-dot" />
+          {nobr(s)}
+        </span>
+      ))}
+    </span>
+  );
+  const lights = (
+    <span className="yw-lights">
+      <i />
+      <i />
+      <i />
+    </span>
+  );
+  const patientWho = (
+    <span className="yw-who">
+      <span className="yw-rec" />
+      {nobr(m.transcript)} · {nobr(m.patient)} · {m.patientTime}
+    </span>
+  );
+  const draftBubble = (
+    <span className="yw-bubble">
+      {nobr(m.draftBefore)}
+      <span className="yw-flag">{nobr(m.draftFlagged)}</span>
+      {nobr(m.draftAfter)}
+    </span>
+  );
+  const draftWho = (
+    <span className="yw-who">
+      {nobr(m.draft)} <span className="yw-faint">({nobr(m.notSent)})</span>
+    </span>
+  );
+  const verdict = (
+    <span className="yw-verdict">
+      {nobr(m.blocked)} · <span className="yw-mono">{failed?.rule}</span>
+    </span>
+  );
+  const sentWho = (
+    <span className="yw-who yw-who-sent">
+      {nobr(m.sent)} <span className="yw-tick">{"✓✓"}</span>
+    </span>
+  );
+  const callStrip = (state: "auto" | "live") => (
+    <span className="yw-call" data-on={state === "live" ? "" : on(step, 1)}>
+      <span className="yw-call-head">
+        <PhoneIcon />
+        <span className="yw-swap">
+          <span data-show={state === "live" ? undefined : step === 0 || undefined}>{nobr(m.incoming)}</span>
+          <span data-show={state === "live" ? "" : step >= 1 || undefined}>{nobr(m.call)}</span>
+        </span>
+        <span className="yw-call-time tabular">{m.callTime}</span>
+      </span>
+      <span className="yw-call-body">
+        <span className="yw-wave">
+          {Array.from({ length: 14 }, (_, i) => (
+            <i key={i} style={{ "--i": i } as CSSProperties} />
+          ))}
+        </span>
+        <span className="yw-swap">
+          <span className="yw-caller tabular" data-show={state === "live" ? undefined : step === 0 || undefined}>
+            {m.caller}
+          </span>
+          <span className="yw-caption" data-show={state === "live" ? "" : step >= 1 || undefined}>
+            {nobr(m.caption)}
+          </span>
+        </span>
+      </span>
+    </span>
+  );
+  const row = (r: (typeof m.rows)[number], i: number, extra?: string) => (
+    <span key={r.name} className={`yw-row ${extra ?? ""}`} data-new={i === 0 || undefined}>
+      <span className="yw-row-top">
+        <span className="yw-tag" data-ch={r.channel === "LINE" ? "line" : "call"}>
+          {nobr(r.channel)}
+        </span>
+        <span className="yw-row-name">{nobr(r.name)}</span>
+        <span className="yw-row-time tabular">{r.time}</span>
+      </span>
+      <span className="yw-row-sum">{nobr(r.summary)}</span>
+      <span className="yw-pill" data-state={i === 0 ? "new" : "done"}>
+        {nobr(r.status)}
+      </span>
+    </span>
+  );
 
   return (
     <StickyStage steps={STEPS} vh={85} label={copy.stageLabel} className="yw-track" stageClassName="yw-stage">
@@ -70,33 +160,31 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
         data-live={live || undefined}
         style={{ "--step": step } as CSSProperties}
       >
-        <div className="yw-copy">
-          <div className="yw-progress" aria-hidden="true">
-            <span className="yw-count tabular">
-              <span className="yw-count-now">{String(step + 1).padStart(2, "0")}</span>
-              <span className="yw-count-of"> / {String(STEPS).padStart(2, "0")}</span>
-            </span>
-            <span className="yw-segs">
-              {copy.beats.map((_, i) => (
-                <span key={i} className="yw-seg" style={{ "--i": i } as CSSProperties} />
-              ))}
-            </span>
-          </div>
-          <ol className="yw-beats">
-            {copy.beats.map((b, i) => (
-              <li key={i} className="yw-beat" data-on={i === step || undefined} data-past={i < step || undefined}>
-                <p className="yw-beat-n readout">
-                  {nobr(copy.step)} {i + 1}
-                </p>
-                <h4 className="yw-beat-title">{nobr(b.title)}</h4>
-                {/* Fills with the scroll inside this beat, so the page never feels stuck between beats. */}
-                <span className="yw-beat-meter" aria-hidden="true" />
-                <p className="yw-beat-text">{nobr(b.text)}</p>
-                {b.stat ? <p className="yw-beat-stat">{nobr(b.stat)}</p> : null}
-              </li>
-            ))}
-          </ol>
-        </div>
+        <ol className="yw-beats">
+          {copy.beats.map((b, i) => (
+            <li key={i} className="yw-beat" data-on={i === step || undefined} data-past={i < step || undefined}>
+              <span className="yw-progress" aria-hidden="true">
+                <span className="yw-count tabular">
+                  <span className="yw-count-now">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="yw-count-of">&nbsp;/&nbsp;{String(STEPS).padStart(2, "0")}</span>
+                </span>
+                <span className="yw-segs">
+                  {copy.beats.map((_, n) => (
+                    <span key={n} className="yw-seg" style={{ "--i": n } as CSSProperties} />
+                  ))}
+                </span>
+              </span>
+              <p className="yw-beat-n readout">
+                {nobr(copy.step)} {i + 1}
+              </p>
+              <h4 className="yw-beat-title">{nobr(b.title)}</h4>
+              {/* Fills with the scroll inside this beat, so the page never feels stuck between beats. */}
+              <span className="yw-beat-meter" aria-hidden="true" />
+              <p className="yw-beat-text">{nobr(b.text)}</p>
+              {b.stat ? <p className="yw-beat-stat">{nobr(b.stat)}</p> : null}
+            </li>
+          ))}
+        </ol>
 
         <div className="yw-mock-area">
           <div className="yw-frame">
@@ -104,200 +192,249 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
               <span className="yw-illus">{nobr(copy.illustration)}</span>
             </span>
             <div className="yw-mock" aria-hidden="true">
-              {/* ---------- back office window ---------- */}
-              <div className="yw-win">
-                <div className="yw-win-bar">
-                  <span className="yw-lights">
-                    <i />
-                    <i />
-                    <i />
-                  </span>
-                  <span className="yw-win-title">
-                    {nobr(m.window)}
-                    <span className="yw-win-clinic"> · {nobr(m.clinic)}</span>
-                  </span>
-                  <span className="yw-chip yw-chip-ok">
-                    <span className="yw-dot yw-pulse" />
-                    {nobr(m.aiOn)}
-                  </span>
-                </div>
-                <div className="yw-win-body">
-                  <nav className="yw-side">
-                    <span className="yw-brand">
-                      <span className="yw-brand-mark">y</span>
-                      <span className="yw-brand-name">{nobr(m.clinic)}</span>
+              {/* ================= full composition ================= */}
+              <div className="yw-full">
+                <div className="yw-win">
+                  <div className="yw-win-bar">
+                    {lights}
+                    <span className="yw-win-title">
+                      {nobr(m.window)} · {nobr(m.clinic)}
                     </span>
-                    {m.nav.map((n, i) => (
-                      <span key={n} className="yw-nav" data-active={i === 1 || undefined}>
-                        <NavIcon i={i} />
-                        {nobr(n)}
-                        {i === 1 ? <span className="yw-badge" data-on={on(step, 4)} /> : null}
-                      </span>
-                    ))}
-                  </nav>
-
-                  <div className="yw-queue">
-                    <p className="yw-kicker">{nobr(m.cases)}</p>
-                    <p className="yw-h">
-                      {nobr(m.queue)}
-                      <span className="yw-live">
-                        <span className="yw-dot yw-dot-red yw-pulse" />
-                        {nobr(m.live)} 2
-                      </span>
-                    </p>
-                    <div className="yw-call" data-on={on(step, 1)}>
-                      <span className="yw-call-head">
-                        <PhoneIcon />
-                        {nobr(m.call)}
-                        <span className="yw-call-time tabular">{m.callTime}</span>
-                      </span>
-                      <span className="yw-wave">
-                        {Array.from({ length: 18 }, (_, i) => (
-                          <i key={i} style={{ "--i": i } as CSSProperties} />
-                        ))}
-                      </span>
-                      <span className="yw-caption">{nobr(m.caption)}</span>
-                    </div>
-                    <div className="yw-rows" data-on={on(step, 4)}>
-                      {m.rows.map((r, i) => (
-                        <div key={r.name} className="yw-row" data-new={i === 0 || undefined}>
-                          <span className="yw-row-top">
-                            <span className="yw-tag" data-ch={r.channel === "LINE" ? "line" : "call"}>
-                              {nobr(r.channel)}
-                            </span>
-                            <span className="yw-row-name">{nobr(r.name)}</span>
-                            <span className="yw-row-time tabular">{r.time}</span>
-                          </span>
-                          <span className="yw-row-sum">{nobr(r.summary)}</span>
-                          <span className="yw-pill" data-state={i === 0 ? "new" : "done"}>
-                            {nobr(r.status)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <span className="yw-chip yw-chip-ok">
+                      <span className="yw-dot yw-pulse" />
+                      {nobr(m.aiOn)}
+                    </span>
                   </div>
-
-                  <div className="yw-pane">
-                    <div className="yw-pane-head">
-                      <span className="yw-pane-title">
-                        {nobr(m.conversation)}
-                        <span className="yw-tag" data-ch="line">
-                          LINE
+                  <div className="yw-win-body">
+                    <nav className="yw-rail">
+                      <span className="yw-brand-mark">y</span>
+                      {/* Two items only: the phone overlaps the lower rail, so nothing may sit there. */}
+                      {[0, 1].map((i) => (
+                        <span key={i} className="yw-rail-item" data-active={i === 1 || undefined}>
+                          <NavIcon i={i} />
+                          {i === 1 ? <span className="yw-badge" data-on={on(step, 4)} /> : null}
                         </span>
-                      </span>
-                      <span className="yw-status">
-                        {m.status.map((s, i) => (
-                          <span key={s} className="yw-status-chip" data-on={i === step || undefined} data-n={i}>
-                            <span className="yw-dot" />
-                            {nobr(s)}
-                          </span>
-                        ))}
-                      </span>
+                      ))}
+                    </nav>
+
+                    <div className="yw-queue">
+                      <p className="yw-kicker">{nobr(m.cases)}</p>
+                      <p className="yw-h">
+                        {nobr(m.queue)}
+                        <span className="yw-live">
+                          <span className="yw-dot yw-dot-red yw-pulse" />
+                          {nobr(m.live)} 2
+                        </span>
+                      </p>
+                      {callStrip("auto")}
+                      <div className="yw-rows" data-on={on(step, 4)}>
+                        {m.rows.map((r, i) => row(r, i))}
+                      </div>
                     </div>
-                    <div className="yw-feed-view">
-                      <div ref={feedRef} className="yw-feed">
-                        <Item from={0} step={step} className="yw-msg yw-msg-patient">
-                          <span className="yw-who">
-                            <span className="yw-rec" />
-                            {nobr(m.transcript)} · {nobr(m.patient)} · {m.patientTime}
+
+                    <div className="yw-pane">
+                      <div className="yw-pane-head">
+                        <span className="yw-pane-title">
+                          {nobr(m.conversation)}
+                          <span className="yw-tag" data-ch="line">
+                            LINE
                           </span>
-                          <span className="yw-bubble">
-                            <span className="yw-words">{nobr(m.message)}</span>
-                          </span>
-                        </Item>
-                        <Item from={2} step={step} className="yw-msg yw-msg-draft" hold={m.draft} end>
-                          <span className="yw-who">
-                            {nobr(m.draft)} <span className="yw-faint">({nobr(m.notSent)})</span>
-                          </span>
-                          <span className="yw-bubble">
-                            {nobr(m.draftBefore)}
-                            <span className="yw-flag">{nobr(m.draftFlagged)}</span>
-                            {nobr(m.draftAfter)}
-                          </span>
-                        </Item>
-                        <Item from={3} step={step} className="yw-guard" hold={m.guard}>
-                          <span className="yw-guard-head">
-                            <ShieldIcon />
-                            {nobr(m.guard)}
-                            <span className="yw-verdict">
-                              {nobr(m.blocked)} · <span className="yw-mono">{m.checks.find((c) => !c.pass)?.rule}</span>
-                            </span>
-                          </span>
-                          {m.checks.map((c, i) => (
-                            <span
-                              key={c.rule}
-                              className="yw-check"
-                              data-pass={c.pass || undefined}
-                              style={{ "--i": i } as CSSProperties}
-                            >
-                              <span className="yw-check-icon">{c.pass ? "✓" : "✕"}</span>
-                              <span className="yw-check-label">{nobr(c.label)}</span>
-                              <span className="yw-mono">{c.rule}</span>
+                        </span>
+                        {status}
+                      </div>
+                      <div className="yw-feed-view">
+                        <div ref={feedRef} className="yw-feed">
+                          {m.history.map((h) => (
+                            <span key={h.day} className="yw-hist">
+                              <span className="yw-day" data-at="-1" data-on="">
+                                {nobr(h.day)}
+                              </span>
+                              <span className="yw-msg yw-msg-old" data-at="-1" data-on="">
+                                <span className="yw-bubble">{nobr(h.question)}</span>
+                              </span>
+                              <span className="yw-msg yw-msg-old yw-msg-ai" data-at="-1" data-on="">
+                                <span className="yw-bubble">{nobr(h.answer)}</span>
+                              </span>
                             </span>
                           ))}
-                        </Item>
-                        <Item from={4} step={step} className="yw-msg yw-msg-reply" hold={m.sent} end>
-                          <span className="yw-who">
-                            {nobr(m.sent)} <span className="yw-tick">{"✓✓"}</span>
+                          <span className="yw-day" data-at="-1" data-on="">
+                            {nobr(m.today)}
                           </span>
-                          <span className="yw-bubble">{nobr(m.reply)}</span>
-                        </Item>
+                          <Item from={0} step={step} className="yw-msg yw-msg-patient">
+                            {patientWho}
+                            <span className="yw-bubble">{nobr(m.message)}</span>
+                          </Item>
+                          <Item from={2} step={step} className="yw-msg yw-msg-draft">
+                            {draftWho}
+                            {draftBubble}
+                          </Item>
+                          <Item from={3} step={step} className="yw-guard">
+                            <span className="yw-guard-head">
+                              <ShieldIcon />
+                              {nobr(m.guard)}
+                              {verdict}
+                            </span>
+                            {m.checks.map((c, i) => (
+                              <span
+                                key={c.rule}
+                                className="yw-check"
+                                data-pass={c.pass || undefined}
+                                style={{ "--i": i } as CSSProperties}
+                              >
+                                <span className="yw-check-icon">{c.pass ? "✓" : "✕"}</span>
+                                <span className="yw-check-label">{nobr(c.label)}</span>
+                                <span className="yw-mono">{c.rule}</span>
+                              </span>
+                            ))}
+                          </Item>
+                          <Item from={4} step={step} className="yw-msg yw-msg-reply">
+                            {sentWho}
+                            <span className="yw-bubble">{nobr(m.reply)}</span>
+                          </Item>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {/* ---------- patient's phone (LINE) ---------- */}
+                <div className="yw-phone">
+                  <div className="yw-screen">
+                    <span className="yw-island" />
+                    <span className="yw-sb tabular">
+                      <span>{m.patientTime}</span>
+                      <span className="yw-sb-icons">
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                    </span>
+                    <span className="yw-line-head">
+                      <span className="yw-back">{"‹"}</span>
+                      <span className="yw-avatar">
+                        <ToothIcon />
+                      </span>
+                      <span className="yw-line-name">{nobr(m.clinic)}</span>
+                    </span>
+                    <div className="yw-chat-view">
+                      <div ref={chatRef} className="yw-chat">
+                        <span className="yw-day" data-at="-1" data-on="">
+                          {nobr(m.today)}
+                        </span>
+                        <span className="yw-lb yw-lb-ai" data-at="-1" data-on="">
+                          {nobr(m.greeting)}
+                        </span>
+                        <Item from={0} step={step} className="yw-lb yw-lb-me">
+                          <span className="yw-lb-meta">
+                            <span data-on={on(step, 1)} className="yw-read">
+                              {nobr(m.read)}
+                            </span>
+                            {m.patientTime}
+                          </span>
+                          <span className="yw-lb-text">{nobr(m.message)}</span>
+                        </Item>
+                        {/* Typing sits over the top of the reply's box, so no gap opens when it lands. */}
+                        <span className="yw-slot">
+                          <span className="yw-lb-typing" data-at="1" data-on={step >= 1 && step < 4 ? "" : undefined}>
+                            <i />
+                            <i />
+                            <i />
+                          </span>
+                          <Item from={4} step={step} className="yw-lb yw-lb-ai yw-lb-reply">
+                            {nobr(m.reply)}
+                          </Item>
+                        </span>
+                      </div>
+                    </div>
+                    <span className="yw-input">
+                      <span className="yw-input-field">{m.input}</span>
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              {/* ---------- patient's phone (LINE) ---------- */}
-              <div className="yw-phone">
-                <div className="yw-screen">
-                  <span className="yw-island" />
-                  <span className="yw-sb tabular">
-                    <span>{m.patientTime}</span>
-                    <span className="yw-sb-icons">
-                      <i />
-                      <i />
-                      <i />
+              {/* ================= compact composition: one card per beat ================= */}
+              <div className="yw-cmp">
+                <div className="yw-cmp-bar">
+                  {lights}
+                  <span className="yw-pane-title">
+                    {nobr(m.conversation)}
+                    <span className="yw-tag" data-ch="line">
+                      LINE
                     </span>
                   </span>
-                  <span className="yw-line-head">
-                    <span className="yw-back">{"‹"}</span>
-                    <span className="yw-avatar">
-                      <ToothIcon />
+                  {status}
+                </div>
+                <div className="yw-cmp-stage">
+                  <Panel n={0} step={step}>
+                    <span className="yw-note">
+                      <span className="yw-row-top">
+                        <span className="yw-tag" data-ch="line">
+                          LINE
+                        </span>
+                        <span className="yw-row-name">{nobr(m.patient)}</span>
+                        <span className="yw-row-time tabular">{m.patientTime}</span>
+                        <span className="yw-pill" data-state="new">
+                          {nobr(m.rows[0]?.status)}
+                        </span>
+                      </span>
+                      <span className="yw-note-text">{nobr(m.message)}</span>
                     </span>
-                    <span className="yw-line-name">{nobr(m.clinic)}</span>
-                  </span>
-                  <div className="yw-chat-view">
-                    <div ref={chatRef} className="yw-chat">
-                      <span className="yw-day">{nobr(m.today)}</span>
-                      <span className="yw-lb yw-lb-ai" data-at="-1" data-on="">
-                        {nobr(m.greeting)}
+                    {m.rows.slice(1, 4).map((r, i) => row(r, i + 1, "yw-row-mini"))}
+                  </Panel>
+                  <Panel n={1} step={step}>
+                    {callStrip("live")}
+                    <span className="yw-msg yw-msg-patient">
+                      {patientWho}
+                      <span className="yw-bubble">{nobr(m.message)}</span>
+                    </span>
+                  </Panel>
+                  <Panel n={2} step={step}>
+                    <span className="yw-msg yw-msg-patient yw-msg-short">
+                      <span className="yw-bubble">
+                        <span className="yw-clamp">{nobr(m.message)}</span>
                       </span>
-                      <Item from={0} step={step} className="yw-lb yw-lb-me">
-                        <span className="yw-lb-meta">
-                          <span data-on={on(step, 1)} className="yw-read">
-                            {nobr(m.read)}
-                          </span>
-                          {m.patientTime}
-                        </span>
-                        <span className="yw-lb-text">{nobr(m.message)}</span>
-                      </Item>
-                      {/* Typing sits over the top of the reply's box, so no gap opens when it lands. */}
-                      <span className="yw-slot">
-                        <span className="yw-lb-typing" data-at="1" data-on={step >= 1 && step < 4 ? "" : undefined}>
-                          <i />
-                          <i />
-                          <i />
-                        </span>
-                        <Item from={4} step={step} className="yw-lb yw-lb-ai yw-lb-reply">
-                          {nobr(m.reply)}
-                        </Item>
+                    </span>
+                    <span className="yw-msg yw-msg-draft">
+                      {draftWho}
+                      {draftBubble}
+                    </span>
+                  </Panel>
+                  <Panel n={3} step={step}>
+                    <span className="yw-msg yw-msg-draft">
+                      {draftWho}
+                      {draftBubble}
+                    </span>
+                    <span className="yw-guard">
+                      <span className="yw-guard-head">
+                        <ShieldIcon />
+                        {nobr(m.guard)}
+                        {verdict}
                       </span>
-                    </div>
-                  </div>
-                  <span className="yw-input">
-                    <span className="yw-input-field">{m.input}</span>
-                  </span>
+                      <span className="yw-check">
+                        <span className="yw-check-icon">{"✕"}</span>
+                        <span className="yw-check-label">{nobr(failed?.label)}</span>
+                      </span>
+                    </span>
+                    <span className="yw-passed">
+                      <span className="yw-check-icon">{"✓"}</span>
+                      {nobr(m.passed)}
+                    </span>
+                  </Panel>
+                  <Panel n={4} step={step}>
+                    <span className="yw-verdict-row">{verdict}</span>
+                    <span className="yw-msg yw-msg-reply">
+                      {sentWho}
+                      <span className="yw-bubble">{nobr(m.reply)}</span>
+                    </span>
+                    <span className="yw-logged">
+                      <span className="yw-tag" data-ch="line">
+                        LINE
+                      </span>
+                      <span className="yw-row-name">{nobr(m.patient)}</span>
+                      <span className="yw-logged-text">{nobr(m.logged)}</span>
+                    </span>
+                  </Panel>
                 </div>
               </div>
             </div>
@@ -312,40 +449,36 @@ function Item({
   from,
   step,
   className,
-  hold,
-  end,
   children,
 }: {
   from: number;
   step: number;
   className: string;
-  /** Label of the dashed slot drawn where this item will land, until it does. */
-  hold?: string;
-  /** Slot sits on the right (model side). */
-  end?: boolean;
   children: ReactNode;
 }) {
-  const item = (
+  return (
     <span className={className} data-at={from} data-on={on(step, from)}>
       {children}
     </span>
   );
-  if (!hold) return item;
+}
+
+/** One beat of the compact composition: shown only on its beat; items that do not fit drop whole. */
+function Panel({ n, step, children }: { n: number; step: number; children: ReactNode }) {
   return (
-    <span className="yw-hold" data-end={end || undefined} data-label={hold} data-on={on(step, from)}>
-      {item}
-    </span>
+    <div className="yw-panel" data-on={n === step || undefined} data-past={n < step || undefined}>
+      {children}
+    </div>
   );
 }
 
 /**
- * Re-aim a list so its newest visible item is in view, with a translate (never layout).
- * "top": the list starts at the top and only moves up once the newest item would fall below
- * the fold. "bottom": the newest item always sits on the bottom edge, like a chat.
+ * Keep the newest visible item of a list in view, like a chat, with a translate (never layout).
+ * Older items scroll up under the view's soft top edge.
  */
-function fit(list: HTMLElement | null, step: number, mode: "top" | "bottom") {
+function fit(list: HTMLElement | null, step: number) {
   const view = list?.parentElement;
-  if (!list || !view) return;
+  if (!list || !view || !list.offsetHeight) return;
   let last: HTMLElement | null = null;
   for (const el of list.querySelectorAll<HTMLElement>("[data-at]")) {
     const at = Number(el.dataset.at);
@@ -358,23 +491,10 @@ function fit(list: HTMLElement | null, step: number, mode: "top" | "bottom") {
   for (let el: HTMLElement | null = last; el && el !== list; el = el.offsetParent as HTMLElement | null) {
     top += el.offsetTop;
   }
-  const bottom = top + last.offsetHeight + pad;
-  const room = view.clientHeight;
-  let shift = room - bottom;
-  if (mode === "top") {
-    // Scroll just enough for the newest item, unless that leaves only a sliver of the item being
-    // cut at the top: then that item goes off whole.
-    const need = bottom - room;
-    const css = getComputedStyle(list);
-    const padTop = parseFloat(css.paddingTop) || 0;
-    const sliver = 2.5 * (parseFloat(css.fontSize) || 14);
-    const items = [...list.children] as HTMLElement[];
-    const cut = items.find((e) => e.offsetTop - padTop < need && e.offsetTop + e.offsetHeight - padTop > need);
-    const left = cut ? cut.offsetTop + cut.offsetHeight - padTop - need : Infinity;
-    const next = cut ? items[items.indexOf(cut) + 1] : undefined;
-    shift = need <= 0 ? 0 : left < sliver && next ? -(next.offsetTop - padTop) : -need;
-  }
-  list.style.setProperty("--shift", `${Math.round(shift)}px`);
+  const shift = view.clientHeight - (top + last.offsetHeight + pad);
+  // Short content starts at the top (no empty band above the history); long content sits on the
+  // bottom edge with the newest item last.
+  list.style.setProperty("--shift", `${Math.round(Math.min(0, shift))}px`);
 }
 
 /* ---------- tiny line icons (decorative, inside the aria-hidden mockup) ---------- */
@@ -393,8 +513,6 @@ function NavIcon({ i }: { i: number }) {
     "M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z",
     "M4 6h16v9H15l-3 3-3-3H4z",
     "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z",
-    "M12 20h8M4 20l1-4L16 5l3 3L8 19z",
-    "M5 20V10M12 20V4M19 20v-7",
   ][i];
   return (
     <svg {...icon} className="yw-icon">
