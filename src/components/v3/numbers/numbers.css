@@ -24,9 +24,39 @@
   gap: 0.5rem;
   padding: var(--inset-card);
   border-radius: var(--radius-card);
-  background: var(--pastel);
+  background: var(--nb-ground);
   color: var(--pastel-ink);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft), inset 0 0 0 1px var(--nb-edge);
+}
+/* Light theme: the area pastels as they are. Dark theme: the token's own dark value read as muddy
+   olive and brown on the warm ground, so each card takes a deep, clean jewel tone of the same hue
+   (low chroma, lightness 0.27, well clear of the 0.165 ground), a hairline edge in that hue and
+   its figure in the pastel itself. Declared on the card (light-dark() resolves where declared).
+   Hues follow the --pastel-* tokens: games 90, commerce 50, ai 165, tools 295. */
+.numbers-card {
+  --nb-ground: var(--pastel);
+  --nb-edge: transparent;
+  --nb-figure: var(--pastel-ink);
+}
+.numbers-card.pastel-games {
+  --nb-ground: light-dark(var(--pastel-games), oklch(0.275 0.032 72));
+  --nb-edge: light-dark(transparent, oklch(0.5 0.06 90 / 0.35));
+  --nb-figure: light-dark(var(--pastel-ink), oklch(0.92 0.09 92));
+}
+.numbers-card.pastel-commerce {
+  --nb-ground: light-dark(var(--pastel-commerce), oklch(0.27 0.045 28));
+  --nb-edge: light-dark(transparent, oklch(0.5 0.07 45 / 0.35));
+  --nb-figure: light-dark(var(--pastel-ink), oklch(0.89 0.07 55));
+}
+.numbers-card.pastel-ai {
+  --nb-ground: light-dark(var(--pastel-ai), oklch(0.27 0.04 170));
+  --nb-edge: light-dark(transparent, oklch(0.5 0.06 165 / 0.35));
+  --nb-figure: light-dark(var(--pastel-ink), oklch(0.9 0.07 165));
+}
+.numbers-card.pastel-tools {
+  --nb-ground: light-dark(var(--pastel-tools), oklch(0.27 0.045 292));
+  --nb-edge: light-dark(transparent, oklch(0.52 0.07 295 / 0.35));
+  --nb-figure: light-dark(var(--pastel-ink), oklch(0.88 0.07 295));
 }
 .numbers-note {
   color: color-mix(in oklab, var(--pastel-ink) 72%, transparent);
@@ -37,6 +67,7 @@
   line-height: 1;
   letter-spacing: -0.05em;
   margin-top: clamp(0.75rem, 0.25rem + 1.5vw, 2rem);
+  color: var(--nb-figure);
 }
 .numbers-label {
   font-size: var(--text-sm);
