@@ -26,6 +26,8 @@ const en = {
     cards: "Up close",
     index: "Index",
   },
+  /** Project pages, phones: the architecture drawing fits the screen first. */
+  plate: { full: "View full size", fit: "Fit to screen" },
 };
 export type MoreWorkCopy = typeof en;
 const th: MoreWorkCopy = {
@@ -46,5 +48,6 @@ const th: MoreWorkCopy = {
     cards: "ดูทีละระบบ",
     index: "ตารางรวม",
   },
+  plate: { full: "ดูขนาดเต็ม", fit: "ย่อให้พอดีจอ" },
 };
 export const moreWork = { en, th };

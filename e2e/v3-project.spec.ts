@@ -92,3 +92,55 @@ test("reduced motion: the next card does not lift on hover", async ({ page, isMo
   await page.waitForTimeout(300);
   expect(await next.evaluate((el) => getComputedStyle(el).translate)).toBe("none");
 });
+
+test("phones: Thai ledes and fact chips stay inside their padding; fact rows share a first line", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, "phone widths");
+  for (const width of [360, 390]) {
+    await page.setViewportSize({ width, height: 800 });
+    for (const route of ["/th/work/cadence", "/th/work/helm", "/th/work/visual-qa-harness"]) {
+      await page.goto(route);
+      const m = await page.evaluate(() => {
+        const inside = (box: Element, text: Element) => {
+          const b = box.getBoundingClientRect();
+          const cs = getComputedStyle(box);
+          const r = document.createRange();
+          r.selectNodeContents(text);
+          const rects = [...r.getClientRects()].filter((x) => x.width > 0);
+          return (
+            Math.min(...rects.map((x) => x.left)) - b.left >= parseFloat(cs.paddingLeft) - 0.5 &&
+            b.right - Math.max(...rects.map((x) => x.right)) >= parseFloat(cs.paddingRight) - 0.5
+          );
+        };
+        const hero = document.querySelector(".pj-hero")!;
+        const facts = [...document.querySelectorAll(".pj-fact")];
+        const tops = facts.map((f) => Math.round(f.querySelector("dd")!.getBoundingClientRect().top));
+        return {
+          lede: inside(hero, hero.querySelector(".pj-tagline")!),
+          chips: facts.map((f) => inside(f, f.querySelector("dd")!)),
+          rows: [tops[0] === tops[1], tops[2] === tops[3]],
+        };
+      });
+      expect(m.lede, `${route} @${width} lede`).toBe(true);
+      expect(m.chips, `${route} @${width} chips`).toEqual([true, true, true, true]);
+      expect(m.rows, `${route} @${width} rows`).toEqual([true, true]);
+    }
+  }
+});
+
+test("phones: the plate first fits the card whole, View full size pans it", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "phone presentation");
+  await page.goto("/work/yimwhan-ai");
+  const scroller = page.locator(".pj-plate .plate-scroll");
+  await scroller.scrollIntoViewIfNeeded();
+  const fit = await scroller.evaluate((s) => ({ scrolls: s.scrollWidth > s.clientWidth + 1, h: s.clientHeight }));
+  expect(fit.scrolls).toBe(false);
+  const zoom = page.getByRole("button", { name: "View full size" });
+  await zoom.click();
+  await expect(page.getByRole("button", { name: "Fit to screen" })).toBeVisible();
+  await expect.poll(() => scroller.evaluate((s) => s.scrollWidth > s.clientWidth + 1)).toBe(true);
+  await page.getByRole("button", { name: "Fit to screen" }).click();
+  await expect.poll(() => scroller.evaluate((s) => s.scrollWidth > s.clientWidth + 1)).toBe(false);
+});
