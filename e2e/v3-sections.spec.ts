@@ -103,7 +103,8 @@ test.describe("how I work notes", () => {
     await page.mouse.down();
     await page.mouse.move(box.x + box.width / 2 - 120, box.y + box.height / 2 + 40, { steps: 8 });
     await page.mouse.up();
-    await expect.poll(async () => (await noteOffset(note)).x).toBeLessThan(-100);
+    // It moved left; it may stop flush against the first note (drops never overlap).
+    await expect.poll(async () => (await noteOffset(note)).x).toBeLessThan(-20);
 
     // Dragged far past the board's edge, it stops inside the board.
     const b2 = (await note.boundingBox())!;
@@ -152,10 +153,42 @@ test.describe("how I work notes", () => {
     for (let i = 1; i <= 6; i++) {
       await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: at(hx - i * 4, hy + i * 12) });
     }
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    // Held: the note is lifted and follows the finger while the page stays put.
+    await expect(note).toHaveAttribute("data-dragging", "");
     await expect.poll(async () => (await noteOffset(note)).y).toBeGreaterThan(40);
     expect(Math.abs((await page.evaluate(() => scrollY)) - y0)).toBeLessThan(20);
-    await expect(page.getByRole("button", { name: "Put the notes back" })).toBeVisible();
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    // Released on the stacked phone board it settles without covering the next note.
+    await expect(note).not.toHaveAttribute("data-dragging", "");
+    await page.waitForTimeout(800);
+    const [a, b] = [(await note.boundingBox())!, (await page.locator("#practice [data-note]").nth(1).boundingBox())!];
+    expect(a.y + a.height).toBeLessThanOrEqual(b.y + 4);
+  });
+
+  test("a note dropped on another settles clear of it", async ({ page, isMobile }) => {
+    test.skip(isMobile, "mouse");
+    await page.goto("/");
+    await scrollTo(page, "practice");
+    const notes = page.locator("#practice [data-note]");
+    const a = (await notes.nth(2).boundingBox())!;
+    const t = (await notes.nth(1).boundingBox())!;
+    await page.mouse.move(a.x + 60, a.y + 60);
+    await page.mouse.down();
+    await page.mouse.move(t.x + 80, t.y + 90, { steps: 10 });
+    await page.mouse.up();
+    await page.waitForTimeout(900);
+    const worst = await page.evaluate(() => {
+      const r = [...document.querySelectorAll("#practice [data-note]")].map((n) => n.getBoundingClientRect());
+      let max = 0;
+      for (let i = 0; i < r.length; i++)
+        for (let j = i + 1; j < r.length; j++) {
+          const w = Math.min(r[i].right, r[j].right) - Math.max(r[i].left, r[j].left);
+          const h = Math.min(r[i].bottom, r[j].bottom) - Math.max(r[i].top, r[j].top);
+          if (w > 0 && h > 0) max = Math.max(max, w * h);
+        }
+      return max;
+    });
+    expect(worst).toBe(0);
   });
 
   test("note insets are symmetric", async ({ page }) => {

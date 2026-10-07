@@ -22,7 +22,9 @@ type Press = { id: number; x: number; y: number; timer: number };
 
 const STEP = 16;
 const BIG_STEP = 64;
-const EDGE = 8;
+const EDGE = 18; // clear of the board edge, with room for the resting tilt
+/** Clear space a settled note keeps from its neighbours (covers the resting tilt). */
+const GAP = 16;
 /** Touch: hold this long (without moving) to pick a note up; moving first scrolls the page. */
 const HOLD_MS = 380;
 const SLOP = 10;
@@ -58,18 +60,54 @@ export function NotesBoard({
     el.style.setProperty("--drag-tilt", `${tilt.toFixed(2)}deg`);
   };
 
+  /**
+   * Geometry in board coordinates from layout boxes (offsetLeft/Top ignore transforms), so it is
+   * exact even while a note is mid-transition. A note's box at offset o = its home box + o.
+   */
+  const home = (el: HTMLElement) => ({ l: el.offsetLeft, t: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+  const at = (b: ReturnType<typeof home>, o: Offset) => ({ l: b.l + o.x, t: b.t + o.y, r: b.l + o.x + b.w, b: b.t + o.y + b.h });
+
   /** How far the note may travel from its home slot and stay on the board. */
-  const bounds = (el: HTMLElement, o: Offset): Bounds => {
-    const b = board.current!.getBoundingClientRect();
-    const r = el.getBoundingClientRect();
-    const left = r.left - o.x;
-    const topEdge = r.top - o.y;
+  const bounds = (el: HTMLElement): Bounds => {
+    const board_ = board.current!;
+    const b = home(el);
     return {
-      minX: b.left + EDGE - left,
-      maxX: b.right - EDGE - (left + r.width),
-      minY: b.top + EDGE - topEdge,
-      maxY: b.bottom - EDGE - (topEdge + r.height),
+      minX: EDGE - b.l,
+      maxX: board_.clientWidth - EDGE - (b.l + b.w),
+      minY: EDGE - b.t,
+      maxY: board_.clientHeight - EDGE - (b.t + b.h),
     };
+  };
+
+  /**
+   * Where a released note comes to rest: never on top of another note. If it lands on one, it
+   * slides the shortest way clear of it (staying on the board); if there is no free spot, it goes
+   * home. The move animates with the note's spring, so a drop always ends in a tidy board.
+   */
+  const settle = (el: HTMLElement, o: Offset): Offset => {
+    const b = bounds(el);
+    const me = home(el);
+    const others = Array.from(board.current!.querySelectorAll<HTMLElement>("[data-note]"))
+      .filter((n) => n !== el)
+      .map((n) => at(home(n), offsets.current.get(n.dataset.note!) ?? { x: 0, y: 0 }));
+    const inside = (q: Offset) => q.x >= b.minX && q.x <= b.maxX && q.y >= b.minY && q.y <= b.maxY;
+    let p = { x: clamp(o.x, b.minX, b.maxX), y: clamp(o.y, b.minY, b.maxY) };
+    for (let i = 0; i < 8; i++) {
+      const r = at(me, p);
+      const hit = others.find((q) => r.l < q.r && r.r > q.l && r.t < q.b && r.b > q.t);
+      if (!hit) return p;
+      const next = [
+        { x: p.x + hit.l - GAP - r.r, y: p.y },
+        { x: p.x + hit.r + GAP - r.l, y: p.y },
+        { x: p.x, y: p.y + hit.t - GAP - r.b },
+        { x: p.x, y: p.y + hit.b + GAP - r.t },
+      ]
+        .filter(inside)
+        .sort((a, c) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(c.x - p.x, c.y - p.y))[0];
+      if (!next) break;
+      p = next;
+    }
+    return { x: 0, y: 0 };
   };
 
   const raise = (el: HTMLElement) => {
@@ -85,7 +123,7 @@ export function NotesBoard({
 
   const begin = (el: HTMLElement, id: string, pointerId: number, x: number, y: number) => {
     const o = offsets.current.get(id) ?? { x: 0, y: 0 };
-    drag.current = { id: pointerId, px: x, py: y, o, b: bounds(el, o), lastX: x, tilt: 0 };
+    drag.current = { id: pointerId, px: x, py: y, o, b: bounds(el), lastX: x, tilt: 0 };
     try {
       el.setPointerCapture(pointerId);
     } catch {
@@ -144,10 +182,7 @@ export function NotesBoard({
     if (!d || d.id !== e.pointerId) return;
     const el = e.currentTarget;
     cancelAnimationFrame(frame.current);
-    const o = {
-      x: clamp(d.o.x + e.clientX - d.px, d.b.minX, d.b.maxX),
-      y: clamp(d.o.y + e.clientY - d.py, d.b.minY, d.b.maxY),
-    };
+    const o = settle(el, { x: d.o.x + e.clientX - d.px, y: d.o.y + e.clientY - d.py });
     drag.current = null;
     delete el.dataset.dragging;
     if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
@@ -183,8 +218,8 @@ export function NotesBoard({
     const el = e.currentTarget;
     const step = e.shiftKey ? BIG_STEP : STEP;
     const cur = offsets.current.get(id) ?? { x: 0, y: 0 };
-    const b = bounds(el, cur);
-    const o = { x: clamp(cur.x + v[0] * step, b.minX, b.maxX), y: clamp(cur.y + v[1] * step, b.minY, b.maxY) };
+    // A step that would land on another note stops flush against it instead.
+    const o = settle(el, { x: cur.x + v[0] * step, y: cur.y + v[1] * step });
     raise(el);
     write(el, o);
     commit(id, o);
