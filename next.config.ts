@@ -1,14 +1,26 @@
 import type { NextConfig } from "next";
 import { execSync } from "node:child_process";
 
+/** A git SHA, abbreviated or full. Anything else (e.g. "local") is never published. */
+const SHA = /^[0-9a-f]{7,40}$/;
+
+/**
+ * The commit this build was made from: the deploy script's BUILD_COMMIT (the pushed SHA, passed
+ * with `vercel deploy --build-env`), then Vercel's git integration, then the local checkout.
+ * Empty when none is known: the footer then leaves the commit out instead of linking a placeholder.
+ */
 function buildCommit(): string {
-  if (process.env.VERCEL_GIT_COMMIT_SHA) return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7);
+  for (const value of [process.env.BUILD_COMMIT, process.env.VERCEL_GIT_COMMIT_SHA]) {
+    const sha = value?.trim().toLowerCase();
+    if (sha && SHA.test(sha)) return sha;
+  }
   try {
-    return execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+    const sha = execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] })
       .toString()
       .trim();
+    return SHA.test(sha) ? sha : "";
   } catch {
-    return "local";
+    return "";
   }
 }
 
