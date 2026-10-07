@@ -12,6 +12,9 @@ const THAI_RUN = /[฀-๿]+/g;
 const NUMBER_UNIT = /(\d[\d,.]*) (?=[฀-๿])/g;
 const LEAD_WORD = /(^|[\s(])(ที่|ใน|ของ|กับ|และ|บน|ด้วย|จาก|ให้|เป็น) (?=[A-Za-z0-9])/g;
 
+/** The repeat mark "ๆ" never starts a line: the space before it becomes a no-break space. */
+const REPEAT_MARK = / ๆ/g;
+
 /** Polite endings never start a line on their own: they stay with the word before them. */
 const PARTICLES = new Set(["ค่ะ", "คะ", "ครับ", "นะ", "นะคะ", "นะครับ", "จ้ะ", "จ้า"]);
 
@@ -62,7 +65,7 @@ function protectedRanges(src: string): [number, number][] {
  */
 export function nobr(text: unknown): ReactNode {
   if (typeof text !== "string" || !THAI.test(text)) return text as ReactNode;
-  const src = text.replace(NUMBER_UNIT, "$1 ").replace(LEAD_WORD, "$1$2 ");
+  const src = text.replace(NUMBER_UNIT, "$1 ").replace(LEAD_WORD, "$1$2 ").replace(REPEAT_MARK, "\u00a0ๆ");
   const ranges = protectedRanges(src);
   if (ranges.length === 0) return src;
   const out: ReactNode[] = [];

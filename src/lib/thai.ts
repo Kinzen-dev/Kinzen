@@ -183,6 +183,10 @@ export const COMPOUNDS = [
   "การอัปเกรด",
   "ด้านบน",
   "ไม่ต่ำกว่า",
+  // Blind review r1: splits seen in the About lede and the case facts.
+  "ส่วนใหญ่",
+  "ทั้งระบบ",
+  "ด้วยตนเอง",
   "เป็นเวลา",
   "เป็นอิสระ",
   "ฝั่งตะวันตก",
