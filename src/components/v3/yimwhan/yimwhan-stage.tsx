@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { YimwhanCopy } from "@/i18n/v3/yimwhan";
 import { StickyStage } from "@/motion/sticky-stage";
 import { nobr } from "@/lib/thai-nodes";
@@ -33,6 +33,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
+  const cmpRef = useRef<HTMLDivElement>(null);
   const m = copy.mock;
   const failed = m.checks.find((c) => !c.pass);
 
@@ -55,6 +56,26 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       io.disconnect();
       mo.disconnect();
     };
+  }, []);
+
+  // Compact chat cards: how far each stack sits lower before its beat's new items arrive (their
+  // height plus gaps), so a card opens with the conversation exactly where the previous card had
+  // it, then slides up with the scroll. Measured on mount and resize only.
+  useLayoutEffect(() => {
+    const el = cmpRef.current;
+    if (!el) return;
+    const measure = () => {
+      for (const stack of el.querySelectorAll<HTMLElement>(".yw-stack[data-chat]")) {
+        const gap = parseFloat(getComputedStyle(stack).rowGap) || 0;
+        let push = 0;
+        for (const f of stack.querySelectorAll<HTMLElement>(":scope > .yw-fresh")) push += f.offsetHeight + gap;
+        stack.style.setProperty("--push", `${Math.round(push)}px`);
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   // Full composition: the transcript and the phone chat sit on their bottom edge like real chats,
@@ -167,6 +188,135 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
     </span>
   );
 
+  // Compact conversation, in reading order. `from` = the beat an item arrives on; `until` = the
+  // last beat it shows. Each card lists what is on screen at its beat.
+  const chatItems: { key: string; from: number; until?: number; el: (k: number) => ReactNode }[] = [
+    ...m.history.flatMap((h, i) => [
+      {
+        key: `d${i}`,
+        from: 0,
+        el: (k: number) => (
+          <span className="yw-day yw-r" style={at(k)}>
+            {nobr(h.day)}
+          </span>
+        ),
+      },
+      {
+        key: `q${i}`,
+        from: 0,
+        el: (k: number) => (
+          <span className="yw-msg yw-msg-old yw-r" style={at(k)}>
+            <span className="yw-bubble">{nobr(h.question)}</span>
+          </span>
+        ),
+      },
+      {
+        key: `a${i}`,
+        from: 0,
+        el: (k: number) => (
+          <span className="yw-msg yw-msg-old yw-msg-ai yw-r" style={at(k)}>
+            <span className="yw-bubble">{nobr(h.answer)}</span>
+          </span>
+        ),
+      },
+    ]),
+    {
+      key: "today",
+      from: 0,
+      el: (k) => (
+        <span className="yw-day yw-r" style={at(k)}>
+          {nobr(m.today)}
+        </span>
+      ),
+    },
+    {
+      key: "call",
+      from: 1,
+      el: (k) => (
+        <span className="yw-r" style={at(k)}>
+          {callStrip("live")}
+        </span>
+      ),
+    },
+    {
+      key: "patient",
+      from: 1,
+      el: (k) => (
+        <span className="yw-msg yw-msg-patient yw-r" style={at(k)}>
+          {patientWho}
+          <span className="yw-bubble">{nobr(m.message)}</span>
+        </span>
+      ),
+    },
+    {
+      key: "draft",
+      from: 2,
+      el: (k) => (
+        <span className="yw-msg yw-msg-draft yw-r" style={at(k)}>
+          {draftWho}
+          {draftBubble}
+        </span>
+      ),
+    },
+    {
+      key: "guard",
+      from: 3,
+      el: (k) => (
+        <span className="yw-guard yw-r" style={at(k)}>
+          <span className="yw-guard-head">
+            <ShieldIcon />
+            {nobr(m.guard)}
+            {verdict(k + 0.4)}
+          </span>
+          <span className="yw-check yw-r" style={at(k + 0.2)}>
+            <span className="yw-check-icon">{"✕"}</span>
+            <span className="yw-check-label">{nobr(failed?.label)}</span>
+          </span>
+          <span className="yw-passed yw-r" style={at(k + 0.55)}>
+            <span className="yw-check-icon">{"✓"}</span>
+            {nobr(m.passed)}
+          </span>
+        </span>
+      ),
+    },
+    {
+      key: "reply",
+      from: 4,
+      el: (k) => (
+        <span className="yw-msg yw-msg-reply yw-r" style={at(k)}>
+          {sentWho}
+          <span className="yw-bubble">{nobr(m.reply)}</span>
+        </span>
+      ),
+    },
+    {
+      key: "logged",
+      from: 4,
+      el: (k) => (
+        <span className="yw-logged yw-r" style={at(k)}>
+          <span className="yw-tag" data-ch="line">
+            LINE
+          </span>
+          <span className="yw-row-name">{nobr(m.patient)}</span>
+          <span className="yw-logged-text">{nobr(m.logged)}</span>
+        </span>
+      ),
+    },
+  ];
+  // Newest first in the DOM (the card stacks bottom up, so the oldest drop whole at the top).
+  // What arrives on this beat reveals with the scroll; what was there before is already in place.
+  const chat = (n: number) => {
+    let fresh = 0;
+    return chatItems
+      .filter((it) => it.from <= n && (it.until ?? LAST) >= n)
+      .map((it) => {
+        const isNew = it.from === n;
+        const k = isNew ? n + 0.03 + 0.2 * fresh++ : n - 0.5;
+        return <Fragment key={it.key}>{isNew ? <span className="yw-fresh">{it.el(k)}</span> : it.el(k)}</Fragment>;
+      })
+      .reverse();
+  };
+
   return (
     <StickyStage steps={STEPS} vh={85} label={copy.stageLabel} className="yw-track" stageClassName="yw-stage">
       <div
@@ -197,7 +347,10 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
               {/* Fills with the scroll inside this beat, so the page never feels stuck between beats. */}
               <span className="yw-beat-meter" aria-hidden="true" />
               <p className="yw-beat-text">{nobr(b.text)}</p>
+              {/* Every beat closes on a true line from the record (the replay numbers on beat 4), so the
+                  beats are close in height and no beat leaves a band of empty navy. */}
               {b.stat ? <p className="yw-beat-stat">{nobr(b.stat)}</p> : null}
+              {b.fact ? <p className="yw-beat-fact">{nobr(b.fact)}</p> : null}
             </li>
           ))}
         </ol>
@@ -383,7 +536,8 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                   </span>
                   {status}
                 </div>
-                <div className="yw-cmp-stage">
+                <div ref={cmpRef} className="yw-cmp-stage">
+                  {/* Beat 1: the inbox, newest on top; rows that do not fit drop whole. */}
                   <Panel n={0} step={step}>
                     <span className="yw-note yw-r" style={at(-0.3)}>
                       <span className="yw-row-top">
@@ -400,65 +554,14 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                         <Words text={m.message} from={0} to={0.4} />
                       </span>
                     </span>
-                    {m.rows.slice(1, 4).map((r, i) => row(r, i + 1, "yw-row-mini", 0.3 + i * 0.15))}
+                    {m.rows.slice(1).map((r, i) => row(r, i + 1, "yw-row-mini", 0.3 + i * 0.12))}
                   </Panel>
-                  <Panel n={1} step={step}>
-                    <span className="yw-r" style={at(0.7)}>
-                      {callStrip("live")}
-                    </span>
-                    <span className="yw-msg yw-msg-patient yw-r" style={at(1.25)}>
-                      {patientWho}
-                      <span className="yw-bubble">{nobr(m.message)}</span>
-                    </span>
-                  </Panel>
-                  <Panel n={2} step={step}>
-                    <span className="yw-msg yw-msg-patient yw-msg-short yw-r" style={at(1.7)}>
-                      <span className="yw-bubble">
-                        <span className="yw-clamp">{nobr(m.message)}</span>
-                      </span>
-                    </span>
-                    <span className="yw-msg yw-msg-draft yw-r" style={at(2)}>
-                      {draftWho}
-                      {draftBubble}
-                    </span>
-                  </Panel>
-                  <Panel n={3} step={step}>
-                    <span className="yw-msg yw-msg-draft yw-r" style={at(2.7)}>
-                      {draftWho}
-                      {draftBubble}
-                    </span>
-                    <span className="yw-guard yw-r" style={at(3.05)}>
-                      <span className="yw-guard-head">
-                        <ShieldIcon />
-                        {nobr(m.guard)}
-                        {verdict(3.45)}
-                      </span>
-                      <span className="yw-check yw-r" style={at(3.25)}>
-                        <span className="yw-check-icon">{"✕"}</span>
-                        <span className="yw-check-label">{nobr(failed?.label)}</span>
-                      </span>
-                    </span>
-                    <span className="yw-passed yw-r" style={at(3.6)}>
-                      <span className="yw-check-icon">{"✓"}</span>
-                      {nobr(m.passed)}
-                    </span>
-                  </Panel>
-                  <Panel n={4} step={step}>
-                    <span className="yw-verdict-row yw-r" style={at(3.7)}>
-                      {verdict(3.7)}
-                    </span>
-                    <span className="yw-msg yw-msg-reply yw-r" style={at(4.05)}>
-                      {sentWho}
-                      <span className="yw-bubble">{nobr(m.reply)}</span>
-                    </span>
-                    <span className="yw-logged yw-r" style={at(4.35)}>
-                      <span className="yw-tag" data-ch="line">
-                        LINE
-                      </span>
-                      <span className="yw-row-name">{nobr(m.patient)}</span>
-                      <span className="yw-logged-text">{nobr(m.logged)}</span>
-                    </span>
-                  </Panel>
+                  {/* Beats 2 to 5: the conversation, newest at the bottom like a chat. */}
+                  {[1, 2, 3, 4].map((n) => (
+                    <Panel key={n} n={n} step={step} chat>
+                      {chat(n)}
+                    </Panel>
+                  ))}
                 </div>
               </div>
             </div>
@@ -535,11 +638,17 @@ function Words({
   );
 }
 
-/** One beat of the compact composition: shown only on its beat; items that do not fit drop whole. */
-function Panel({ n, step, children }: { n: number; step: number; children: ReactNode }) {
+/**
+ * One beat of the compact composition, shown only on its beat. Items that do not fit drop whole
+ * (they wrap into a clipped column), never a sliced line. Chat cards stack bottom up and slide up
+ * with the scroll as the beat's new items arrive (--push, measured: their height).
+ */
+function Panel({ n, step, chat, children }: { n: number; step: number; chat?: boolean; children: ReactNode }) {
   return (
     <div className="yw-panel" data-on={n === step || undefined} data-past={n < step || undefined}>
-      {children}
+      <div className="yw-stack" data-chat={chat || undefined} style={{ "--n": n } as CSSProperties}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -563,10 +672,18 @@ function fit(list: HTMLElement | null, step: number) {
   for (let el: HTMLElement | null = last; el && el !== list; el = el.offsetParent as HTMLElement | null) {
     top += el.offsetTop;
   }
-  const shift = view.clientHeight - (top + last.offsetHeight + pad);
-  // Short content starts at the top (no empty band above the history); long content sits on the
-  // bottom edge with the newest item last.
-  list.style.setProperty("--shift", `${Math.round(Math.min(0, shift))}px`);
+  // How far the list must move up for the newest item to show; then round that up to the next item
+  // boundary, so the top edge never slices a message (whole items in every still frame).
+  const need = top + last.offsetHeight + pad - view.clientHeight;
+  let shift = 0;
+  if (need > 0) {
+    const padTop = parseFloat(getComputedStyle(list).paddingTop) || 0;
+    const items = [...list.querySelectorAll<HTMLElement>(":scope > *:not(.yw-hist), :scope > .yw-hist > *")]
+      .map((el) => el.offsetTop - padTop)
+      .sort((a, b) => a - b);
+    shift = -(items.find((t) => t >= need) ?? need);
+  }
+  list.style.setProperty("--shift", `${Math.round(shift)}px`);
 }
 
 /* ---------- tiny line icons (decorative, inside the aria-hidden mockup) ---------- */

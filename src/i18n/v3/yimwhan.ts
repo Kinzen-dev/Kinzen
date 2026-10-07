@@ -15,14 +15,17 @@ const en = {
     {
       title: "A patient writes in",
       text: "A message lands on the clinic's LINE. Phone calls reach the same assistant.",
+      fact: "Built with Fastify, Twilio and the LINE Messaging API.",
     },
     {
       title: "Every word becomes text",
       text: "Chats arrive as text and calls are turned into text as the patient speaks, so staff read one conversation.",
+      fact: "Calls run through real-time speech-to-text.",
     },
     {
       title: "The model writes a draft",
       text: "The model drafts a reply. Nothing has reached the patient yet.",
+      fact: "Prompts stay thin; the rules live in code.",
     },
     {
       title: "The guard blocks the unsafe line",
@@ -32,6 +35,7 @@ const en = {
     {
       title: "A safe reply goes out, and is logged",
       text: "The patient gets a safe answer and an offer to book. Staff see the whole conversation in the back office.",
+      fact: "In production on a dedicated phone number since July 2026, with gated releases and one-step rollback.",
     },
   ],
   finaleEyebrow: "Try it yourself",
@@ -61,6 +65,7 @@ const en = {
     scenarios: [
       {
         choice: "Toothache, asks for a painkiller",
+        short: "Toothache",
         patient: "My back tooth has been throbbing since last night. What painkiller should I take, and how much?",
         draftBefore: "Sorry to hear that. ",
         draftFlagged: "Take ibuprofen 400 mg every 6 hours",
@@ -72,6 +77,7 @@ const en = {
       },
       {
         choice: "Bleeding gums, asks what it is",
+        short: "Gums bleed",
         patient: "My gums bleed every time I brush. Is it gum disease?",
         draftBefore: "",
         draftFlagged: "That sounds like gingivitis, nothing serious.",
@@ -83,6 +89,7 @@ const en = {
       },
       {
         choice: "Whitening, asks if it lasts forever",
+        short: "Whitening",
         patient: "If I get my teeth whitened, will they stay white forever?",
         draftBefore: "Yes! ",
         draftFlagged: "Our whitening is guaranteed to last for life.",
@@ -176,14 +183,17 @@ const th: YimwhanCopy = {
     {
       title: "คนไข้ทักเข้ามา",
       text: "ข้อความเข้ามาที่ LINE ของคลินิก ส่วนสายโทรเข้าก็มาถึงผู้ช่วยตัวเดียวกัน",
+      fact: "สร้างด้วย Fastify, Twilio และ LINE Messaging API",
     },
     {
       title: "ทุกคำกลายเป็นข้อความ",
       text: "แชทเข้ามาเป็นข้อความอยู่แล้ว ส่วนสายโทรถอดเป็นข้อความระหว่างที่คนไข้พูด พนักงานจึงอ่านเป็นบทสนทนาเดียว",
+      fact: "สายโทรผ่านระบบถอดเสียงพูดเป็นข้อความแบบทันที",
     },
     {
       title: "โมเดลร่างคำตอบ",
       text: "โมเดลเขียนร่างคำตอบขึ้นมา แต่ยังไม่มีอะไรส่งถึงคนไข้",
+      fact: "เขียน prompt ให้สั้น แล้วย้ายกฎไปไว้ในโค้ด",
     },
     {
       title: "ชุดตรวจบล็อกประโยคที่ไม่ปลอดภัย",
@@ -193,6 +203,7 @@ const th: YimwhanCopy = {
     {
       title: "ส่งคำตอบที่ปลอดภัย แล้วบันทึกไว้",
       text: "คนไข้ได้คำตอบที่ปลอดภัย พร้อมข้อเสนอให้จองคิว พนักงานเห็นบทสนทนาทั้งหมดในระบบหลังบ้าน",
+      fact: "รันบนเบอร์โทรเฉพาะมาตั้งแต่กรกฎาคม 2026 ทุก release ผ่านด่านตรวจ และย้อนกลับได้ในขั้นตอนเดียว",
     },
   ],
   finaleEyebrow: "ลองเล่นเอง",
@@ -221,6 +232,7 @@ const th: YimwhanCopy = {
     scenarios: [
       {
         choice: "ปวดฟัน ขอชื่อยาแก้ปวด",
+        short: "ปวดฟัน",
         patient: "ฟันกรามด้านในปวดตุบ ๆ ตั้งแต่เมื่อคืนเลยค่ะ ควรกินยาแก้ปวดตัวไหน กินเท่าไหร่ดีคะ",
         draftBefore: "ปวดแบบนี้ทรมานแย่เลยค่ะ ",
         draftFlagged: "ทาน Ibuprofen 400 มก. ทุก 6 ชั่วโมง",
@@ -231,6 +243,7 @@ const th: YimwhanCopy = {
       },
       {
         choice: "เหงือกมีเลือดออก ถามว่าเป็นอะไร",
+        short: "เลือดออก",
         patient: "แปรงฟันทีไรเลือดออกที่เหงือกทุกที แบบนี้เป็นโรคเหงือกหรือเปล่าคะ",
         draftBefore: "",
         draftFlagged: "อาการแบบนี้น่าจะเป็นเหงือกอักเสบค่ะ ไม่ร้ายแรง",
@@ -241,6 +254,7 @@ const th: YimwhanCopy = {
       },
       {
         choice: "ฟอกสีฟัน ถามว่าขาวถาวรไหม",
+        short: "ฟอกสีฟัน",
         patient: "ถ้าฟอกสีฟัน ฟันจะขาวไปตลอดเลยไหมคะ",
         draftBefore: "ใช่ค่ะ ",
         draftFlagged: "ที่นี่รับประกันฟันขาวถาวรตลอดชีวิต",

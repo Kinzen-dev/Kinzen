@@ -220,17 +220,58 @@
 /* Placeholders for the stages still to come. */
 /* The slots share the spare height of the window, so it never shows a blank lower half while a
    run is in progress (up to a point: beyond 8rem the slot stops growing). */
+/* Steps still to come read as in progress (a live dot, a quiet tint), not as empty boxes. */
 .agent-demo-ghost {
   flex: 1 1 auto;
-  max-height: 8rem;
+  max-height: 6rem;
   display: flex;
   align-items: center;
+  gap: 0.625rem;
   min-height: 3.25rem;
   padding: 0.5rem 0.875rem;
-  border: 1px dashed var(--rule);
   border-radius: 1rem;
-  color: var(--ink-3);
+  background: color-mix(in oklch, var(--ink) 5%, transparent);
+  color: var(--ink-2);
   font-size: var(--text-sm);
+}
+.agent-demo-wait {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: agent-demo-blink 900ms step-end infinite;
+}
+.agent-demo[data-active="false"] .agent-demo-wait {
+  animation-play-state: paused;
+}
+
+/* Choices: phones show a compact row of three short labels (the full text stays the accessible
+   name, visually hidden); from md the full labels in a column. */
+.agent-demo-short {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .agent-demo-choice {
+    position: relative;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    text-align: left;
+  }
+  .agent-demo-short {
+    display: block;
+    min-width: 0;
+    font-size: var(--text-sm);
+    line-height: 1.3;
+  }
+  .agent-demo-long {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 .agent-demo-ghost.agent-demo-reply {
   align-self: flex-end;

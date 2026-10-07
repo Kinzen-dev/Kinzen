@@ -85,17 +85,17 @@ export function AgentDemo({ copy }: { copy: Copy }) {
       setPaused(false);
       started.current = true; // and the first-view replay must never override their pick
       play(next);
-      // Phones: the window sits under the choices. Bring it into view so the run is seen, and if
-      // it is taller than the room, its lower part: that is where the verdict and the safe reply land.
+      // Phones: the window sits under the choices. Scroll only as much as the run needs (its lower
+      // part is where the verdict and the safe reply land), and never so far that the choices leave
+      // the screen: at most until they reach the header.
       const win = rootRef.current?.querySelector<HTMLElement>(".agent-demo-window");
-      if (win) {
-        const r = win.getBoundingClientRect();
+      const picks = rootRef.current?.querySelector<HTMLElement>(".agent-demo-choices");
+      if (win && picks) {
         const top = 80; // the floating header pill
-        const room = window.innerHeight - top;
-        let dy = 0;
-        if (r.height > room - 16 || r.bottom > window.innerHeight) dy = r.bottom - window.innerHeight + 12;
-        if (r.height <= room - 16 && r.top - dy < top) dy = r.top - top - 8;
-        if (Math.abs(dy) > 4) {
+        const r = win.getBoundingClientRect();
+        const room = picks.getBoundingClientRect().top - top - 8;
+        const dy = Math.max(0, Math.min(r.bottom - window.innerHeight + 12, room));
+        if (dy > 4) {
           const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           window.scrollBy({ top: dy, behavior: still ? "auto" : "smooth" });
         }
@@ -275,21 +275,27 @@ export function AgentDemo({ copy }: { copy: Copy }) {
               {nobr(copy.keyHint)}
             </span>
           </p>
-          {copy.scenarios.map((s, i) => (
-            <button
-              key={s.rule}
-              type="button"
-              aria-pressed={scenario === i}
-              aria-keyshortcuts={String(i + 1)}
-              onClick={() => choose(i)}
-              className={`agent-demo-choice grid min-h-11 grid-cols-[auto_1fr] items-baseline gap-3 rounded-[var(--radius-sm)] border border-rule bg-surface px-4 py-3 text-left transition-colors duration-200 hover:border-rule-strong ${scenario === i ? "beam" : ""}`}
-            >
-              <kbd className="readout" aria-hidden="true">
-                {i + 1}
-              </kbd>
-              <span className="text-balance">{nobr(s.choice)}</span>
-            </button>
-          ))}
+          <div className="agent-demo-choices grid grid-cols-3 gap-2 md:grid-cols-1">
+            {copy.scenarios.map((s, i) => (
+              <button
+                key={s.rule}
+                type="button"
+                aria-pressed={scenario === i}
+                aria-keyshortcuts={String(i + 1)}
+                onClick={() => choose(i)}
+                className={`agent-demo-choice grid min-h-11 grid-cols-[auto_1fr] items-baseline gap-2 rounded-[var(--radius-sm)] border border-rule bg-surface px-3 py-3 text-left transition-colors duration-200 hover:border-rule-strong md:gap-3 md:px-4 ${scenario === i ? "beam" : ""}`}
+              >
+                <kbd className="readout" aria-hidden="true">
+                  {i + 1}
+                </kbd>
+                {/* Phones: a compact row of three, the short label shown; the full one stays the name. */}
+                <span className="agent-demo-short" aria-hidden="true">
+                  {nobr(s.short)}
+                </span>
+                <span className="agent-demo-long text-balance">{nobr(s.choice)}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {!reduced ? (
@@ -376,11 +382,13 @@ function Transcript({ copy, s, stage, still }: { copy: Copy; s: Scenario; stage:
       {/* What is still to come, drawn faintly so the reserved space reads as a pipeline, not a gap. */}
       {!still && !at(stage, "checking") ? (
         <li className="agent-demo-ghost" aria-hidden="true">
+          <span className="agent-demo-wait" />
           {nobr(copy.ghostGuard)}
         </li>
       ) : null}
       {!still && !at(stage, "typing-reply") ? (
         <li className="agent-demo-ghost agent-demo-reply" aria-hidden="true">
+          <span className="agent-demo-wait" />
           {nobr(copy.ghostReply)}
         </li>
       ) : null}
