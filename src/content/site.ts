@@ -354,7 +354,7 @@ const content: SiteContentInput = {
         {
           text: {
             en: "Delivered Shopify integrations using the Admin GraphQL and Storefront APIs, Liquid, metafields and app proxies, alongside Next.js services.",
-            th: "ส่งมอบงานเชื่อมต่อ Shopify ด้วย Admin GraphQL API, Storefront API, Liquid, metafields และ app proxy ควบคู่กับบริการที่เขียนด้วย Next.js",
+            th: "ส่งมอบงานเชื่อมต่อ Shopify ด้วย Admin GraphQL API, Storefront API, Liquid, metafields และ app proxy ร่วมกับบริการที่พัฒนาด้วย Next.js",
           },
           provenance: { claimId: "exp-anymind.bullet-2", source: "CLAIMS", confidence: "STATED" },
         },
