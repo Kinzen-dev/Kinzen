@@ -112,12 +112,17 @@ export default function AssembleSystem({ locale }: { locale: Locale }) {
       .to(el, { x: 0, y: 0, rotate: 0, duration: 0.6, ease: "elastic.out(1, 0.45)" });
   };
 
-  const tryPlace = (id: TileId, socket: number, el: HTMLElement | null) => {
+  const tryPlace = (id: TileId, socket: number, el: HTMLElement | null, byKey = false) => {
     if (ORDER[socket] === id && placed[socket] === null) {
       const next = [...placed];
       next[socket] = id;
       if (el) gsap.set(el, { rotate: 0 });
       commit(next);
+      // Keyboard and tap flow: the focused drop button is gone, so hand focus to the next part.
+      if (byKey)
+        requestAnimationFrame(() =>
+          rootRef.current?.querySelector<HTMLElement>(".asm-tray .asm-tile, .asm-actions .asm-btn")?.focus(),
+        );
       setSelected(null);
       setMessage({ text: c.placed(c.tiles[id], socket + 1), tone: "ok" });
       return;
@@ -335,7 +340,12 @@ export default function AssembleSystem({ locale }: { locale: Locale }) {
           ))}
         </div>
 
-        <div ref={boardRef} className="asm-board" data-selecting={selected ? "" : undefined}>
+        <div
+          ref={boardRef}
+          className="asm-board"
+          data-selecting={selected ? "" : undefined}
+          onKeyDown={(e) => e.key === "Escape" && setSelected(null)}
+        >
           <svg className="asm-wire" width={wire.w} height={wire.h} aria-hidden="true">
             <path ref={wireRef} d={wire.d} className="asm-wire-base" />
             <path ref={litRef} d={wire.d} className="asm-wire-lit" />
@@ -375,7 +385,9 @@ export default function AssembleSystem({ locale }: { locale: Locale }) {
                     <button
                       type="button"
                       className="asm-drop"
-                      onClick={() => tryPlace(selected, i, rootRef.current?.querySelector(`[data-flip-id="${selected}"]`) ?? null)}
+                      onClick={() =>
+                        tryPlace(selected, i, rootRef.current?.querySelector(`[data-flip-id="${selected}"]`) ?? null, true)
+                      }
                     >
                       {c.placeHere(c.tiles[selected], i + 1)}
                     </button>
