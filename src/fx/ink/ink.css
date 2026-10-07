@@ -1,0 +1,111 @@
+/* ------------------------------------------------------------------
+   Hero scene 0: the ink desk, laid over the wordmark paragraph's box.
+   The KINZEN text stays in the paragraph only as its layout box (the
+   band's size, the masthead hand-off, the slot every GPU scene measures);
+   it is never painted. The drawing is contain-fitted and centred.
+   ------------------------------------------------------------------ */
+.hero-wordmark {
+  position: relative;
+}
+.hero-wordmark-text {
+  visibility: hidden;
+}
+.ink-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: var(--ink);
+  pointer-events: none;
+  /* The stage fades it during the burst into dust. */
+  transition: opacity 0ms;
+}
+.ink-art {
+  fill: currentColor;
+}
+/* Mask strokes: wide enough to uncover a traced ink line from its contour (art lines are ~4-5 units). */
+.ink-mask-strokes path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ink-flood {
+  fill: #fff;
+}
+.ink-prop {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ink-bubble-shape {
+  fill: color-mix(in oklab, var(--ink) 5%, var(--ground));
+}
+.ink-check circle {
+  fill: var(--gold);
+}
+.ink-check path {
+  fill: none;
+  stroke: var(--gold-ink);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ink-line,
+.ink-pulse {
+  fill: none;
+  stroke-linecap: round;
+}
+.ink-line {
+  stroke: var(--gold);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--gold) 55%, transparent));
+}
+.ink-pulse {
+  stroke: oklch(0.95 0.06 85);
+  stroke-width: 4.5;
+  filter: drop-shadow(0 0 6px var(--gold));
+}
+.ink-antenna {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 6px var(--gold));
+}
+.ink-pen-tip {
+  fill: oklch(0.96 0.05 85);
+}
+.ink-pool {
+  fill: color-mix(in oklab, var(--gold) 7%, transparent);
+  filter: blur(18px);
+}
+
+/* As served (no script, reduced motion, or a script that never came): the finished drawing. */
+.ink-svg:not([data-state="drawing"]) :is(.ink-pen, .ink-pulse, .ink-ring) {
+  opacity: 0;
+}
+
+/* With motion and scripting the drawing waits for its controller, so a finished frame never
+   flashes before it is drawn. Safety net: revealed finished after 2.5 s if no controller claims
+   it (a failed chunk, a stalled load); the controller then starts from the finished picture. */
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .ink-svg:not([data-state]) {
+    animation: ink-safety-net 300ms var(--ease-out) 2.5s both;
+  }
+}
+@keyframes ink-safety-net {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media print {
+  .ink-svg {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}

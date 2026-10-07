@@ -9,19 +9,18 @@ import { nobr } from "@/lib/thai-nodes";
 import { getV3, type V3Copy } from "@/i18n/v3";
 import { HeroKinetic } from "./hero-kinetic";
 import { HeroScale } from "./hero-scale";
+import { InkArt } from "@/fx/ink/ink-art";
+import { HeroControls } from "@/fx/react/hero-controls";
 import "./hero.css";
 
 /**
- * The first screen. The wordmark is real server-rendered text; the particle field (when the
- * device allows it) is layered in through `fx`.
- * When the field is going to run (dark theme, motion allowed, hardware WebGL2: decided before
- * paint by ThemeScript, html[data-fx="pending"]) the wordmark is held at opacity 0 and the dust
- * condenses into the name instead, so the LCP element is the hero line paragraph below the h1,
- * painted with the first frame. Measured on the production build (M2, metal): 72 to 228 ms
- * unthrottled, 208 to 292 ms at 4x CPU, desktop 1440 and phone 390. In the light theme, under
- * reduced motion and on software GL the wordmark itself is the LCP (72 to 164 ms, 4x CPU 216 to
- * 456 ms). Only if the field fails after the gate does the wordmark become a late LCP entry, when
- * fx.css reveals it (at once on a failure the field reports, by 1.8 s at worst).
+ * The first screen. Its top band is a stage (v4): the ink desk, server-rendered finished inside
+ * the wordmark paragraph, draws itself and then turns into the gold KINZEN in four materials
+ * (dust, metal, ink in water, keycaps) and back, forever; the sequence is layered in through `fx`
+ * after first paint (fx/sequence). The KINZEN text stays in the paragraph as the band's layout box
+ * and the slot every scene draws the name into, never painted; so the LCP element is always real
+ * text below it (the kinetic line or the hero line), painted with the first frame. Without
+ * scripting and under reduced motion the band is the finished ink desk, still.
  * v3: the hero is a dark scene in both themes. Under the name, a kinetic line ("I build" + a
  * cycling phrase, the first phrase painted with the first frame, so it is real LCP-eligible text);
  * pill CTAs in the Contact order (email, CV, LinkedIn); glass fact chips; and on scroll the whole
@@ -60,7 +59,8 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
           data-hero-wordmark
           className="hero-wordmark -mx-[0.04em] pt-[clamp(1.5rem,5vh,4rem)] font-semibold select-none"
         >
-          KINZEN
+          <span className="hero-wordmark-text">KINZEN</span>
+          <InkArt />
         </p>
 
         <div className="hero-body grid gap-6 border-t border-rule pt-6 pb-12 md:grid-cols-12 md:gap-x-6 md:gap-y-8 md:pt-7 md:pb-14">
@@ -132,6 +132,7 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
             ))}
           </dl>
         </div>
+        <HeroControls pause={copy.stage.pause} play={copy.stage.play} />
       </div>
     </section>
   );
