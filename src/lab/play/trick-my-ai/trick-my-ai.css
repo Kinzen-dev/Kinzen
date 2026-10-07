@@ -1,0 +1,406 @@
+/* trick-my-ai: a reply editor with live rule highlights, and the guard panel beside it. */
+.tm {
+  --tm-diag: oklch(0.72 0.17 25);
+  --tm-dose: oklch(0.76 0.15 55);
+  --tm-cure: oklch(0.72 0.17 350);
+  --tm-hype: oklch(0.8 0.13 95);
+  --tm-elig: oklch(0.72 0.14 300);
+  display: grid;
+  gap: 1.5rem;
+  padding: var(--inset-card);
+}
+@media (min-width: 60rem) {
+  .tm {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 2rem;
+    padding: 2rem;
+  }
+}
+[data-rule="no_diagnose"] {
+  --hue: var(--tm-diag);
+}
+[data-rule="dosing-gate"] {
+  --hue: var(--tm-dose);
+}
+[data-rule="efficacy_claim"] {
+  --hue: var(--tm-cure);
+}
+[data-rule="superlative_claim"] {
+  --hue: var(--tm-hype);
+}
+[data-rule="eligibility_promise"] {
+  --hue: var(--tm-elig);
+}
+
+.tm-main {
+  display: grid;
+  gap: 0.875rem;
+  align-content: start;
+  min-width: 0;
+}
+
+/* ---------- thread ---------- */
+.tm-thread {
+  display: grid;
+  gap: 0.625rem;
+}
+.tm-bubble {
+  display: grid;
+  gap: 0.375rem;
+  max-width: 34rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1.125rem;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+.tm-patient {
+  justify-self: start;
+  border-top-left-radius: 0.375rem;
+  background: color-mix(in oklch, var(--ink) 9%, var(--surface));
+}
+.tm-out {
+  justify-self: end;
+  border-top-right-radius: 0.375rem;
+  background: color-mix(in oklch, var(--pa-line) 22%, var(--surface));
+  animation: tm-in 520ms var(--pa-ease) both;
+}
+.tm-sent {
+  display: grid;
+  gap: 0.5rem;
+}
+.tm-bounced {
+  background: color-mix(in oklch, var(--tm-diag) 14%, var(--surface));
+  animation: tm-bounce 700ms var(--pa-ease) both;
+}
+.tm-bounced p {
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklch, var(--tm-diag) 70%, transparent);
+  color: var(--ink-2);
+}
+.tm-instead {
+  animation-delay: 420ms;
+}
+.tm-sent-note {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+.tm-sent-note code {
+  font-family: var(--font-mono);
+}
+.tm-ok {
+  color: var(--pa-green);
+}
+.tm-bad {
+  color: var(--tm-diag);
+}
+@keyframes tm-in {
+  from {
+    opacity: 0;
+    translate: 0 0.75rem;
+    scale: 0.96;
+  }
+}
+@keyframes tm-bounce {
+  0% {
+    opacity: 0;
+    translate: 0 0.75rem;
+  }
+  35% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  50% {
+    translate: -0.6rem 0;
+  }
+  62% {
+    translate: 0.45rem 0;
+  }
+  74% {
+    translate: -0.25rem 0;
+  }
+  100% {
+    translate: 0 0;
+    opacity: 0.75;
+  }
+}
+
+/* ---------- editor: a transparent textarea over a mirror that draws the marks ---------- */
+.tm-editor-label {
+  margin-top: 0.5rem;
+}
+.tm-editor {
+  position: relative;
+  display: grid;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--ground) 55%, var(--surface));
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+.tm-editor:focus-within {
+  border-color: var(--gold);
+}
+.tm[data-state="block"] .tm-editor:focus-within {
+  border-color: color-mix(in oklch, var(--tm-diag) 70%, var(--gold));
+}
+.tm-mirror,
+.tm-input {
+  grid-area: 1 / 1;
+  margin: 0;
+  padding: 1rem 1rem 0.75rem;
+  font: inherit;
+  font-size: var(--text-base);
+  line-height: 2.7;
+  letter-spacing: 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  tab-size: 4;
+}
+.tm-mirror {
+  min-height: 8.6rem;
+  color: transparent;
+  pointer-events: none;
+}
+.tm-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+}
+.tm-input::placeholder {
+  color: var(--ink-3);
+}
+.tm-mirror mark {
+  position: relative;
+  color: transparent;
+  border-radius: 0.3rem;
+  background: linear-gradient(
+      color-mix(in oklch, var(--hue) 30%, transparent),
+      color-mix(in oklch, var(--hue) 30%, transparent)
+    )
+    no-repeat 0 0 / 100% 100%;
+  box-shadow: inset 0 -2px 0 var(--hue);
+  animation: tm-sweep 380ms var(--pa-ease) both;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+/* The rule name rides above the flagged phrase. */
+.tm-mirror mark::after {
+  content: attr(data-tag);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 0.125rem);
+  padding: 0 0.3rem;
+  border-radius: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  color: oklch(0.18 0.02 260);
+  background: var(--hue);
+  animation: tm-tag 420ms var(--pa-ease) 120ms both;
+}
+.tm-mirror mark[data-flip]::after {
+  left: auto;
+  right: 0;
+}
+/* Phones: the guard panel sits below, so a compact meter rides under the editor. */
+.tm-mini {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 2rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+.tm-mini .readout {
+  text-align: end;
+}
+@media (min-width: 60rem) {
+  .tm-mini {
+    display: none;
+  }
+}
+@keyframes tm-sweep {
+  from {
+    background-size: 0% 100%;
+    box-shadow: inset 0 0 0 var(--hue);
+  }
+}
+@keyframes tm-tag {
+  from {
+    opacity: 0;
+    translate: 0 0.35rem;
+    scale: 0.8;
+  }
+}
+
+.tm-try,
+.tm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tm-try .pa-label {
+  margin-inline-end: 0.25rem;
+}
+
+/* ---------- guard panel ---------- */
+.tm-guard {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--surface) 80%, transparent);
+  min-width: 0;
+}
+.tm-meter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.tm-verdict {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: color-mix(in oklch, var(--ink) 10%, transparent);
+  color: var(--ink-2);
+  animation: tm-pop 420ms var(--pa-ease) both;
+}
+.tm-verdict[data-state="pass"] {
+  background: color-mix(in oklch, var(--pa-green) 20%, transparent);
+  color: var(--pa-green);
+}
+.tm-verdict[data-state="block"] {
+  background: color-mix(in oklch, var(--tm-diag) 22%, transparent);
+  color: var(--tm-diag);
+}
+@keyframes tm-pop {
+  from {
+    scale: 0.7;
+    opacity: 0;
+  }
+  60% {
+    scale: 1.08;
+  }
+}
+.tm-meter {
+  --v: 0;
+  position: relative;
+  height: 0.875rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pa-green), var(--gold) 45%, var(--tm-diag) 85%);
+  overflow: hidden;
+}
+.tm-meter-cover {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklch, var(--ground) 88%, var(--ink));
+  transform-origin: 100% 50%;
+  transform: scaleX(calc(1 - var(--v)));
+  transition: transform 640ms var(--pa-ease);
+}
+.tm-meter-needle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 10px var(--ink);
+  translate: calc(var(--v) * (100cqw - 3px)) 0;
+  transition: translate 640ms var(--pa-ease);
+}
+.tm-meter {
+  container-type: inline-size;
+}
+.tm-score {
+  margin-top: -0.25rem;
+}
+.tm-checks {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tm-checks li {
+  display: grid;
+  grid-template-columns: 1.5rem auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  transition: background-color var(--dur-3) var(--ease-out);
+}
+.tm-checks code {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.tm-check-label {
+  color: var(--ink-2);
+  text-align: end;
+}
+.tm-check-icon {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  font-size: 0.6875rem;
+  background: color-mix(in oklch, var(--pa-green) 18%, transparent);
+  color: var(--pa-green);
+}
+.tm-checks li[data-bad="true"] {
+  background: color-mix(in oklch, var(--hue) 14%, transparent);
+}
+.tm-checks li[data-bad="true"] .tm-check-icon {
+  background: var(--hue);
+  color: oklch(0.18 0.02 260);
+  animation: tm-pop 420ms var(--pa-ease) both;
+}
+.tm-checks li[data-bad="true"] code {
+  color: var(--hue);
+}
+.tm-fix {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+.tm-fix-body {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink);
+  animation: tm-in 480ms var(--pa-ease) both;
+}
+.tm-fix-body del {
+  color: var(--ink-3);
+  text-decoration-color: var(--tm-diag);
+}
+.tm-fix-body ins {
+  text-decoration: none;
+  background: color-mix(in oklch, var(--pa-green) 16%, transparent);
+  border-radius: 0.25rem;
+  box-shadow: inset 0 -1px 0 var(--pa-green);
+}
+/* Nothing typed yet: the checks wait instead of claiming a pass. */
+.tm[data-state="idle"] .tm-check-icon {
+  background: color-mix(in oklch, var(--ink) 8%, transparent);
+  color: var(--ink-3);
+}
