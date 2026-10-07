@@ -18,7 +18,8 @@ function formatKB(bytes: number, locale: Locale) {
   return new Intl.NumberFormat(locale === "th" ? "th-TH" : "en-GB", { maximumFractionDigits: 0 }).format(bytes / 1024);
 }
 
-export function Colophon({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+/** Receives only its own strings: a client component's props are serialized into every page. */
+export function Colophon({ locale, labels }: { locale: Locale; labels: Dictionary["colophon"] }) {
   const [weight, setWeight] = useState<number | null>(null);
   const commit = process.env.NEXT_PUBLIC_BUILD_COMMIT ?? "local";
   // Thai separates sentences with a space, not a full stop.
@@ -44,15 +45,15 @@ export function Colophon({ locale, dict }: { locale: Locale; dict: Dictionary })
 
   return (
     <p className="readout max-w-prose">
-      {dict.colophon.weighs}{" "}
-      <span className="text-ink">{weight === null ? dict.colophon.measuring : `${formatKB(weight, locale)} KB`}</span>
+      {labels.weighs}{" "}
+      <span className="text-ink">{weight === null ? labels.measuring : `${formatKB(weight, locale)} KB`}</span>
       {stop}
-      {dict.colophon.built} {builtLabel} {dict.colophon.from}{" "}
+      {labels.built} {builtLabel} {labels.from}{" "}
       <a className="link" href={`https://github.com/Kinzen-dev/Kinzen/commit/${commit}`}>
         {commit}
       </a>
       {stop}
-      {dict.colophon.fonts}
+      {labels.fonts}
     </p>
   );
 }
