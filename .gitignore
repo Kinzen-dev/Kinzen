@@ -47,3 +47,6 @@ next-env.d.ts
 
 # agent worktrees and local Claude state
 /.claude/
+
+# vitest JSON reports written by local tooling
+.vitest/
