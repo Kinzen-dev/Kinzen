@@ -1,0 +1,27 @@
+/* ------------------------------------------------------------------
+   Tool marks: official brand marks at text size, before a tool's name.
+   Never recoloured; a mark that would vanish on the chip surface in one
+   theme sits on a small contrasting tile in that theme instead.
+   ------------------------------------------------------------------ */
+.tool-mark {
+  flex: none;
+  width: 1.125em;
+  height: 1.125em;
+}
+.tool-mark[data-badge] {
+  border-radius: 0.25em;
+}
+/* A light mark (React, Vitest, LiveKit) in the light theme: an ink tile. */
+.tool-mark[data-badge="light"] {
+  background: light-dark(oklch(0.24 0.015 65), transparent);
+  box-shadow: 0 0 0 0.15em light-dark(oklch(0.24 0.015 65), transparent);
+}
+/* A dark mark (SQLite, Fly.io) in the dark theme: a paper tile. */
+.tool-mark[data-badge="dark"] {
+  background: light-dark(transparent, oklch(0.95 0.012 85));
+  box-shadow: 0 0 0 0.15em light-dark(transparent, oklch(0.95 0.012 85));
+}
+/* A practice, not a product: a quiet dot in the secondary ink. */
+.tool-mark-practice {
+  color: var(--ink-3);
+}

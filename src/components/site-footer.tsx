@@ -36,6 +36,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
           <Link href={privacy} prefetch={prefetchFor(privacy)} className="link">
             {nobr(dict.colophon.privacy)}
           </Link>
+          <span className="mt-1 block">{nobr(dict.footer.trademarks)}</span>
         </p>
       </div>
     </footer>
