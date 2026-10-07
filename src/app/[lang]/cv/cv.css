@@ -62,6 +62,8 @@
 
 .cv-section {
   display: grid;
+  /* An implicit column sizes to min-content, which WebKit measures wider than a phone for Thai. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem 1.5rem;
   border-top: 1px solid var(--rule-strong);
   padding-block: 1.25rem 2.25rem;
