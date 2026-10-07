@@ -1,0 +1,396 @@
+/* Lab: assemble the system (preview only). */
+.asm {
+  padding-top: calc(var(--header-h) + clamp(1.5rem, 4vw, 3rem));
+  padding-bottom: 3rem;
+}
+.asm-head {
+  max-width: 44rem;
+}
+.asm-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+:lang(th) .asm-kicker {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  font-size: var(--text-xs);
+}
+.asm-kicker i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.asm-title {
+  margin-top: 0.75rem;
+  font-size: clamp(2rem, 1.2rem + 3vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+:lang(th) .asm-title {
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.asm-lede {
+  margin-top: 0.75rem;
+  color: var(--ink-2);
+  max-width: 40rem;
+}
+
+.asm-card {
+  --tile-h: 3rem;
+  position: relative;
+  margin-top: 1.75rem;
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  transition:
+    box-shadow var(--dur-4) var(--ease-out),
+    border-color var(--dur-4) var(--ease-out);
+}
+.asm-card[data-done] {
+  border-color: color-mix(in oklab, var(--gold) 60%, var(--rule));
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--gold) 14%, transparent),
+    var(--shadow-lift);
+}
+
+/* ---------- tray ---------- */
+.asm-tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: calc(var(--tile-h) + 1.5rem);
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--ground) 70%, transparent);
+}
+.asm-tray-label {
+  margin-right: 0.25rem;
+  color: var(--ink-3);
+}
+.asm-tray-empty {
+  color: var(--ink-3);
+}
+.asm-tray:has(.asm-tray-empty) {
+  min-height: 0;
+}
+
+.asm-tile {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--tile-h);
+  padding-inline: 0.875rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 1px 0 var(--rule), 0 6px 14px -10px oklch(0 0 0 / 0.4);
+  transition:
+    box-shadow var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
+}
+.asm-tile:hover {
+  border-color: var(--gold);
+}
+.asm-tile[aria-pressed="true"] {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--gold) 35%, transparent),
+    0 10px 24px -12px oklch(0 0 0 / 0.5);
+}
+.asm-tile[data-dragging] {
+  z-index: 20;
+  cursor: grabbing;
+  box-shadow: var(--shadow-lift);
+}
+.asm-tile:focus-visible,
+.asm-drop:focus-visible,
+.asm-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.asm-glyph {
+  flex: none;
+  color: var(--ink-2);
+}
+
+/* ---------- board ---------- */
+.asm-board {
+  position: relative;
+  margin-top: 1.25rem;
+}
+.asm-wire {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.asm-packet-layer {
+  z-index: 0;
+}
+.asm-wire-base {
+  fill: none;
+  stroke: var(--rule-strong);
+  stroke-opacity: 0.35;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 5;
+}
+.asm-wire-lit {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 0 99999;
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--gold) 80%, transparent));
+}
+.asm-packet-halo {
+  fill: color-mix(in oklab, var(--gold) 30%, transparent);
+}
+.asm-packet-core {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 8px var(--gold));
+}
+
+.asm-sockets {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.75rem 1rem;
+}
+@media (min-width: 44rem) {
+  .asm-sockets {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 72rem) {
+  .asm-sockets {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+}
+.asm-socket {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.5rem;
+  min-height: 9.5rem;
+  padding: 0.875rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--rule-strong);
+  border-color: color-mix(in oklab, var(--rule-strong) 45%, transparent);
+  background: var(--surface);
+  transition:
+    border-color var(--dur-3) var(--ease-out),
+    background var(--dur-3) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out);
+}
+.asm-socket[data-filled] {
+  border-style: solid;
+  border-color: var(--rule);
+}
+.asm-socket[data-hover],
+[data-selecting] .asm-socket:not([data-filled]) {
+  border-color: var(--gold);
+}
+.asm-socket[data-hover] {
+  background: color-mix(in oklab, var(--gold) 8%, var(--surface));
+}
+.asm-socket[data-lit] {
+  border-color: var(--gold);
+  box-shadow: 
+    0 0 0 3px color-mix(in oklab, var(--gold) 18%, transparent),
+    0 0 28px -6px color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 6%, var(--surface));
+}
+.asm-socket[data-lit] .asm-glyph {
+  color: var(--gold);
+}
+.asm-step {
+  color: var(--ink-3);
+}
+.asm-socket[data-lit] .asm-step {
+  color: var(--gold);
+}
+.asm-hint {
+  font-size: var(--text-sm);
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+.asm-empty {
+  display: block;
+  height: var(--tile-h);
+  border-radius: 0.875rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 6px,
+    color-mix(in oklab, var(--rule) 60%, transparent) 6px 7px
+  );
+}
+.asm-socket .asm-tile {
+  width: 100%;
+  justify-content: flex-start;
+  padding-inline: 0.625rem;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.asm-drop {
+  min-height: var(--tile-h);
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.875rem;
+  border: 1px dashed var(--gold);
+  color: var(--ink);
+  font-size: var(--text-xs);
+  line-height: 1.25;
+  background: color-mix(in oklab, var(--gold) 10%, transparent);
+}
+
+/* ---------- sparks ---------- */
+.asm-sparks {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.asm-sparks i {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+  opacity: 0;
+}
+.asm-sparks i:nth-child(3n) {
+  width: 4px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* ---------- footer ---------- */
+.asm-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+.asm-live {
+  flex: 1 1 18rem;
+  min-height: 1.5rem;
+  color: var(--ink-2);
+}
+.asm-live[data-tone="wrong"] {
+  color: var(--ink);
+}
+.asm-live[data-tone="run"] {
+  color: var(--ink);
+  font-weight: 500;
+}
+.asm-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.asm-btn {
+  min-height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.asm-btn:hover {
+  border-color: var(--gold);
+}
+.asm-btn-gold {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--gold-ink);
+}
+.asm-reply {
+  margin-top: 1rem;
+  max-width: 26rem;
+  margin-left: auto;
+  padding: 0.875rem 1rem;
+  border-radius: 1.125rem 1.125rem 0.25rem 1.125rem;
+  background: var(--gold);
+  color: var(--gold-ink);
+  animation: asm-pop var(--dur-3) var(--ease-out) both;
+}
+.asm-reply .readout {
+  color: inherit;
+  opacity: 0.75;
+}
+.asm-reply p {
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+@keyframes asm-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .asm-reply {
+    animation: none;
+  }
+}
+@media (max-width: 43.99rem) {
+  .asm-socket {
+    min-height: 0;
+    padding: 0.75rem;
+  }
+  .asm-hint {
+    font-size: var(--text-xs);
+  }
+  .asm-card {
+    --tile-h: 2.625rem;
+  }
+  .asm-tray {
+    gap: 0.5rem;
+  }
+  .asm-tile {
+    gap: 0.375rem;
+    padding-inline: 0.625rem 0.75rem;
+    font-size: var(--text-sm);
+  }
+  .asm-socket .asm-tile {
+    padding-inline: 0.5rem;
+  }
+  .asm-glyph {
+    width: 18px;
+    height: 18px;
+  }
+}

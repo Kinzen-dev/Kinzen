@@ -1,0 +1,54 @@
+/* lab-hero-a banner: the home hero's first screen with an effect layer under the copy. */
+.a-hero {
+  min-height: 100svh;
+}
+.a-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.a-stage > * {
+  position: absolute;
+  inset: 0;
+}
+.a-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* The copy never blocks the effect's pointer tracking (listeners sit on the section); only the
+   links and buttons take hits. */
+.a-copy {
+  z-index: 1;
+  pointer-events: none;
+}
+.a-copy :is(a, button) {
+  pointer-events: auto;
+}
+.a-wordmark-pad {
+  padding-top: max(var(--header-h), clamp(1.5rem, 5vh, 4rem));
+}
+.a-wordmark {
+  position: relative;
+  height: 0.82em;
+}
+.a-slot {
+  position: absolute;
+}
+/* Whole-banner effects: a navy wash under the copy so the type keeps its contrast. */
+.a-hero[data-scrim] .a-body {
+  position: relative;
+}
+.a-hero[data-scrim] .a-body::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2rem calc(-1 * var(--gutter)) 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--ground) 0%, transparent),
+    color-mix(in oklab, var(--ground) 82%, transparent) 3.5rem,
+    color-mix(in oklab, var(--ground) 92%, transparent)
+  );
+  pointer-events: none;
+}
