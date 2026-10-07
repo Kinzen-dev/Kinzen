@@ -1,0 +1,103 @@
+/* ------------------------------------------------------------------
+   Tools: full-bleed marquee rows of pastel chips, then group cards.
+   ------------------------------------------------------------------ */
+.tools-marquees {
+  display: grid;
+  /* minmax(0, 1fr): a marquee's track is max-content wide; the column must not grow to it. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  margin-bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
+}
+.tools-marquee {
+  --marquee-gap: 0.75rem;
+}
+.tool-chip {
+  display: inline-flex;
+  align-items: center;
+  height: clamp(2.75rem, 2.4rem + 1.2vw, 3.5rem);
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  background: var(--pastel);
+  color: var(--pastel-ink);
+  font-size: clamp(1rem, 0.85rem + 0.6vw, 1.375rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.tool-chip-plain {
+  --pastel: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+/* Reduced motion: the rows are wrapped, still chips inside the gutter. */
+@media (prefers-reduced-motion: reduce) {
+  .tools-marquee {
+    padding-inline: var(--gutter);
+    max-width: 96rem;
+    margin-inline: auto;
+  }
+  /* The shared marquee rows do not shrink (flex-shrink 0), so their wrap never kicks in:
+     let the visible row take the track width and wrap. */
+  .tools-marquee .marquee-track {
+    width: 100%;
+  }
+  .tools-marquee .marquee-row {
+    flex-shrink: 1;
+    min-width: 0;
+    padding-inline-end: 0;
+    --marquee-gap: 0.5rem;
+  }
+  /* Forty still chips: smaller, pill-sized, so the wrapped block stays short. */
+  .tools-marquee .tool-chip {
+    height: 2.25rem;
+    padding-inline: var(--inset-pill);
+    font-size: var(--text-sm);
+  }
+}
+
+.tools-groups {
+  display: grid;
+  gap: 0.75rem;
+}
+@media (min-width: 40rem) {
+  .tools-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64rem) {
+  .tools-groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+.tools-card {
+  padding: var(--inset-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+/* Phones: one card with ruled rows instead of six stacked cards. */
+@media (max-width: 39.99rem) {
+  .tools-groups {
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    overflow: clip;
+  }
+  .tools-card {
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .tools-card + .tools-card {
+    border-top: 1px solid var(--rule);
+  }
+}
+.tools-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--pastel);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--pastel-ink) 18%, transparent);
+}
