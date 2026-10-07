@@ -16,4 +16,11 @@ export const demos: LabDemo[] = [
     technique: "Pointer-captured drag plus tap-to-place, GSAP Flip into sockets, MotionPath-style packet on a measured SVG wire, Physics2D sparks.",
     load: () => import("./assemble-system"),
   },
+  {
+    id: "under-the-hood",
+    title: "Under the hood",
+    idea: "Rub a polished (fictional) clinic inbox to wipe it away and find the architecture plate that runs it; it heals back.",
+    technique: "One 2D canvas: low-res float mask with brush stamps, bleed and slow heal, noise-thresholded edge, blueprint drawn source-in plus a gold rim.",
+    load: () => import("./under-the-hood"),
+  },
 ];
