@@ -63,7 +63,10 @@ test.describe("command palette", () => {
       input.setAttribute("aria-label", "probe");
       document.querySelector("main")?.prepend(input);
     });
+    // Closing hands focus back to the trigger; let that finish so it cannot pull focus off the probe.
+    await page.waitForFunction(() => document.activeElement !== document.body);
     await page.locator("#probe").focus();
+    await expect(page.locator("#probe")).toBeFocused();
     await page.keyboard.type("a/b");
     await expect(page.locator("#probe")).toHaveValue("a/b");
     await expect(dialog).toBeHidden();

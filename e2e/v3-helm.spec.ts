@@ -21,8 +21,10 @@ test.describe("v3 Helm scene", () => {
       await expect(scene.locator("ol.helm-beats > li")).toHaveCount(5);
       await expect(scene.locator(".hw")).toHaveAttribute("aria-hidden", "true");
       await expect(scene.locator("figcaption")).toContainText(route === "/th" ? "ข้อมูลสมมติ" : "fictional");
-      const href = await scene.locator("a.helm-cta").getAttribute("href");
-      expect(href).toBe(route === "/th" ? "/th/work/helm" : "/work/helm");
+      // One case link inside the stage, one after it for phones (where the stage hides its own).
+      const hrefs = await scene.locator("a.helm-cta").evaluateAll((as) => as.map((a) => a.getAttribute("href")));
+      expect(hrefs.length).toBeGreaterThan(0);
+      for (const href of hrefs) expect(href).toBe(route === "/th" ? "/th/work/helm" : "/work/helm");
       const text = await scene.innerText();
       expect(text).not.toMatch(/[—–⁠]/);
     });
