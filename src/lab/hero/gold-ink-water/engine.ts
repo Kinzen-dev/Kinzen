@@ -324,7 +324,7 @@ export function startFluid(section: HTMLElement, host: HTMLElement, slot: HTMLEl
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
   let unit = 0;
-  const use = (p: { prog: WebGLProgram }) => {
+  const bind = (p: { prog: WebGLProgram }) => {
     gl.useProgram(p.prog);
     unit = 0;
   };
@@ -337,7 +337,7 @@ export function startFluid(section: HTMLElement, host: HTMLElement, slot: HTMLEl
   const splat = (x: number, y: number, vx: number, vy: number, radius: number, ink = 0) => {
     if (!vel || !dye) return;
     const u = P.splat.u;
-    use(P.splat);
+    bind(P.splat);
     tex(P.splat, "uTarget", vel.read.tex[0]);
     gl.uniform1f(u.uAspect, cssW / cssH);
     gl.uniform2f(u.uPoint, x / cssW, 1 - y / cssH);
@@ -346,7 +346,7 @@ export function startFluid(section: HTMLElement, host: HTMLElement, slot: HTMLEl
     blit(vel.write);
     vel.swap();
     if (ink > 0) {
-      use(P.splat);
+      bind(P.splat);
       tex(P.splat, "uTarget", dye.read.tex[0]);
       gl.uniform1f(u.uAspect, cssW / cssH);
       gl.uniform2f(u.uPoint, x / cssW, 1 - y / cssH);
@@ -419,12 +419,12 @@ export function startFluid(section: HTMLElement, host: HTMLElement, slot: HTMLEl
     const texel = [1 / simW, 1 / simH];
     gl.disable(gl.BLEND);
 
-    use(P.curl);
+    bind(P.curl);
     tex(P.curl, "uVel", vel.read.tex[0]);
     gl.uniform2f(P.curl.u.uTexel, texel[0], texel[1]);
     blit(curl);
 
-    use(P.vort);
+    bind(P.vort);
     tex(P.vort, "uVel", vel.read.tex[0]);
     tex(P.vort, "uCurl", curl.tex[0]);
     gl.uniform2f(P.vort.u.uTexel, texel[0], texel[1]);
@@ -433,19 +433,19 @@ export function startFluid(section: HTMLElement, host: HTMLElement, slot: HTMLEl
     blit(vel.write);
     vel.swap();
 
-    use(P.div);
+    bind(P.div);
     tex(P.div, "uVel", vel.read.tex[0]);
     gl.uniform2f(P.div.u.uTexel, texel[0], texel[1]);
     blit(divg);
 
-    use(P.scale);
+    bind(P.scale);
     tex(P.scale, "uTex", pres.read.tex[0]);
     gl.uniform1f(P.scale.u.uK, 0.8);
     blit(pres.write);
     pres.swap();
 
     const iters = prof.phone ? 10 : 20;
-    use(P.pres);
+    bind(P.pres);
     gl.uniform2f(P.pres.u.uTexel, texel[0], texel[1]);
     for (let i = 0; i < iters; i++) {
       unit = 0;
@@ -455,14 +455,14 @@ export function startFluid(section: HTMLElement, host: HTMLElement, slot: HTMLEl
       pres.swap();
     }
 
-    use(P.grad);
+    bind(P.grad);
     tex(P.grad, "uP", pres.read.tex[0]);
     tex(P.grad, "uVel", vel.read.tex[0]);
     gl.uniform2f(P.grad.u.uTexel, texel[0], texel[1]);
     blit(vel.write);
     vel.swap();
 
-    use(P.advVel);
+    bind(P.advVel);
     tex(P.advVel, "uVel", vel.read.tex[0]);
     gl.uniform2f(P.advVel.u.uTexel, texel[0], texel[1]);
     gl.uniform1f(P.advVel.u.uDt, dt);
@@ -472,7 +472,7 @@ export function startFluid(section: HTMLElement, host: HTMLElement, slot: HTMLEl
 
     // Calm water gathers the ink back: the pull and the refill grow after the last stir.
     const calm = Math.min(1, Math.max(0, (performance.now() - lastStir) / 1000 - 0.8) / 2.5);
-    use(P.advDye);
+    bind(P.advDye);
     tex(P.advDye, "uVel", vel.read.tex[0]);
     tex(P.advDye, "uDye", dye.read.tex[0]);
     tex(P.advDye, "uMask", mask);
@@ -487,7 +487,7 @@ export function startFluid(section: HTMLElement, host: HTMLElement, slot: HTMLEl
     blit(dye.write);
     dye.swap();
 
-    use(P.show);
+    bind(P.show);
     tex(P.show, "uDye", dye.read.tex[0]);
     tex(P.show, "uVel", vel.read.tex[0]);
     gl.uniform2f(P.show.u.uTexel, 1 / dyeW, 1 / dyeH);
