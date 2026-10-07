@@ -1568,3 +1568,25 @@
     display: none;
   }
 }
+
+/* Case link after the pinned stage: only where .helm-meta is hidden (phones, motion on). */
+.helm-cta-after {
+  display: none;
+}
+@media (max-width: 55.99rem) {
+  .helm-cta-after {
+    display: flex;
+    padding-block: 0 2.5rem;
+  }
+}
+@media (orientation: landscape) and (max-height: 540px) {
+  .helm-cta-after {
+    display: flex;
+    padding-block: 0 2rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .helm-cta-after {
+    display: none;
+  }
+}

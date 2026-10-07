@@ -170,6 +170,8 @@ export function PaletteDialog({
           await navigator.clipboard.writeText(data.email);
           setAnnouncement("");
           window.setTimeout(() => setAnnouncement(labels.emailCopied), 30);
+          // Sighted users see it too (the palette has closed), then it clears.
+          window.setTimeout(() => setAnnouncement(""), 3200);
         } catch {
           window.location.assign(`mailto:${data.email}`);
         }
@@ -334,7 +336,7 @@ export function PaletteDialog({
         </div>
       </dialog>
 
-      <span role="status" className="sr-only">
+      <span role="status" className={announcement ? "palette-toast" : "sr-only"}>
         {announcement}
       </span>
     </>

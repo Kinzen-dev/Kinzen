@@ -157,3 +157,20 @@
     display: none !important;
   }
 }
+
+/* Confirmation after a palette action that closes the palette (Copy email). */
+.palette-toast {
+  position: fixed;
+  z-index: 60;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.625rem var(--inset-pill);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-lift);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}

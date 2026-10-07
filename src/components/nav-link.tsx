@@ -12,7 +12,14 @@ import type { ComponentProps } from "react";
 export function navTarget(pathname: string | null, href: string, elsewhere?: string): string {
   if (!elsewhere || !href.includes("#")) return href;
   const home = href.split("#")[0] || "/";
-  return pathname === home ? href : elsewhere;
+  return publicPath(pathname) === home ? href : elsewhere;
+}
+
+/** The address bar path: English pages are served from /en/... behind a rewrite, so a pathname
+ *  can carry an "/en" prefix that the public URL (and every header href) does not. */
+export function publicPath(pathname: string | null): string {
+  if (!pathname) return "/";
+  return pathname.replace(/^\/en(?=\/|$)/, "") || "/";
 }
 
 /** Header link that marks itself as the current page (CV, the /work index); anchors never do. */
@@ -23,6 +30,6 @@ export function NavLink({
 }: ComponentProps<typeof Link> & { href: string; elsewhere?: string }) {
   const pathname = usePathname();
   const target = navTarget(pathname, href, elsewhere);
-  const current = !target.includes("#") && pathname === target;
+  const current = !target.includes("#") && publicPath(pathname) === target;
   return <Link href={target} prefetch={prefetchFor(target)} aria-current={current ? "page" : undefined} {...rest} />;
 }
