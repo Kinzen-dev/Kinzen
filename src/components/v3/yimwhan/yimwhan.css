@@ -624,7 +624,7 @@
   position: relative;
   flex: 1;
   min-height: 0;
-  overflow: clip;
+  overflow: hidden; /* not clip: axe treats clip as visible */
   margin-inline: -1em;
 }
 .yw-row {
@@ -750,7 +750,7 @@
 .yw-feed-view {
   position: relative;
   min-height: 0;
-  overflow: clip;
+  overflow: hidden; /* not clip: axe treats clip as visible */
   /* Soft top edge once the transcript starts scrolling. */
   mask-image: linear-gradient(to bottom, transparent 0, #000 1em);
 }
@@ -1049,7 +1049,7 @@
 .yw-chat-view {
   position: relative;
   min-height: 0;
-  overflow: clip;
+  overflow: hidden; /* not clip: axe treats clip as visible */
   padding-inline: 0.65em;
 }
 .yw-chat {
