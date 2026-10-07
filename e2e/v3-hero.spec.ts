@@ -97,23 +97,90 @@ test.describe("hero v3", () => {
     }
   });
 
-  test("fact chips are rounded glass boxes with symmetric insets", async ({ page }) => {
+  test("fact chips are rounded glass boxes with symmetric insets, and repeat nothing from the strip", async ({
+    page,
+  }) => {
     await page.goto("/");
     const chips = hero(page).locator(".hero-chip");
     await expect(chips).toHaveCount(4);
     for (let i = 0; i < 4; i++) {
       const c = await chips.nth(i).evaluate((el) => {
         const cs = getComputedStyle(el);
-        return [
-          cs.paddingTop,
-          cs.paddingRight,
-          cs.paddingBottom,
-          cs.paddingLeft,
-          parseFloat(cs.borderTopLeftRadius),
-        ] as const;
+        return [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft, parseFloat(cs.borderTopLeftRadius)] as const;
       });
       expect(new Set(c.slice(0, 4)).size).toBe(1);
       expect(c[4]).toBeGreaterThan(8);
+    }
+    const text = (await hero(page).locator(".hero-facts").textContent()) ?? "";
+    expect(text).not.toMatch(/Years in production|Systems in this index/);
+  });
+
+  for (const width of [360, 1024, 1280, 1440]) {
+    test(`chip values never break inside a word at ${width}px (EN and TH)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      for (const path of ["/", "/th"]) {
+        await page.goto(path);
+        await page.evaluate(() => document.fonts.ready);
+        // Latin words must sit on one line; Thai may break only where the browser finds a word
+        // boundary, so only space-free Latin runs are checked.
+        const broken = await hero(page)
+          .locator(".hero-chip dd")
+          .evaluateAll((dds) =>
+            dds.flatMap((dd) => {
+              const out: string[] = [];
+              const walk = document.createTreeWalker(dd, NodeFilter.SHOW_TEXT);
+              for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+                const t = n as Text;
+                for (const m of t.data.matchAll(/[A-Za-z0-9:]+/g)) {
+                  const r = document.createRange();
+                  r.setStart(t, m.index!);
+                  r.setEnd(t, m.index! + m[0].length);
+                  if (new Set([...r.getClientRects()].map((x) => Math.round(x.top))).size > 1) out.push(m[0]);
+                }
+              }
+              return out;
+            }),
+          );
+        expect(broken, path).toEqual([]);
+      }
+    });
+  }
+
+  test("hidden phrases are fully invisible at rest, not a faint blurred copy", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await page.waitForTimeout(1_000);
+    const vis = await page
+      .locator("[data-hero-kinetic] .cycler-item:not([data-on])")
+      .evaluateAll((els) => els.map((el) => getComputedStyle(el).visibility));
+    expect(vis.length).toBe(3);
+    expect(new Set(vis)).toEqual(new Set(["hidden"]));
+  });
+
+  test("the beam runs on the pill's own edge, never outside it", async ({ page }) => {
+    await page.goto("/");
+    const inset = await hero(page)
+      .locator(".hero-cta-primary")
+      .evaluate((el) => {
+        const b = getComputedStyle(el, "::before");
+        return [b.top, b.right, b.bottom, b.left];
+      });
+    expect(inset).toEqual(["0px", "0px", "0px", "0px"]);
+  });
+
+  test("phone CTA row: the primary takes the full row, the two secondaries share the next", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    for (const path of ["/", "/th"]) {
+      await page.goto(path);
+      const boxes = await hero(page)
+        .locator(".hero-cta")
+        .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().toJSON() as DOMRect));
+      const row = hero(page).locator(".hero-ctas");
+      const rw = (await row.boundingBox())!.width;
+      expect(Math.abs(boxes[0].width - rw), path).toBeLessThan(1);
+      expect(Math.abs(boxes[1].top - boxes[2].top), path).toBeLessThan(1);
+      expect(boxes[1].top, path).toBeGreaterThan(boxes[0].bottom);
+      expect(Math.abs(boxes[1].width - boxes[2].width), path).toBeLessThan(1);
     }
   });
 

@@ -13,6 +13,13 @@ const en = {
   /** Phone set (below 48rem), index-aligned with `phrases`: every phrase fits one line at 360 px,
    *  so the cycler box is one line tall and short phrases never leave an empty band. */
   phrasesPhone: ["AI receptionists", "Shopify platforms", "agent workspaces", "developer tools"],
+  /** Fact chips beside the CTAs: who and how to work with, from profile.availability (the numbers
+   *  live in the strip below, so none repeats here). */
+  facts: {
+    works: { label: "Works", value: "Remote first" },
+    openTo: { label: "Open to", value: "Senior and lead roles" },
+    projects: { label: "Projects through", value: "Vesperwerk" },
+  },
 };
 export type HeroCopy = typeof en;
 const th: HeroCopy = {
@@ -26,5 +33,10 @@ const th: HeroCopy = {
     "เครื่องมือสำหรับนักพัฒนา",
   ],
   phrasesPhone: ["AI รับสายและตอบแชท", "แพลตฟอร์ม Shopify", "พื้นที่ทำงานของ AI agent", "เครื่องมือสำหรับนักพัฒนา"],
+  facts: {
+    works: { label: "ทำงาน", value: "ทางไกลเป็นหลัก" },
+    openTo: { label: "เปิดรับ", value: "ตำแหน่ง senior และ lead" },
+    projects: { label: "รับงานโปรเจกต์ผ่าน", value: "Vesperwerk" },
+  },
 };
 export const hero = { en, th };

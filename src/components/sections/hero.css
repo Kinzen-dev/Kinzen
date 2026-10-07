@@ -63,6 +63,21 @@
   padding-bottom: var(--u-gap);
   color: var(--ink);
 }
+/* Hidden phrases are fully gone at rest, not just at opacity 0: a blurred, composited copy could
+   still leave a faint smear beside the headline. visibility flips after the 520 ms fade-out and
+   at once when a phrase comes in. */
+.hero-kinetic .cycler-item:not([data-on]) {
+  visibility: hidden;
+  transition:
+    opacity 520ms var(--ease-out),
+    filter 520ms var(--ease-out),
+    translate 520ms var(--ease-out),
+    visibility 0s linear 520ms;
+}
+.hero-kinetic .cycler-item[data-on] {
+  visibility: visible;
+}
+
 /* Phone phrase set (one line each at 360 px) below 48rem, the full set above. */
 .kinetic-phone {
   display: none;
@@ -118,12 +133,27 @@
 .hero-cta-primary:hover {
   background: color-mix(in oklab, var(--gold) 86%, white);
 }
-/* The beam orbits just outside the pill (gold on gold would be invisible on its own edge). */
+/* The beam runs ON the pill's edge: a pale glint travelling round the gold border (gold light on
+   a gold fill would vanish, and a ring floating outside read as a misregistered print). Above the
+   fill (z-index 0 inside the pill's isolation), never over the label (the ring is 1.5px). */
 .hero-cta-primary.beam::before {
-  inset: -5px;
+  inset: 0;
+  z-index: 0;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--beam),
+    transparent 0 60%,
+    color-mix(in oklab, white 40%, transparent) 78%,
+    color-mix(in oklab, white 92%, var(--gold)) 88%,
+    transparent 93%
+  );
+}
+.hero-cta-primary > * {
+  position: relative;
+  z-index: 1;
 }
 .hero-cta-primary:focus-visible {
-  outline-offset: 8px;
+  outline-offset: 3px;
 }
 .hero-cta-primary svg {
   transition: translate var(--dur-2) var(--ease-out);
@@ -139,6 +169,26 @@
 .hero-cta-ghost:hover {
   border-color: color-mix(in oklab, var(--ink) 40%, transparent);
   background: color-mix(in oklab, var(--ink) 11%, transparent);
+}
+
+/* Phones: the primary action takes the full row, the two secondaries share the next one (no
+   orphaned pill at 360 in Thai). From 48rem: one row. */
+.hero-ctas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.hero-ctas .hero-cta {
+  justify-content: center;
+}
+.hero-ctas .hero-cta-primary {
+  grid-column: 1 / -1;
+}
+@media (min-width: 48rem) {
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
 /* ---------- glass fact chips ---------- */
@@ -182,11 +232,16 @@
   margin-top: 0.35em;
 }
 .hero-chip dd {
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
+  text-wrap: balance;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  overflow-wrap: anywhere;
+  /* Whole words only: a chip is sized so its longest word fits (min content width about 120px at
+     every breakpoint); never break inside one. */
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
 }
 /* Live state (gold's job): the Bangkok clock is running. */
 .hero-live {

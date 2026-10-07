@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Locale } from "@/content/schema";
-import { links, profile, projects, t, yearsInProduction } from "@/content";
+import { availability, links, profile, t } from "@/content";
 import { localePath, prefetchFor } from "@/lib/site-url";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { BangkokTime } from "../clock";
@@ -31,13 +31,17 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
   const copy = (v3 ?? getV3(locale)).hero;
   const email = links.find((l) => l.kind === "email");
   const linkedin = links.find((l) => l.kind === "linkedin");
-  const years = yearsInProduction(new Date(process.env.NEXT_PUBLIC_BUILD_DATE ?? "2026-10-06"));
-
-  const facts = [
+  // Who and how to work with (profile.availability); the numbers are the strip's job.
+  const f = copy.facts;
+  const facts: { label: string; value: ReactNode; live?: boolean }[] = [
     { label: dict.facts.bangkokTime, value: <BangkokTime locale={locale} />, live: true },
-    { label: dict.facts.yearsInProduction, value: <span className="tabular">{years}</span> },
-    { label: dict.facts.systems, value: <span className="tabular">{projects.length}</span> },
-    { label: dict.facts.founder, value: "Vesperwerk" },
+    ...(availability
+      ? [
+          { label: f.works.label, value: nobr(f.works.value) },
+          { label: f.openTo.label, value: nobr(f.openTo.value) },
+        ]
+      : []),
+    { label: f.projects.label, value: f.projects.value },
   ];
 
   return (
@@ -83,9 +87,9 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
               })}
             />
           </div>
-          <div className="self-end md:col-span-12 lg:col-span-6">
+          <div className="self-end md:col-span-12 xl:col-span-5">
             <p className="max-w-[46ch] text-ink-2 md:text-lg">{nobr(t(profile.heroLine, locale))}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="hero-ctas mt-7">
               {email ? (
                 <a href={email.href} className="hero-cta hero-cta-primary beam">
                   {nobr(dict.hero.ctaEmail)}
@@ -116,7 +120,7 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
             </div>
           </div>
 
-          <dl className="hero-facts self-end md:col-span-12 lg:col-span-6">
+          <dl className="hero-facts self-end md:col-span-12 xl:col-span-7">
             {facts.map((fact) => (
               <div key={fact.label} className="hero-chip">
                 <dt className="readout">
