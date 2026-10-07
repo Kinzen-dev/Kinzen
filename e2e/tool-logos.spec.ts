@@ -1,0 +1,79 @@
+import { expect, test } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+// Tool logos: official brand marks on plain chips, decorative next to real-text names.
+
+test.describe("tool logos", () => {
+  test("marquee chips are plain surface chips with a decorative mark or a deliberate text-only name", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const chips = page.locator("#skills .marquee-row:not([aria-hidden]) .tool-chip");
+    expect(await chips.count()).toBeGreaterThan(30);
+    const ts = chips.filter({ hasText: /^TypeScript$/ });
+    await expect(ts.locator("svg.tool-mark")).toHaveAttribute("aria-hidden", "true");
+    await expect(ts.locator("svg.tool-mark use")).toHaveAttribute("href", /\/tool-logos\.svg\?v=\w+#typescript$/);
+    await expect(ts.locator("svg.tool-mark")).toHaveAttribute("fill", "#3178C6");
+    // Black marks follow the text colour so they read in the dark theme.
+    await expect(chips.filter({ hasText: /^Next\.js$/ }).locator("svg")).toHaveAttribute("fill", "currentColor");
+    // Text-only on purpose.
+    for (const name of ["Azure", "Codex", "Playwright", "Tauri", "Twilio Media Streams"]) {
+      await expect(chips.filter({ hasText: new RegExp(`^${name}$`) }).locator("svg")).toHaveCount(0);
+    }
+    // No pastel chip fills any more: every chip sits on the plain surface.
+    const grounds = await chips.evaluateAll((els) => [...new Set(els.map((e) => getComputedStyle(e).backgroundColor))]);
+    expect(grounds).toHaveLength(1);
+  });
+
+  test("the sprite serves every mark the page references", async ({ page, request }) => {
+    await page.goto("/");
+    const hrefs = await page
+      .locator("#skills svg.tool-mark use")
+      .evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute("href")!))]);
+    const res = await request.get(hrefs[0].split("#")[0]);
+    expect(res.ok()).toBe(true);
+    expect(res.headers()["content-type"]).toContain("image/svg+xml");
+    const sprite = await res.text();
+    for (const href of hrefs) expect(sprite, href).toContain(`<symbol id="${href.split("#")[1]}"`);
+  });
+
+  test("group cards list each tool as mark + name; the names stay real text", async ({ page }) => {
+    await page.goto("/");
+    const backend = page.locator("#skills dl > div").first();
+    await expect(backend.locator("dd li")).toHaveCount(8);
+    await expect(backend.locator("dd")).toContainText("TypeScript");
+    await expect(backend.locator("dd li").filter({ hasText: "Hexagonal" }).locator("svg")).toHaveClass(
+      /tool-mark-practice/,
+    );
+    for (const svg of await page.locator("#skills dd svg").all())
+      await expect(svg).toHaveAttribute("aria-hidden", "true");
+  });
+
+  test("case page stack pills carry the marks", async ({ page }) => {
+    await page.goto("/work/yimwhan-ai");
+    const pills = page.locator(".pj-pill");
+    await expect(pills.filter({ hasText: "Fly.io" }).locator("svg.tool-mark")).toHaveAttribute("data-badge", "dark");
+    await expect(pills.filter({ hasText: "Litestream" }).locator("svg")).toHaveCount(0);
+  });
+
+  for (const [route, note] of [
+    ["/", "Logos are trademarks of their respective owners."],
+    ["/th", "โลโก้ทั้งหมดเป็นเครื่องหมายการค้าของเจ้าของแต่ละราย"],
+  ]) {
+    test(`${route}: footer carries the trademark note`, async ({ page }) => {
+      await page.goto(route);
+      await expect(page.getByRole("contentinfo")).toContainText(note);
+    });
+  }
+
+  for (const theme of ["light", "dark"]) {
+    test(`axe is clean on the tools section and a case page (${theme})`, async ({ page }) => {
+      await page.addInitScript((t) => localStorage.setItem("theme", t), theme);
+      for (const route of ["/", "/work/yimwhan-ai"]) {
+        await page.goto(route);
+        const results = await new AxeBuilder({ page }).include(route === "/" ? "#skills" : ".pj-pills").analyze();
+        expect(results.violations, route).toEqual([]);
+      }
+    });
+  }
+});

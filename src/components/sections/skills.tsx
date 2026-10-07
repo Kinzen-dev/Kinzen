@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import type { Locale } from "@/content/schema";
+import type { Locale, SkillGroup } from "@/content/schema";
 import { skillItems, skills, t } from "@/content";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { getV3, type V3Copy } from "@/i18n/v3";
@@ -8,9 +8,10 @@ import { MarqueeGroup } from "@/motion/marquee-group";
 import { SectionHeader } from "./section-header";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
+import { ToolMark } from "@/components/tools/tool-mark";
 import "../v3/tools/tools.css";
 
-/** Chip colour per skill group (area pastels; "plain" = paper with a rule). */
+/** Dot colour before each group title (area pastels; "plain" = paper with a rule). */
 const GROUP_TINT: Record<string, string> = {
   backend: "pastel-tools",
   frontend: "pastel-games",
@@ -30,9 +31,17 @@ const ROWS = [
   ["ai", "frontend", "testing"],
 ];
 
-/** Round-robin through the groups so neighbouring chips change colour. */
-function interleave(lists: { tint: string; label: string }[][]) {
-  const out: { tint: string; label: string }[] = [];
+type Tool = { key: string; label: string };
+
+/** A group's tools: the English name picks the mark, the label is what the reader sees. */
+function tools(group: SkillGroup, locale: Locale): Tool[] {
+  const labels = skillItems(group, locale);
+  return group.items.map((item, i) => ({ key: typeof item === "string" ? item : item.en, label: labels[i] }));
+}
+
+/** Round-robin through the groups so neighbouring chips come from different jobs. */
+function interleave(lists: Tool[][]) {
+  const out: Tool[] = [];
   for (let i = 0; i < Math.max(...lists.map((l) => l.length)); i++) {
     for (const l of lists) if (l[i]) out.push(l[i]);
   }
@@ -40,36 +49,42 @@ function interleave(lists: { tint: string; label: string }[][]) {
 }
 
 /**
- * A comma-separated stack list that only breaks between items or at spaces: short items stay
- * whole, and a hyphenated word ("speech-to-text") never breaks at its hyphens.
+ * A tool's name that only breaks at spaces: short names stay whole, and a hyphenated word
+ * ("speech-to-text", "event-driven") never breaks at its hyphens.
  */
-function stackList(items: string[]) {
-  return items.map((item, i) => (
-    <Fragment key={item}>
-      {i > 0 ? ", " : null}
-      {item.length <= 20 ? (
-        <span className="whitespace-nowrap">{nobr(item)}</span>
+function toolLabel(label: string) {
+  if (label.length <= 20) return <span className="whitespace-nowrap">{nobr(label)}</span>;
+  return label
+    .split(/(\S*-\S*)/)
+    .filter(Boolean)
+    .map((part, j) =>
+      part.includes("-") ? (
+        <span key={j} className="whitespace-nowrap">
+          {part}
+        </span>
       ) : (
-        item
-          .split(/(\S*-\S*)/)
-          .filter(Boolean)
-          .map((part, j) =>
-            part.includes("-") ? (
-              <span key={j} className="whitespace-nowrap">
-                {part}
-              </span>
-            ) : (
-              <Fragment key={j}>{nobr(part)}</Fragment>
-            ),
-          )
-      )}
-    </Fragment>
-  ));
+        <Fragment key={j}>{nobr(part)}</Fragment>
+      ),
+    );
+}
+
+/** A group's tools as a wrapped list of mark + name. */
+function toolList(items: Tool[]) {
+  return (
+    <ul className="tools-list">
+      {items.map((item) => (
+        <li key={item.key}>
+          <ToolMark name={item.key} />
+          <span>{toolLabel(item.label)}</span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 /**
- * Tools (v3): two marquee rows of the stack in pastel chips, running in opposite directions,
- * then the same stack grouped by job in compact cards. The marquees are decoration (the cards
+ * Tools (v3): two marquee rows of the stack as brand-mark chips on the plain surface, running in
+ * opposite directions, then the same stack grouped by job in compact cards. The marquees are decoration (the cards
  * carry the content for assistive tech) with a visible pause button; under reduced motion they
  * become wrapped, still chips.
  */
@@ -80,7 +95,7 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
       ids
         .map((id) => byId.get(id))
         .filter((g) => g !== undefined)
-        .map((g) => skillItems(g, locale).map((label) => ({ tint: GROUP_TINT[g.id] ?? "plain", label }))),
+        .map((g) => tools(g, locale)),
     ),
   );
 
@@ -100,9 +115,10 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
             reverse={i % 2 === 1}
             seconds={i % 2 === 1 ? 62 : 54}
             className="tools-marquee"
-            items={row.map((chip) => (
-              <span key={chip.label} className={`tool-chip ${chip.tint === "plain" ? "tool-chip-plain" : chip.tint}`}>
-                {nobr(chip.label)}
+            items={row.map((tool) => (
+              <span key={tool.key} className="tool-chip">
+                <ToolMark name={tool.key} />
+                <span>{toolLabel(tool.label)}</span>
               </span>
             ))}
           />
@@ -116,10 +132,10 @@ export function Skills({ locale, dict, v3 = getV3(locale) }: { locale: Locale; d
             return (
               <div key={group.id} className={`tools-card ${tint === "plain" ? "" : tint}`}>
                 <dt className="flex items-center gap-2.5 font-semibold tracking-[-0.01em]">
-                  <span aria-hidden="true" className={`tools-swatch ${tint === "plain" ? "tool-chip-plain" : ""}`} />
+                  <span aria-hidden="true" className={`tools-swatch ${tint === "plain" ? "tools-swatch-plain" : ""}`} />
                   {nobr(t(group.label, locale))}
                 </dt>
-                <dd className="mt-3 text-ink-2">{stackList(skillItems(group, locale))}</dd>
+                <dd className="mt-3.5 text-ink-2">{toolList(tools(group, locale))}</dd>
               </div>
             );
           })}

@@ -128,7 +128,11 @@ const en = {
     body: "The link may be old, or the page moved when this site was rebuilt.",
     home: "Back to the start",
   },
-  footer: { rights: "Kittipong Khonthong", updated: "Content updated" },
+  footer: {
+    rights: "Kittipong Khonthong",
+    updated: "Content updated",
+    trademarks: "Logos are trademarks of their respective owners.",
+  },
   work: {
     filterLabel: "Filter by category",
     showing: "Showing {shown} of {total} projects",
@@ -321,7 +325,11 @@ const th: Dictionary = {
     body: "ลิงก์อาจเก่าไปแล้ว หรือหน้านี้ถูกย้ายตอนผมทำเว็บใหม่",
     home: "กลับหน้าแรก",
   },
-  footer: { rights: "กฤติพงษ์ ก้อนทอง", updated: "อัปเดตเนื้อหาล่าสุด" },
+  footer: {
+    rights: "กฤติพงษ์ ก้อนทอง",
+    updated: "อัปเดตเนื้อหาล่าสุด",
+    trademarks: "โลโก้ทั้งหมดเป็นเครื่องหมายการค้าของเจ้าของแต่ละราย",
+  },
   work: {
     filterLabel: "กรองตามประเภทผลงาน",
     showing: "แสดง {shown} จาก {total} ผลงาน",
