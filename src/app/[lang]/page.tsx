@@ -5,6 +5,7 @@ import { Hero } from "@/components/sections/hero";
 import { Experience } from "@/components/sections/experience";
 import { Practice } from "@/components/sections/practice";
 import { Skills } from "@/components/sections/skills";
+import { Play } from "@/components/sections/interactive/play";
 import { About } from "@/components/sections/about";
 import { Contact } from "@/components/sections/contact";
 import { JsonLd, profilePageJsonLd } from "@/lib/json-ld";
@@ -53,6 +54,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <Experience locale={locale} dict={dict} />
       <Practice locale={locale} dict={dict} v3={v3} />
       <Skills locale={locale} dict={dict} v3={v3} />
+      <Play locale={locale} v3={v3} />
       <About locale={locale} dict={dict} offClockArt={offClockArt} />
       <Contact locale={locale} dict={dict} v3={v3} />
       <JsonLd data={profilePageJsonLd(locale, dict.meta.title)} />

@@ -1,0 +1,469 @@
+/* Night desk (ported from the lab): the stage fills the section's scene pane. */
+.nd-stage {
+  position: relative;
+  height: 100%;
+  overflow: clip;
+  background: #03040a;
+  isolation: isolate;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+.nd-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: pan-y;
+  user-select: none;
+}
+.nd-stage[data-mode="desk"] .nd-canvas {
+  touch-action: none;
+}
+
+/* HUD: Bangkok clock (top left), sound (top right). */
+.nd-hud {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: clamp(0.875rem, 2vw, 1.5rem);
+  pointer-events: none;
+}
+.nd-hud > * {
+  pointer-events: auto;
+}
+.nd-clock {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.25rem;
+  white-space: nowrap;
+  color: oklch(0.94 0.012 85);
+  font-size: clamp(0.95rem, 0.85rem + 0.4vw, 1.2rem);
+  text-shadow: 0 1px 12px oklch(0 0 0 / 0.6);
+}
+.nd-clock b {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.nd-clock span {
+  color: oklch(0.8 0.012 80);
+  font-weight: 400;
+}
+.nd-clock .nd-phase {
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  color: oklch(0.76 0.115 80);
+  text-transform: lowercase;
+}
+:lang(th) .nd-clock .nd-phase {
+  font-family: var(--font-sans);
+}
+.nd-clock svg {
+  align-self: center;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.55;
+  transition: opacity var(--dur-2);
+}
+.nd-clock:hover svg,
+.nd-clock:focus-visible svg,
+.nd-clock svg[data-lapse] {
+  opacity: 1;
+}
+.nd-clock svg[data-lapse] {
+  animation: nd-spin 1.2s linear infinite;
+  color: oklch(0.76 0.115 80);
+}
+@keyframes nd-spin {
+  to {
+    rotate: -360deg;
+  }
+}
+
+/* Hotspots: a gold dot that names itself on hover or focus (always named on phones). */
+.nd-spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+.nd-stage:not([data-ready]) .nd-spot,
+.nd-spot[data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.nd-spot i {
+  position: absolute;
+  left: -1.375rem;
+  top: -1.375rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+}
+.nd-spot i::before,
+.nd-spot i::after {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  width: 0.625rem;
+  height: 0.625rem;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: oklch(0.8 0.12 82);
+  box-shadow: 0 0 12px oklch(0.8 0.12 82 / 0.8);
+}
+.nd-spot i::after {
+  background: transparent;
+  box-shadow: none;
+  border: 1.5px solid oklch(0.8 0.12 82 / 0.8);
+  animation: nd-pulse 2.6s var(--ease-out) infinite;
+}
+@keyframes nd-pulse {
+  0% {
+    width: 0.625rem;
+    height: 0.625rem;
+    opacity: 1;
+  }
+  70%,
+  100% {
+    width: 2.25rem;
+    height: 2.25rem;
+    opacity: 0;
+  }
+}
+.nd-spot span {
+  position: absolute;
+  left: 1rem;
+  top: -0.8rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: oklch(0.12 0.02 266 / 0.8);
+  border: 1px solid oklch(0.8 0.12 82 / 0.45);
+  color: oklch(0.94 0.012 85);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  translate: -0.25rem 0;
+  transition:
+    opacity var(--dur-2),
+    translate var(--dur-2) var(--ease-out);
+  pointer-events: none;
+}
+.nd-spot:hover span,
+.nd-spot:focus-visible span {
+  opacity: 1;
+  translate: 0 0;
+}
+.nd-spot:focus-visible {
+  outline: none;
+}
+.nd-spot:focus-visible i {
+  outline: 2px solid oklch(0.8 0.12 82);
+  outline-offset: 2px;
+}
+/* Desktop: the dots stay quiet until the visitor is in the scene; the objects themselves are the targets. */
+.nd-stage[data-mode="desk"] .nd-spot i::before {
+  opacity: 0.75;
+}
+.nd-stage[data-mode="desk"][data-focus] .nd-spot {
+  opacity: 0;
+  pointer-events: none;
+}
+.nd-stage[data-mode="phone"] .nd-spot span,
+.nd-stage[data-mode="still"] .nd-spot span {
+  opacity: 1;
+  translate: 0 0;
+  left: -50%;
+  top: 0.95rem;
+  translate: -50% 0;
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.5rem;
+}
+
+/* The phone's ring marks. */
+.nd-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.nd-ring svg {
+  position: absolute;
+  width: 5.5rem;
+  left: -2.75rem;
+  top: -4.4rem;
+  fill: none;
+  stroke: oklch(0.82 0.12 82);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0;
+  scale: 0.85;
+  transition:
+    opacity 120ms,
+    scale 160ms var(--ease-out);
+  filter: drop-shadow(0 0 6px oklch(0.8 0.12 82 / 0.7));
+}
+.nd-ring[data-on="true"] svg {
+  opacity: 1;
+  scale: 1.05;
+}
+
+.nd-back {
+  position: absolute;
+  z-index: 3;
+  left: clamp(0.875rem, 2vw, 1.5rem);
+  bottom: clamp(0.875rem, 2vw, 1.5rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: 0.875rem 1.125rem;
+  border-radius: 999px;
+  border: 1px solid oklch(0.94 0.012 85 / 0.25);
+  background: oklch(0.12 0.02 266 / 0.7);
+  backdrop-filter: blur(10px);
+  color: oklch(0.94 0.012 85);
+  font-size: 0.875rem;
+  animation: nd-in var(--dur-3) var(--ease-out);
+}
+.nd-back svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@keyframes nd-in {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+}
+
+.nd-caption {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: clamp(0.875rem, 2vw, 1.5rem);
+  translate: -50% 0;
+  width: min(36rem, calc(100% - 2rem));
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  background: oklch(0.12 0.02 266 / 0.78);
+  border: 1px solid oklch(0.8 0.12 82 / 0.35);
+  backdrop-filter: blur(12px);
+  color: oklch(0.94 0.012 85);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-3);
+}
+.nd-caption[data-on] {
+  opacity: 1;
+}
+.nd-caption-who {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: oklch(0.8 0.12 82);
+}
+:lang(th) .nd-caption-who {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  font-size: 0.75rem;
+}
+@media (min-width: 48rem) {
+  .nd-caption {
+    width: min(30rem, calc(100% - 22rem));
+  }
+}
+
+.nd-hint {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: clamp(0.875rem, 2vw, 1.5rem);
+  translate: -50% 0;
+  padding: 0.375rem 0.875rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: oklch(0.94 0.012 85 / 0.7);
+  background: oklch(0.12 0.02 266 / 0.45);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity var(--dur-4);
+}
+:lang(th) .nd-hint {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+.nd-hint[data-off] {
+  opacity: 0;
+}
+.nd-fail {
+  position: absolute;
+  inset: auto 1rem 1rem;
+  color: oklch(0.8 0.012 80);
+}
+
+/* Monitor sheet (phones and reduced motion). */
+.nd-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 1rem;
+  padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(1rem + env(safe-area-inset-bottom));
+  background: #05070d;
+  color: oklch(0.94 0.012 85);
+  animation: nd-sheet-in var(--dur-3) var(--ease-out);
+}
+@keyframes nd-sheet-in {
+  from {
+    opacity: 0;
+    translate: 0 1.5rem;
+  }
+}
+.nd-sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.nd-sheet-head h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.nd-sheet-head p {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: oklch(0.78 0.012 80);
+}
+.nd-sheet-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  border: 1px solid oklch(0.94 0.012 85 / 0.25);
+}
+.nd-sheet-close svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.nd-panes {
+  display: grid;
+  gap: 0.625rem;
+  grid-auto-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+@media (min-width: 48rem) {
+  .nd-panes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.nd-pane {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  border-radius: 0.875rem;
+  border: 1px solid oklch(0.94 0.012 85 / 0.14);
+  background: #0b101c;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  overflow: hidden;
+  transition: border-color var(--dur-3);
+}
+.nd-pane[data-busy] {
+  border-color: oklch(0.8 0.12 82 / 0.7);
+}
+.nd-pane header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid oklch(0.94 0.012 85 / 0.08);
+  font-weight: 600;
+}
+.nd-pane header i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: oklch(0.94 0.012 85 / 0.35);
+}
+.nd-pane[data-busy] header i {
+  background: oklch(0.8 0.12 82);
+}
+.nd-pane ol {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  overflow: hidden;
+}
+.nd-pane li {
+  color: oklch(0.94 0.012 85 / 0.8);
+  animation: nd-type var(--dur-3) steps(12);
+}
+.nd-pane li[data-kind="cmd"] {
+  color: oklch(0.96 0.012 85);
+}
+.nd-pane li[data-kind="dim"] {
+  color: oklch(0.94 0.012 85 / 0.45);
+}
+.nd-pane li[data-kind="ok"] {
+  color: #9fd3a8;
+}
+.nd-pane li[data-kind="hand"] {
+  color: oklch(0.8 0.12 82);
+}
+@keyframes nd-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nd-spot i::after,
+  .nd-clock svg[data-lapse],
+  .nd-pane li,
+  .nd-sheet,
+  .nd-back {
+    animation: none;
+  }
+}
