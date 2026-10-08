@@ -10,7 +10,7 @@ import "./gold-numerals.css";
 /** Figures sit left of the captions on wide screens, above them on narrow ones (matches the CSS). */
 function layout(cw: number, ch: number): Layout {
   if (cw >= 900 && cw / ch > 1.15) return { zone: { x0: 0.06, y0: 0.24, x1: 0.55, y1: 0.8 } };
-  return { zone: { x0: 0.07, y0: 0.17, x1: 0.93, y1: 0.47 } };
+  return { zone: { x0: 0.07, y0: 0.17, x1: 0.93, y1: 0.51 } };
 }
 
 /**
@@ -37,11 +37,6 @@ export default function GoldNumerals({ locale }: LabProps) {
     if (!section || !pin || !canvas) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const coarse = window.matchMedia("(pointer: coarse)").matches;
-    setTouch(coarse);
-    if (reduced) {
-      setMode("still");
-      return;
-    }
     let dead = false;
     let stage: ReturnType<typeof createNumeralStage> = null;
     let raf = 0;
@@ -67,6 +62,11 @@ export default function GoldNumerals({ locale }: LabProps) {
       .catch(() => undefined)
       .then(() => {
         if (dead) return;
+        setTouch(coarse);
+        if (reduced) {
+          setMode("still");
+          return;
+        }
         stage = createNumeralStage(canvas, pin, {
           figures: c.stats.map((s) => s.figure),
           font: family,

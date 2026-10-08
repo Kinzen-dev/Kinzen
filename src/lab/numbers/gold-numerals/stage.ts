@@ -15,8 +15,26 @@ import type { Targets } from "@/fx/targets/types";
 
 /** Per-device budget: phones and small machines get fewer particles and one bloom level. */
 const TIERS: Record<"full" | "lite", TierConfig> = {
-  full: { side: 448, maxDpr: 2, pxBudget: 2_600_000, fps: 60, bloomLevels: 2, aberration: 0, pointer: true, maxShift: 0 },
-  lite: { side: 320, maxDpr: 2, pxBudget: 1_300_000, fps: 60, bloomLevels: 1, aberration: 0, pointer: false, maxShift: 0 },
+  full: {
+    side: 448,
+    maxDpr: 2,
+    pxBudget: 2_600_000,
+    fps: 60,
+    bloomLevels: 2,
+    aberration: 0,
+    pointer: true,
+    maxShift: 0,
+  },
+  lite: {
+    side: 320,
+    maxDpr: 2,
+    pxBudget: 1_300_000,
+    fps: 60,
+    bloomLevels: 1,
+    aberration: 0,
+    pointer: false,
+    maxShift: 0,
+  },
 };
 
 /** While dust is in flight: loose spring, curl turbulence, so it streams. Then it settles. */
@@ -157,7 +175,9 @@ export function createNumeralStage(
    * that fits every figure (narrow figures grow, the stream breathes; the set still reads as one).
    */
   function fitSize(zone: Layout["zone"], i: number): number {
-    const c = new OffscreenCanvas(1, 1).getContext("2d") as OffscreenCanvasRenderingContext2D & { letterSpacing?: string };
+    const c = new OffscreenCanvas(1, 1).getContext("2d") as OffscreenCanvasRenderingContext2D & {
+      letterSpacing?: string;
+    };
     c.font = `600 100px ${opts.font}`;
     if ("letterSpacing" in c) c.letterSpacing = "-4px";
     const zw = (zone.x1 - zone.x0) * cw;
@@ -185,7 +205,9 @@ export function createNumeralStage(
     const order = new Uint32Array(G);
     for (let j = 0; j < G; j++) {
       const useEdge = ink.edge.length > 0 && Math.random() < EDGE;
-      const p = useEdge ? ink.ink[ink.edge[(Math.random() * ink.edge.length) | 0]] : ink.ink[(Math.random() * ink.ink.length) | 0];
+      const p = useEdge
+        ? ink.ink[ink.edge[(Math.random() * ink.edge.length) | 0]]
+        : ink.ink[(Math.random() * ink.ink.length) | 0];
       const px = p % ink.w;
       gx[j] = (px + Math.random()) * inv;
       gy[j] = ((p - px) / ink.w + Math.random()) * inv;
@@ -219,7 +241,7 @@ export function createNumeralStage(
       pos[o + 2] = gauss() * 0.5;
       pos[o + 3] = 0;
     }
-    return { pos, glyphArea: (ink.ink.length * inv * inv) || 1, fs };
+    return { pos, glyphArea: ink.ink.length * inv * inv || 1, fs };
   }
 
   const pointCss = (fs: number) => Math.min(2.3, Math.max(1.2, fs * 0.0052));

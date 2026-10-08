@@ -1,0 +1,317 @@
+/* Lab: editorial numerals (preview only). The page scene: paper in the light theme, the warm
+   dark ground in the dark theme. Figures bleed off alternate edges; captions stay slim. */
+.ed {
+  --ed-h: clamp(20rem, 68svh, 44rem);
+  padding-top: calc(var(--header-h) + clamp(1.5rem, 4vw, 3rem));
+  padding-bottom: clamp(5rem, 10vw, 9rem);
+  overflow-x: clip;
+}
+.ed-head {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.ed-kicker {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+:lang(th) .ed-kicker {
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
+  font-size: var(--text-xs);
+}
+.ed-head-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* ---- a spread ---- */
+.ed-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 1.5rem;
+  min-height: var(--ed-h);
+  margin-top: clamp(2.5rem, 7vw, 6.5rem);
+  padding-inline: var(--gutter);
+  max-width: 96rem;
+  margin-inline: auto;
+}
+.ed-row:first-of-type {
+  margin-top: clamp(1.5rem, 4vw, 3rem);
+}
+.ed-stage {
+  position: absolute;
+  /* The canvas spans the viewport width, so the figure can meet the real screen edge. */
+  inset: 0 calc(50% - 50vw);
+  pointer-events: none;
+  translate: 0 var(--ed-fig-y, 0px);
+  will-change: translate;
+}
+.ed-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ed-fig {
+  display: none;
+}
+.ed-cap {
+  /* Beside the figure (--ed-cap-at, measured from the drawn ink), bottom on its baseline. */
+  position: absolute;
+  bottom: calc(var(--ed-h) * 0.03);
+  left: var(--ed-cap-at, 58%);
+  width: min(30rem, 40%);
+  translate: 0 var(--ed-cap-y, 0px);
+}
+.ed-row[data-side="right"] .ed-cap {
+  left: auto;
+  right: var(--ed-cap-at, 58%);
+}
+
+.ed-idx {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.ed-idx::after {
+  content: "";
+  width: 3rem;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.ed-label {
+  margin-top: 1rem;
+  font-size: clamp(1.5rem, 1rem + 1.25vw, 2.375rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  color: var(--ink);
+}
+:lang(th) .ed-label {
+  line-height: 1.38;
+  letter-spacing: 0;
+}
+.ed-second {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.875rem;
+  margin-top: 1.25rem;
+}
+.ed-second-fig {
+  font-size: clamp(2.25rem, 1.6rem + 1.4vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--gold);
+}
+.ed-second-label {
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.ed-outcome {
+  margin-top: 0.875rem;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.ed-source {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.ed-source span {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  translate: 0 0.05em;
+}
+:lang(th) .ed-source span {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  font-size: var(--text-xs);
+}
+
+/* ---- how it was measured (the 500/37 spread): hover the spread, or its button ---- */
+.ed-measure {
+  margin-top: 0.75rem;
+}
+.ed-measure-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color var(--dur-2) var(--ease-out);
+}
+.ed-measure-btn:hover,
+.ed-row:hover .ed-measure-btn {
+  text-decoration-color: var(--gold);
+}
+.ed-measure-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+.ed-measure-btn i {
+  position: relative;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+}
+.ed-measure-btn i::before,
+.ed-measure-btn i::after {
+  content: "";
+  position: absolute;
+  inset: 50% 25% auto;
+  height: 1px;
+  translate: 0 -50%;
+  background: var(--gold);
+  transition: rotate var(--dur-3) var(--ease-out);
+}
+.ed-measure-btn i::after {
+  rotate: 90deg;
+}
+.ed-row[data-open] .ed-measure-btn i::after {
+  rotate: 0deg;
+}
+.ed-note {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--dur-4) var(--ease-out),
+    opacity var(--dur-3) var(--ease-out);
+}
+.ed-note > div {
+  overflow: hidden;
+}
+.ed-note p {
+  margin-top: 0.25rem;
+  padding: var(--inset-compact);
+  border-left: 2px solid var(--gold);
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.ed-row[data-open] .ed-note {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ed-row[data-key="yimwhan"]:hover .ed-note {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+/* Captions arrive a beat after the ink starts to bleed in. */
+@media (prefers-reduced-motion: no-preference) {
+  .ed[data-mode="ink"] .ed-cap > * {
+    opacity: 0;
+    translate: 0 1rem;
+    transition:
+      opacity 900ms var(--ease-out),
+      translate 900ms var(--ease-out);
+  }
+  .ed[data-mode="ink"] .ed-row[data-in] .ed-cap > * {
+    opacity: 1;
+    translate: 0 0;
+  }
+  .ed-row[data-in] .ed-cap > :nth-child(1) {
+    transition-delay: 350ms;
+  }
+  .ed-row[data-in] .ed-cap > :nth-child(2) {
+    transition-delay: 450ms;
+  }
+  .ed-row[data-in] .ed-cap > :nth-child(3) {
+    transition-delay: 550ms;
+  }
+  .ed-row[data-in] .ed-cap > :nth-child(n + 4) {
+    transition-delay: 650ms;
+  }
+}
+
+/* ---- no WebGL2: the figures in gold type, cropped the same way ---- */
+.ed[data-mode="type"] .ed-canvas {
+  display: none;
+}
+.ed[data-mode="type"] .ed-fig {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: -0.08em;
+  font-size: calc(var(--ed-h) * 1.25);
+  font-weight: 600;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  background-image: linear-gradient(160deg, var(--gold), oklch(0.68 0.11 78) 45%, var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.ed[data-mode="type"] .ed-row[data-side="right"] .ed-fig {
+  left: auto;
+  right: -0.08em;
+}
+
+/* ---- phones: the figure on top, cropped at its edge; the caption below ---- */
+@media (max-width: 699px) {
+  .ed {
+    --ed-h: min(78vw, 22rem);
+  }
+  .ed-row {
+    display: block;
+    min-height: 0;
+    padding-top: var(--ed-h);
+  }
+  .ed-stage {
+    inset: 0 calc(50% - 50vw) auto;
+    height: var(--ed-h);
+  }
+  .ed-cap,
+  .ed-row[data-side="right"] .ed-cap {
+    position: relative;
+    inset: auto;
+    width: auto;
+    margin-top: 1rem;
+  }
+  .ed-label {
+    font-size: clamp(1.375rem, 1rem + 2vw, 1.75rem);
+  }
+  .ed[data-mode="type"] .ed-fig {
+    font-size: calc(var(--ed-h) * 1.1);
+  }
+}

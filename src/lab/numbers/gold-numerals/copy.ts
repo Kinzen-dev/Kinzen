@@ -25,6 +25,7 @@ type Copy = {
   hintTouch: string;
   measuredBtn: string;
   measured: string;
+  sourceLabel: string;
   stats: Stat[];
 };
 
@@ -33,6 +34,7 @@ const en: Copy = {
   hint: "Scroll to move the dust; the cursor stirs it.",
   hintTouch: "Scroll to move the dust; tap to stir it.",
   measuredBtn: "How it was measured",
+  sourceLabel: "Source",
   measured:
     "A July 2026 test sent 500 real customer messages through the LINE reply pipeline. Deterministic code checks caught 37 rule violations in the raw model drafts, mostly overstated claims, and every final reply passed those checks in this test set.",
   stats: [
@@ -77,6 +79,7 @@ const th: Copy = {
   hint: "เลื่อนหน้าเพื่อให้ผงทองไหลไปตัวเลขถัดไป ขยับเมาส์เพื่อกวน",
   hintTouch: "เลื่อนหน้าเพื่อให้ผงทองไหลไปตัวเลขถัดไป แตะเพื่อกวน",
   measuredBtn: "วัดผลอย่างไร",
+  sourceLabel: "ที่มา",
   measured:
     "ทดสอบเมื่อกรกฎาคม 2026 โดยส่งข้อความจริงจากลูกค้า 500 ข้อความเข้าเส้นทางตอบกลับของ LINE ชุดตรวจในโค้ดแบบ deterministic (ตรวจตามกฎที่กำหนดไว้) จับร่างคำตอบจากโมเดลที่ผิดกฎได้ 37 ครั้ง ส่วนใหญ่เป็นคำอวดอ้างเกินจริง และในการทดสอบนี้ คำตอบสุดท้ายทุกข้อความผ่านการตรวจทั้งหมด",
   stats: [

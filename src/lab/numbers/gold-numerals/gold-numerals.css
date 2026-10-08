@@ -1,6 +1,6 @@
 /* Lab: gold numerals (preview only). A pinned navy scene; the dust draws the figure, the DOM
    carries every word. Zones match layout() in index.tsx: figure left (6% to 55%) and captions
-   right on wide screens; figure on top (17% to 47%) and captions below on narrow ones. */
+   right on wide screens; figure on top (17% to 51%) and captions below on narrow ones. */
 .gn {
   position: relative;
   /* One viewport pinned, plus 70svh of scroll per further stat. */
@@ -238,7 +238,7 @@
 /* ---- narrow: figure on top, captions below ---- */
 @media (max-width: 899px), (max-aspect-ratio: 23/20) {
   .gn-list {
-    inset: 52% var(--gutter) auto var(--gutter);
+    inset: 56% var(--gutter) auto var(--gutter);
     align-items: start;
   }
   .gn-item {
@@ -282,7 +282,7 @@
 .gn[data-mode="still"] .gn-list {
   position: static;
   margin-top: clamp(1.5rem, 4vw, 3rem);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  grid-template-columns: repeat(var(--gn-cols, 1), minmax(0, 1fr));
   align-items: start;
   gap: clamp(2rem, 4vw, 3.5rem) clamp(1.5rem, 4vw, 4rem);
 }
@@ -302,9 +302,15 @@
   line-height: 1;
   letter-spacing: -0.05em;
   margin-bottom: 1.25rem;
-  background: linear-gradient(170deg, oklch(0.9 0.08 85), var(--gold) 55%, oklch(0.6 0.11 70));
+  background-image: linear-gradient(170deg, oklch(0.9 0.08 85), var(--gold) 55%, oklch(0.6 0.11 70));
+  -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
+  width: fit-content;
+}
+.gn[data-mode="still"] .gn-hint {
+  display: none;
 }
 .gn[data-mode="still"] .gn-cap > * {
   opacity: 1;
@@ -312,4 +318,14 @@
 }
 .gn[data-mode="still"] .gn-label {
   font-size: clamp(1.25rem, 0.95rem + 0.8vw, 1.75rem);
+}
+@media (min-width: 40rem) {
+  .gn[data-mode="still"] {
+    --gn-cols: 2;
+  }
+}
+@media (min-width: 72rem) {
+  .gn[data-mode="still"] {
+    --gn-cols: 4;
+  }
 }
