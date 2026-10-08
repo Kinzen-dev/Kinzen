@@ -10,4 +10,12 @@ export const demos: LabDemo[] = [
       "three.js + cannon-es rigid bodies (compound boxes cut from each glyph), spring grab, Stable Fluids on the water's mirror, synthesized metal sound.",
     load: () => import("./gold-toss"),
   },
+  {
+    id: "thock",
+    title: "Thock",
+    idea: "A low-angle field of navy and cream keycaps: every key sinks with a thock, your own keyboard presses them, space sends a gold ripple, ship spells itself.",
+    technique:
+      "three.js instanced sculpted caps, per-key springs set in the input handler (no lag), damped wave grid, legend atlas shaded as brushed gold, synthesized thock.",
+    load: () => import("./thock"),
+  },
 ];

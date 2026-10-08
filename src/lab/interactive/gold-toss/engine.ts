@@ -1196,7 +1196,7 @@ void main(){
       fluid.splat(u, w, Math.cos(a + 0.6) * 260, Math.sin(a + 0.6) * 260, 0.001);
     }
     for (let i = 0; i < 70; i++) fluid.step(1 / 60);
-    ring(-1.2, FRONT_Z + 1.1, 1.2);
+    ring(-1.2, FRONT_Z + 1.1, 0.6);
     rings[0].z = 0.6;
     render(0);
   } else {
