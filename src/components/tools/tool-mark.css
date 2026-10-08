@@ -1,27 +1,52 @@
 /* ------------------------------------------------------------------
    Tool marks: official brand marks at text size, before a tool's name.
-   Never recoloured; a mark that would vanish on the chip surface in one
-   theme sits on a small contrasting tile in that theme instead.
+   At rest a mark takes the label's tone, a step quieter; its host shows
+   the brand colour on hover, keyboard focus or a tap (ToolMarkTap sets
+   data-tool-on on touch). A mark that would vanish on the surface while
+   coloured sits on a small contrasting tile for that moment only.
    ------------------------------------------------------------------ */
 .tool-mark {
   flex: none;
   width: 1.125em;
   height: 1.125em;
+  fill: color-mix(in oklch, currentColor 72%, transparent);
+  transition:
+    fill 240ms var(--ease-out),
+    background-color 240ms var(--ease-out),
+    box-shadow 240ms var(--ease-out);
 }
 .tool-mark[data-badge] {
   border-radius: 0.25em;
+  box-shadow: 0 0 0 0.15em transparent;
 }
-/* A light mark (React, Vitest, LiveKit) in the light theme: an ink tile. */
-.tool-mark[data-badge="light"] {
-  background: light-dark(oklch(0.24 0.015 65), transparent);
+@media (hover: hover) {
+  [data-tool-host]:hover > .tool-mark {
+    fill: var(--brand);
+  }
+  /* A light mark (React, Vitest, LiveKit) in the light theme: an ink tile. */
+  [data-tool-host]:hover > .tool-mark[data-badge="light"] {
+    background-color: light-dark(oklch(0.24 0.015 65), transparent);
+    box-shadow: 0 0 0 0.15em light-dark(oklch(0.24 0.015 65), transparent);
+  }
+  /* A dark mark (SQLite, Fly.io) in the dark theme: a paper tile. */
+  [data-tool-host]:hover > .tool-mark[data-badge="dark"] {
+    background-color: light-dark(transparent, oklch(0.95 0.012 85));
+    box-shadow: 0 0 0 0.15em light-dark(transparent, oklch(0.95 0.012 85));
+  }
+}
+[data-tool-host]:is(:focus-visible, :focus-within, [data-tool-on]) > .tool-mark {
+  fill: var(--brand);
+}
+[data-tool-host]:is(:focus-visible, :focus-within, [data-tool-on]) > .tool-mark[data-badge="light"] {
+  background-color: light-dark(oklch(0.24 0.015 65), transparent);
   box-shadow: 0 0 0 0.15em light-dark(oklch(0.24 0.015 65), transparent);
 }
-/* A dark mark (SQLite, Fly.io) in the dark theme: a paper tile. */
-.tool-mark[data-badge="dark"] {
-  background: light-dark(transparent, oklch(0.95 0.012 85));
+[data-tool-host]:is(:focus-visible, :focus-within, [data-tool-on]) > .tool-mark[data-badge="dark"] {
+  background-color: light-dark(transparent, oklch(0.95 0.012 85));
   box-shadow: 0 0 0 0.15em light-dark(transparent, oklch(0.95 0.012 85));
 }
-/* A practice, not a product: a quiet dot in the secondary ink. */
+/* A practice, not a product: a quiet dot in the secondary ink, never coloured. */
 .tool-mark-practice {
+  fill: currentColor;
   color: var(--ink-3);
 }

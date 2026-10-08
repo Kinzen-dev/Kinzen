@@ -2,7 +2,7 @@
  * Bakes the hero wordmark into a 1-bit glyph mask for the particle field.
  *
  * The mask is cut from the real DOM wordmark (`[data-hero-wordmark]`) of a running
- * production build, so it carries the exact shipped glyphs: Geist 600, the hero's
+ * production build, so it carries the exact shipped glyphs: Google Sans 700, the hero's
  * tracking and feature settings. The field never waits on `document.fonts` and never
  * rasterises text on the main thread.
  *
@@ -34,8 +34,8 @@ const info = await page.evaluate(
   async ({ fontPx, padEm }) => {
     const el = document.querySelector<HTMLElement>("[data-hero-wordmark]");
     if (!el) throw new Error("no [data-hero-wordmark] on the page");
-    const family = getComputedStyle(el).fontFamily;
-    await document.fonts.load(`600 ${fontPx}px ${family}`, el.textContent ?? "");
+    const { fontFamily: family, fontWeight: weight } = getComputedStyle(el);
+    await document.fonts.load(`${weight} ${fontPx}px ${family}`, el.textContent ?? "");
     await document.fonts.ready;
     // Anything around the element must read as "off" (the screenshot box is rounded out).
     // Lift it out of the hero (overflow-clip) so nothing clips the big glyphs; classes travel with it.
@@ -62,7 +62,7 @@ const info = await page.evaluate(
       weight: cs.fontWeight,
       tracking: cs.letterSpacing,
       features: cs.fontFeatureSettings,
-      loaded: document.fonts.check(`600 ${fontPx}px ${family}`),
+      loaded: document.fonts.check(`${weight} ${fontPx}px ${family}`),
     };
   },
   { fontPx: FONT_PX, padEm: PAD_EM },

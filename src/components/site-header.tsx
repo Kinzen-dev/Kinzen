@@ -42,7 +42,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
             <div>
               <HomeLink
                 href={localePath(locale, "/")}
-                className="nav-brand-link font-semibold tracking-[-0.02em]"
+                className="nav-brand-link font-bold tracking-[-0.02em]"
                 label={plain(dict.a11y.home)}
               >
                 <span data-masthead-mark className="text-[1.0625rem]">

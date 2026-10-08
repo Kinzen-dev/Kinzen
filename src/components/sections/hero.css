@@ -51,12 +51,12 @@
 .hero-kinetic-lead {
   color: var(--ink);
 }
-/* The Thai face arrives late (preload off), and "ผมสร้าง" at display size changes width when it
-   swaps in, which slid the whole phrase box sideways (CLS 0.0115 on /th at 1440). Its width is
-   pinned to its Noto Sans Thai measure (3.293em at every size), so the swap moves nothing. */
+/* "ผมสร้าง" at display size changes width when the Thai face swaps in for the system one, which
+   slid the whole phrase box sideways (CLS 0.0115 on /th at 1440). Its width is pinned to its
+   Google Sans 600 measure (3.115em at every size), so a late swap moves nothing. */
 :lang(th) .hero-kinetic-lead {
   display: inline-block;
-  width: 3.3em;
+  width: 3.12em;
   white-space: nowrap;
 }
 .hero-kinetic-phrase {

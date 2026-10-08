@@ -108,6 +108,28 @@
   }
 }
 
+/* Arial scaled to Google Sans (measured: 1.0105x wider; ascent 0.966, descent 0.286 em), so the
+   swap from fallback to web font barely moves a line. Latin only: Thai falls through to the
+   system Thai face until Google Sans (preloaded) arrives. */
+@font-face {
+  font-family: "Google Sans Fallback";
+  src: local("Arial"), local("ArialMT");
+  font-weight: 400 500;
+  size-adjust: 101.05%;
+  ascent-override: 95.6%;
+  descent-override: 28.3%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Google Sans Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 600 700;
+  size-adjust: 101.05%;
+  ascent-override: 95.6%;
+  descent-override: 28.3%;
+  line-gap-override: 0%;
+}
+
 @theme inline {
   --color-ground: var(--ground);
   --color-surface: var(--surface);
@@ -130,8 +152,11 @@
   --shadow-soft: var(--shadow-soft);
   --shadow-lift: var(--shadow-lift);
 
-  --font-sans: var(--font-geist), var(--font-thai), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), var(--font-thai), ui-monospace, "SF Mono", Menlo, monospace;
+  /* Google Sans carries Latin and Thai in one family; the code face has no Thai, so Thai inside a
+     readout falls through to Google Sans before any system face. */
+  --font-sans: var(--font-google-sans), "Google Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-google-sans-code), var(--font-google-sans), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-hand: var(--font-playpen), var(--font-google-sans), ui-rounded, sans-serif;
 
   --ease-out-expo: var(--ease-out);
 
@@ -169,7 +194,6 @@
     min-height: 100dvh;
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
-    font-feature-settings: "ss01", "cv11";
     overflow-x: clip;
   }
 
@@ -252,7 +276,7 @@
     border-bottom: 1px solid var(--rule);
   }
 
-  /* Thai pages: readouts use the text face (Geist + Noto Sans Thai) with tabular figures.
+  /* Thai pages: readouts use the text face (Google Sans) with tabular figures.
      A monospace face has no Thai, so Thai dates and labels inside it came out letter-spaced
      ("เ ม . ย ."); one consistent face on Thai pages reads better than mixed fallbacks. */
   :lang(th) .readout {
@@ -352,23 +376,25 @@ html:has(dialog[open]) {
 }
 
 /* ------------------------------------------------------------------
-   Hero wordmark: fills the shell width edge to edge. Six capitals of
-   Geist 600 at -0.06em tracking measure about 3.2em wide.
+   Hero wordmark: its ink fills the shell width edge to edge. Six capitals
+   of Google Sans 700 at -0.05em tracking: ink 3.246em wide, starting
+   0.081em into the line box (the K's side bearing, pulled out by the margin).
    ------------------------------------------------------------------ */
 /* Phones in landscape: cap the wordmark so the name and actions share the first screen. */
 @media (orientation: landscape) and (max-height: 32rem) {
   .hero-wordmark {
-    font-size: min(calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24), 34svh) !important;
+    font-size: min(calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.25), 34svh) !important;
   }
 }
 
 .hero-wordmark {
   /* Never wraps, even while a fallback font with wider glyphs is showing. */
   white-space: nowrap;
-  font-size: calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.24);
+  font-size: calc((min(100vw, 96rem) - 2 * var(--gutter)) / 3.25);
+  font-weight: 700;
   line-height: 0.76;
-  letter-spacing: -0.06em;
-  font-feature-settings: "ss01";
+  letter-spacing: -0.05em;
+  margin-inline-start: -0.081em;
   padding-bottom: 0.06em;
 }
 

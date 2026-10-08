@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Geist, Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import { getDictionary } from "@/i18n/dictionaries";
 import { ThemeScript } from "@/components/theme-script";
 import { Doodle } from "@/components/doodles/doodle";
+import { fontVariables } from "./fonts";
 import "./globals.css";
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
-const notoThai = Noto_Sans_Thai({ subsets: ["thai"], variable: "--font-thai", display: "swap", preload: false });
 
 export const metadata: Metadata = {
   title: "404 | Kinzen",
@@ -28,14 +24,14 @@ export default function GlobalNotFound() {
   const order = `if(/^\\/th(\\/|$)/.test(location.pathname)){document.documentElement.lang="th";document.documentElement.dataset.nf="th"}`;
 
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${notoThai.variable}`} suppressHydrationWarning>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
         <ThemeScript />
         <script dangerouslySetInnerHTML={{ __html: order }} />
       </head>
       <body>
         <header className="shell flex items-center justify-between pt-6">
-          <Link href="/" className="font-semibold tracking-[-0.02em]">
+          <Link href="/" className="font-bold tracking-[-0.02em]">
             KINZEN
           </Link>
           <span className="readout">404</span>

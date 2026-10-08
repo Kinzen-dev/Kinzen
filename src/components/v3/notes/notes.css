@@ -95,6 +95,10 @@
 .note-art {
   height: 4.5rem;
 }
+/* Handwritten (Playpen Sans Thai, loaded on demand): the notes read as written, not typeset. */
+.note {
+  font-family: var(--font-hand);
+}
 .note h3 {
   color: var(--pastel-ink);
 }

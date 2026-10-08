@@ -13,9 +13,10 @@ test.describe("tool logos", () => {
     const ts = chips.filter({ hasText: /^TypeScript$/ });
     await expect(ts.locator("svg.tool-mark")).toHaveAttribute("aria-hidden", "true");
     await expect(ts.locator("svg.tool-mark use")).toHaveAttribute("href", /\/tool-logos\.svg\?v=\w+#typescript$/);
-    await expect(ts.locator("svg.tool-mark")).toHaveAttribute("fill", "#3178C6");
+    // The brand colour rides along as --brand; at rest the mark takes the label's tone.
+    await expect(ts.locator("svg.tool-mark")).toHaveAttribute("style", /--brand:\s*#3178C6/);
     // Black marks follow the text colour so they read in the dark theme.
-    await expect(chips.filter({ hasText: /^Next\.js$/ }).locator("svg")).toHaveAttribute("fill", "currentColor");
+    await expect(chips.filter({ hasText: /^Next\.js$/ }).locator("svg")).toHaveAttribute("style", /--brand:\s*currentColor/);
     // Text-only on purpose.
     for (const name of ["Azure", "Codex", "Playwright", "Tauri", "Twilio Media Streams"]) {
       await expect(chips.filter({ hasText: new RegExp(`^${name}$`) }).locator("svg")).toHaveCount(0);
@@ -47,6 +48,38 @@ test.describe("tool logos", () => {
     );
     for (const svg of await page.locator("#skills dd svg").all())
       await expect(svg).toHaveAttribute("aria-hidden", "true");
+  });
+
+  test("marks rest in the label's tone and show the brand colour on hover", async ({ page, isMobile }) => {
+    test.skip(isMobile, "no hover on touch; the tap test covers phones");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const item = page.locator("#skills dd li").filter({ hasText: /^TypeScript$/ });
+    const fill = () => item.locator("svg.tool-mark").evaluate((el) => getComputedStyle(el).fill);
+    // At rest: the label's colour mixed a step toward transparent, not the brand blue.
+    const rest = await fill();
+    expect(rest).not.toBe("rgb(49, 120, 198)");
+    expect(rest).toMatch(/\/ 0\.72\)$/);
+    await item.hover();
+    await expect.poll(fill).toBe("rgb(49, 120, 198)");
+  });
+
+  test("a tap shows the brand colour, another tap moves it, and it clears by itself", async ({ browser }) => {
+    const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const items = page.locator("#skills dd li[data-tool-host]");
+    const ts = items.filter({ hasText: /^TypeScript$/ });
+    const node = items.filter({ hasText: /^Node\.js$/ });
+    await ts.tap();
+    await expect(ts).toHaveAttribute("data-tool-on", "");
+    await expect.poll(() => ts.locator("svg").evaluate((el) => getComputedStyle(el).fill)).toBe("rgb(49, 120, 198)");
+    await node.tap();
+    await expect(ts).not.toHaveAttribute("data-tool-on");
+    await expect(node).toHaveAttribute("data-tool-on", "");
+    await expect(node).not.toHaveAttribute("data-tool-on", { timeout: 4_000 });
+    await ctx.close();
   });
 
   test("case page stack pills carry the marks", async ({ page }) => {
