@@ -357,36 +357,27 @@ test.describe("hero v3", () => {
   }
 });
 
-test.describe("numbers strip", () => {
-  test("four pastel cards, figures from content, symmetric insets; the odometer rolls into view", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "no-preference" });
+test.describe("numbers section", () => {
+  // The section itself (switcher, five views) is covered by e2e/v4-numbers.spec.ts; this checks
+  // it still opens right after the hero with the approved figures as real text.
+  test("right after the hero: the board with the four approved figures", async ({ page }) => {
     await page.goto("/");
-    const cards = page.locator("[data-numbers] .numbers-card");
-    await expect(cards).toHaveCount(4);
-    const values = await cards.locator(".odometer > .sr-only").allTextContents();
-    expect(values).toEqual(["7", "4", "500", "37"]);
-    for (let i = 0; i < 4; i++) {
-      const c = await cards.nth(i).evaluate((el) => {
-        const cs = getComputedStyle(el);
-        return {
-          pad: new Set([cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft]).size,
-          bg: cs.backgroundColor,
-        };
-      });
-      expect(c.pad).toBe(1);
-      expect(c.bg).not.toBe("rgba(0, 0, 0, 0)");
-    }
-    await page.locator("[data-numbers]").scrollIntoViewIfNeeded();
-    await expect(cards.first().locator(".odometer[data-rolled]")).toHaveCount(1);
+    const numbers = page.locator("[data-numbers]");
+    await expect(numbers.locator(".sf-row")).toHaveCount(4);
+    expect(await numbers.locator(".sf-fig > .sr-only").allTextContents()).toEqual(["7", "10+", "6,000+", "500", "37"]);
+    const heroBottom = await hero(page).evaluate((el) => el.getBoundingClientRect().bottom + window.scrollY);
+    const numbersTop = await numbers.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+    expect(numbersTop).toBeGreaterThanOrEqual(heroBottom - 1);
   });
 
   test("Thai labels render (no joiners), the figures stay the same", async ({ page }) => {
     await page.goto("/th");
-    const strip = page.locator("[data-numbers]");
-    await expect(strip.locator(".numbers-card")).toHaveCount(4);
-    expect(await strip.locator(".odometer > .sr-only").allTextContents()).toEqual(["7", "4", "500", "37"]);
-    const text = (await strip.textContent()) ?? "";
-    expect(text).toContain("ปีที่ทำระบบใช้งานจริง");
-    expect(text).not.toMatch(/⁠|—|–/);
+    const numbers = page.locator("[data-numbers]");
+    await expect(numbers.locator(".sf-row")).toHaveCount(4);
+    expect(await numbers.locator(".sf-fig > .sr-only").allTextContents()).toEqual(["7", "10+", "6,000+", "500", "37"]);
+    const text = (await numbers.textContent()) ?? "";
+    expect(text.replace(/\s+/g, "")).toContain("ปีที่สร้างระบบใช้งานจริง");
+    expect(text).not.toMatch(/\u2060|\u2014|\u2013/);
   });
 });
+
