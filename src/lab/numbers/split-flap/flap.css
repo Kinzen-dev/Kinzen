@@ -1,0 +1,378 @@
+/* ------------------------------------------------------------------
+   Split-flap board (lab, numbers-a). A navy board in both themes; near
+   black flaps with gold figures; captions type in on the board's ink.
+   Font family is inherited (the site face), never set here.
+   ------------------------------------------------------------------ */
+.sf {
+  padding-block: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
+}
+.sf-board {
+  --th: clamp(2.75rem, 0.6rem + 4.2vw, 5rem);
+  --gap: calc(var(--th) * 0.07);
+  --fig-w: calc(var(--th) * 0.7 * 3 + var(--gap) * 2);
+  --flap: oklch(0.125 0.022 266);
+  --flap-hi: oklch(0.165 0.026 266);
+  --flap-lo: oklch(0.115 0.02 266);
+  --flap-lo2: oklch(0.095 0.018 266);
+  --seam: oklch(0.05 0.015 266);
+  /* One board colour in both themes: the night token's dark value sank the flaps into it. */
+  --ground: oklch(0.205 0.034 266);
+  position: relative;
+  border-radius: var(--radius-card);
+  padding: clamp(1.25rem, 0.25rem + 2.8vw, 3.25rem);
+  background:
+    radial-gradient(90% 70% at 50% -10%, oklch(0.36 0.05 266 / 0.35), transparent 65%),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.025), transparent 40%),
+    var(--ground);
+  color: var(--ink);
+  box-shadow:
+    inset 0 0 0 1px oklch(1 0 0 / 0.06),
+    inset 0 1px 0 oklch(1 0 0 / 0.09),
+    0 2.5rem 5rem -2.5rem oklch(0.18 0.04 266 / 0.55);
+}
+/* Four screws in the bezel corners. */
+.sf-board::before {
+  content: "";
+  position: absolute;
+  inset: 0.75rem;
+  pointer-events: none;
+  --s: radial-gradient(circle, oklch(0.42 0.02 266) 0 1.5px, oklch(0.2 0.02 266) 2px 3px, transparent 3.5px);
+  background:
+    var(--s) top left / 8px 8px no-repeat,
+    var(--s) top right / 8px 8px no-repeat,
+    var(--s) bottom left / 8px 8px no-repeat,
+    var(--s) bottom right / 8px 8px no-repeat;
+}
+
+.sf-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+}
+.sf-title {
+  font-size: var(--text-xl);
+  line-height: var(--text-xl--line-height);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.sf-cols,
+.sf-row,
+.sf-group > .sf-sub,
+.sf-group > .sf-passed {
+  display: grid;
+  grid-template-columns: var(--fig-w) minmax(0, 1fr) minmax(8rem, 13rem);
+  column-gap: clamp(1.25rem, 0.5rem + 2.2vw, 3rem);
+  align-items: center;
+}
+.sf-cols {
+  padding-bottom: 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.sf-cols span:first-child {
+  justify-self: end;
+}
+.sf-cols span:last-child {
+  justify-self: end;
+}
+.sf-rows {
+  display: grid;
+}
+.sf-row {
+  position: relative;
+  padding-block: clamp(0.875rem, 0.5rem + 0.9vw, 1.375rem);
+  border-top: 1px solid oklch(1 0 0 / 0.08);
+}
+.sf-fig {
+  justify-self: end;
+}
+.sf-tiles {
+  display: flex;
+  gap: var(--gap);
+}
+.sf-label,
+.sf-passed-text {
+  font-size: clamp(1.125rem, 0.85rem + 0.95vw, 1.75rem);
+  line-height: 1.35;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+  max-width: 40ch;
+}
+.sf-note {
+  justify-self: end;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* 500 and 37 share one entry: two flap lines, the verdict, one note, a gold bracket. */
+.sf-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: clamp(0.75rem, 0.4rem + 0.8vw, 1.125rem);
+}
+.sf-group > .sf-sub,
+.sf-group > .sf-passed {
+  grid-column: 1;
+}
+.sf-group > .sf-sub,
+.sf-group > .sf-passed {
+  column-gap: clamp(1.25rem, 0.5rem + 2.2vw, 3rem);
+}
+.sf-note-group {
+  position: absolute;
+  right: 0;
+  top: clamp(0.875rem, 0.5rem + 0.9vw, 1.375rem);
+  height: var(--th);
+  display: flex;
+  align-items: center;
+}
+.sf-sub-caught .sf-label {
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+}
+.sf-passed .sf-check {
+  justify-self: end;
+  display: block;
+}
+.sf-passed-text {
+  font-size: var(--text-lg);
+  color: var(--gold);
+}
+.sf-group::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--th) * -0.32);
+  top: calc(clamp(0.875rem, 0.5rem + 0.9vw, 1.375rem) + var(--th) * 0.2);
+  bottom: calc(clamp(0.875rem, 0.5rem + 0.9vw, 1.375rem) + 0.6rem);
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--gold) 70%, transparent), color-mix(in oklab, var(--gold) 20%, transparent));
+}
+
+/* ---------------- Flap tile ---------------- */
+.sf-tile {
+  --tw: calc(var(--th) * 0.7);
+  --r: calc(var(--th) * 0.075);
+  position: relative;
+  display: block;
+  width: var(--tw);
+  height: var(--th);
+  perspective: calc(var(--th) * 5);
+  font-size: calc(var(--th) * 0.76);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  line-height: var(--th);
+  color: var(--gold);
+  border-radius: var(--r);
+  box-shadow:
+    0 calc(var(--th) * 0.06) calc(var(--th) * 0.14) oklch(0.04 0.02 266 / 0.55),
+    0 0 0 1px oklch(0 0 0 / 0.4);
+}
+.sf-tile-sm {
+  --th: 2.25rem;
+}
+.sf-tile[data-blank] {
+  opacity: 0.6;
+}
+.sf-half,
+.sf-leaf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+}
+.sf-top,
+.sf-leaf-top {
+  top: 0;
+  border-radius: var(--r) var(--r) 0 0;
+  background: linear-gradient(to bottom, var(--flap-hi), var(--flap));
+}
+.sf-bot,
+.sf-leaf-bot {
+  top: 50%;
+  border-radius: 0 0 var(--r) var(--r);
+  background: linear-gradient(to bottom, var(--flap-lo), var(--flap-lo2));
+}
+.sf-g {
+  display: block;
+  height: var(--th);
+  text-align: center;
+  /* Gold glyph with a faint inner glow, like a printed flap under board light. */
+  text-shadow: 0 0 calc(var(--th) * 0.18) color-mix(in oklab, var(--gold) 28%, transparent);
+}
+.sf-bot .sf-g,
+.sf-leaf-bot .sf-g {
+  margin-top: calc(var(--th) * -0.5);
+}
+.sf-leaf {
+  z-index: 2;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+.sf-leaf-top {
+  transform-origin: 50% 100%;
+}
+.sf-leaf-bot {
+  transform-origin: 50% 0;
+}
+.sf-shade {
+  position: absolute;
+  inset: 0;
+  background: oklch(0.03 0.01 266);
+  opacity: 0;
+  pointer-events: none;
+}
+/* The seam between the halves, and the two hinge pins at its ends. */
+.sf-tile::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.5px);
+  height: 1px;
+  background: var(--seam);
+}
+.sf-tile::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  top: calc(50% - var(--th) * 0.055);
+  height: calc(var(--th) * 0.11);
+  left: -1px;
+  right: -1px;
+  background: linear-gradient(
+    to right,
+    oklch(0.32 0.02 266) 0 2px,
+    transparent 2px calc(100% - 2px),
+    oklch(0.32 0.02 266) calc(100% - 2px)
+  );
+  border-radius: 1px;
+}
+
+/* ---------------- Typing ---------------- */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .sf[data-armed] .sf-type {
+    --shown: 0;
+  }
+  .sf[data-armed] .sf-type .tp-ch {
+    opacity: clamp(0, calc(var(--shown) - var(--i)), 1);
+    color: color-mix(
+      in oklab,
+      var(--gold) calc(clamp(0, 1 - (var(--shown) - var(--i)) / 12, 1) * 100%),
+      currentColor
+    );
+  }
+  .sf[data-armed] .sf-note {
+    opacity: 0;
+    translate: 0 0.35rem;
+    transition:
+      opacity 600ms var(--ease-out) 900ms,
+      translate 600ms var(--ease-out) 900ms;
+  }
+  .sf[data-armed] [data-lit] .sf-note {
+    opacity: 1;
+    translate: 0 0;
+  }
+  .sf-row {
+    cursor: default;
+    transition: background-color 300ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .sf-row:hover {
+      background-color: oklch(1 0 0 / 0.025);
+    }
+  }
+}
+
+.sf-hint {
+  margin-top: 1rem;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  text-align: center;
+}
+.sf-hint-tap {
+  display: none;
+}
+@media (hover: none) {
+  .sf-hint-hover {
+    display: none;
+  }
+  .sf-hint-tap {
+    display: inline;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-hint {
+    display: none;
+  }
+}
+
+/* ---------------- Phones and narrow tablets ---------------- */
+@media (max-width: 47.99rem) {
+  .sf-board {
+    --th: 3rem;
+    --fig-w: auto;
+  }
+  .sf-cols {
+    display: none;
+  }
+  .sf-row,
+  .sf-group > .sf-sub,
+  .sf-group > .sf-passed {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 1rem;
+    row-gap: 0.625rem;
+  }
+  .sf-row:not(.sf-group) .sf-fig {
+    justify-self: start;
+  }
+  .sf-row:not(.sf-group) .sf-label {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .sf-row:not(.sf-group) .sf-note {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+  .sf-group > .sf-sub {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sf-group .sf-fig {
+    justify-self: start;
+  }
+  .sf-group > .sf-passed {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .sf-note-group {
+    height: 3rem;
+  }
+  .sf-label {
+    font-size: var(--text-base);
+    max-width: none;
+  }
+  .sf-passed-text {
+    font-size: var(--text-sm);
+  }
+  .sf-group::before {
+    display: none;
+  }
+}
+
+/* Thai: no tracking on the mono labels (spaced Thai reads as broken words). */
+:lang(th) :is(.sf-note, .sf-cols) {
+  letter-spacing: 0;
+}

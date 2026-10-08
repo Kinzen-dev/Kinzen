@@ -1,0 +1,502 @@
+/* ------------------------------------------------------------------
+   Scrolly stats (lab, numbers-a). A navy scene. Wide screens with
+   motion: a pinned stage, one huge morphing numeral, each stat's copy
+   and motif fading through. Phones and reduced motion: a vertical list.
+   Motifs draw from --m (0..1) in CSS; JS only writes numbers.
+   ------------------------------------------------------------------ */
+@property --m {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+.ss {
+  --ss-gold-soft: color-mix(in oklab, var(--gold) 22%, transparent);
+  position: relative;
+  background:
+    radial-gradient(70% 55% at 22% 45%, oklch(0.32 0.05 266 / 0.45), transparent 70%),
+    var(--ground);
+  color: var(--ink);
+}
+.ss-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.ss-hint {
+  display: none;
+}
+.ss-numeral,
+.ss-rail {
+  display: none;
+}
+.ss-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.ss-label {
+  font-size: clamp(1.375rem, 0.95rem + 1.35vw, 2.375rem);
+  line-height: 1.18;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  max-width: 24ch;
+}
+.ss-copy {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+}
+.ss-doodle {
+  height: clamp(3.5rem, 2.5rem + 2.5vw, 5.5rem);
+  color: color-mix(in oklab, var(--ink) 78%, transparent);
+  margin-bottom: 0.25rem;
+  transform: rotate(-4deg) scale(calc(0.86 + var(--m) * 0.14));
+  transform-origin: 30% 80%;
+}
+.ss-caps {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.ss-cap-gold {
+  color: var(--gold);
+}
+
+/* ---------------- 7: seven hops on the year axis ---------------- */
+.ss-years {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+}
+.ss-years svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.ss-axis {
+  stroke: color-mix(in oklab, var(--ink) 22%, transparent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.ss-tick {
+  stroke: color-mix(in oklab, var(--ink) 35%, transparent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+/* No non-scaling-stroke here: it breaks pathLength-based dashes (the arcs would stop short). */
+.ss-hop {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: calc(1 - clamp(0, var(--m) * 7 - var(--k), 1));
+}
+.ss-land {
+  fill: var(--gold);
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: clamp(0, calc((var(--m) * 7 - var(--k) - 0.92) * 14), 1);
+  scale: calc(0.4 + 0.6 * clamp(0, calc((var(--m) * 7 - var(--k) - 0.92) * 14), 1));
+}
+.ss-origin {
+  fill: var(--ground);
+  stroke: var(--gold);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.ss-years-labels {
+  position: relative;
+  height: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+}
+.ss-years-labels span {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  translate: -50% 0;
+}
+.ss-years-labels span:first-child {
+  translate: 0 0;
+}
+.ss-years-labels span:last-child {
+  translate: -100% 0;
+}
+.ss-years .ss-caps {
+  order: -1;
+}
+
+/* ---------------- 4: the role as four whole years and a tail ---------------- */
+.ss-lead {
+  display: grid;
+  gap: 0.625rem;
+  width: 100%;
+  padding-bottom: 1.5rem;
+}
+.ss-lead-segs {
+  display: flex;
+  gap: 0.3rem;
+  height: 1rem;
+}
+.ss-lead-seg {
+  position: relative;
+  flex-basis: 0;
+  border-radius: 0.3rem;
+  background: color-mix(in oklab, var(--ink) 10%, transparent);
+}
+.ss-lead-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--gold);
+  transform-origin: 0 50%;
+  transform: scaleX(clamp(0, calc((var(--m) * 50 - var(--k0)) / var(--len)), 1));
+}
+.ss-lead-tail .ss-lead-fill {
+  background: repeating-linear-gradient(-45deg, var(--gold) 0 2px, color-mix(in oklab, var(--gold) 35%, transparent) 2px 4px);
+}
+.ss-lead-yr {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+}
+
+/* ---------------- 20+: storefronts drawing in, then the plus ---------------- */
+.ss-stores {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: clamp(0.375rem, 0.2rem + 0.6vw, 0.875rem);
+  width: min(100%, 26rem);
+}
+.ss-store {
+  display: block;
+  width: 100%;
+  height: auto;
+  --d: clamp(0, calc(var(--m) * 21 - var(--k)), 1);
+}
+.ss-store path {
+  fill: currentColor;
+  fill-opacity: 0;
+  stroke: color-mix(in oklab, var(--ink) 80%, transparent);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: calc(1 - var(--d));
+}
+.ss-store path:nth-child(2) {
+  fill-opacity: calc(var(--d) * 0.14);
+}
+.ss-store-plus {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  background: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 600;
+  font-size: 1.375rem;
+  opacity: clamp(0, calc(var(--m) * 21 - 20), 1);
+  scale: calc(0.5 + 0.5 * clamp(0, calc(var(--m) * 21 - 20), 1));
+}
+
+/* ---------------- 500 / 37: the replay ---------------- */
+.ss-replay {
+  display: grid;
+  gap: 0.875rem;
+  width: 100%;
+}
+.ss-replay canvas {
+  display: block;
+  width: 100%;
+  color: var(--ink);
+  border-top-color: var(--gold);
+  column-rule-color: oklch(0.68 0.19 30);
+}
+.ss-caught {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+}
+.ss-caught-fig {
+  font-size: clamp(2.5rem, 1.8rem + 2vw, 3.75rem);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--gold);
+  min-width: 1.25em;
+  transition: opacity 300ms var(--ease-out);
+}
+[data-precatch] .ss-caught-fig {
+  opacity: 0;
+}
+.ss-caught-label {
+  font-size: var(--text-base);
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--ink) 85%, transparent);
+  text-wrap: pretty;
+}
+.ss-verdict {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  color: var(--gold);
+  font-weight: 500;
+  transition:
+    opacity 450ms var(--ease-out),
+    translate 450ms var(--ease-out);
+}
+.ss-verdict svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.2em;
+}
+.ss-panel-replay:not([data-verdict]) .ss-verdict {
+  opacity: 0;
+  translate: 0 0.375rem;
+}
+.ss-legend {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+/* ---------------- Vertical list (phones, reduced motion, no JS) ---------------- */
+.ss-stage {
+  padding-block: clamp(3rem, 2rem + 4vw, 5rem);
+}
+.ss-panel {
+  display: grid;
+  gap: 1.25rem;
+  padding-block: 2.5rem;
+  border-top: 1px solid oklch(1 0 0 / 0.08);
+}
+.ss-panels {
+  margin-top: 1.5rem;
+}
+.ss-fig {
+  font-size: clamp(6rem, 3rem + 18vw, 11rem);
+  font-weight: 600;
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+.ss-panel-replay .ss-fig {
+  font-size: clamp(5rem, 2rem + 16vw, 10rem);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ss-panel {
+    transition: --m 1600ms cubic-bezier(0.33, 0, 0.2, 1) 150ms;
+  }
+}
+/* Wide screens without the pinned story (reduced motion): figure left, words and motif right. */
+@media (min-width: 48rem) {
+  .ss-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    column-gap: clamp(2rem, 1rem + 3vw, 5rem);
+    align-items: start;
+  }
+  .ss-fig {
+    grid-row: 1 / span 2;
+  }
+  .ss-copy,
+  .ss-lead,
+  .ss-stores,
+  .ss-replay {
+    grid-column: 2;
+  }
+  .ss-years {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------------- Pinned story (wide screens, motion allowed) ---------------- */
+@media (min-width: 48rem) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .ss-track {
+    position: relative;
+    height: calc(var(--total) * 100svh);
+  }
+  .ss-stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: clip;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    padding-top: calc(var(--header-h) + 1.5rem);
+    padding-bottom: clamp(1.5rem, 1rem + 2vh, 3rem);
+  }
+  .ss-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .ss-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    opacity: calc(1 - var(--p, 0) * 12);
+  }
+  .ss-hint::after {
+    content: "";
+    width: 2.5rem;
+    height: 1px;
+    background: currentColor;
+  }
+  .ss-body {
+    position: relative;
+  }
+  .ss-numeral {
+    display: block;
+    position: absolute;
+    left: var(--gutter);
+    /* The figure's column (matches the panel grid: 1.3fr of 2.3fr after the gap). */
+    width: calc((100% - 2 * var(--gutter) - clamp(2rem, 1rem + 3vw, 5rem)) * 1.3 / 2.3);
+    top: 50%;
+    height: 0.8em;
+    margin-top: -0.5em;
+    font-size: min(25vw, 54svh);
+    font-weight: 600;
+    line-height: 0.8;
+    letter-spacing: -0.045em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    pointer-events: none;
+  }
+  .ss-slot > span,
+  .ss-measure {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: pre;
+    will-change: transform, opacity, filter;
+  }
+  .ss-measure {
+    visibility: hidden;
+    will-change: auto;
+  }
+  .ss-panels {
+    position: absolute;
+    inset: 0 var(--gutter);
+    margin: 0;
+  }
+  .ss-panel {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr) auto;
+    column-gap: clamp(2rem, 1rem + 3vw, 5rem);
+    row-gap: 1.75rem;
+    transition: none;
+    will-change: opacity, transform;
+  }
+  .ss-panel:not([data-i="0"]) {
+    opacity: 0;
+  }
+  .ss-fig {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .ss-copy {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .ss-lead,
+  .ss-stores,
+  .ss-replay {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .ss-years {
+    grid-column: 1 / -1;
+    grid-row: 5;
+  }
+  .ss-panel-replay {
+    grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr);
+    row-gap: 1.25rem;
+  }
+  .ss-panel-replay .ss-doodle {
+    display: none;
+  }
+  .ss-replay canvas {
+    width: min(100%, calc(36svh * 25 / 22.2));
+  }
+  .ss-panel-replay .ss-label {
+    font-size: clamp(1.25rem, 0.9rem + 1vw, 1.875rem);
+  }
+
+  .ss-rail {
+    display: grid;
+    gap: 0.875rem;
+    position: absolute;
+    right: calc(var(--gutter) * 0.45);
+    top: 50%;
+    translate: 0 -50%;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+  }
+  .ss-rail li {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    transition: color 300ms;
+  }
+  .ss-rail li::after {
+    content: "";
+    width: 0.75rem;
+    height: 1px;
+    background: currentColor;
+    transition:
+      width 400ms var(--ease-out),
+      background-color 300ms;
+  }
+  .ss-stage[data-active="0"] .ss-rail li[data-i="0"],
+  .ss-stage[data-active="1"] .ss-rail li[data-i="1"],
+  .ss-stage[data-active="2"] .ss-rail li[data-i="2"],
+  .ss-stage[data-active="3"] .ss-rail li[data-i="3"] {
+    color: var(--gold);
+  }
+  .ss-stage[data-active="0"] .ss-rail li[data-i="0"]::after,
+  .ss-stage[data-active="1"] .ss-rail li[data-i="1"]::after,
+  .ss-stage[data-active="2"] .ss-rail li[data-i="2"]::after,
+  .ss-stage[data-active="3"] .ss-rail li[data-i="3"]::after {
+    width: 1.75rem;
+  }
+}
+
+/* Thai: no tracking on the mono labels (spaced Thai reads as broken words). */
+:lang(th) :is(.ss-title, .ss-note, .ss-hint) {
+  letter-spacing: 0;
+}
