@@ -52,6 +52,16 @@ export default function EditorialNumerals({ copy, play }: ViewProps) {
           font: family,
           reduced: still,
           narrow: () => window.matchMedia(NARROW_MQ).matches,
+          // Wide stages: the caption sits beside the drawn figure, not at a fixed column.
+          onLayout: ({ left, right }) => {
+            const r = root.getBoundingClientRect();
+            const c = canvas.getBoundingClientRect();
+            const gap = Math.max(32, r.width * 0.04);
+            const side = root.dataset.side;
+            const at = side === "right" ? r.right - (c.left + left) + gap : c.left + right - r.left + gap;
+            const max = r.width - Math.min(r.width * 0.42, 448);
+            root.style.setProperty("--ed-cap-at", `${Math.round(Math.max(0, Math.min(max, at)))}px`);
+          },
         });
         if (!ink) {
           setMode("type");

@@ -76,11 +76,12 @@
     opacity 300ms var(--ease-out),
     translate 300ms var(--ease-out);
 }
+/* Beside the drawn figure (--ed-cap-at, measured from the ink), bottom on its baseline. */
 .ed-cap[data-side="left"] {
-  right: 0;
+  left: var(--ed-cap-at, 60%);
 }
 .ed-cap[data-side="right"] {
-  left: 0;
+  right: var(--ed-cap-at, 60%);
 }
 .ed-cap[data-on] {
   opacity: 1;

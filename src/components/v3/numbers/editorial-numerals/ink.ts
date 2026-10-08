@@ -103,6 +103,8 @@ export function createInk(
     reduced: boolean;
     /** Narrow stages set the figure on top, as wide as the stage allows. */
     narrow: () => boolean;
+    /** Where the drawn ink starts and ends (CSS px from the canvas's left edge). */
+    onLayout?: (ink: { left: number; right: number }) => void;
   },
 ): Ink | null {
   const gl = canvas.getContext("webgl2", {
@@ -215,6 +217,7 @@ export function createInk(
     gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA, gl!.RGBA, gl!.UNSIGNED_BYTE, off);
     // The red channel of white text is its coverage; the shader samples .r.
     scale = fs * 0.42;
+    opts.onLayout?.({ left: left / dpr, right: (left + iw) / dpr });
     return true;
   }
 
