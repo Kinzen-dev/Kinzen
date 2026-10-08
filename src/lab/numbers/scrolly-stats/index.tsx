@@ -166,6 +166,7 @@ export default function ScrollyStats({ locale }: LabProps) {
     // Glyph advance widths of the numeral face (measured, never assumed: the site font may change).
     const widths = new Map<string, number>();
     let size = 0;
+    let colW = 0;
     const measure = () => {
       const probe = document.createElement("span");
       probe.className = "ss-measure";
@@ -175,6 +176,7 @@ export default function ScrollyStats({ locale }: LabProps) {
         widths.set(ch, probe.getBoundingClientRect().width);
       }
       size = parseFloat(getComputedStyle(num).fontSize);
+      colW = num.clientWidth;
       probe.remove();
     };
 
@@ -196,7 +198,13 @@ export default function ScrollyStats({ locale }: LabProps) {
         }
       }
       if (t >= 1) from = to;
-      let x = 0;
+      // Centre the figure in its column; the width eases between the two figures as they morph.
+      let total = 0;
+      for (let j = 0; j < slots.length; j++) {
+        const wa = widths.get(from[j] ?? "") ?? 0;
+        total += wa + ((widths.get(to[j] ?? "") ?? 0) - wa) * t;
+      }
+      let x = Math.max(0, (colW - total) / 2);
       slots.forEach((slot, j) => {
         const ca = from[j] ?? "";
         const cb = to[j] ?? "";

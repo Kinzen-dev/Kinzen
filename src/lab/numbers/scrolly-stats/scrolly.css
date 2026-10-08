@@ -372,6 +372,8 @@
     display: block;
     position: absolute;
     left: var(--gutter);
+    /* The figure's column (matches the panel grid: 1.3fr of 2.3fr after the gap). */
+    width: calc((100% - 2 * var(--gutter) - clamp(2rem, 1rem + 3vw, 5rem)) * 1.3 / 2.3);
     top: 50%;
     height: 0.8em;
     margin-top: -0.5em;
@@ -492,4 +494,9 @@
   .ss-stage[data-active="3"] .ss-rail li[data-i="3"]::after {
     width: 1.75rem;
   }
+}
+
+/* Thai: no tracking on the mono labels (spaced Thai reads as broken words). */
+:lang(th) :is(.ss-title, .ss-note, .ss-hint) {
+  letter-spacing: 0;
 }

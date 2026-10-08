@@ -463,3 +463,8 @@
     animation: none !important;
   }
 }
+
+/* Thai: no tracking on the mono labels (spaced Thai reads as broken words). */
+:lang(th) :is(.hv-note, .hv-guard-label, .hv-replay) {
+  letter-spacing: 0;
+}
