@@ -12,7 +12,7 @@ export const THUNDER = { name: "thunder", segments: [{start: 0.25, dur: 13}, {st
 export const MUSIC = { name: "cozy-loop", loop: {body: 26.666667, tail: 0.75, correlated: true} as AssetLoop };
 export const SFX = {
   name: "sfx",
-  clinks: [{start: 0.15, dur: 0.4}, {start: 0.7, dur: 0.124}, {start: 0.974, dur: 0.4}, {start: 1.524, dur: 0.124}, {start: 1.798, dur: 0.084}, {start: 2.032, dur: 0.104}, {start: 2.286, dur: 0.159}] as Segment[],
-  splashes: [{start: 2.595, dur: 1.4}, {start: 4.145, dur: 1.4}] as Segment[],
-  drops: [{start: 5.695, dur: 0.6}, {start: 6.445, dur: 0.6}, {start: 7.195, dur: 0.6}] as Segment[],
+  clinks: [{start: 0.15, dur: 0.22}, {start: 0.52, dur: 0.129}, {start: 0.799, dur: 0.22}, {start: 1.169, dur: 0.124}, {start: 1.443, dur: 0.084}, {start: 1.677, dur: 0.104}, {start: 1.931, dur: 0.159}] as Segment[],
+  splashes: [{start: 2.24, dur: 1.4}, {start: 3.79, dur: 1.4}] as Segment[],
+  drops: [{start: 5.34, dur: 0.45}, {start: 5.94, dur: 0.45}, {start: 6.54, dur: 0.45}] as Segment[],
 };

@@ -253,27 +253,34 @@ const sfxAt: Record<"clinks" | "splashes" | "drops", { start: number; dur: numbe
     parts.push(toPeak(chs, peakDb));
     kinds.push(kind);
   };
-  // Coins dropped into a cup: the first strike only, cut before the first bounce.
+  // Strikes are found on a 12 kHz high-passed copy, where each contact is a sharp click and the
+  // coin's long ring does not mask the next bounce.
+  const hits = (path: string, rise: number) => onsets(readAudio(path, SR, 1, "highpass=f=12000:poles=2")[0], rise, 0.025);
+  // Coins dropped into a cup: the first strike only, cut just before the first bounce.
   for (const id of ["metal-1", "metal-2", "metal-3"]) {
     const s = src(id);
     used.set(s.id, "sfx clinks (gold strikes)");
-    const c = readAudio(join(SOURCES, s.localPath.split("sources/").pop()!), SR, 1, "highpass=f=300");
-    const on = onsets(c[0], 18, 0.06);
+    const path = join(SOURCES, s.localPath.split("sources/").pop()!);
+    const c = readAudio(path, SR, 1, "highpass=f=300");
+    const on = hits(path, 12);
     const a = Math.max(0, (on[0] ?? 0) - 0.003);
-    const b = Math.min(c[0].length / SR, on[1] !== undefined ? on[1] - 0.004 : a + 0.4, a + 0.4);
+    // The cup's bounces are too quiet to find reliably; 0.22 s keeps the strike and its ring.
+    const b = Math.min(c[0].length / SR, on[1] !== undefined ? on[1] - 0.004 : a + 0.22, a + 0.22);
     add("clinks", fade(slice(c, a, b), 0.002, Math.min(0.08, (b - a) * 0.5)), -8);
   }
-  // Coins on a floor: the first strike of four of them, with a short natural ring.
+  // Coins on a floor: the first strike of four of them, up to the first bounce.
   {
     const s = src("metal-4");
     used.set(s.id, "sfx clinks (gold strikes)");
-    const c = readAudio(join(SOURCES, s.localPath.split("sources/").pop()!), SR, 1, "highpass=f=300");
-    const on = onsets(c[0], 20, 1);
+    const path = join(SOURCES, s.localPath.split("sources/").pop()!);
+    const c = readAudio(path, SR, 1, "highpass=f=300");
+    const drops = onsets(c[0], 20, 1);
+    const on = hits(path, 12);
     for (const k of [0, 2, 5, 8]) {
-      if (on[k] === undefined) continue;
-      const a = on[k] - 0.003;
-      const next = onsets(slice(c, on[k] + 0.02, on[k] + 0.5)[0], 12, 0.05)[0];
-      const b = on[k] + Math.min(0.32, next !== undefined ? next + 0.016 : 0.32);
+      if (drops[k] === undefined) continue;
+      const a = drops[k] - 0.003;
+      const next = on.find((t) => t > drops[k] + 0.03);
+      const b = Math.min(next !== undefined ? next - 0.004 : a + 0.3, a + 0.3);
       add("clinks", fade(slice(c, a, b), 0.002, Math.min(0.1, (b - a) * 0.5)), -8);
     }
   }
@@ -288,14 +295,32 @@ const sfxAt: Record<"clinks" | "splashes" | "drops", { start: number; dur: numbe
   {
     const s = src("drop-1");
     used.set(s.id, "sfx drops (drips)");
-    const c = readAudio(join(SOURCES, s.localPath.split("sources/").pop()!), SR, 1, "highpass=f=120");
-    const on = onsets(c[0], 20, 0.6);
-    for (const k of [1, 4, 7]) {
-      if (on[k] === undefined) continue;
-      const a = on[k] - 0.004;
-      const b = Math.min(on[k + 1] !== undefined ? on[k + 1] - 0.05 : a + 0.6, a + 0.6);
-      add("drops", fade(slice(c, a, b), 0.002, Math.min(0.2, (b - a) * 0.5)), -8);
+    const c = readAudio(join(SOURCES, s.localPath.split("sources/").pop()!), SR, 1, "highpass=f=120,afftdn=nr=18:nf=-60");
+    // The three loudest drips (best above the room's hiss), each with a quiet half second after.
+    const lv: number[] = [];
+    const n5 = Math.round(0.005 * SR);
+    for (let i = 0; i + n5 <= c[0].length; i += n5) {
+      let m = 0;
+      for (let k = i; k < i + n5; k++) m = Math.max(m, Math.abs(c[0][k]));
+      lv.push(m);
     }
+    const order = lv.map((v, i) => [v, i * 0.005]).sort((x, y) => y[0] - x[0]);
+    const picked: number[] = [];
+    for (const [, t] of order) {
+      if (picked.length === 3) break;
+      if (picked.some((p) => Math.abs(p - t) < 0.6)) continue;
+      // The attack is where the drip first rises within 20 ms before its peak.
+      const win = c[0].subarray(Math.round((t - 0.02) * SR), Math.round(t * SR));
+      const top = Math.max(...win.map(Math.abs));
+      const rise = win.findIndex((v) => Math.abs(v) > top * 0.1);
+      picked.push(t - 0.02 + rise / SR);
+    }
+    picked.sort((x, y) => x - y);
+    for (const t of picked) {
+      const a = t - 0.004;
+      add("drops", fade(slice(c, a, a + 0.45), 0.002, 0.15), -8);
+    }
+    report.push({ dropPeaksDbfs: picked.map((t) => +db(lv[Math.round(t / 0.005)] ?? 0).toFixed(1)) });
   }
   const sprite = concat(parts, 0.15);
   sprite.at.forEach((seg, i) => sfxAt[kinds[i]].push(seg));
