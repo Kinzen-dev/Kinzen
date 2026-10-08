@@ -67,16 +67,13 @@ async function scrollThrough(page: Page) {
 }
 
 test.describe("CSP (TECH-08)", () => {
-  test("headers: enforced baseline plus the report-only origin policy", async ({ request }) => {
+  test("headers: enforced CSP baseline, no report-only policy (it had no endpoint; Safari logged an error)", async ({ request }) => {
     for (const path of ["/", "/th/privacy", "/no-such-page"]) {
       const headers = (await request.get(path)).headers();
       expect(headers["content-security-policy"]).toBe(
         "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
       );
-      const report = headers["content-security-policy-report-only"];
-      expect(report).toContain("default-src 'self'");
-      expect(report).toContain("connect-src 'self'");
-      expect(report).not.toMatch(/https?:|\*/);
+      expect(headers["content-security-policy-report-only"]).toBeUndefined();
       expect(headers["x-frame-options"]).toBe("DENY");
     }
   });

@@ -79,7 +79,6 @@ const ai: Builder = (gsap, root, light) => {
 
   // Clear the finished frame.
   tl.to([voice, ask, reply, ok, codeRow, ...ticks], { autoAlpha: 0, duration: 0.45, ease: "power2.in" });
-  tl.to(checks, { opacity: 0.45, duration: 0.45 }, "<");
   tl.call(() => {
     for (const el of [askText, replyText, codeLine]) el.textContent = "";
     evalN.textContent = "0";
@@ -126,13 +125,13 @@ const ai: Builder = (gsap, root, light) => {
   tl.call(light, [["LLM evals"]]);
   const t0 = tl.duration();
   countUp(tl, evalN, 0, 12, 1.5, t0);
-  checks.forEach((check, i) => {
-    tl.to(check, { opacity: 1, duration: 0.2 }, t0 + i * 0.3);
+  checks.forEach((_, i) => {
+    // The label stays at full contrast; the tick landing is the "checked" signal.
     tl.fromTo(
       ticks[i],
       { autoAlpha: 0, scale: 0.4 },
       { autoAlpha: 1, scale: 1, duration: 0.4, ease: "back.out(2.6)" },
-      "<",
+      t0 + i * 0.3,
     );
   });
   tl.fromTo(ok, { autoAlpha: 0, x: -4 }, { autoAlpha: 1, x: 0, duration: 0.35, ease: "power3.out" }, ">0.1");
