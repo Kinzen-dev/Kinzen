@@ -357,7 +357,9 @@ metalnessFactor = mix(metalnessFactor, 1.0, gMetal);`,
         "#include <emissivemap_fragment>",
         `#include <emissivemap_fragment>
 totalEmissiveRadiance += uGold * vec3(1.0, 0.78, 0.42) * vGlow * (0.04 + vTop * (0.16 + 1.4 * gLegend) + 0.25 * vGoldCap * vTop);
-totalEmissiveRadiance += uGold * gLegend * 0.07;`,
+totalEmissiveRadiance += uGold * gLegend * 0.07;
+// The ripple is light, not paint: tops under it glow warm.
+totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 1.1, vGlow) * (1.0 - step(0.5, vGoldCap)) * 0.55;`,
       );
   };
 
