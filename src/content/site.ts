@@ -22,7 +22,7 @@ const content: SiteContentInput = {
     },
     heroLine: {
       en: "Production systems, built and run end to end: event-driven TypeScript services on AWS, Shopify platforms, and AI voice and LINE products with guardrails in code.",
-      th: "ระบบที่ใช้งานจริง ผมสร้างและดูแลเองครบทั้งระบบ ตั้งแต่บริการ TypeScript แบบ event-driven บน AWS แพลตฟอร์ม Shopify ไปจนถึงผลิตภัณฑ์ AI รับสายและตอบแชท LINE ที่มีกฎกำกับเขียนไว้ในโค้ด",
+      th: "ระบบที่ใช้งานจริง ผมสร้างและดูแลเองครบทั้งระบบ: บริการ TypeScript แบบ event-driven บน AWS แพลตฟอร์ม Shopify และ AI รับสายและตอบแชท LINE ที่มีกฎอยู่ในโค้ด",
     },
     oneLiner: {
       en: "Senior full-stack engineer with seven years of production experience across frontend, backend and DevOps. Builds and runs event-driven services on a real-time transactional platform with 6,000+ daily active users (Kafka, MongoDB, AWS EKS). Former Tech Lead for AnyMind Group's EC Platform, leading 5 to 8 engineers across 10+ Shopify brands. Founder of Vesperwerk, building voice and LINE AI products with human-gated agent workflows.",

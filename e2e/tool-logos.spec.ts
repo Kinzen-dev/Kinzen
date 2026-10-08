@@ -41,7 +41,7 @@ test.describe("tool logos", () => {
   test("group cards list each tool as mark + name; the names stay real text", async ({ page }) => {
     await page.goto("/");
     const backend = page.locator("#skills dl > div").first();
-    await expect(backend.locator("dd li")).toHaveCount(8);
+    await expect(backend.locator("dd li")).toHaveCount(9);
     await expect(backend.locator("dd")).toContainText("TypeScript");
     await expect(backend.locator("dd li").filter({ hasText: "Hexagonal" }).locator("svg")).toHaveClass(
       /tool-mark-practice/,
@@ -83,7 +83,7 @@ test.describe("tool logos", () => {
   });
 
   test("case page stack pills carry the marks", async ({ page }) => {
-    await page.goto("/work/yimwhan-ai");
+    await page.goto("/work/clinic-receptionist");
     const pills = page.locator(".pj-pill");
     await expect(pills.filter({ hasText: "Fly.io" }).locator("svg.tool-mark")).toHaveAttribute("data-badge", "dark");
     await expect(pills.filter({ hasText: "Litestream" }).locator("svg")).toHaveCount(0);
@@ -102,7 +102,7 @@ test.describe("tool logos", () => {
   for (const theme of ["light", "dark"]) {
     test(`axe is clean on the tools section and a case page (${theme})`, async ({ page }) => {
       await page.addInitScript((t) => localStorage.setItem("theme", t), theme);
-      for (const route of ["/", "/work/yimwhan-ai"]) {
+      for (const route of ["/", "/work/clinic-receptionist"]) {
         await page.goto(route);
         const results = await new AxeBuilder({ page }).include(route === "/" ? "#skills" : ".pj-pills").analyze();
         expect(results.violations, route).toEqual([]);
