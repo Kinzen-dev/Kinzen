@@ -201,11 +201,12 @@ export function createNumeralStage(
   let index = -1;
   let flowTimer = 0;
   let dead = false;
+  let readyOk = false;
   let visible = false;
   let opened = false;
 
   /**
-   * Font size for figure `i`: the largest that fits the zone, but never more than 2x the size
+   * Font size for figure `i`: the largest that fits the zone, but never more than 3x the size
    * that fits every figure (narrow figures grow, the stream breathes; the set still reads as one).
    */
   function fitSize(zone: Layout["zone"], i: number): number {
@@ -222,7 +223,7 @@ export function createNumeralStage(
       const ih = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
       return Math.min((100 * zw) / Math.max(1, iw), (100 * zh) / Math.max(1, ih));
     });
-    return Math.min(fit[i], Math.min(...fit) * 2);
+    return Math.min(fit[i], Math.min(...fit) * 3);
   }
 
   function sample(i: number): Sampled {
@@ -323,7 +324,9 @@ export function createNumeralStage(
 
   const sync = () => {
     if (dead) return;
-    if (visible && !document.hidden) {
+    // Never before the shaders are up: the opening seed needs the sim, or every grain starts at
+    // the centre (it did when the view mounted already on screen).
+    if (visible && !document.hidden && readyOk) {
       open();
       engine.start();
     } else engine.stop();
@@ -371,7 +374,6 @@ export function createNumeralStage(
   measure();
   engine.setPalette(palette);
   engine.setParams({ ...CALM, glyphPointer: 0.5, mouseR: 1.6, dustSpring: 0.5, dustTurb: 2.2 }, true);
-  let readyOk = false;
   void engine.ready().then((ok) => {
     if (dead) return;
     opts.onReady?.(ok);
