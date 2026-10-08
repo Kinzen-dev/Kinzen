@@ -12,7 +12,7 @@ import { WorkCards } from "@/components/v3/more-work/work-cards";
 import { DrawPath } from "@/motion/draw-path";
 
 /** Card order on /work: area pastels alternate like a checkerboard (no two tools cards touch). */
-const CARDS = ["proj-yimwhan", "proj-helm", "proj-visual-qa", "proj-anymind-ec", "proj-ronglen", "proj-cadence"];
+const CARDS = ["proj-clinic", "proj-helm", "proj-visual-qa", "proj-anymind-ec", "proj-ronglen", "proj-cadence"];
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/work">): Promise<Metadata> {
   const { lang } = await params;

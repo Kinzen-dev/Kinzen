@@ -54,6 +54,8 @@ export const profile = z.object({
   preferredName: nonEmpty,
   handle: nonEmpty,
   role: localized,
+  /** Full headline (role, stack, focus): the /cv role line and the meta descriptions. */
+  headline: localized,
   heroLine: localized,
   oneLiner: localized,
   bioShort: localized,
@@ -118,7 +120,7 @@ export const project = z.object({
   tagline: localized,
   kind: z.enum(["product", "internal-tool", "side-project", "platform"]),
   area: z.enum(["ai", "commerce", "tools", "games"]),
-  status: z.enum(["live", "internal", "in-production", "delivered", "archived"]),
+  status: z.enum(["live", "internal", "pilot", "delivered", "archived"]),
   period: z.object({ start: yearMonth, end: z.union([yearMonth, z.literal("present")]).optional() }),
   role: localized,
   stack: z.array(nonEmpty).min(1),

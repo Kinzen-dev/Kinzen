@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 /**
- * Glass pill tone (v3): the pill turns dark glass over any dark scene (hero, Yimwhan, contact)
+ * Glass pill tone (v3): the pill turns dark glass over any dark scene (hero, clinic receptionist, contact)
  * and light glass over the page, like a camera exposure. One rAF-throttled check per scroll of
  * what sits under the pill; writes html[data-nav-tone]. Renders nothing.
  */

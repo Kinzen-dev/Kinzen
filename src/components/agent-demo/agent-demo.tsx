@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { YimwhanCopy } from "@/i18n/v3/yimwhan";
+import type { ClinicCopy } from "@/i18n/v3/clinic";
 import "./agent-demo.css";
 import { nobr } from "@/lib/thai-nodes";
 
-type Copy = YimwhanCopy["demo"];
+type Copy = ClinicCopy["demo"];
 type Scenario = Copy["scenarios"][number];
 
 /**

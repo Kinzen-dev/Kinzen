@@ -7,7 +7,7 @@ const en = {
   lead: "I",
   key: "build",
   join: " ",
-  /** What he builds (content: Yimwhan, AnyMind EC Platform, Helm, Visual QA). Longest first: the
+  /** What he builds (content: clinic receptionist, AnyMind EC Platform, Helm, Visual QA). Longest first: the
    *  first phrase is the one painted on load, and it sets the LCP size. */
   phrases: ["AI phone and LINE assistants", "Shopify platforms", "agent workspaces", "developer tools"],
   /** Phone set (below 48rem), index-aligned with `phrases`: every phrase fits one line at 360 px,
