@@ -45,8 +45,24 @@
   background-color: light-dark(transparent, oklch(0.95 0.012 85));
   box-shadow: 0 0 0 0.15em light-dark(transparent, oklch(0.95 0.012 85));
 }
+/* Lit from script (a view's beat, a passing light, a lifted ring): the host or an ancestor
+   carries data-lit. */
+[data-lit] .tool-mark:not(.tool-mark-practice) {
+  fill: var(--brand);
+}
+[data-lit] .tool-mark[data-badge="light"] {
+  background-color: light-dark(oklch(0.24 0.015 65), transparent);
+  box-shadow: 0 0 0 0.15em light-dark(oklch(0.24 0.015 65), transparent);
+}
+[data-lit] .tool-mark[data-badge="dark"] {
+  background-color: light-dark(transparent, oklch(0.95 0.012 85));
+  box-shadow: 0 0 0 0.15em light-dark(transparent, oklch(0.95 0.012 85));
+}
 /* A practice, not a product: a quiet dot in the secondary ink, never coloured. */
 .tool-mark-practice {
   fill: currentColor;
   color: var(--ink-3);
+}
+[data-lit] .tool-mark-practice {
+  color: var(--gold);
 }

@@ -6,14 +6,14 @@ import "./tool-mark.css";
 /**
  * The mark for `name` (decorative: the visible name next to it is the label), or nothing.
  * It renders in the label's tone; its host (`data-tool-host`) shows the brand colour on hover,
- * focus or a tap (ToolMarkTap).
+ * focus or a tap (ToolMarkTap), or while a script lights an ancestor (`data-lit`, the tools views).
  */
-export function ToolMark({ name }: { name: string }) {
+export function ToolMark({ name, className = "" }: { name: string; className?: string }) {
   const mark = toolMark(name);
   if (!mark) return null;
   if (mark === "practice") {
     return (
-      <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" className="tool-mark tool-mark-practice">
+      <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" className={`tool-mark tool-mark-practice ${className}`}>
         <circle cx="12" cy="12" r="3.5" fill="currentColor" />
       </svg>
     );
@@ -24,7 +24,7 @@ export function ToolMark({ name }: { name: string }) {
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 24 24"
-      className="tool-mark"
+      className={`tool-mark ${className}`}
       style={{ "--brand": color } as CSSProperties}
       data-badge={"badge" in logo ? logo.badge : undefined}
     >

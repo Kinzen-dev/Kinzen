@@ -1,0 +1,351 @@
+"use client";
+
+import {
+  createElement,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ComponentType,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
+import type { Locale } from "@/content/schema";
+import type { ToolsCopy } from "@/i18n/v3/tools";
+import { nobr } from "@/lib/thai-nodes";
+import { VIEW_IDS, type ToolGroup, type ViewId, type ViewProps } from "./types";
+import "./showcase.css";
+
+type View = ComponentType<ViewProps>;
+
+/** Every view is its own chunk: only the one on screen (and the next, just before its turn) downloads. */
+const LOADERS: Record<ViewId, () => Promise<{ default: View }>> = {
+  bento: () => import("./bento-loops"),
+  spotlight: () => import("./logo-spotlight"),
+  orbit: () => import("./logo-orbit"),
+  pipeline: () => import("./stack-pipeline"),
+};
+const loading = new Map<ViewId, Promise<View>>();
+function load(id: ViewId): Promise<View> {
+  let p = loading.get(id);
+  if (!p) {
+    p = LOADERS[id]().then((m) => m.default);
+    p.catch(() => loading.delete(id));
+    loading.set(id, p);
+  }
+  return p;
+}
+
+/** The view the server renders (static) and the page opens on. */
+const FIRST: ViewId = "bento";
+/** Auto-advance period; the active tab's progress line is this timer (a CSS animation). */
+const ADVANCE_S = 20;
+/** Crossfade length; the old view unmounts when it ends. */
+const FADE_MS = 700;
+/** A finger lifted inside the section keeps the timer paused this long. */
+const TOUCH_GRACE_MS = 5000;
+/** Set once a visitor picks a view: auto-advance stays off for the rest of the visit. */
+const PICKED_KEY = "kp-tools-view-picked";
+
+const next = (id: ViewId) => VIEW_IDS[(VIEW_IDS.indexOf(id) + 1) % VIEW_IDS.length];
+
+function readPicked() {
+  try {
+    return sessionStorage.getItem(PICKED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function writePicked() {
+  try {
+    sessionStorage.setItem(PICKED_KEY, "1");
+  } catch {
+    // Storage blocked: the pick still holds for this page view.
+  }
+}
+
+type Copy = Pick<ToolsCopy, "views" | "hints" | "switcher" | "showing">;
+
+/**
+ * The tools section's four views of one stack (bento of loops, logo wall, orbit, pipeline) behind a
+ * quiet tab switcher. While the section is in view and nobody points, hovers, focuses or touches
+ * inside it, it moves to the next view every ADVANCE_S seconds with a crossfade; the first pick
+ * stops that for the visit. The stage keeps one height per breakpoint, so nothing below moves.
+ * `children` is the server-rendered first view: complete without JS, swapped for its live twin
+ * (same markup) once that chunk loads. Reduced motion: no auto-advance, no crossfade, still views.
+ */
+export function ToolsShowcase({
+  locale,
+  groups,
+  copy,
+  children,
+}: {
+  locale: Locale;
+  groups: ToolGroup[];
+  copy: Copy;
+  children: ReactNode;
+}) {
+  const uid = useId();
+  const tabId = (id: ViewId) => `${uid}-tab-${id}`;
+  const panelId = `${uid}-panel`;
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState<ViewId>(FIRST);
+  const [active, setActive] = useState<ViewId>(FIRST);
+  const [leaving, setLeaving] = useState<ViewId | null>(null);
+  const [views, setViews] = useState<Partial<Record<ViewId, View>>>({});
+  const [auto, setAuto] = useState(false);
+  const [reduced, setReduced] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [held, setHeld] = useState(false);
+  const [announce, setAnnounce] = useState("");
+
+  const activeRef = useRef(active);
+  const reducedRef = useRef(reduced);
+  const seq = useRef(0);
+  const fadeTimer = useRef(0);
+  const running = auto && inView && !held;
+
+  /** Show `to` once its chunk is in: the current view fades out over it, then unmounts. */
+  const show = useCallback(async (to: ViewId) => {
+    const ticket = ++seq.current;
+    let View: View;
+    try {
+      View = await load(to);
+    } catch {
+      return;
+    }
+    if (ticket !== seq.current) return;
+    setViews((v) => (v[to] ? v : { ...v, [to]: View }));
+    const from = activeRef.current;
+    if (from === to) return;
+    activeRef.current = to;
+    setActive(to);
+    window.clearTimeout(fadeTimer.current);
+    if (reducedRef.current) {
+      setLeaving(null);
+      return;
+    }
+    setLeaving(from);
+    fadeTimer.current = window.setTimeout(() => setLeaving(null), FADE_MS);
+  }, []);
+
+  const pick = useCallback(
+    (to: ViewId) => {
+      setAuto(false);
+      writePicked();
+      setSelected(to);
+      void show(to);
+    },
+    [show],
+  );
+
+  const advance = useCallback(() => {
+    const to = next(activeRef.current);
+    setSelected(to);
+    setAnnounce(`${copy.showing}: ${copy.views[to]}`);
+    void show(to);
+  }, [copy, show]);
+
+  // Motion preference, the visit's earlier pick, and the live first view once the section nears.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => {
+      reducedRef.current = mq.matches;
+      setReduced(mq.matches);
+      setAuto(!mq.matches && !readPicked());
+    };
+    sync();
+    mq.addEventListener("change", sync);
+
+    // The live bento only matters with motion; under reduced motion the static one is the view.
+    const near = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting || reducedRef.current) return;
+        near.disconnect();
+        void load(FIRST).then((View) => setViews((v) => (v[FIRST] ? v : { ...v, [FIRST]: View })));
+      },
+      { rootMargin: "50% 0px" },
+    );
+    near.observe(root);
+    const seen = new IntersectionObserver(([e]) => setInView(e.isIntersecting && !document.hidden), {
+      threshold: 0.35,
+    });
+    seen.observe(root);
+    const onVis = () => {
+      if (document.hidden) setInView(false);
+      else {
+        seen.unobserve(root);
+        seen.observe(root);
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      mq.removeEventListener("change", sync);
+      near.disconnect();
+      seen.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+      window.clearTimeout(fadeTimer.current);
+    };
+  }, []);
+
+  // Anyone pointing, hovering, focusing or touching inside holds the timer.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    let hover = false;
+    let focus = false;
+    let touch = false;
+    let touchTimer = 0;
+    const sync = () => setHeld(hover || focus || touch);
+    const onEnter = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      hover = true;
+      sync();
+    };
+    const onLeave = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      hover = false;
+      sync();
+    };
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      window.clearTimeout(touchTimer);
+      touch = true;
+      sync();
+    };
+    const onUp = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      window.clearTimeout(touchTimer);
+      touchTimer = window.setTimeout(() => {
+        touch = false;
+        sync();
+      }, TOUCH_GRACE_MS);
+    };
+    const onFocusIn = () => {
+      focus = true;
+      sync();
+    };
+    const onFocusOut = (e: FocusEvent) => {
+      focus = root.contains(e.relatedTarget as Node | null);
+      sync();
+    };
+    root.addEventListener("pointerenter", onEnter);
+    root.addEventListener("pointerleave", onLeave);
+    root.addEventListener("pointerdown", onDown, { passive: true });
+    root.addEventListener("pointerup", onUp, { passive: true });
+    root.addEventListener("pointercancel", onUp, { passive: true });
+    root.addEventListener("focusin", onFocusIn);
+    root.addEventListener("focusout", onFocusOut);
+    return () => {
+      window.clearTimeout(touchTimer);
+      root.removeEventListener("pointerenter", onEnter);
+      root.removeEventListener("pointerleave", onLeave);
+      root.removeEventListener("pointerdown", onDown);
+      root.removeEventListener("pointerup", onUp);
+      root.removeEventListener("pointercancel", onUp);
+      root.removeEventListener("focusin", onFocusIn);
+      root.removeEventListener("focusout", onFocusOut);
+    };
+  }, []);
+
+  // While auto-advance runs, the next view's chunk comes down ahead of its turn.
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setTimeout(() => void load(next(active)).catch(() => {}), 4000);
+    return () => window.clearTimeout(id);
+  }, [running, active]);
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const i = VIEW_IDS.indexOf(selected);
+    const n = VIEW_IDS.length;
+    const to =
+      e.key === "ArrowRight" || e.key === "ArrowDown"
+        ? VIEW_IDS[(i + 1) % n]
+        : e.key === "ArrowLeft" || e.key === "ArrowUp"
+          ? VIEW_IDS[(i - 1 + n) % n]
+          : e.key === "Home"
+            ? VIEW_IDS[0]
+            : e.key === "End"
+              ? VIEW_IDS[n - 1]
+              : null;
+    if (!to) return;
+    e.preventDefault();
+    pick(to);
+    tabsRef.current?.querySelector<HTMLButtonElement>(`[data-view="${to}"]`)?.focus();
+  };
+
+  const panes = leaving && leaving !== active ? [leaving, active] : [active];
+
+  return (
+    <div ref={rootRef} className="tv" data-running={running || undefined} data-auto={auto || undefined}>
+      <div className="tv-bar">
+        <div ref={tabsRef} role="tablist" aria-label={copy.switcher} className="tv-tabs" onKeyDown={onKeyDown}>
+          {VIEW_IDS.map((id) => {
+            const on = id === selected;
+            return (
+              <button
+                key={id}
+                id={tabId(id)}
+                type="button"
+                role="tab"
+                data-view={id}
+                aria-selected={on}
+                aria-controls={panelId}
+                tabIndex={on ? 0 : -1}
+                className="tv-tab"
+                onClick={() => (id === selected ? undefined : pick(id))}
+                onPointerEnter={() => void load(id).catch(() => {})}
+                onFocus={() => void load(id).catch(() => {})}
+              >
+                <span>{nobr(copy.views[id])}</span>
+                {on && auto ? (
+                  <span
+                    key={active}
+                    aria-hidden="true"
+                    className="tv-progress"
+                    style={{ animationDuration: `${ADVANCE_S}s` }}
+                    onAnimationEnd={advance}
+                  />
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+        <div className="tv-hints">
+          {VIEW_IDS.map((id) => (
+            <p key={id} className="tv-hint" data-on={id === selected || undefined} aria-hidden={id !== selected}>
+              {nobr(copy.hints[id])}
+            </p>
+          ))}
+        </div>
+      </div>
+      <p className="sr-only" aria-live="polite">
+        {announce}
+      </p>
+
+      <div id={panelId} role="tabpanel" aria-labelledby={tabId(active)} className="tv-stage" data-view={active}>
+        {panes.map((id) => {
+          const View = views[id];
+          const out = id !== active;
+          return (
+            <div
+              key={id}
+              className="tv-pane"
+              data-view={id}
+              data-state={out ? "out" : leaving ? "in" : undefined}
+              inert={out}
+              aria-hidden={out || undefined}
+            >
+              {View ? createElement(View, { locale, groups }) : id === FIRST ? children : null}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
