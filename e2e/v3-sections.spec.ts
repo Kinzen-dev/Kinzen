@@ -208,30 +208,6 @@ test.describe("AI-assisted engineering notes", () => {
   });
 });
 
-test.describe("tools", () => {
-  test("two marquee rows run in opposite directions; the groups carry the content", async ({ page }) => {
-    await page.goto("/");
-    const marquees = page.locator("#skills .marquee");
-    await expect(marquees).toHaveCount(2);
-    await expect(page.locator("#skills .tools-marquees")).toHaveAttribute("aria-hidden", "true");
-    await expect(marquees.nth(1)).toHaveAttribute("data-reverse", "true");
-    await expect(page.locator("#skills dl dt")).toHaveCount(6);
-  });
-
-  test("reduced motion: still chips that wrap inside the page", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await scrollTo(page, "skills");
-    const track = page.locator("#skills .marquee-track").first();
-    expect(await track.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
-    const width = page.viewportSize()!.width;
-    const overflow = await page
-      .locator("#skills .marquee-row:not([aria-hidden]) .tool-chip")
-      .evaluateAll((els, w) => els.filter((e) => e.getBoundingClientRect().right > w).length, width);
-    expect(overflow).toBe(0);
-  });
-});
-
 test.describe("about", () => {
   test("the portrait slot is decorative art and the bio is real text", async ({ page }) => {
     await page.goto("/");

@@ -4,7 +4,7 @@ import { thai } from "./thai";
 
 /**
  * Audit track a-02 (platform): TECH-01/02 footer, TECH-03 og:url, TECH-06 privacy page,
- * TECH-08 CSP, TECH-09 content dates, TECH-10 shortcuts, TECH-11 marquee pause.
+ * TECH-08 CSP, TECH-09 content dates, TECH-10 shortcuts. (TECH-11 left with the marquee.)
  */
 
 const SLUGS = ["clinic-receptionist", "anymind-ec-platform", "helm", "ronglen", "visual-qa-harness", "cadence"];
@@ -232,45 +232,5 @@ test.describe("shortcuts (TECH-10)", () => {
     await page.waitForTimeout(200);
     expect(await choices.evaluateAll((els) => els.map((e) => e.getAttribute("aria-pressed")))).toEqual(before);
     await expect(page.getByRole("dialog")).toBeHidden();
-  });
-});
-
-test.describe("marquee pause (TECH-11)", () => {
-  const playState = (page: Page) =>
-    page
-      .locator(".tools-marquee .marquee-track")
-      .first()
-      .evaluate((el) => getComputedStyle(el).animationPlayState);
-
-  test("pause holds when focus and pointer leave, survives a reload, resumes on demand", async ({ page }) => {
-    await page.goto("/");
-    const button = page.getByRole("button", { name: "Pause motion" });
-    await button.scrollIntoViewIfNeeded();
-    expect(await playState(page)).toBe("running");
-    await button.click();
-    await expect(page.getByRole("button", { name: "Resume motion" })).toBeFocused();
-    await page.keyboard.press("Tab");
-    await page.mouse.move(1, 1);
-    expect(await playState(page)).toBe("paused");
-
-    await page.reload();
-    await page.getByRole("button", { name: "Resume motion" }).scrollIntoViewIfNeeded();
-    expect(await playState(page)).toBe("paused");
-    await page.getByRole("button", { name: "Resume motion" }).press("Enter");
-    await expect(page.getByRole("button", { name: "Pause motion" })).toBeVisible();
-    expect(await playState(page)).toBe("running");
-  });
-
-  test("Thai labels; hidden under reduced motion, where the rows are still", async ({ page }) => {
-    await page.goto("/th");
-    await expect(page.getByRole("button", { name: thai("หยุดภาพเคลื่อนไหว") })).toBeVisible();
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await expect(page.getByRole("button", { name: thai("หยุดภาพเคลื่อนไหว") })).toBeHidden();
-    expect(
-      await page
-        .locator(".tools-marquee .marquee-track")
-        .first()
-        .evaluate((el) => getComputedStyle(el).animationName),
-    ).toBe("none");
   });
 });

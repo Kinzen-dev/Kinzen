@@ -1,0 +1,345 @@
+/* Tools view: logo wall. Every tool in the theme tone, lit by a soft spotlight. */
+.ls {
+  height: 100%;
+}
+
+/* ---------------------------------------------------------------- wall */
+.ls-wall {
+  --line: color-mix(in oklch, var(--rule) 75%, transparent);
+  position: relative;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--rule),
+    var(--shadow-soft);
+  overflow: hidden;
+  isolation: isolate;
+  touch-action: pan-y;
+}
+/* The light: a fixed-size soft disc moved on the compositor (transform only). */
+.ls-glow {
+  position: absolute;
+  top: -15rem;
+  left: -15rem;
+  z-index: -1;
+  width: 30rem;
+  height: 30rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklch, var(--gold) 16%, transparent),
+    color-mix(in oklch, var(--gold) 6%, transparent) 45%,
+    transparent
+  );
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 0.6s var(--ease-out);
+}
+.ls-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.ls-row + .ls-row {
+  border-top: 1px solid var(--line);
+}
+.ls-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.875rem var(--inset-card) 0.625rem;
+  text-align: start;
+  color: var(--ink-2);
+  transition: color var(--dur-2) var(--ease-out);
+  outline-offset: -3px;
+}
+.ls-label-idx,
+.ls-label-n {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+:lang(th) .ls-label-n {
+  font-family: var(--font-sans);
+}
+.ls-label-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.ls-label-n {
+  margin-inline-start: auto;
+}
+.ls-label:hover,
+.ls-label[aria-pressed="true"] {
+  color: var(--ink);
+}
+.ls-label[aria-pressed="true"] .ls-label-idx {
+  color: var(--gold);
+}
+.ls-label:focus-visible {
+  outline: 2px solid var(--gold);
+}
+
+.ls-cells {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none;
+}
+.ls-fill {
+  display: none;
+}
+/* Each cell draws its own right and bottom hairline; they warm to gold under the light. */
+.ls-cell,
+.ls-fill {
+  --k: 0;
+  box-shadow:
+    1px 0 0 color-mix(in oklch, var(--gold) calc(var(--k) * 55%), var(--line)),
+    0 1px 0 color-mix(in oklch, var(--gold) calc(var(--k) * 55%), var(--line));
+}
+.ls-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: 5.75rem;
+  padding: 0.75rem 0.375rem;
+  text-align: center;
+  outline-offset: -3px;
+  cursor: default;
+}
+.ls-cell:focus-visible {
+  outline: 2px solid var(--gold);
+}
+.ls-cell .tool-mark {
+  --tone: color-mix(in oklch, var(--ink) 52%, transparent);
+  width: 1.75rem;
+  height: 1.75rem;
+  fill: color-mix(in oklch, var(--brand, var(--ink)) calc(var(--k) * 100%), var(--tone));
+  transform: translateY(calc(var(--k) * -3px)) scale(calc(1 + var(--k) * 0.1));
+  filter: drop-shadow(
+    0 calc(var(--k) * 6px) calc(var(--k) * 14px)
+      color-mix(in oklch, var(--brand, var(--ink)) calc(var(--k) * 40%), transparent)
+  );
+  transition: none;
+}
+/* Marks that vanish on the surface get their tile as they light (light theme: React, Vitest;
+   dark theme: SQLite, Fly.io). */
+.ls-cell .tool-mark[data-badge="light"] {
+  background: light-dark(color-mix(in oklch, oklch(0.24 0.015 65) calc(var(--k) * 100%), transparent), transparent);
+  box-shadow: 0 0 0 0.2rem
+    light-dark(color-mix(in oklch, oklch(0.24 0.015 65) calc(var(--k) * 100%), transparent), transparent);
+}
+.ls-cell .tool-mark[data-badge="dark"] {
+  background: light-dark(transparent, color-mix(in oklch, oklch(0.95 0.012 85) calc(var(--k) * 100%), transparent));
+  box-shadow: 0 0 0 0.2rem
+    light-dark(transparent, color-mix(in oklch, oklch(0.95 0.012 85) calc(var(--k) * 100%), transparent));
+}
+.ls-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  max-width: 100%;
+  color: color-mix(in oklch, var(--ink) calc(var(--k) * 100%), var(--ink-3));
+  font-size: 0.6875rem;
+  line-height: 1.3;
+}
+/* A text-only tool (or a practice) is set as its name: the name is the mark. */
+.ls-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  max-width: 100%;
+  color: color-mix(in oklch, var(--ink) calc(55% + var(--k) * 45%), transparent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  transform: translateY(calc(var(--k) * -2px));
+  text-shadow: 0 0 calc(var(--k) * 16px) color-mix(in oklch, var(--gold) calc(var(--k) * 45%), transparent);
+}
+.ls-word .tool-mark {
+  width: 0.625rem;
+  height: 0.625rem;
+  fill: color-mix(in oklch, var(--gold) calc(var(--k) * 100%), color-mix(in oklch, var(--ink) 40%, transparent));
+  transform: none;
+  filter: none;
+}
+.ls-cell:hover {
+  --k: 1 !important;
+}
+
+/* Tablets: rows of six. */
+@media (min-width: 40rem) {
+  .ls-cells {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .ls-cell {
+    min-height: 6.5rem;
+  }
+  .ls-cell .tool-mark {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+/* Desktop: the group name is the row's first column, every row nine cells wide. */
+@media (min-width: 64rem) {
+  .ls-row {
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+  }
+  .ls-label {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.25rem;
+    padding: 1.125rem var(--inset-card);
+    box-shadow: 1px 0 0 var(--line);
+  }
+  .ls-label-n {
+    margin-inline-start: 0;
+  }
+  .ls-cells {
+    grid-template-columns: repeat(var(--cols, 9), minmax(0, 1fr));
+  }
+  .ls-fill {
+    display: block;
+  }
+  .ls-cell {
+    min-height: 7.5rem;
+    gap: 0.625rem;
+  }
+  .ls-cell .tool-mark {
+    width: 2.125rem;
+    height: 2.125rem;
+  }
+  .ls-name {
+    font-size: 0.75rem;
+  }
+  .ls-word {
+    font-size: 0.9375rem;
+  }
+}
+
+.ls-word-short {
+  display: none;
+}
+
+/* ---------- fit to the stage ---------- */
+/* The wall fills the stage. Phones and tablets: a compact wall, six cells to a row under each
+   group's name; on phones the names under the marks go (screen readers keep every name) and long
+   word-only names shorten. */
+.ls-wall {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.ls-row {
+  flex: auto;
+}
+@media (max-width: 63.99rem) {
+  .ls-row {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .ls-label {
+    padding: 0.5rem var(--inset-card) 0.25rem;
+  }
+  .ls-label-name {
+    font-size: 0.8125rem;
+  }
+  .ls-cells {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .ls-cell {
+    min-height: 2.75rem;
+    gap: 0.25rem;
+    padding: 0.375rem 0.125rem;
+  }
+  .ls-cell .tool-mark {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  .ls-name {
+    font-size: 0.6875rem;
+    -webkit-line-clamp: 1;
+  }
+  .ls-word {
+    font-size: 0.75rem;
+  }
+  .ls-word:has(.ls-word-short) .ls-word-full {
+    display: none;
+  }
+  .ls-word-short {
+    display: block;
+  }
+  .ls-cell {
+    padding-block: 0.25rem;
+  }
+}
+@media (max-width: 39.99rem) {
+  .ls-label {
+    padding-block: 0.375rem 0.125rem;
+  }
+  .ls-cell {
+    min-height: 2.375rem;
+    padding-block: 0.25rem;
+  }
+  .ls-cell .tool-mark {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .ls-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .ls-word {
+    font-size: 0.59375rem;
+    letter-spacing: -0.02em;
+  }
+  .ls-word .tool-mark {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+}
+/* The narrowest phones: six cells to a row, so a word-only name still fits on its line. */
+@media (max-width: 22.49rem) {
+  .ls-cells {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .ls-word {
+    font-size: 0.5625rem;
+  }
+}
+@media (min-width: 64rem) {
+  .ls-cell {
+    min-height: 0;
+    height: 100%;
+  }
+}
+
+/* A slow device (measured in the frame loop): no glow under the marks or the words. */
+.ls-wall[data-lite] .ls-cell .tool-mark {
+  filter: none;
+}
+.ls-wall[data-lite] .ls-word {
+  text-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-cell .tool-mark,
+  .ls-word {
+    transform: none;
+  }
+  .ls-glow {
+    transition: none;
+  }
+}
