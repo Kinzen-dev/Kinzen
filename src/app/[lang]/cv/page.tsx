@@ -105,12 +105,11 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
                 <p className="cv-dates readout">{range(era.start, era.end)}</p>
               </div>
               <p className="cv-meta">
-                {era.org.name}
+                {/* An unnamed client is known only by its approved descriptor (the entry's summary). */}
+                {era.org.confidential ? nobr(t(era.summary, locale).replace(/\.$/, "")) : era.org.name}
                 <span className="text-ink-3"> / </span>
                 {nobr(t(era.location, locale))}
               </p>
-              {/* An unnamed client is known only by its approved descriptor. */}
-              {era.org.confidential ? <p className="cv-text">{nobr(t(era.summary, locale))}</p> : null}
               <ul className="cv-points">
                 {era.highlights.map((h) => (
                   <li key={h.text.en.slice(0, 24)}>{nobr(t(h.text, locale))}</li>

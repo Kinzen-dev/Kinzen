@@ -263,11 +263,8 @@
     text-decoration: none;
   }
 
-  /* Selected work opens page 2 (with its label): split after Experience it would continue on a
-     page with an empty left column. Everything from here fits one A4 page in both languages. */
-  .cv-section:has(#cv-projects) {
-    break-before: page;
-  }
+  /* Since v1.7 (four roles) Experience runs onto page 2, so Selected work simply follows it there:
+     a forced break would leave page 2 half empty and push the rest to a third page. */
   .cv-section {
     grid-template-columns: 32mm 1fr;
     gap: 2mm 6mm;

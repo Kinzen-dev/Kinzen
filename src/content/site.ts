@@ -170,7 +170,7 @@ const content: SiteContentInput = {
       end: "present",
       location: { en: "Remote", th: "ทำงานทางไกล" },
       summary: {
-        en: "Real-time transactional platform with wallet and ledger (confidential client, NDA). Part-time contract.",
+        en: "Real-time transactional platform with wallet and ledger (confidential client, NDA), part-time contract.",
         th: "แพลตฟอร์มธุรกรรมแบบเรียลไทม์ที่มี wallet และ ledger (ลูกค้าที่ไม่เปิดเผยชื่อ ภายใต้ NDA) สัญญาจ้างแบบพาร์ตไทม์",
       },
       stack: ["TypeScript", "NestJS", "Kafka", "MongoDB", "Next.js", "AWS EKS", "Terragrunt", "GitHub Actions"],
