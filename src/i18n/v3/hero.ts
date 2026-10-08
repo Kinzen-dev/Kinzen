@@ -20,6 +20,8 @@ const en = {
     openTo: { label: "Open to", value: "Senior and lead roles" },
     projects: { label: "Projects through", value: "Vesperwerk" },
   },
+  /** The looping hero picture's pause control (an accessible name only, no visible text). */
+  stage: { pause: "Pause the animation", play: "Play the animation" },
 };
 export type HeroCopy = typeof en;
 const th: HeroCopy = {
@@ -38,5 +40,6 @@ const th: HeroCopy = {
     openTo: { label: "เปิดรับ", value: "ตำแหน่ง senior และ lead" },
     projects: { label: "รับงานโปรเจกต์ผ่าน", value: "Vesperwerk" },
   },
+  stage: { pause: "หยุดภาพเคลื่อนไหว", play: "เล่นภาพเคลื่อนไหวต่อ" },
 };
 export const hero = { en, th };
