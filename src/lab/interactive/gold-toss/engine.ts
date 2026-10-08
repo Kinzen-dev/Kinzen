@@ -30,7 +30,7 @@ const DEPTH = 0.26;
 const WATER = -0.24;
 const G = 15;
 const LEDGE = { w: BW + 0.8, d: 0.95, h: 1.6 };
-const DOMAIN = { x0: -4.8, z0: -1.4, w: 9.6, d: 5.2 };
+const DOMAIN = { x0: -4.8, z0: -1.4, w: 9.6, d: 5.8 };
 const FRONT_Z = LEDGE.d / 2;
 
 type Box = { cx: number; cy: number; hx: number; hy: number };
@@ -159,6 +159,7 @@ const WATER_SHADER = {
     uVel: { value: null },
     uDomain: { value: new THREE.Vector4() },
     uDyeTexel: { value: new THREE.Vector2() },
+    uDyeScale: { value: 1 },
     uGold: { value: new THREE.Color() },
     uDeep: { value: new THREE.Color() },
     uCam: { value: new THREE.Vector3() },
@@ -180,6 +181,7 @@ uniform vec3 color;
 uniform sampler2D tDiffuse, uDye, uVel;
 uniform vec4 uDomain;
 uniform vec2 uDyeTexel;
+uniform float uDyeScale;
 uniform vec3 uGold, uDeep, uCam;
 uniform float uTime;
 uniform vec4 uRings[12];
@@ -212,7 +214,8 @@ void main(){
     float R = texture2D(uDye, uv + vec2(uDyeTexel.x, 0.0)).x;
     float T = texture2D(uDye, uv + vec2(0.0, uDyeTexel.y)).x;
     float B = texture2D(uDye, uv - vec2(0.0, uDyeTexel.y)).x;
-    dg = vec2(R - L, T - B) * inside;
+    // Per-texel differences grow on a coarser dye grid: scale back so the ink shades the same.
+    dg = vec2(R - L, T - B) * inside * uDyeScale;
     slope += texture2D(uVel, uv).xy * 0.00005 * inside;
   }
   slope += dg * 0.05;
@@ -366,6 +369,7 @@ void main(){
   const dyeH = Math.round((dyeW * DOMAIN.d) / DOMAIN.w);
   const fluid = createFluid(renderer, simW, simH, dyeW, dyeH, lite ? 10 : 18);
   wu.uDyeTexel.value.set(1 / dyeW, 1 / dyeH);
+  wu.uDyeScale.value = dyeW / 1024;
   const toUV = (x: number, z: number) => [(x - DOMAIN.x0) / DOMAIN.w, (z - DOMAIN.z0) / DOMAIN.d] as const;
   const inDomain = (u: number, v: number) => u > 0.02 && u < 0.98 && v > 0.02 && v < 0.98;
   // World units per second to sim texels per second (x and z).
@@ -612,7 +616,8 @@ void main(){
       const spokes = 10;
       for (let i = 0; i < spokes; i++) {
         const a = (i / spokes) * Math.PI * 2;
-        const s = (240 + 260 * k) * 0.5;
+        // Texels per second, scaled to the grid so the bloom spreads the same on a coarse phone grid.
+        const s = (240 + 260 * k) * 0.5 * (simW / 192);
         fluid.splat(
           u + (Math.cos(a) * 0.012) / (DOMAIN.w / DOMAIN.d),
           w + Math.sin(a) * 0.012,
@@ -725,7 +730,20 @@ void main(){
     enter(L);
     const side = L.slot.x < 0 ? -1 : 1;
     L.body.velocity.set(side * (0.5 + Math.random() * 1.1), 4.4 + Math.random() * 1.0, 2.3 + Math.random() * 0.9);
+    landInView(L);
     L.body.angularVelocity.set((Math.random() - 0.3) * 7, (Math.random() - 0.5) * 6, side * -(2 + Math.random() * 4));
+  };
+  // Aim assist: from the flight time to the water, trim the horizontal speed so the splash lands
+  // inside the ink band the camera sees (a hard flick still flies, it just comes down in view).
+  const landInView = (L: Letter) => {
+    const p = L.body.position;
+    const v = L.body.velocity;
+    const t = (v.y + Math.sqrt(v.y * v.y + 2 * G * Math.max(0, p.y - WATER))) / G;
+    const portrait = camera.aspect < 1;
+    const zMax = portrait ? 2.9 : 3.3;
+    const xMax = portrait ? 1.7 : 2.6;
+    if (p.z + v.z * t > zMax) v.z = (zMax - p.z) / t;
+    if (Math.abs(p.x + v.x * t) > xMax) v.x = (Math.sign(v.x) * xMax - p.x) / t;
   };
   const hop = (L: Letter, k = 1) => {
     enter(L);
@@ -879,7 +897,8 @@ void main(){
     if (portrait) v.x -= L.slot.x * 0.7;
     const s = Math.hypot(v.x, v.y);
     v.y += Math.min(0.8, s * 0.15);
-    v.z += portrait ? Math.min(2.8, 1.1 + s * 0.4) : Math.min(2.2, 0.6 + s * 0.26);
+    v.z += portrait ? Math.min(1.5, 0.7 + s * 0.18) : Math.min(2.2, 0.6 + s * 0.26);
+    landInView(L);
     const tumble = Math.min(1, s / 7);
     L.body.angularVelocity.vadd(
       new CANNON.Vec3((Math.random() - 0.5) * 6 * tumble, (Math.random() - 0.5) * 5 * tumble, -Math.sign(v.x || 1) * 3 * tumble),
@@ -1225,7 +1244,8 @@ void main(){
     const v = new THREE.Vector3();
     return letters.map((L) => {
       v.copy(L.mesh.position).project(camera);
-      return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height, state: L.state };
+      const p = L.mesh.position;
+      return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height, state: L.state, w: [p.x, p.y, p.z].map((n) => +n.toFixed(2)) };
     });
   };
 
