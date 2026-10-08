@@ -21,7 +21,7 @@ describe("numbers section copy", () => {
         expect(copy.views[id]).toBeTruthy();
         expect(copy.hints[id]).toBeTruthy();
       }
-      expect(JSON.stringify(copy)).not.toMatch(/[–—⁠]/);
+      expect(JSON.stringify(copy)).not.toMatch(/[\u2013\u2014\u2060]/);
     }
   });
 });

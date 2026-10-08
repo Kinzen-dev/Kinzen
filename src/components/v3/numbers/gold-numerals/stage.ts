@@ -205,7 +205,7 @@ export function createNumeralStage(
   let opened = false;
 
   /**
-   * Font size for figure `i`: the largest that fits the zone, but never more than 1.45x the size
+   * Font size for figure `i`: the largest that fits the zone, but never more than 2x the size
    * that fits every figure (narrow figures grow, the stream breathes; the set still reads as one).
    */
   function fitSize(zone: Layout["zone"], i: number): number {
@@ -222,7 +222,7 @@ export function createNumeralStage(
       const ih = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
       return Math.min((100 * zw) / Math.max(1, iw), (100 * zh) / Math.max(1, ih));
     });
-    return Math.min(fit[i], Math.min(...fit) * 1.45);
+    return Math.min(fit[i], Math.min(...fit) * 2);
   }
 
   function sample(i: number): Sampled {

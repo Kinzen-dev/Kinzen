@@ -9,6 +9,7 @@
  * replay, 500 messages and 37 caught). Never print a percentage from 500/37. The 6,000+ card names
  * no client, domain or industry: only "real-time transactional platform" and "confidential client".
  * The clinic product is only ever "AI phone and LINE receptionist for dental clinics".
+ * Thai ranges ("5 ถึง 8") use no-break spaces so a line never ends inside one.
  */
 export type StatKey = "production" | "brands" | "users" | "replay";
 
@@ -91,7 +92,7 @@ const th: NumbersCopy = {
   showing: "กำลังแสดง",
   views: {
     "split-flap": "บอร์ด",
-    "honest-viz": "ตามสัดส่วน",
+    "honest-viz": "สัดส่วน",
     "scrolly-stats": "เรื่องเล่า",
     "gold-numerals": "ผงทอง",
     "editorial-numerals": "นิตยสาร",
@@ -112,7 +113,7 @@ const th: NumbersCopy = {
     },
     brands: {
       figure: "10+",
-      label: "แบรนด์ที่ AnyMind Group โดยผมนำทีมวิศวกร 5 ถึง 8 คน",
+      label: "แบรนด์ที่ AnyMind Group โดยผมนำทีมวิศวกร 5\u00a0ถึง\u00a08 คน",
       note: "Tech Lead ปี 2022 ถึง 2026",
       source: "AnyMind Group ทีม EC Platform ปี 2022 ถึง 2026",
     },
@@ -145,7 +146,7 @@ const th: NumbersCopy = {
     careerStart: "ต.ค. 2019",
     today: "วันนี้",
     brandsCaption: "10 แบรนด์ขึ้นไป",
-    team: "ทีม 5 ถึง 8 คน",
+    team: "ทีม 5\u00a0ถึง\u00a08 คน",
     usersLegend: "จุดละ 100 ผู้ใช้งานต่อวัน",
     matrixLegend: "จุดละ 1 ข้อความ ตำแหน่งที่มาของ 37 ครั้งเป็นภาพประกอบ",
     guard: "ชุดตรวจในโค้ด",

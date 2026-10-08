@@ -6,6 +6,12 @@
   /* The stage height every view composes into (one per breakpoint: no jump between views). */
   --nv-h: 48rem;
 }
+/* The narrowest phones wrap every caption once more. */
+@media (max-width: 22.49rem) {
+  .nv {
+    --nv-h: 53rem;
+  }
+}
 @media (min-width: 48rem) {
   .nv {
     --nv-h: 46rem;

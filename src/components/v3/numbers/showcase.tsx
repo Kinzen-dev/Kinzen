@@ -231,12 +231,15 @@ export function NumbersShowcase({ locale, copy, children }: { locale: Locale; co
         sync();
       }, TOUCH_GRACE_MS);
     };
-    const onFocusIn = () => {
-      focus = true;
+    // Keyboard focus holds; the focus a mouse click leaves on a tab does not (the pointer
+    // leaving is what releases a mouse user, or the stories would freeze after every pick).
+    const keyboardFocus = (el: EventTarget | null) => el instanceof Element && el.matches(":focus-visible");
+    const onFocusIn = (e: FocusEvent) => {
+      focus = keyboardFocus(e.target);
       sync();
     };
     const onFocusOut = (e: FocusEvent) => {
-      focus = root.contains(e.relatedTarget as Node | null);
+      focus = root.contains(e.relatedTarget as Node | null) && keyboardFocus(e.relatedTarget);
       sync();
     };
     root.addEventListener("pointerenter", onEnter);
