@@ -231,7 +231,7 @@ void main(){
     refl += texture2DProj(tDiffuse, q).rgb;
   }
   refl /= 5.0;
-  vec3 col = uDeep * 0.6 + refl * mix(0.1, 0.62, F);
+  vec3 col = uDeep * 0.6 + refl * mix(0.08, 0.52, F);
   // Gold ink in the water: thin wisps an amber veil, thick ink lit liquid gold.
   float a = (1.0 - exp(-pow(d, 1.2) * 1.9)) * 0.92;
   vec3 Ld = normalize(vec3(-0.35, 0.85, 0.4));
@@ -240,8 +240,8 @@ void main(){
   float spec = pow(clamp(dot(inkN, normalize(Ld + V)), 0.0, 1.0), 70.0);
   // Veins: where the ink folds (steep gradient) it reads darker and richer, the way dye in water
   // shows its layers; flat thick ink is bright.
-  float fold = smoothstep(0.02, 0.25, length(dg));
-  vec3 ink = mix(uGold * vec3(0.8, 0.6, 0.3) * 0.62, uGold * vec3(1.15, 1.02, 0.78) * 1.05, smoothstep(0.08, 1.1, d));
+  float fold = smoothstep(0.02, 0.25, length(dg)) * smoothstep(0.35, 0.9, d);
+  vec3 ink = mix(uGold * vec3(0.95, 0.78, 0.45) * 0.8, uGold * vec3(1.15, 1.02, 0.78) * 1.05, smoothstep(0.08, 1.1, d));
   ink *= (0.5 + 0.6 * diff) * (1.0 - fold * 0.35);
   col = mix(col, ink, a * 0.9) + vec3(1.0, 0.9, 0.7) * spec * a * 1.1 + refl * F * a * 0.25;
   float far = smoothstep(4.0, 11.5, length(vWorld.xz));
@@ -330,12 +330,12 @@ void main(){
   stoneBump.repeat.set(3, 1.4);
   const ledgeGeo = new RoundedBoxGeometry(LEDGE.w, LEDGE.h, LEDGE.d, 3, 0.04);
   const ledgeMat = new THREE.MeshStandardMaterial({
-    color: new THREE.Color().setRGB(0.007, 0.008, 0.012),
-    roughness: 0.78,
+    color: new THREE.Color().setRGB(0.008, 0.009, 0.013),
+    roughness: 0.5,
     roughnessMap: stoneBump,
     bumpMap: stoneBump,
-    bumpScale: 0.9,
-    envMapIntensity: 0.2,
+    bumpScale: 0.3,
+    envMapIntensity: 0.5,
   });
   const ledge = new THREE.Mesh(ledgeGeo, ledgeMat);
   ledge.position.set(0, -LEDGE.h / 2, 0);
@@ -385,7 +385,7 @@ void main(){
   (world.solver as CANNON.GSSolver).iterations = lite ? 8 : 14;
   const metal = new CANNON.Material("metal");
   const stone = new CANNON.Material("stone");
-  world.addContactMaterial(new CANNON.ContactMaterial(metal, metal, { friction: 0.32, restitution: 0.2 }));
+  world.addContactMaterial(new CANNON.ContactMaterial(metal, metal, { friction: 0.16, restitution: 0.22 }));
   world.addContactMaterial(new CANNON.ContactMaterial(metal, stone, { friction: 0.62, restitution: 0.08 }));
   const ledgeBody = new CANNON.Body({ mass: 0, material: stone });
   ledgeBody.addShape(new CANNON.Box(new CANNON.Vec3(LEDGE.w / 2, LEDGE.h / 2, LEDGE.d / 2)));
@@ -730,7 +730,9 @@ void main(){
   const hop = (L: Letter, k = 1) => {
     enter(L);
     L.body.velocity.set((Math.random() - 0.5) * 0.4 * k, 3.1 * k, 0.35 * k);
-    L.body.angularVelocity.set((Math.random() - 0.5) * 2 * k, (Math.random() - 0.5) * 3 * k, (Math.random() - 0.5) * 1.5 * k);
+    // Spin grows with the square: the idle invitation (k ~ 0.5) barely turns, a tap tumbles.
+    const kk = k * k;
+    L.body.angularVelocity.set((Math.random() - 0.5) * 2 * kk, (Math.random() - 0.5) * 3 * kk, (Math.random() - 0.5) * 1.5 * kk);
   };
 
   let hasPlayed = false;
@@ -818,12 +820,14 @@ void main(){
     const { L, point } = hit;
     enter(L);
     const local = L.body.pointToLocalFrame(new CANNON.Vec3(point.x, point.y, point.z));
-    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -point.z);
+    // The hand works in a plane a little in front of the row: a grabbed letter comes out toward
+    // the viewer first, so dragging it sideways passes in front of its neighbours.
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -(point.z + 0.42));
     held = {
       L,
       local,
       plane,
-      target: point.clone(),
+      target: ray.ray.intersectPlane(plane, new THREE.Vector3()) ?? point.clone(),
       hist: [{ x: cx, y: cy, t: performance.now() }],
       downAt: performance.now(),
       moved: 0,
@@ -992,6 +996,11 @@ void main(){
           b.mass * (w0 * w0 * (t.y - wp.y) - 2 * z * w0 * pv.y),
           b.mass * (w0 * w0 * (t.z - wp.z) - 2 * z * w0 * pv.z),
         );
+        // A hand, not a crane: the pull is capped (about four times the letter's weight), so a held
+        // letter nudges its neighbours but cannot bulldoze the whole word.
+        const fl = f.length();
+        const cap = b.mass * G * 3;
+        if (fl > cap) f.scale(cap / fl, f);
         b.applyForce(f, r);
       }
       world.step(STEP);
