@@ -1,4 +1,13 @@
-import { QUAD_VS, program, texture, target, freeTarget, releaseContext, fitCanvas, type Target } from "../../hero/a-kit/gl";
+import {
+  QUAD_VS,
+  program,
+  texture,
+  target,
+  freeTarget,
+  releaseContext,
+  fitCanvas,
+  type Target,
+} from "../../hero/a-kit/gl";
 import { readProfile, runLoop, sceneColors } from "../../hero/a-kit/loop";
 import * as S from "./shaders";
 
@@ -105,7 +114,18 @@ export function createBowl(
   const ripple = dbl(NH);
   const curl = rt(NV);
   const divg = rt(NV);
-  for (const t of [vel.read, vel.write, pres.read, pres.write, dye.read, dye.write, ripple.read, ripple.write, curl, divg]) {
+  for (const t of [
+    vel.read,
+    vel.write,
+    pres.read,
+    pres.write,
+    dye.read,
+    dye.write,
+    ripple.read,
+    ripple.write,
+    curl,
+    divg,
+  ]) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, t.fbo);
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -354,7 +374,8 @@ export function createBowl(
     dropBufB.fill(0);
     drops.slice(0, S.MAX_DROPS).forEach((d, i) => {
       // Stretch along the fall, a gentle wobble while it forms.
-      const e = d.phase === "form" ? 1 + 0.05 * Math.sin(d.t * 11) + 0.08 * d.w : 1 + Math.min(0.55, Math.abs(d.vh) * 0.09);
+      const e =
+        d.phase === "form" ? 1 + 0.05 * Math.sin(d.t * 11) + 0.08 * d.w : 1 + Math.min(0.55, Math.abs(d.vh) * 0.09);
       dropBuf.set([d.x, d.y, Math.max(0, d.h), d.r], i * 4);
       dropBufB.set([e, d.alpha, 0, 0], i * 4);
     });

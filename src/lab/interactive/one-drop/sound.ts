@@ -6,7 +6,8 @@
 export type Plinker = { plink: (weight: number, small: boolean) => void; close: () => void };
 
 export function createPlinker(): Plinker | null {
-  const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  const AC =
+    window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) return null;
   const ac = new AC();
   const out = ac.createGain();

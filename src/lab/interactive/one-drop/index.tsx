@@ -124,7 +124,14 @@ export default function OneDrop({ locale }: LabProps) {
           <button type="button" className="od-btn od-sound" aria-pressed={sound} onClick={toggleSound}>
             <svg viewBox="0 0 20 20" aria-hidden="true">
               <path d="M3 8h3l4-3.5v11L6 12H3z" />
-              {sound ? <path className="od-wave" d="M13 7.2c1 .8 1.5 1.8 1.5 2.8s-.5 2-1.5 2.8M15 5.2c1.6 1.3 2.4 3 2.4 4.8s-.8 3.5-2.4 4.8" /> : <path className="od-wave" d="M13.5 8l4 4M17.5 8l-4 4" />}
+              {sound ? (
+                <path
+                  className="od-wave"
+                  d="M13 7.2c1 .8 1.5 1.8 1.5 2.8s-.5 2-1.5 2.8M15 5.2c1.6 1.3 2.4 3 2.4 4.8s-.8 3.5-2.4 4.8"
+                />
+              ) : (
+                <path className="od-wave" d="M13.5 8l4 4M17.5 8l-4 4" />
+              )}
             </svg>
             {nobr(sound ? c.soundOn : c.soundOff)}
           </button>
