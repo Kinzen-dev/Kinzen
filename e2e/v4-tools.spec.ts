@@ -228,10 +228,12 @@ test.describe("layout", () => {
           await page.waitForTimeout(300);
           const m = await activePane(page).evaluate((pane) => {
             const root = pane.firstElementChild as HTMLElement;
-            // The logo wall clips its own rows: measure the wall itself.
-            const wall = root.querySelector<HTMLElement>(".ls-wall");
+            // The logo wall clips its own rows: measure down to its last row (its light overflows on purpose).
+            const rows = root.querySelectorAll<HTMLElement>(".ls-row");
+            const last = rows[rows.length - 1];
+            const wallRows = last ? last.getBoundingClientRect().bottom - root.getBoundingClientRect().top : 0;
             return {
-              content: Math.max(root.scrollHeight, wall ? wall.scrollHeight : 0),
+              content: Math.max(root.scrollHeight, Math.round(wallRows)),
               stage: (pane.parentElement as HTMLElement).getBoundingClientRect().height,
               sw: document.documentElement.scrollWidth,
               vw: document.documentElement.clientWidth,
