@@ -316,6 +316,14 @@
   }
 }
 
+/* A slow device (measured in the frame loop): no glow under the marks or the words. */
+.ls-wall[data-lite] .ls-cell .tool-mark {
+  filter: none;
+}
+.ls-wall[data-lite] .ls-word {
+  text-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ls-cell .tool-mark,
   .ls-word {

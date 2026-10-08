@@ -100,12 +100,23 @@ export default function LogoSpotlight({ locale, groups }: ViewProps) {
     let visible = false;
     let raf = 0;
     let last = 0;
+    let lite = false;
+    let probeFrames = 0;
+    let probeTime = 0;
     let start = performance.now();
 
     const frame = (now: number) => {
       raf = 0;
       const dt = Math.min(0.05, (now - (last || now)) / 1000);
       last = now;
+      // A slow device (frames well over budget once warm) drops the glow under each lit mark.
+      if (!lite && dt > 0) {
+        if (++probeFrames > 20) probeTime += dt;
+        if (probeFrames === 80 && probeTime / 60 > 0.024) {
+          lite = true;
+          wall.dataset.lite = "";
+        }
+      }
       const still = reduce();
       const idle = now > pointerUntil && focused < 0 && !group;
       if (idle && !still) {

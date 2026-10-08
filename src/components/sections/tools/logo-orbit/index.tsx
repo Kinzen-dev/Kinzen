@@ -109,6 +109,12 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
     let last = 0;
     let raf = 0;
     let running = false;
+    let lite = false;
+    let probeFrames = 0;
+    let probeTime = 0;
+    let shownLx = "";
+    let shownLy = "";
+    const moving0 = () => !reduce && !st.paused && visible;
     let visible = true;
     let shown = -2;
     let tourShown: boolean | null = null;
@@ -133,7 +139,7 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
       const r = stage.getBoundingClientRect();
       W = r.width;
       H = r.height;
-      dpr = Math.min(2, window.devicePixelRatio || 1);
+      dpr = Math.min(lite || W < 560 ? 1.5 : 2, window.devicePixelRatio || 1);
       for (const cv of [back, front]) {
         cv.width = Math.round(W * dpr);
         cv.height = Math.round(H * dpr);
@@ -187,6 +193,18 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      // A slow device (frames well over budget once warm) drops the depth blur, the comets and the
+      // beam glow, and draws the rings at a lower resolution.
+      if (!lite && moving0()) {
+        if (++probeFrames > 20) probeTime += dt;
+        if (probeFrames === 80) {
+          if (probeTime / 60 > 0.024) {
+            lite = true;
+            stage.dataset.lite = "";
+            layout();
+          }
+        }
+      }
       const moving = !reduce && !st.paused;
       if (moving) for (let i = 0; i < n; i++) phase[i] += omega[i] * dt;
 
@@ -224,8 +242,15 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
       tilt = baseTilt + py * 0.05;
       roll = px * 0.045;
       // The orb's lit side follows the pointer a little, as if the light source moved with it.
-      stage.style.setProperty("--lx", `${(34 + px * 9).toFixed(1)}%`);
-      stage.style.setProperty("--ly", `${(28 + py * 7).toFixed(1)}%`);
+      // Only when it changes: a custom property on the stage restyles everything inside it.
+      const lx = `${(34 + px * 9).toFixed(1)}%`;
+      const ly = `${(28 + py * 7).toFixed(1)}%`;
+      if (lx !== shownLx || ly !== shownLy) {
+        shownLx = lx;
+        shownLy = ly;
+        stage.style.setProperty("--lx", lx);
+        stage.style.setProperty("--ly", ly);
+      }
       const cr = Math.cos(roll);
       const sr = Math.sin(roll);
       const para = phone ? 4 : 12;
@@ -247,7 +272,7 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
           const k = (d + 1) / 2;
           const s = (0.62 + 0.38 * k) * (1 + 0.14 * lift[i]) * (1 - (phone ? 0.3 : 0.12) * dim[i]);
           const o = (0.4 + 0.6 * k) * (1 - 0.72 * dim[i]) + 0.4 * lift[i] * (1 - k);
-          const blur = Math.round(((1 - k) * 1.5 * (1 - lift[i]) + dim[i] * 1.2) * 4) / 4;
+          const blur = lite ? 0 : Math.round(((1 - k) * 1.5 * (1 - lift[i]) + dim[i] * 1.2) * 4) / 4;
           const p = pos[i][j];
           p.x = X;
           p.y = Y;
@@ -355,7 +380,7 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
             ctx.stroke();
           }
           // A comet running round the ring: brighter on the lifted ring, absent on dimmed ones.
-          const amp = reduce ? 0 : (1 - dim[i]) * (0.35 + 0.65 * lift[i]);
+          const amp = reduce || lite ? 0 : (1 - dim[i]) * (0.35 + 0.65 * lift[i]);
           if (amp > 0.02) {
             const head = phase[i] * 2.6 + i * 1.7;
             const SEG = 16;
@@ -409,17 +434,21 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
           ctx.beginPath();
           ctx.moveTo(tx, ty);
           ctx.lineTo(hx, hy);
-          ctx.globalAlpha = 0.22 * fade;
-          ctx.lineWidth = 6;
-          ctx.stroke();
+          if (!lite) {
+            ctx.globalAlpha = 0.22 * fade;
+            ctx.lineWidth = 6;
+            ctx.stroke();
+          }
           ctx.globalAlpha = 0.95 * fade;
           ctx.lineWidth = 1.6;
           ctx.stroke();
-          ctx.globalAlpha = 0.25 * fade;
-          ctx.fillStyle = gold;
-          ctx.beginPath();
-          ctx.arc(hx, hy, 7, 0, TAU);
-          ctx.fill();
+          if (!lite) {
+            ctx.globalAlpha = 0.25 * fade;
+            ctx.fillStyle = gold;
+            ctx.beginPath();
+            ctx.arc(hx, hy, 7, 0, TAU);
+            ctx.fill();
+          }
           ctx.globalAlpha = fade;
           ctx.fillStyle = gold;
           ctx.beginPath();

@@ -2,6 +2,7 @@
 
 import {
   createElement,
+  startTransition,
   useCallback,
   useEffect,
   useId,
@@ -48,7 +49,7 @@ function advanceSeconds() {
 }
 /** Share of the section that must be on screen for auto-advance to run. */
 const IN_VIEW = 0.35;
-/** Crossfade length; the old view unmounts when it ends. */
+/** Crossfade length (showcase.css); the old view unmounts when it ends. */
 const FADE_MS = 700;
 /** A finger lifted inside the section keeps the timer paused this long. */
 const TOUCH_GRACE_MS = 5000;
@@ -104,14 +105,13 @@ export function ToolsShowcase({
   const [leaving, setLeaving] = useState<ViewId | null>(null);
   const [views, setViews] = useState<Partial<Record<ViewId, View>>>({});
   const [auto, setAuto] = useState(false);
-  const [reduced, setReduced] = useState(false);
   const [inView, setInView] = useState(false);
   const [held, setHeld] = useState(false);
   const [announce, setAnnounce] = useState("");
   const [period, setPeriod] = useState(ADVANCE_S);
 
   const activeRef = useRef(active);
-  const reducedRef = useRef(reduced);
+  const reducedRef = useRef(false);
   const seq = useRef(0);
   const fadeTimer = useRef(0);
   const running = auto && inView && !held;
@@ -126,18 +126,18 @@ export function ToolsShowcase({
       return;
     }
     if (ticket !== seq.current) return;
-    setViews((v) => (v[to] ? v : { ...v, [to]: View }));
     const from = activeRef.current;
-    if (from === to) return;
     activeRef.current = to;
-    setActive(to);
     window.clearTimeout(fadeTimer.current);
-    if (reducedRef.current) {
-      setLeaving(null);
-      return;
-    }
-    setLeaving(from);
-    fadeTimer.current = window.setTimeout(() => setLeaving(null), FADE_MS);
+    // A transition: React renders the incoming view in slices, so the page keeps its frames.
+    startTransition(() => {
+      setViews((v) => (v[to] ? v : { ...v, [to]: View }));
+      if (from === to) return;
+      setActive(to);
+      setLeaving(reducedRef.current ? null : from);
+    });
+    // The outgoing view leaves when its fade ends (onAnimationEnd); this is the backstop.
+    if (from !== to && !reducedRef.current) fadeTimer.current = window.setTimeout(() => setLeaving(null), FADE_MS * 3);
   }, []);
 
   const pick = useCallback(
@@ -165,7 +165,6 @@ export function ToolsShowcase({
     setPeriod(advanceSeconds());
     const sync = () => {
       reducedRef.current = mq.matches;
-      setReduced(mq.matches);
       setAuto(!mq.matches && !readPicked());
     };
     sync();
@@ -173,8 +172,8 @@ export function ToolsShowcase({
 
     // The live bento only matters with motion; under reduced motion the static one is the view.
     const near = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting || reducedRef.current) return;
+      (entries) => {
+        if (!entries[entries.length - 1].isIntersecting || reducedRef.current) return;
         near.disconnect();
         void load(FIRST).then((View) => setViews((v) => (v[FIRST] ? v : { ...v, [FIRST]: View })));
       },
@@ -361,6 +360,13 @@ export function ToolsShowcase({
               data-state={out ? "out" : leaving ? "in" : undefined}
               inert={out}
               aria-hidden={out || undefined}
+              onAnimationEnd={
+                out
+                  ? (e) => {
+                      if (e.target === e.currentTarget) setLeaving((l) => (l === id ? null : l));
+                    }
+                  : undefined
+              }
             >
               {View ? createElement(View, { locale, groups }) : id === FIRST ? children : null}
             </div>

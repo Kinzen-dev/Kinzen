@@ -393,8 +393,7 @@
   padding-inline: 0.75rem;
   border-radius: 999px;
   border: 1px solid var(--rule);
-  background: color-mix(in oklab, var(--surface) 80%, transparent);
-  backdrop-filter: blur(8px);
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
   font-size: var(--text-xs);
   color: var(--ink-2);
 }
@@ -491,4 +490,10 @@
   .lo-node {
     transition: none;
   }
+}
+
+/* A slow device (measured in the frame loop): the sheen holds still. */
+.lo-stage[data-lite] .lo-core-orb::after,
+.lo-stage[data-lite] .lo-core-halo {
+  animation: none;
 }
