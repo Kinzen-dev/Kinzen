@@ -162,7 +162,7 @@ for (const name of names) {
       d += (a[i] - b[i]) ** 2;
       ref += a[i] ** 2;
     }
-    Object.assign(row, { wrapVsNextLoopResidualDb: r2(10 * Math.log10(d / ref)) });
+    Object.assign(row, { wrapVsNextLoopResidualDb: d === 0 ? "sample-identical" : r2(10 * Math.log10(d / ref)) });
   }
   if (name === "night-desk") {
     const music = win(m, sr, 3, 21);
