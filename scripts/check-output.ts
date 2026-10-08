@@ -1,17 +1,33 @@
 /**
  * Post-build guard: scan every prerendered page and RSC payload for strings that
- * must never ship (wrong numbers, phone numbers, em dashes, hidden entries).
+ * must never ship (wrong numbers, phone numbers, em dashes, hidden entries, banned terms).
  */
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { homedir } from "node:os";
 import { join } from "node:path";
 import { FORBIDDEN } from "../src/content/forbidden";
+import { BANNED_TERM_HASHES, findTerms, parseTermFile, type TermHash } from "../src/content/term-guard";
 
-const ROOT = join(process.cwd(), ".next", "server", "app");
+// CHECK_OUTPUT_ROOT points the scan at a copy of the build (used to prove the guards on a fixture).
+const BUILD = process.env.CHECK_OUTPUT_ROOT ?? join(process.cwd(), ".next");
+const ROOT = join(BUILD, "server", "app");
+const STATIC = join(BUILD, "static");
+
+/**
+ * Banned terms, by hash (src/content/term-guard.ts), plus an optional private list that never
+ * enters the repo. A hit names the hash or the private line number, never the term itself.
+ */
+const PRIVATE_TERMS = process.env.KINZEN_PRIVATE_TERMS ?? join(homedir(), ".config", "kinzen", "private-terms.txt");
+const privateTerms: TermHash[] = existsSync(PRIVATE_TERMS) ? parseTermFile(readFileSync(PRIVATE_TERMS, "utf8")) : [];
+const termLabel = (h: TermHash) => {
+  const n = privateTerms.indexOf(h);
+  return n >= 0 ? `private term #${n + 1}` : `banned term ${h.sha256.slice(0, 12)}`;
+};
 
 /** Text that exists only on hidden entries and must never reach a page. */
 const HIDDEN_MARKERS: { pattern: RegExp; reason: string }[] = [
-  { pattern: /Confidential client/, reason: "hidden part-time contract leaked" },
-  { pattern: /part-time-contract/, reason: "hidden part-time contract leaked" },
+  // The contract entry is public since v1.7 (descriptor only); its schema enum must still never render.
+  { pattern: /part-time-contract/, reason: "internal experience type leaked" },
   { pattern: /github\.com\/Kinzen-dev"/, reason: "GitHub profile link is hidden until cleanup" },
   { pattern: /CLAIMS\.md|claimId|provenance/, reason: "provenance must never render" },
   // No joiners anywhere: visible Thai uses nowrap spans (lib/thai-nodes.ts) since review round 5.
@@ -40,6 +56,9 @@ for (const file of files) {
   // a forbidden pattern. Their text comes from the same content this script already scans.
   if (bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) continue;
   const text = bytes.toString("utf8");
+  for (const hit of findTerms(text, [...BANNED_TERM_HASHES, ...privateTerms])) {
+    failures.push(`${file.replace(process.cwd() + "/", "")}: ${termLabel(hit)} (the product rename or a private term)`);
+  }
   for (const rule of [...FORBIDDEN, ...HIDDEN_MARKERS]) {
     const match = text.match(rule.pattern);
     if (match) failures.push(`${file.replace(process.cwd() + "/", "")}: ${rule.reason} (matched "${match[0]}")`);
@@ -53,6 +72,14 @@ for (const file of files) {
   }
 }
 
+// Client bundles: only the term guard applies (minified code legitimately holds other patterns).
+const chunks = existsSync(STATIC) ? walk(STATIC).filter((f) => f.endsWith(".js")) : [];
+for (const file of chunks) {
+  for (const hit of findTerms(readFileSync(file, "utf8"), [...BANNED_TERM_HASHES, ...privateTerms])) {
+    failures.push(`${file.replace(process.cwd() + "/", "")}: ${termLabel(hit)} in a client bundle`);
+  }
+}
+
 if (files.length === 0) {
   console.error("check-output: no build output found. Run `pnpm build` first.");
   process.exit(1);
@@ -63,4 +90,7 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`check-output: ${files.length} files clean`);
+console.log(
+  `check-output: ${files.length} files and ${chunks.length} client chunks clean` +
+    (privateTerms.length ? ` (${privateTerms.length} private terms checked)` : " (no private term list)"),
+);

@@ -17,8 +17,23 @@ describe("site content", () => {
     }
   });
 
+  it("orders experience Vesperwerk, contract, AnyMind, ZyGen (King, 2026-10-08)", () => {
+    expect(experience.map((e) => e.id)).toEqual(["exp-founder", "exp-contract", "exp-anymind", "exp-zygen"]);
+  });
+
+  it("names the contract client only by the approved descriptor", () => {
+    const contract = experience.find((e) => e.id === "exp-contract")!;
+    expect(contract.org.confidential).toBe(true);
+    expect(contract.summary.en).toContain("transactional platform with wallet and ledger (confidential client, NDA)");
+    expect(contract.highlights.some((h) => /co-led/i.test(h.text.en))).toBe(true);
+  });
+
+  it("labels the clinic product a pilot, never live", () => {
+    expect(getProject("clinic-receptionist")?.status).toBe("pilot");
+    expect(allText).not.toMatch(/in production with clinics|serving patients|paying clinics/i);
+  });
+
   it("drops hidden entries from everything the pages read", () => {
-    expect(experience.some((e) => e.id === "exp-contract")).toBe(false);
     expect(links.some((l) => l.kind === "github")).toBe(false);
     expect(projects.every((p) => p.visibility === "public")).toBe(true);
   });
@@ -29,7 +44,7 @@ describe("site content", () => {
   });
 
   it("finds projects by slug", () => {
-    expect(getProject("yimwhan-ai")?.name).toBe("Yimwhan AI");
+    expect(getProject("clinic-receptionist")?.name).toBe("Clinic AI receptionist");
     expect(getProject("nope")).toBeUndefined();
   });
 

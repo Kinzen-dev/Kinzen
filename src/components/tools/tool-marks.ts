@@ -24,7 +24,7 @@ const MARKS: Record<string, LogoSlug | "practice"> = {
   Redis: "redis",
   SQLite: "sqlite",
   Docker: "docker",
-  "Kubernetes (GKE)": "kubernetes",
+  "Kubernetes (EKS, GKE)": "kubernetes",
   GKE: "googlecloud",
   "Fly.io": "flydotio",
   Cloudflare: "cloudflare",
@@ -56,11 +56,20 @@ const MARKS: Record<string, LogoSlug | "practice"> = {
 };
 
 /**
- * Text-only on purpose: no mark in Simple Icons (Azure, Soniox, Litestream), a mark we leave out
- * (Twilio, Codex/OpenAI, Playwright), or a licence that forbids it (Tauri: CC BY-NC-ND).
+ * Text-only on purpose: no mark in Simple Icons (Azure, AWS, Soniox, Litestream, BullMQ,
+ * Terragrunt, SOPS, Phaser), a mark we leave out (Twilio, Codex/OpenAI, Playwright; Three.js and
+ * the Helm chart tool until the sprite is regenerated, so the chart tool's wheel never sits beside
+ * King's own Helm app), or a licence that forbids it (Tauri: CC BY-NC-ND).
  */
 export const TEXT_ONLY = new Set([
   "Azure",
+  "AWS (EKS, MSK, S3)",
+  "BullMQ",
+  "Terragrunt",
+  "SOPS",
+  "Phaser",
+  "Three.js",
+  "Helm (Kubernetes charts)",
   "Twilio",
   "Twilio Media Streams",
   "Codex",

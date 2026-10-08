@@ -14,6 +14,6 @@ describe("placeThaiMarks (share cards)", () => {
     expect(cp(placeThaiMarks("ฟ้า"))).toEqual(["e1f", "f737", "e32"]);
   });
   it("leaves text without those sequences alone", () => {
-    for (const s of ["ผู้ช่วย", "น้ำ", "Yimwhan AI", "กฎ", ""]) expect(placeThaiMarks(s)).toBe(s);
+    for (const s of ["ผู้ช่วย", "น้ำ", "Clinic AI receptionist", "กฎ", ""]) expect(placeThaiMarks(s)).toBe(s);
   });
 });

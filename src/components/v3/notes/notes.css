@@ -19,18 +19,25 @@
   gap: 1.75rem;
   justify-items: center;
 }
+/* Four notes: two by two on tablets, one row of four on wide screens (never a lone orphan). */
 @media (min-width: 48rem) {
   .notes-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: clamp(1.25rem, 3vw, 3rem);
     align-items: start;
     padding-bottom: 2rem;
   }
-  /* A pinned-up board, not a table: the middle note sits lower, the last a touch lower. */
-  .notes-list > :nth-child(3n + 2) {
+  /* A pinned-up board, not a table: every other note sits lower. */
+  .notes-list > :nth-child(even) {
     margin-top: 2.5rem;
   }
-  .notes-list > :nth-child(3n) {
+}
+@media (min-width: 72rem) {
+  .notes-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(1.25rem, 2vw, 2.25rem);
+  }
+  .notes-list > :nth-child(4n + 3) {
     margin-top: 0.75rem;
   }
 }

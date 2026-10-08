@@ -70,7 +70,7 @@ export function yearLabel(p: Project, dict: Dictionary, locale: Locale = "en") {
   return `${fmt(start)}\u00a0→ ${fmt(end)}`;
 }
 
-export const isLive = (status: Project["status"]) => status === "live" || status === "in-production";
+export const isLive = (status: Project["status"]) => status === "live";
 
 export function workPath(locale: Locale, slug: string) {
   return localePath(locale, `/work/${slug}`);

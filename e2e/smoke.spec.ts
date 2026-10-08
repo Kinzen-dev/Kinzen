@@ -32,7 +32,7 @@ test.describe("shell", () => {
 
   // Mobile emulation grows the LAYOUT viewport to fit wide content, so comparing
   // scrollWidth with innerWidth is blind there: compare with the real viewport width.
-  for (const path of ["/", "/th", "/cv", "/th/cv", "/work/yimwhan-ai", "/th/work/helm", "/missing-page"]) {
+  for (const path of ["/", "/th", "/cv", "/th/cv", "/work/clinic-receptionist", "/th/work/helm", "/missing-page"]) {
     test(`${path} never widens the layout or scrolls sideways`, async ({ page }) => {
       await page.goto(path);
       await page.waitForTimeout(800);

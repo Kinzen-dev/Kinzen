@@ -63,7 +63,7 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
         <div className="cv-id">
           <h1 className="cv-name">{nobr(t(profile.displayName, locale))}</h1>
           {locale === "th" ? <p className="cv-alt-name">{profile.name}</p> : null}
-          <p className="cv-role">{nobr(t(profile.role, locale))}</p>
+          <p className="cv-role">{nobr(t(profile.headline, locale))}</p>
         </div>
         <div className="cv-print-action">
           <PrintButton label={dict.cv.print} />
@@ -105,7 +105,8 @@ export default async function CvPage({ params }: PageProps<"/[lang]/cv">) {
                 <p className="cv-dates readout">{range(era.start, era.end)}</p>
               </div>
               <p className="cv-meta">
-                {era.org.name}
+                {/* An unnamed client is known only by its approved descriptor (the entry's summary). */}
+                {era.org.confidential ? nobr(t(era.summary, locale).replace(/\.$/, "")) : era.org.name}
                 <span className="text-ink-3"> / </span>
                 {nobr(t(era.location, locale))}
               </p>
