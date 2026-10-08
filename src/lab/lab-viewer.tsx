@@ -12,18 +12,22 @@ import { demos as toolsB } from "./tools/registry-b";
 import { demos as numbersA } from "./numbers/registry-a";
 import { demos as numbersB } from "./numbers/registry-b";
 import { demos as concepts } from "./concepts/registry";
+import { demos as ixA } from "./interactive/registry-a";
+import { demos as ixB } from "./interactive/registry-b";
+import { demos as ixC } from "./interactive/registry-c";
 import "./lab.css";
 
-type Kind = "hero" | "play" | "tools" | "numbers" | "concepts";
+type Kind = "hero" | "play" | "tools" | "numbers" | "concepts" | "interactive";
 const SETS: Record<Kind, LabDemo[]> = {
   hero: [...heroA, ...heroB],
   play: [...playA, ...playB],
   tools: [...toolsA, ...toolsB],
   numbers: [...numbersA, ...numbersB],
   concepts,
+  interactive: [...ixA, ...ixB, ...ixC],
 };
 // Built once at module scope (never during render): one lazy chunk per demo.
-const VIEWS = new Map([...SETS.hero, ...SETS.play, ...SETS.tools, ...SETS.numbers, ...SETS.concepts].map((d) => [d.id, lazy(d.load)]));
+const VIEWS = new Map([...SETS.hero, ...SETS.play, ...SETS.tools, ...SETS.numbers, ...SETS.concepts, ...SETS.interactive].map((d) => [d.id, lazy(d.load)]));
 
 /** Lab switcher: one demo at a time (hash = demo id), a bar to move between them. */
 export function LabViewer({ kind, locale, banner }: { kind: Kind; locale: Locale; banner: LabBanner }) {
