@@ -5,6 +5,7 @@ import { bangkokHours, clockText, skyAt, type Phase } from "./clock";
 import type { SpotId } from "./copy";
 import { SHARED, inkPass } from "./ink";
 import { DESK_Y, push, settled, step, type Prop } from "./physics";
+import { softwareGl } from "../kit/loop";
 
 /*
  * Night desk runtime: renderer + ink pass, a spring-driven camera (drag to orbit a few degrees
@@ -41,6 +42,11 @@ export type EngineOpts = {
   onReady?: () => void;
 };
 
+/** Thrown when only a software renderer is available (the section shows the desk's picture). */
+export class SoftwareRenderer extends Error {
+  name = "SoftwareRenderer";
+}
+
 export type Engine = {
   activate: (spot: SpotId) => void;
   back: () => void;
@@ -71,6 +77,13 @@ export function createNightDesk(o: EngineOpts): Engine {
     alpha: false,
     powerPreference: "high-performance",
   });
+  if (softwareGl(renderer.getContext())) {
+    renderer.dispose();
+    renderer.forceContextLoss();
+    throw new SoftwareRenderer();
+  }
+  // Compile errors are not polled per program (a synchronous stall); shaders are fixed and tested.
+  renderer.debug.checkShaderErrors = false;
   renderer.setClearColor(0x03040a, 0);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -797,8 +810,9 @@ export function createNightDesk(o: EngineOpts): Engine {
       windowStart = now;
     }
   };
+  let compiled = false;
   const sync = () => {
-    const on = visible && !document.hidden;
+    const on = compiled && visible && !document.hidden;
     if (on && !raf) {
       last = 0;
       windowStart = 0;
@@ -821,7 +835,18 @@ export function createNightDesk(o: EngineOpts): Engine {
   ro.observe(host);
   resize();
   room.notepad.draw(0);
-  sync();
+  // Shaders compile in parallel first (KHR_parallel_shader_compile): no long task on the first frame.
+  let dead = false;
+  const begin = () => {
+    if (dead) return;
+    compiled = true;
+    sync();
+  };
+  // The room draws into the ink pass's target (its programs differ from the screen's), the pass to the screen.
+  renderer.setRenderTarget(rt);
+  const room1 = renderer.compileAsync(scene, camera);
+  renderer.setRenderTarget(null);
+  Promise.all([room1, renderer.compileAsync(post, postCam)]).then(begin, begin);
   if (still) {
     host.dataset.ready = "true";
     requestAnimationFrame(() => o.onReady?.());
@@ -832,6 +857,7 @@ export function createNightDesk(o: EngineOpts): Engine {
     back: () => setFocus(null),
     timeLapse,
     destroy: () => {
+      dead = true;
       cancelAnimationFrame(raf);
       raf = 0;
       io.disconnect();

@@ -14,7 +14,7 @@ export function Play({ locale, v3 = getV3(locale) }: { locale: Locale; v3?: V3Co
   const poster = (
     <picture>
       <source media="(max-width: 39.99rem)" srcSet="/play/night-desk-phone.webp" type="image/webp" />
-      <img src="/play/night-desk-desk.webp" alt={c.still} loading="lazy" decoding="async" />
+      <img src="/play/night-desk-desk.webp" alt={c.stills["night-desk"]} loading="lazy" decoding="async" />
     </picture>
   );
   return (
@@ -32,6 +32,8 @@ export function Play({ locale, v3 = getV3(locale) }: { locale: Locale; v3?: V3Co
             soundOn: c.soundOn,
             soundOff: c.soundOff,
             noGl: c.noGl,
+            stills: c.stills,
+            stillNote: c.stillNote,
           }}
           poster={poster}
         />

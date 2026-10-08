@@ -67,7 +67,7 @@ export class Sound {
   }
 
   thunder() {
-    this.rain.setIntensity(1);
+    this.rain.thunder();
   }
 
   /** Play a decoded clip through a phone-line band (300 Hz to 3.4 kHz). */
@@ -103,6 +103,7 @@ export class Sound {
     this.stopClip();
     this.ringing?.();
     this.ringing = null;
+    this.sfx.stop();
     this.rain.stop();
     this.music.stop();
   }

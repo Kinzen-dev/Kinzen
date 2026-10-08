@@ -49,7 +49,7 @@ function scribble(g: CanvasRenderingContext2D, pts: [number, number][], r: () =>
  * The skyline as data: R = building mask, G = lit window, B = each window's flicker phase.
  * Bangkok-ish: a dense mid-rise band, a few towers, one stepped tower with a spire.
  */
-export function cityTexture(): THREE.CanvasTexture {
+function drawCity(): THREE.CanvasTexture {
   const W = 2048;
   const H = 512;
   const [c, g] = canvas(W, H);
@@ -114,7 +114,7 @@ export function cityTexture(): THREE.CanvasTexture {
 }
 
 /** Keyboard top: dark keys with cream outlines. */
-export function keyboardTexture(): THREE.CanvasTexture {
+function drawKeyboard(): THREE.CanvasTexture {
   const [c, g] = canvas(1024, 320);
   const r = rng(3);
   g.fillStyle = "#1b1f2b";
@@ -139,7 +139,7 @@ export function keyboardTexture(): THREE.CanvasTexture {
 }
 
 /** The phone's rotary dial: gold face, ink finger holes. */
-export function dialTexture(): THREE.CanvasTexture {
+function drawDial(): THREE.CanvasTexture {
   const [c, g] = canvas(256, 256);
   g.fillStyle = "#d9a64b";
   g.fillRect(0, 0, 256, 256);
@@ -164,7 +164,7 @@ export function dialTexture(): THREE.CanvasTexture {
 }
 
 /** A framed ink study of a leaf (left wall). */
-export function leafArtTexture(): THREE.CanvasTexture {
+function drawLeafArt(): THREE.CanvasTexture {
   const [c, g] = canvas(256, 340);
   const r = rng(11);
   g.fillStyle = "#151a26";
@@ -201,7 +201,7 @@ export function leafArtTexture(): THREE.CanvasTexture {
 }
 
 /** A polaroid with a tiny gold skyline sketch. */
-export function polaroidTexture(seed: number): THREE.CanvasTexture {
+function drawPolaroid(seed: number): THREE.CanvasTexture {
   const [c, g] = canvas(200, 240);
   const r = rng(seed);
   g.fillStyle = "#e9e1cf";
@@ -255,7 +255,7 @@ export function polaroidTexture(seed: number): THREE.CanvasTexture {
 }
 
 /** A sticky note with a few lines of scribble. */
-export function noteTexture(seed: number, color = "#e8d9a8"): THREE.CanvasTexture {
+function drawNote(seed: number, color = "#e8d9a8"): THREE.CanvasTexture {
   const [c, g] = canvas(160, 160);
   const r = rng(seed);
   g.fillStyle = color;
@@ -701,5 +701,44 @@ export class AgentScreen {
       g.restore();
     }
     this.texture.needsUpdate = true;
+  }
+}
+
+/*
+ * The room's static paper textures are drawn once per page and kept: a scene that comes back (the
+ * section loops) reuses them, and warmTextures() draws them ahead one per task, so building the
+ * room never blocks the page for long.
+ */
+const drawn = new Map<string, THREE.CanvasTexture>();
+const once = (key: string, draw: () => THREE.CanvasTexture) => {
+  let t = drawn.get(key);
+  if (!t) {
+    t = draw();
+    drawn.set(key, t);
+  }
+  return t;
+};
+export const cityTexture = () => once("city", drawCity);
+export const keyboardTexture = () => once("keyboard", drawKeyboard);
+export const dialTexture = () => once("dial", drawDial);
+export const leafArtTexture = () => once("leaf", drawLeafArt);
+export const polaroidTexture = (seed: number) => once(`polaroid-${seed}`, () => drawPolaroid(seed));
+export const noteTexture = (seed: number, color = "#e8d9a8") =>
+  once(`note-${seed}-${color}`, () => drawNote(seed, color));
+
+export async function warmTextures() {
+  const steps = [
+    cityTexture,
+    keyboardTexture,
+    dialTexture,
+    leafArtTexture,
+    () => noteTexture(4),
+    () => polaroidTexture(2),
+    () => polaroidTexture(3),
+    () => noteTexture(8, "#d9c8e8"),
+  ];
+  for (const step of steps) {
+    step();
+    await new Promise((r) => setTimeout(r, 0));
   }
 }

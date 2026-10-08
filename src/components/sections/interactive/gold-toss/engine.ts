@@ -4,7 +4,7 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 import { Reflector } from "three/examples/jsm/objects/Reflector.js";
 import { WORDMARK } from "@/fx/baked/wordmark";
 import { wordmarkBitmap } from "../kit/glyphs";
-import { readProfile, runLoop } from "../kit/loop";
+import { readProfile, runLoop, softwareGl } from "../kit/loop";
 import { traceGlyphs, type Glyph } from "../kit/contours";
 import { createFluid } from "./fluid";
 import { brushedTexture, fpsGuard, studio, tokenColor } from "../kit/three-kit";
@@ -63,6 +63,8 @@ type Letter = {
 export type GoldToss = {
   throwLetter: (index?: number) => void;
   stop: () => void;
+  /** Why nothing runs: no WebGL, or only a software renderer (the section shows a picture). */
+  failed?: "none" | "software";
 };
 
 /** Boxes covering a glyph's ink: the outline is rasterised small, cut into bands, runs merged down. */
@@ -265,8 +267,15 @@ export function startGoldToss(stage: HTMLElement, sound: GoldSound, onPlay: () =
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   } catch {
-    return { throwLetter: () => {}, stop: () => {} };
+    return { throwLetter: () => {}, stop: () => {}, failed: "none" };
   }
+  if (softwareGl(renderer.getContext())) {
+    renderer.dispose();
+    renderer.forceContextLoss();
+    return { throwLetter: () => {}, stop: () => {}, failed: "software" };
+  }
+  // Compile errors are not polled per program (a synchronous stall); shaders are fixed and tested.
+  renderer.debug.checkShaderErrors = false;
   const dpr0 = Math.min(prof.dpr, lite ? 1.5 : 2);
   renderer.setPixelRatio(dpr0);
   renderer.toneMapping = THREE.NeutralToneMapping;
@@ -1231,20 +1240,26 @@ void main(){
     };
     kickRaf = requestAnimationFrame(tick);
   };
-  if (prof.still) {
-    const [u, w] = toUV(-1.2, FRONT_Z + 1.1);
-    fluid.splat(u, w, -150, 60, 0.004, 1.4);
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2;
-      fluid.splat(u, w, Math.cos(a + 0.6) * 260, Math.sin(a + 0.6) * 260, 0.001);
+  // Shaders compile in parallel first (KHR_parallel_shader_compile): no long task on the first frame.
+  let dead = false;
+  const begin = () => {
+    if (dead) return;
+    if (prof.still) {
+      const [u, w] = toUV(-1.2, FRONT_Z + 1.1);
+      fluid.splat(u, w, -150, 60, 0.004, 1.4);
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        fluid.splat(u, w, Math.cos(a + 0.6) * 260, Math.sin(a + 0.6) * 260, 0.001);
+      }
+      for (let i = 0; i < 70; i++) fluid.step(1 / 60);
+      ring(-1.2, FRONT_Z + 1.1, 0.6);
+      rings[0].z = 0.6;
+      render(0);
+    } else {
+      stopLoop = runLoop(stage, frame);
     }
-    for (let i = 0; i < 70; i++) fluid.step(1 / 60);
-    ring(-1.2, FRONT_Z + 1.1, 0.6);
-    rings[0].z = 0.6;
-    render(0);
-  } else {
-    stopLoop = runLoop(stage, frame);
-  }
+  };
+  renderer.compileAsync(scene, camera).then(begin, begin);
 
   const ro = new ResizeObserver(() => {
     layout();
@@ -1272,6 +1287,7 @@ void main(){
   return {
     throwLetter,
     stop: () => {
+      dead = true;
       delete w.__goldToss;
       stopLoop();
       cancelAnimationFrame(kickRaf);

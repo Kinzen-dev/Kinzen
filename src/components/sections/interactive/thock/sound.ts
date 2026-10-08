@@ -7,6 +7,7 @@ export type ThockSound = {
   spaceRipple: () => void;
   /** "ship" typed: a small reward. */
   chime: () => void;
+  stop: () => void;
 };
 
 export function createThockSound(): ThockSound {
@@ -18,5 +19,9 @@ export function createThockSound(): ThockSound {
     release: (code) => keys.release(code),
     spaceRipple: () => keys.spaceRipple(),
     chime: () => sfx.metalClink(0.5),
+    stop: () => {
+      keys.stop();
+      sfx.stop();
+    },
   };
 }

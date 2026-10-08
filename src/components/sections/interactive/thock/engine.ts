@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
-import { readProfile, runLoop } from "../kit/loop";
+import { readProfile, runLoop, softwareGl } from "../kit/loop";
 import { fpsGuard, studio, tokenColor } from "../kit/three-kit";
 import type { ThockSound } from "./sound";
 
@@ -176,7 +176,11 @@ function makeAtlas(font: string) {
   return { tex, get };
 }
 
-export type Thock = { stop: () => void };
+export type Thock = {
+  stop: () => void;
+  /** Why nothing runs: no WebGL, or only a software renderer (the section shows a picture). */
+  failed?: "none" | "software";
+};
 
 export function startThock(
   stage: HTMLElement,
@@ -195,8 +199,15 @@ export function startThock(
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   } catch {
-    return { stop: () => {} };
+    return { stop: () => {}, failed: "none" };
   }
+  if (softwareGl(renderer.getContext())) {
+    renderer.dispose();
+    renderer.forceContextLoss();
+    return { stop: () => {}, failed: "software" };
+  }
+  // Compile errors are not polled per program (a synchronous stall); shaders are fixed and tested.
+  renderer.debug.checkShaderErrors = false;
   const dpr0 = Math.min(prof.dpr, lite ? 1.5 : 2);
   renderer.setPixelRatio(dpr0);
   renderer.toneMapping = THREE.NeutralToneMapping;
@@ -820,9 +831,16 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
     step(dt);
     render();
   };
-  step(1 / 60);
-  render();
-  const stopLoop = runLoop(stage, frame);
+  // Shaders compile in parallel first (KHR_parallel_shader_compile): no long task on the first frame.
+  let dead = false;
+  let stopLoop = () => {};
+  renderer.compileAsync(scene, camera).then(begin, begin);
+  function begin() {
+    if (dead) return;
+    step(1 / 60);
+    render();
+    stopLoop = runLoop(stage, frame);
+  }
   const ro = new ResizeObserver(() => {
     layout();
     dirty = true;
@@ -841,6 +859,7 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
 
   return {
     stop: () => {
+      dead = true;
       delete w.__thock;
       stopLoop();
       ro.disconnect();

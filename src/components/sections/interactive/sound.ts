@@ -113,6 +113,10 @@ export function createRain(b: AudioBus) {
     setIntensity(k: number) {
       g.gain.setTargetAtTime(k * 0.06, ctx.currentTime, 0.8);
     },
+    thunder(distance = 0.5) {
+      void distance;
+      hiss(b, 0.4, 2, 120);
+    },
     stop() {
       s.stop();
       g.disconnect();
@@ -175,6 +179,7 @@ export function createThock(b: AudioBus) {
       blip(b, 880, 0.05, 1.1);
       hiss(b, 0.3, 1.2, 600);
     },
+    stop() {},
   };
 }
 
@@ -204,6 +209,7 @@ export function createSfx(b: AudioBus) {
       hiss(b, 0.4, 0.03, 3000);
       blip(b, on ? 1900 : 1500, 0.08, 0.05, "triangle");
     },
+    stop() {},
   };
 }
 

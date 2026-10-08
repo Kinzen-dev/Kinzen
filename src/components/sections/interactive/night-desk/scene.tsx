@@ -62,8 +62,9 @@ export default function NightDesk({ locale, onReady, onFail }: SceneProps) {
     h.appendChild(probe);
     const font = getComputedStyle(probe).fontFamily || "ui-monospace, Menlo, monospace";
     probe.remove();
-    void import("./engine")
-      .then(({ createNightDesk }) => {
+    // The room's paper textures are drawn ahead, one per task, before the room is built.
+    void Promise.all([import("./engine"), import("./textures").then((t) => t.warmTextures())])
+      .then(([{ createNightDesk }]) => {
         if (dead) return;
         engine.current = createNightDesk({
           canvas: cv,
@@ -83,9 +84,7 @@ export default function NightDesk({ locale, onReady, onFail }: SceneProps) {
           onReady,
         });
       })
-      .catch(() => {
-        onFail?.();
-      });
+      .catch((err: unknown) => onFail?.(err instanceof Error && err.name === "SoftwareRenderer" ? "software" : "none"));
     return () => {
       dead = true;
       engine.current?.destroy();

@@ -19,7 +19,7 @@ const COPY = {
 };
 
 /** Gold toss: fling the heavy gold letters; they splash into ink water and come back home (lab-ix-b, ported). */
-export default function GoldToss({ locale, onReady, onFail }: SceneProps) {
+export default function GoldToss({ locale, onReady, onPlay, onFail }: SceneProps) {
   const c = COPY[locale === "th" ? "th" : "en"];
   const stage = useRef<HTMLDivElement>(null);
   const [played, setPlayed] = useState(false);
@@ -27,13 +27,18 @@ export default function GoldToss({ locale, onReady, onFail }: SceneProps) {
   useEffect(() => {
     const el = stage.current;
     if (!el) return;
-    const toss = startGoldToss(el, createGoldSound(), () => setPlayed(true));
+    const sound = createGoldSound();
+    const toss = startGoldToss(el, sound, () => {
+      setPlayed(true);
+      onPlay?.();
+    });
     let raf = 0;
-    if (!el.querySelector("canvas")) onFail?.();
+    if (toss.failed || !el.querySelector("canvas")) onFail?.(toss.failed ?? "none");
     else raf = requestAnimationFrame(() => (raf = requestAnimationFrame(() => onReady?.())));
     return () => {
       cancelAnimationFrame(raf);
       toss.stop();
+      sound.stop();
     };
     // Mounted once per visit of the scene.
     // eslint-disable-next-line react-hooks/exhaustive-deps

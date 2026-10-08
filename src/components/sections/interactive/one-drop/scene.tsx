@@ -25,11 +25,12 @@ export default function OneDrop({ locale, onReady, onFail }: SceneProps) {
     if (!el || !sec) return;
     const plinker = createPlinker();
     const b = createBowl(el, sec, { onImpact: (w, small) => plinker.plink(w, small) });
-    bowl.current = b;
-    if (!b) {
-      onFail?.();
+    if (!b || b === "software") {
+      plinker.stop();
+      onFail?.(b ?? "none");
       return;
     }
+    bowl.current = b;
     let raf = requestAnimationFrame(() => (raf = requestAnimationFrame(() => onReady?.())));
     let pid = -1;
     const down = (e: PointerEvent) => {
@@ -65,6 +66,7 @@ export default function OneDrop({ locale, onReady, onFail }: SceneProps) {
       window.removeEventListener("pointercancel", cancel);
       el.removeEventListener("contextmenu", menu);
       b.destroy();
+      plinker.stop();
       bowl.current = null;
     };
     // Mounted once per visit of the scene.

@@ -116,9 +116,19 @@ function snapshot(pane: HTMLElement): Promise<HTMLCanvasElement | null> {
   });
 }
 
+/** A scene's composed still, framed for the phone or the desk (public/play, made from the real render). */
+function ScenePicture({ id, alt }: { id: SceneId; alt: string }) {
+  return (
+    <picture className="iv-picture">
+      <source media="(max-width: 39.99rem)" srcSet={`/play/${id}-phone.webp`} type="image/webp" />
+      <img src={`/play/${id}-desk.webp`} alt={alt} decoding="async" />
+    </picture>
+  );
+}
+
 type Copy = Pick<
   InteractiveCopy,
-  "scenes" | "hints" | "switcher" | "showing" | "sound" | "soundOn" | "soundOff" | "noGl"
+  "scenes" | "hints" | "switcher" | "showing" | "sound" | "soundOn" | "soundOff" | "noGl" | "stills" | "stillNote"
 >;
 
 /**
@@ -147,6 +157,8 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
   const [near, setNear] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  // Only a software renderer here: every scene shows its picture and none mounts again.
+  const [software, setSoftware] = useState(false);
   const [auto, setAuto] = useState(false);
   const [inView, setInView] = useState(false);
   const [held, setHeld] = useState(false);
@@ -315,8 +327,7 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
   // Anyone pointing, hovering, focusing or touching inside holds the timer; playing a scene stops it.
   useEffect(() => {
     const root = rootRef.current;
-    const stage = paneRef.current;
-    if (!root || !stage) return;
+    if (!root) return;
     let hover = false;
     let focus = false;
     let touch = false;
@@ -354,7 +365,10 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
       focus = root.contains(e.relatedTarget as Node | null);
       sync();
     };
-    const onPlay = () => stopAuto();
+    // Delegated: the pane is a new element for every scene.
+    const onPlay = (e: Event) => {
+      if ((e.target as Element | null)?.closest?.(".iv-pane")) stopAuto();
+    };
     root.addEventListener("pointerenter", onEnter);
     root.addEventListener("pointerleave", onLeave);
     root.addEventListener("pointerdown", onDown, { passive: true });
@@ -362,8 +376,8 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
     root.addEventListener("pointercancel", onUp, { passive: true });
     root.addEventListener("focusin", onFocusIn);
     root.addEventListener("focusout", onFocusOut);
-    stage.addEventListener("pointerdown", onPlay, { passive: true });
-    stage.addEventListener("keydown", onPlay);
+    root.addEventListener("pointerdown", onPlay, { passive: true });
+    root.addEventListener("keydown", onPlay);
     return () => {
       window.clearTimeout(touchTimer);
       root.removeEventListener("pointerenter", onEnter);
@@ -373,8 +387,8 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
       root.removeEventListener("pointercancel", onUp);
       root.removeEventListener("focusin", onFocusIn);
       root.removeEventListener("focusout", onFocusOut);
-      stage.removeEventListener("pointerdown", onPlay);
-      stage.removeEventListener("keydown", onPlay);
+      root.removeEventListener("pointerdown", onPlay);
+      root.removeEventListener("keydown", onPlay);
     };
   }, [stopAuto]);
 
@@ -415,7 +429,7 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
     tabsRef.current?.querySelector<HTMLButtonElement>(`[data-scene-id="${to}"]`)?.focus();
   };
 
-  const Live = near ? scenes[active] : undefined;
+  const Live = near && !software ? scenes[active] : undefined;
 
   return (
     <div
@@ -480,17 +494,23 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
           data-scene-id={active}
           data-state={reduced ? undefined : "in"}
         >
-          {failed ? (
+          {software ? (
+            <>
+              <ScenePicture id={active} alt={copy.stills[active]} />
+              <p className="iv-fail">{nobr(copy.stillNote)}</p>
+            </>
+          ) : failed ? (
             <p className="iv-fail">{nobr(copy.noGl)}</p>
           ) : Live ? (
             createElement(Live, {
               locale,
               onReady: () => setReady(true),
-              onFail: () => setFailed(true),
+              onPlay: stopAuto,
+              onFail: (why) => (why === "software" ? setSoftware(true) : setFailed(true)),
             })
           ) : null}
         </div>
-        {active === FIRST ? (
+        {active === FIRST && !software ? (
           <div className="iv-poster" data-hide={ready || undefined} aria-hidden={ready || undefined}>
             {poster}
           </div>

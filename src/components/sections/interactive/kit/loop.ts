@@ -1,3 +1,5 @@
+import { isSoftwareRenderer } from "@/fx/engine/capability";
+
 /**
  * Runtime helpers shared by the lab-hero-a demos: an rAF loop that pauses off screen and in a
  * hidden tab and reports its own frame rate, the pointer as seen by the banner, and the
@@ -11,6 +13,17 @@ export type Profile = {
   phone: boolean;
   dpr: number;
 };
+
+/**
+ * A software renderer (SwiftShader, llvmpipe: no usable GPU) needs seconds to build a scene and
+ * draws a few frames a second at best: a scene that finds one gives its context back at once and
+ * the section shows that scene's picture instead (same rule as the hero, which turns off).
+ */
+export function softwareGl(gl: WebGLRenderingContext | WebGL2RenderingContext): boolean {
+  const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+  const r = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+  return isSoftwareRenderer(String(r ?? ""));
+}
 
 export function readProfile(maxDpr = 2): Profile {
   const phone = matchMedia("(pointer: coarse)").matches || innerWidth < 768;

@@ -20,7 +20,7 @@ const COPY = {
 };
 
 /** Thock: a playable keycap field with springs, thocks, a gold ripple and a secret word (lab-ix-b, ported). */
-export default function Thock({ locale, onReady, onFail }: SceneProps) {
+export default function Thock({ locale, onReady, onPlay, onFail }: SceneProps) {
   const c = COPY[locale === "th" ? "th" : "en"];
   const stage = useRef<HTMLDivElement>(null);
   const [ship, setShip] = useState(false);
@@ -29,13 +29,18 @@ export default function Thock({ locale, onReady, onFail }: SceneProps) {
   useEffect(() => {
     const el = stage.current;
     if (!el) return;
-    const toy = startThock(el, createThockSound(), setShip, () => setPlayed(true));
+    const sound = createThockSound();
+    const toy = startThock(el, sound, setShip, () => {
+      setPlayed(true);
+      onPlay?.();
+    });
     let raf = 0;
-    if (!el.querySelector("canvas")) onFail?.();
+    if (toy.failed || !el.querySelector("canvas")) onFail?.(toy.failed ?? "none");
     else raf = requestAnimationFrame(() => (raf = requestAnimationFrame(() => onReady?.())));
     return () => {
       cancelAnimationFrame(raf);
       toy.stop();
+      sound.stop();
     };
     // Mounted once per visit of the scene.
     // eslint-disable-next-line react-hooks/exhaustive-deps

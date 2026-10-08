@@ -28,9 +28,16 @@ const en = {
   sound: "Sound",
   soundOn: "Sound is on. It starts with your first tap or key press.",
   soundOff: "Sound is off.",
-  /** Alt text of the server-rendered still of the first scene. */
-  still:
-    "A hand-drawn 3D desk at night: a wide monitor, a gold desk phone, a notepad, a lamp, two plants and a window over the Bangkok skyline.",
+  /** Alt text of each scene's picture (the server's still of the first; every scene without a GPU). */
+  stills: {
+    "night-desk":
+      "A hand-drawn 3D desk at night: a wide monitor, a gold desk phone, a notepad, a lamp, two plants and a window over the Bangkok skyline.",
+    "gold-toss": "The letters KINZEN in brushed gold on a stone ledge, mirrored in dark water.",
+    thock: "A low-angle field of navy and cream keycaps with a long gold space bar.",
+    "one-drop": "A shallow bowl of dark water with threads of gold ink drifting in it.",
+  },
+  /** Under a scene's picture when the browser draws without a graphics processor. */
+  stillNote: "A picture of the scene: this browser draws without graphics acceleration.",
   /** Shown in the stage when the device has no WebGL. */
   noGl: "This scene needs WebGL, which this browser does not offer.",
 };
@@ -56,8 +63,14 @@ const th: InteractiveCopy = {
   sound: "เสียง",
   soundOn: "เปิดเสียงอยู่ เสียงจะเริ่มเมื่อแตะหรือกดปุ่มครั้งแรก",
   soundOff: "ปิดเสียงอยู่",
-  still:
-    "โต๊ะทำงานสามมิติลายเส้นหมึกตอนกลางคืน มีจอกว้าง โทรศัพท์ตั้งโต๊ะสีทอง สมุดจด โคมไฟ ต้นไม้สองกระถาง และหน้าต่างมองเห็นตึกในกรุงเทพฯ",
+  stills: {
+    "night-desk":
+      "โต๊ะทำงานสามมิติลายเส้นหมึกตอนกลางคืน มีจอกว้าง โทรศัพท์ตั้งโต๊ะสีทอง สมุดจด โคมไฟ ต้นไม้สองกระถาง และหน้าต่างมองเห็นตึกในกรุงเทพฯ",
+    "gold-toss": "ตัวอักษร KINZEN สีทองวางบนหิน มีเงาสะท้อนบนผิวน้ำสีเข้ม",
+    thock: "ปุ่มคีย์บอร์ดสีกรมท่าและสีครีมเรียงเต็มพื้น มองจากมุมต่ำ มี space bar สีทองยาวหนึ่งปุ่ม",
+    "one-drop": "ชามน้ำสีเข้ม มีเส้นหมึกสีทองลอยวนอยู่ในน้ำ",
+  },
+  stillNote: "แสดงเป็นภาพนิ่ง เพราะเบราว์เซอร์นี้วาดภาพโดยไม่มีการเร่งกราฟิก",
   noGl: "ฉากนี้ต้องใช้ WebGL ซึ่งเบราว์เซอร์นี้ยังไม่รองรับ",
 };
 export const interactive = { en, th };

@@ -1,5 +1,5 @@
 import { QUAD_VS, program, texture, target, freeTarget, releaseContext, fitCanvas, type Target } from "../kit/gl";
-import { readProfile, runLoop, sceneColors } from "../kit/loop";
+import { readProfile, runLoop, sceneColors, softwareGl } from "../kit/loop";
 import * as S from "./shaders";
 
 /*
@@ -49,7 +49,7 @@ export function createBowl(
   host: HTMLElement,
   scene: HTMLElement,
   opts: { onImpact?: (weight: number, small: boolean) => void },
-): Bowl | null {
+): Bowl | "software" | null {
   const prof = readProfile(2);
   const canvas = document.createElement("canvas");
   host.appendChild(canvas);
@@ -57,6 +57,11 @@ export function createBowl(
   if (!gl) {
     canvas.remove();
     return null;
+  }
+  if (softwareGl(gl)) {
+    releaseContext(gl);
+    canvas.remove();
+    return "software";
   }
   gl.getExtension("EXT_color_buffer_float");
   gl.getExtension("EXT_color_buffer_half_float");
