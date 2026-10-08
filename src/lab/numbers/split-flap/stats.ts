@@ -13,7 +13,7 @@ const en = {
   title: "In numbers",
   production: { value: 7, label: "years building production systems", note: "since 2019" },
   techLead: { value: 4, label: "years as Tech Lead for AnyMind Group's EC Platform", note: "2022 to 2026" },
-  stores: { value: 20, suffix: "+", label: "Shopify stores built across my career", note: "career total" },
+  stores: { value: 20, suffix: "+", label: "Shopify stores worked on across my career", note: "career total" },
   replay: {
     value: 500,
     label: "real customer messages through the LINE reply pipeline",

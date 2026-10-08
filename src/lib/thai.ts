@@ -118,6 +118,7 @@ export const COMPOUNDS = [
   "full-stack",
   "ส่วนใหญ่",
   "ยังไง",
+  "คำอวดอ้าง",
   "สมมติ",
   "ชั่วโมง",
   "e-commerce",
