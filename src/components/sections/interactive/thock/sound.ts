@@ -18,7 +18,7 @@ export function createThockSound(): ThockSound {
     press: (code, velocity) => keys.press(code, velocity),
     release: (code) => keys.release(code),
     spaceRipple: () => keys.spaceRipple(),
-    chime: () => sfx.metalClink(0.5),
+    chime: () => sfx.chime(),
     stop: () => {
       keys.stop();
       sfx.stop();

@@ -9,17 +9,6 @@ import { createCozyMusic, createRain, createSfx, getAudioBus, type AudioBus } fr
 
 export type KnockKind = "mug" | "pen" | "ball" | "desk" | "floor" | "wall" | "phone" | "lamp";
 
-/** How heavy each thing sounds when it hits (the bus's drop voice takes a weight 0..1). */
-const WEIGHT: Record<KnockKind, number> = {
-  mug: 0.45,
-  pen: 0.1,
-  ball: 0.25,
-  desk: 0.6,
-  floor: 0.9,
-  wall: 0.7,
-  phone: 0.5,
-  lamp: 0.4,
-};
 
 export class Sound {
   private bus: AudioBus;
@@ -58,12 +47,11 @@ export class Sound {
   knock(kind: KnockKind, speed: number) {
     const v = Math.min(1, speed / 2);
     if (v < 0.05) return;
-    if (kind === "phone" || kind === "lamp") this.sfx.metalClink(v * 0.6);
-    else this.sfx.drop(WEIGHT[kind] * (0.5 + v * 0.5));
+    this.sfx.knock(kind, v);
   }
 
   purr() {
-    this.sfx.drop(0.2);
+    this.sfx.purr();
   }
 
   thunder() {

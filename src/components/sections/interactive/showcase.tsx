@@ -285,10 +285,10 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
     let audible = false;
     let off: (() => void) | undefined;
     let dead = false;
+    // The bus fades and suspends itself for a hidden tab; off screen is ours to report.
     const apply = () => {
-      if (!bus) return;
-      if (unlocked && audible && !document.hidden) void bus.ctx.resume().catch(() => {});
-      else if (bus.ctx.state === "running") void bus.ctx.suspend().catch(() => {});
+      if (!bus || !unlocked) return;
+      bus.setAway(!audible || document.hidden);
     };
     const attach = (attachRef.current = (b: Bus) => {
       if (dead || bus) return;
@@ -320,7 +320,7 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
       io.disconnect();
       document.removeEventListener("visibilitychange", apply);
       off?.();
-      if (bus?.ctx.state === "running") void bus.ctx.suspend().catch(() => {});
+      bus?.setAway(true);
     };
   }, []);
 

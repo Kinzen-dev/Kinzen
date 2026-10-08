@@ -14,7 +14,7 @@ export function createGoldSound(): GoldSound {
   const sfx = createSfx(getAudioBus());
   return {
     clink: (speed) => sfx.metalClink(Math.min(1, speed)),
-    thud: (speed) => sfx.drop(Math.min(1, speed)),
+    thud: (speed) => sfx.thud(Math.min(1, speed)),
     splash: (speed) => sfx.splash(Math.min(1, speed)),
     stop: () => sfx.stop(),
   };
