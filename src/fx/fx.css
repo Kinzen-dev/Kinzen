@@ -64,6 +64,11 @@
   width: 1rem;
   background: var(--gold);
 }
+/* Skipped on this device (too slow): a hollow, faint dot. */
+.hero-stage-dots li[data-skipped]:not([data-on]) {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ink) 22%, transparent);
+}
 .hero-stage-toggle {
   display: grid;
   place-items: center;

@@ -8,13 +8,15 @@ export type StageState = {
   running: boolean;
   /** Paused by the visitor (the stage also stops itself off screen, which is not this). */
   paused: boolean;
-  /** Scenes in play this visit (heavy ones may have been skipped on a slow device). */
+  /** Every scene of the loop, in order (just the desk when there is no GPU). */
   scenes: string[];
-  /** Index into `scenes` of the scene on stage. */
-  index: number;
+  /** Scenes dropped for this session (too slow on this device, or failed to build). */
+  skipped: string[];
+  /** The scene the viewer sees: during a hand-over it switches where the incoming scene takes over. */
+  visible: string;
 };
 
-let state: StageState = { running: false, paused: false, scenes: [], index: 0 };
+let state: StageState = { running: false, paused: false, scenes: [], skipped: [], visible: "desk" };
 const listeners = new Set<() => void>();
 
 export const stageStore = {

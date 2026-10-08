@@ -221,4 +221,111 @@ test.describe("v4 hero sequence", () => {
       }
     });
   }
+
+  test("the active dot always shows the scene the viewer sees, through a full cycle", async ({ page }) => {
+    test.setTimeout(120_000);
+    await gpuStage(page, "/?fx-speed=6");
+    // One sample per animation frame callback: what the stage shows and what the dots say, read
+    // together in the same frame.
+    await page.evaluate(() => {
+      type Sample = { vis: string; dot: string; scene: string; next: string; svg: number; canvas: boolean };
+      const w = window as Window & { __sync?: Sample[] };
+      w.__sync = [];
+      const hero = document.querySelector<HTMLElement>("[data-hero]")!;
+      const svg = document.querySelector<SVGSVGElement>("[data-ink-desk]")!;
+      const stageBox = document.querySelector<HTMLElement>(".fx-stage")!;
+      let n = 0;
+      const tick = () => {
+        if (n++ % 6 === 0) {
+          w.__sync!.push({
+            vis: hero.dataset.stageVisible ?? "",
+            dot: document.querySelector<HTMLElement>("[data-hero-controls] li[data-on]")?.dataset.scene ?? "",
+            scene: hero.dataset.stageScene ?? "",
+            next: hero.dataset.stageNext ?? "",
+            svg: parseFloat(svg.style.opacity || "1"),
+            canvas: stageBox.hasAttribute("data-show"),
+          });
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    await expect
+      .poll(async () => (await stage(page))!.history.length, { timeout: 90_000, intervals: [500] })
+      .toBeGreaterThanOrEqual(7);
+    type Sample = { vis: string; dot: string; scene: string; next: string; svg: number; canvas: boolean };
+    const samples = await page.evaluate(() => (window as Window & { __sync?: Sample[] }).__sync ?? []);
+    expect(samples.length).toBeGreaterThan(100);
+    const bad = samples.filter((x) => x.dot !== x.vis);
+    expect(bad.slice(0, 5), `${bad.length} of ${samples.length} frames out of sync`).toEqual([]);
+    for (const x of samples) {
+      // The visible scene is one of the two on stage, and the frame agrees with it.
+      expect([x.scene, x.next]).toContain(x.vis);
+      if (x.vis === "desk" && x.scene === "desk") expect(x.svg).toBeGreaterThanOrEqual(0.45);
+      if (x.vis !== "desk") expect(x.canvas).toBe(true);
+      if (x.vis !== "desk" && x.scene === "desk") expect(x.svg).toBeLessThanOrEqual(0.55);
+    }
+    // Every scene was seen, in order, and the dot switched inside each hand-over, not at its edges.
+    const seen = samples.map((x) => x.vis).filter((v, i, a) => i === 0 || v !== a[i - 1]);
+    expect(seen.slice(0, 6)).toEqual(["desk", "particles", "gold3d", "fluid", "keycaps", "desk"]);
+    const switches = samples.filter((x, i) => i > 0 && x.vis !== samples[i - 1].vis);
+    for (const x of switches) expect(x.next, `switch to ${x.vis}`).toBe(x.vis);
+  });
+
+  test("the dot stays with the visible scene across pause, tab hide and off-screen", async ({ page }) => {
+    await gpuStage(page, "/?fx-speed=6");
+    const same = () =>
+      page.evaluate(() => {
+        const vis = document.querySelector<HTMLElement>("[data-hero]")!.dataset.stageVisible;
+        const dot = document.querySelector<HTMLElement>("[data-hero-controls] li[data-on]")?.dataset.scene;
+        return { vis, dot };
+      });
+    const check = async () => {
+      const s = await same();
+      expect(s.dot).toBe(s.vis);
+    };
+    // Pause (in whatever hand-over or scene it lands), then play.
+    const toggle = page.locator("[data-hero-controls] button");
+    for (let i = 0; i < 4; i++) {
+      await page.waitForTimeout(700);
+      await toggle.click();
+      await check();
+      await page.waitForTimeout(300);
+      await check();
+      await toggle.click();
+      await check();
+    }
+    // Tab hidden and shown.
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => true });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect.poll(async () => (await stage(page))!.running).toBe(false);
+    await check();
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => false });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect.poll(async () => (await stage(page))!.running).toBe(true);
+    await check();
+    // Off screen and back.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect.poll(async () => (await stage(page))!.running).toBe(false);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect.poll(async () => (await stage(page))!.running).toBe(true);
+    await check();
+  });
+
+  test("a scene skipped on a slow device reads as skipped in the dots", async ({ page }) => {
+    // The session memory the slow-device rule writes: water skipped.
+    await page.addInitScript(() => sessionStorage.setItem("kz-hero-skip", JSON.stringify(["fluid"])));
+    await gpuStage(page, "/?fx-speed=6");
+    await expect(page.locator('[data-hero-controls] li[data-scene="fluid"]')).toHaveAttribute("data-skipped", "");
+    await expect(page.locator("[data-hero-controls] li[data-skipped]")).toHaveCount(1);
+    await expect(page.locator("[data-hero-controls] li")).toHaveCount(5);
+    await expect
+      .poll(async () => (await stage(page))!.history.length, { timeout: 60_000, intervals: [500] })
+      .toBeGreaterThanOrEqual(5);
+    expect((await stage(page))!.history.slice(0, 5)).toEqual(["desk", "particles", "gold3d", "keycaps", "desk"]);
+  });
 });
