@@ -1,0 +1,152 @@
+/* Lab (preview only): the section frame shared by the lab-ix-b toys (gold-toss, thock). */
+.ix {
+  padding-top: calc(var(--header-h) + clamp(1.5rem, 4vw, 3rem));
+  padding-bottom: 3rem;
+}
+.ix-head {
+  max-width: 44rem;
+}
+.ix-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+:lang(th) .ix-kicker {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  font-size: var(--text-xs);
+}
+.ix-kicker i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.ix-title {
+  margin-top: 0.75rem;
+  font-size: clamp(2rem, 1.2rem + 3vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+:lang(th) .ix-title {
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.ix-lede {
+  margin-top: 0.75rem;
+  color: var(--ink-2);
+  max-width: 38rem;
+}
+
+.ix-card {
+  position: relative;
+  margin-top: 1.75rem;
+  box-shadow: var(--shadow-lift);
+  background: radial-gradient(120% 90% at 50% 20%, oklch(0.2 0.035 262), oklch(0.11 0.022 266) 70%);
+}
+.ix-stage {
+  position: relative;
+  height: clamp(26rem, 54vw, 42rem);
+  max-height: 80svh;
+  outline: none;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ix-stage:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--gold);
+  border-radius: var(--radius-card);
+}
+.ix-stage canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 40rem) {
+  .ix-stage {
+    height: min(72svh, 36rem);
+  }
+}
+
+/* The in-world prompt: small, quiet, bottom left (like the concept frame's "throw one"). */
+.ix-hint {
+  position: absolute;
+  left: var(--inset-card);
+  bottom: var(--inset-card);
+  pointer-events: none;
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
+  color: oklch(0.9 0.02 85 / 0.72);
+}
+.ix-hint > span {
+  transition: opacity var(--dur-4) var(--ease-out);
+}
+.ix-hint > [data-gone] {
+  opacity: 0;
+}
+
+.ix-sound {
+  position: absolute;
+  top: var(--inset-compact);
+  right: var(--inset-compact);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: 0.875rem 1rem;
+  border-radius: 999px;
+  border: 1px solid oklch(0.9 0.02 85 / 0.18);
+  background: oklch(0.14 0.025 266 / 0.55);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  transition:
+    border-color var(--dur-2) var(--ease-out),
+    background var(--dur-2) var(--ease-out);
+}
+.ix-sound:hover {
+  border-color: oklch(0.9 0.02 85 / 0.4);
+}
+.ix-sound:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.ix-sound[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--gold) 70%, transparent);
+  color: var(--gold);
+}
+.ix-sound svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: currentColor;
+}
+.ix-sound .ix-wave {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+/* A soft vignette over the toy: the edges fall into the dark, the middle holds the light. */
+.ix-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(120% 95% at 50% 42%, transparent 55%, oklch(0.08 0.02 266 / 0.55));
+}
