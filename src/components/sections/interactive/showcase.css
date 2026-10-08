@@ -132,7 +132,10 @@
   overflow: clip;
   isolation: isolate;
   background: #03040a;
-  box-shadow: var(--shadow-lift);
+  /* A hairline keeps the card's edge on a dark page. */
+  box-shadow:
+    0 0 0 1px oklch(0.9 0.02 85 / 0.1),
+    var(--shadow-lift);
   color: var(--ink);
 }
 .iv-pane {
