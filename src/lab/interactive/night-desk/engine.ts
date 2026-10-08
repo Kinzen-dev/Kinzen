@@ -51,7 +51,7 @@ type Pose = { target: THREE.Vector3; dir: THREE.Vector3; w: number; h: number };
 
 const v3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 const OVERVIEW: Pose = { target: v3(0, 1.22, -0.22), dir: v3(0, 0.3, 1).normalize(), w: 2.5, h: 1.72 };
-const OVERVIEW_PHONE: Pose = { target: v3(0.02, 1.2, -0.15), dir: v3(0, 0.36, 1).normalize(), w: 1.34, h: 1.1 };
+const OVERVIEW_PHONE: Pose = { target: v3(0.02, 1.2, -0.15), dir: v3(0, 0.36, 1).normalize(), w: 1.48, h: 1.1 };
 const FOCUS: Partial<Record<SpotId, Pose>> = {
   monitor: { target: v3(0.02, 1.077, -0.26), dir: v3(0, 0.05, 1).normalize(), w: 1.1, h: 0.47 },
   phone: { target: v3(0.47, 0.81, 0.1), dir: v3(0.12, 0.5, 1).normalize(), w: 0.78, h: 0.44 },
@@ -444,7 +444,8 @@ export function createNightDesk(o: EngineOpts): Engine {
     if (!el) return;
     proj.copy(p).project(camera);
     const vis = show && proj.z < 1 && Math.abs(proj.x) < 0.98 && Math.abs(proj.y) < 0.96;
-    const x = ((proj.x + 1) / 2) * W;
+    // Kept clear of the stage edges so a label never clips (phones label every dot).
+    const x = THREE.MathUtils.clamp(((proj.x + 1) / 2) * W, 44, W - 44);
     const y = ((1 - proj.y) / 2) * H;
     el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
     el.dataset.hidden = vis ? "false" : "true";
