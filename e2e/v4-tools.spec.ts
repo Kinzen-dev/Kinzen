@@ -228,8 +228,10 @@ test.describe("layout", () => {
           await page.waitForTimeout(300);
           const m = await activePane(page).evaluate((pane) => {
             const root = pane.firstElementChild as HTMLElement;
+            // The logo wall clips its own rows: measure the wall itself.
+            const wall = root.querySelector<HTMLElement>(".ls-wall");
             return {
-              content: root.scrollHeight,
+              content: Math.max(root.scrollHeight, wall ? wall.scrollHeight : 0),
               stage: (pane.parentElement as HTMLElement).getBoundingClientRect().height,
               sw: document.documentElement.scrollWidth,
               vw: document.documentElement.clientWidth,

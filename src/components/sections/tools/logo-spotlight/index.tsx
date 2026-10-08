@@ -21,7 +21,7 @@ const COPY = {
   },
 } satisfies Record<Locale, unknown>;
 
-/** On a phone's small cells, long names set as words shorten (the full name stays for screen readers). */
+/** On phone and tablet cells, long names set as words shorten (the full name stays for screen readers). */
 const PHONE_SHORT: Record<string, string> = {
   "Hexagonal and event-driven design": "Hexagonal",
   "Twilio Media Streams": "Twilio",
