@@ -30,6 +30,20 @@ const XF: Record<string, number> = {
   "keycaps>desk": 2.2,
 };
 const xf = (a: SceneId, b: SceneId) => XF[`${a}>${b}`] ?? 2;
+/**
+ * Where in each hand-over (share of its length) the incoming scene becomes what the viewer sees:
+ * the ink is gone once the strokes have flashed into dust; metal and water take over halfway
+ * through their sweep and melt; the keys once the ink has snapped into cells and they rise; the
+ * desk once the keys have mostly sunk. The scene dots switch there, never at a hand-over's start
+ * or end. Pairs not listed (after a skip) switch halfway.
+ */
+const DOMINANT: Record<string, number> = {
+  "desk>particles": 0.12,
+  "particles>gold3d": 0.5,
+  "gold3d>fluid": 0.5,
+  "fluid>keycaps": 0.5,
+  "keycaps>desk": 0.6,
+};
 const ORDER: SceneId[] = ["desk", "particles", "gold3d", "fluid", "keycaps"];
 const HEAVY = new Set<SceneId>(["fluid", "keycaps"]);
 const LOAD: Record<GpuSceneId, () => Promise<SceneFactory>> = {
@@ -96,6 +110,8 @@ export type StageEls = {
 type Debug = {
   scene: SceneId;
   next: SceneId | null;
+  /** The scene the viewer sees (what the dots show). */
+  visible: SceneId;
   t: number;
   order: SceneId[];
   history: SceneId[];
@@ -139,6 +155,7 @@ export function startSequence(els: StageEls): () => void {
   const debug: Debug = {
     scene: cur,
     next,
+    visible: cur,
     t: 0,
     order,
     history: ["desk"],
@@ -167,7 +184,8 @@ export function startSequence(els: StageEls): () => void {
   const setOrder = (o: SceneId[]) => {
     order = o;
     debug.order = o;
-    stageStore.set({ scenes: o });
+    const loop = o.length > 1;
+    stageStore.set({ scenes: loop ? ORDER : ["desk"], skipped: loop ? ORDER.filter((s) => !o.includes(s)) : [] });
   };
 
   // ---------- geometry ----------
@@ -260,13 +278,31 @@ export function startSequence(els: StageEls): () => void {
     }
   };
 
+  /** What the viewer sees now: the outgoing scene until the incoming one dominates the hand-over. */
+  const visibleNow = (): SceneId => (next && nt / xf(cur, next) >= (DOMINANT[`${cur}>${next}`] ?? 0.5) ? next : cur);
+  let shownScene: SceneId | null = null;
+  let shownNext: SceneId | null | undefined;
+  let shownCur: SceneId | null = null;
+  /** Publish the stage state (only what changed): data attributes, debug, and the dots' store. */
   const publish = () => {
     debug.scene = cur;
     debug.next = next;
-    hero.dataset.stageScene = cur;
-    if (next) hero.dataset.stageNext = next;
-    else delete hero.dataset.stageNext;
-    stageStore.set({ index: Math.max(0, order.indexOf(cur)) });
+    if (cur !== shownCur) {
+      shownCur = cur;
+      hero.dataset.stageScene = cur;
+    }
+    if (next !== shownNext) {
+      shownNext = next;
+      if (next) hero.dataset.stageNext = next;
+      else delete hero.dataset.stageNext;
+    }
+    const vis = visibleNow();
+    if (vis !== shownScene) {
+      shownScene = vis;
+      debug.visible = vis;
+      hero.dataset.stageVisible = vis;
+      stageStore.set({ visible: vis });
+    }
   };
 
   const note = (what: string) => {
@@ -474,6 +510,7 @@ export function startSequence(els: StageEls): () => void {
     judge(raw);
     const d = Math.min(raw / 1000, 1 / 20) * speed;
     advance(d);
+    publish();
     debug.t = t;
     // Simulations step at most a twentieth of a second, whatever the debug clock speed.
     draw(Math.min(d, 1 / 20));
@@ -580,7 +617,7 @@ export function startSequence(els: StageEls): () => void {
     // The safety net already showed the finished drawing (a slow load): start from the hold.
     if (d.shown) t = DRAW_S;
     svg.style.opacity = "1";
-    stageStore.set({ running: true, scenes: order, index: 0 });
+    stageStore.set({ running: true, scenes: ["desk"], skipped: [], visible: cur });
     publish();
     sync();
     // The GPU comes in once the drawing is under way (after first paint, when the browser is idle).
@@ -610,6 +647,7 @@ export function startSequence(els: StageEls): () => void {
     svg.style.removeProperty("opacity");
     delete hero.dataset.stageScene;
     delete hero.dataset.stageNext;
+    delete hero.dataset.stageVisible;
     delete stage.dataset.show;
     stageStore.set({ running: false });
   };
