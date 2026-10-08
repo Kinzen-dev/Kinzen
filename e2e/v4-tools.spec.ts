@@ -18,19 +18,23 @@ const TOOLS = [
   "Fastify",
   "GraphQL",
   "Kafka",
+  "BullMQ",
   "Python",
   "Hexagonal and event-driven design",
   "React",
   "Next.js",
   "Vite",
   "Tailwind CSS",
+  "Three.js",
+  "Phaser",
   "Tauri",
   "MongoDB",
   "PostgreSQL",
   "Redis",
   "SQLite",
+  "AWS (EKS, MSK, S3)",
   "Docker",
-  "Kubernetes (GKE)",
+  "Kubernetes (EKS, GKE)",
   "Fly.io",
   "Cloudflare",
   "Azure",
@@ -39,6 +43,9 @@ const TOOLS = [
   "Jest",
   "GitHub Actions",
   "GitLab CI/CD",
+  "Helm (Kubernetes charts)",
+  "Terragrunt",
+  "SOPS",
   "Shopify Admin and Storefront APIs",
   "Liquid",
   "LINE Messaging API",
@@ -310,7 +317,7 @@ test.describe("tool marks", () => {
   test("bento chips carry a decorative mark or a deliberate text-only name", async ({ page }) => {
     await page.goto("/");
     const chips = page.locator("#skills .bl-chip");
-    await expect(chips).toHaveCount(38);
+    await expect(chips).toHaveCount(45);
     const ts = chips.filter({ hasText: /^TypeScript$/ });
     await expect(ts.locator("svg.tool-mark")).toHaveAttribute("aria-hidden", "true");
     await expect(ts.locator("svg.tool-mark use")).toHaveAttribute("href", /\/tool-logos\.svg\?v=\w+#typescript$/);
@@ -372,7 +379,7 @@ test.describe("tool marks", () => {
   });
 
   test("case page stack pills carry the marks", async ({ page }) => {
-    await page.goto("/work/yimwhan-ai");
+    await page.goto("/work/clinic-receptionist");
     const pills = page.locator(".pj-pill");
     await expect(pills.filter({ hasText: "Fly.io" }).locator("svg.tool-mark")).toHaveAttribute("data-badge", "dark");
     await expect(pills.filter({ hasText: "Litestream" }).locator("svg")).toHaveCount(0);
@@ -391,7 +398,7 @@ test.describe("tool marks", () => {
   for (const theme of ["light", "dark"]) {
     test(`axe is clean on a case page's pills (${theme})`, async ({ page }) => {
       await page.addInitScript((t) => localStorage.setItem("theme", t), theme);
-      await page.goto("/work/yimwhan-ai");
+      await page.goto("/work/clinic-receptionist");
       const results = await new AxeBuilder({ page }).include(".pj-pills").analyze();
       expect(results.violations).toEqual([]);
     });

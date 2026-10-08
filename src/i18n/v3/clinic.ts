@@ -1,5 +1,5 @@
 /**
- * v3 copy for the "yimwhan" section. EN is the source; TH mirrors its shape (type-checked).
+ * v3 copy for the "clinic" section. EN is the source; TH mirrors its shape (type-checked).
  * Thai: natural, no em or en dashes; visible strings render through nobr() at the call site.
  *
  * Everything under `mock` is FICTIONAL sample data for the coded illustration: an invented
@@ -8,7 +8,7 @@
 const en = {
   eyebrow: "AI receptionist for dental clinics",
   caseStudy: "Read the case study",
-  stageLabel: "How one patient message moves through Yimwhan AI, in five steps",
+  stageLabel: "How one patient message moves through the clinic receptionist, in five steps",
   illustration: "Illustration with sample data",
   step: "Step",
   beats: [
@@ -35,7 +35,7 @@ const en = {
     {
       title: "The checked reply goes out, and is logged",
       text: "The patient gets a reply that passed the rules and an offer to book. Staff see the whole conversation in the back office.",
-      fact: "In production on a dedicated phone number since July 2026, with gated releases and one-step rollback.",
+      fact: "In pilot with a dental clinic, go-live expected October 2026. On a dedicated phone number since July 2026, with gated releases and one-step rollback.",
     },
   ],
   finaleEyebrow: "Try it yourself",
@@ -174,12 +174,12 @@ const en = {
   },
 };
 
-export type YimwhanCopy = typeof en;
+export type ClinicCopy = typeof en;
 
-const th: YimwhanCopy = {
+const th: ClinicCopy = {
   eyebrow: "ผู้ช่วย AI สำหรับคลินิกทันตกรรม",
   caseStudy: "อ่านเบื้องหลังโปรเจกต์",
-  stageLabel: "ข้อความจากคนไข้หนึ่งข้อความผ่าน Yimwhan AI อย่างไร ใน 5 ขั้น",
+  stageLabel: "ข้อความจากคนไข้หนึ่งข้อความผ่านผู้ช่วย AI ของคลินิกอย่างไร ใน 5 ขั้น",
   illustration: "ภาพประกอบ ใช้ข้อมูลตัวอย่าง",
   step: "ขั้นที่",
   beats: [
@@ -206,7 +206,7 @@ const th: YimwhanCopy = {
     {
       title: "ส่งคำตอบที่ผ่านกฎ แล้วบันทึกไว้",
       text: "คนไข้ได้รับคำตอบที่ผ่านกฎ พร้อมข้อเสนอให้จองคิว พนักงานเห็นบทสนทนาทั้งหมดในระบบหลังบ้าน",
-      fact: "รันบนเบอร์โทรเฉพาะมาตั้งแต่กรกฎาคม 2026 ทุก release ผ่านด่านตรวจ และย้อนกลับได้ในขั้นตอนเดียว",
+      fact: "อยู่ในช่วงนำร่องกับคลินิกทันตกรรม คาดว่าจะเปิดใช้งานจริงตุลาคม 2026 รันบนเบอร์โทรเฉพาะมาตั้งแต่กรกฎาคม 2026 ทุก release ผ่านด่านตรวจ และย้อนกลับได้ในขั้นตอนเดียว",
     },
   ],
   finaleEyebrow: "ลองเล่นเอง",
@@ -326,4 +326,4 @@ const th: YimwhanCopy = {
   },
 };
 
-export const yimwhan = { en, th };
+export const clinic = { en, th };

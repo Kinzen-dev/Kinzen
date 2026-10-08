@@ -62,16 +62,16 @@ test.describe("audit review regressions", () => {
     await ctx.close();
   });
 
-  test("320px: the Yimwhan demo's status chip never covers the LINE tag", async ({ browser }) => {
+  test("320px: the clinic demo's status chip never covers the LINE tag", async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: 320, height: 700 } });
     const page = await ctx.newPage();
     for (const route of ["/", "/th"]) {
       await page.goto(route);
-      await page.locator(".yw-cmp-bar").first().scrollIntoViewIfNeeded();
+      await page.locator(".cr-cmp-bar").first().scrollIntoViewIfNeeded();
       const overlap = await page.evaluate(() => {
-        const bar = document.querySelector(".yw-cmp-bar")!;
-        const tag = bar.querySelector(".yw-tag")!.getBoundingClientRect();
-        return [...bar.querySelectorAll(".yw-status-chip")].some((el) => {
+        const bar = document.querySelector(".cr-cmp-bar")!;
+        const tag = bar.querySelector(".cr-tag")!.getBoundingClientRect();
+        return [...bar.querySelectorAll(".cr-status-chip")].some((el) => {
           const c = el.getBoundingClientRect();
           return c.left < tag.right && c.right > tag.left && c.top < tag.bottom && c.bottom > tag.top;
         });

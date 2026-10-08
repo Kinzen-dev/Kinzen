@@ -4,10 +4,10 @@ import { thai } from "./thai";
 
 /**
  * Audit track a-02 (platform): TECH-01/02 footer, TECH-03 og:url, TECH-06 privacy page,
- * TECH-08 CSP, TECH-09 content dates, TECH-10 shortcuts, TECH-11 marquee pause.
+ * TECH-08 CSP, TECH-09 content dates, TECH-10 shortcuts. (TECH-11 left with the marquee.)
  */
 
-const SLUGS = ["yimwhan-ai", "anymind-ec-platform", "helm", "ronglen", "visual-qa-harness", "cadence"];
+const SLUGS = ["clinic-receptionist", "anymind-ec-platform", "helm", "ronglen", "visual-qa-harness", "cadence"];
 const NEUTRAL = ["/", "/work", "/cv", ...SLUGS.map((s) => `/work/${s}`), "/privacy"];
 const th = (path: string) => (path === "/" ? "/th" : `/th${path}`);
 /** The 18 content pages, the privacy page in both languages, and the 404 in both. */
@@ -223,7 +223,7 @@ test.describe("shortcuts (TECH-10)", () => {
   test("digits typed outside the demo never change it, even with the demo on screen", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/th");
-    const demo = page.locator("#yimwhan .agent-demo");
+    const demo = page.locator("#clinic .agent-demo");
     const choices = demo.getByRole("group").getByRole("button");
     await demo.scrollIntoViewIfNeeded();
     const before = await choices.evaluateAll((els) => els.map((e) => e.getAttribute("aria-pressed")));

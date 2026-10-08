@@ -1,15 +1,12 @@
 "use client";
 
-import { Fragment, useEffect, useId, useRef, type KeyboardEvent } from "react";
+import { Fragment, useEffect, useId, useRef, type CSSProperties, type KeyboardEvent } from "react";
 import type { Locale } from "@/content/schema";
 import { nobr } from "@/lib/thai-nodes";
 import { ToolMark } from "@/components/tools/tool-mark";
 import { toolMark } from "@/components/tools/tool-marks";
 import type { ViewProps } from "../types";
 import "./spotlight.css";
-
-/** Columns of the widest row (data and cloud has nine tools); shorter rows end in empty cells. */
-const COLS = 9;
 
 const COPY = {
   en: {
@@ -29,6 +26,8 @@ const PHONE_SHORT: Record<string, string> = {
   "Hexagonal and event-driven design": "Hexagonal",
   "Twilio Media Streams": "Twilio",
   "Real-time speech-to-text": "Speech to text",
+  "AWS (EKS, MSK, S3)": "AWS",
+  "Helm (Kubernetes charts)": "Helm charts",
 };
 
 /** "mark" for a brand mark, "practice" for a way of working, "text" for a text-only tool. */
@@ -69,6 +68,8 @@ export default function LogoSpotlight({ locale, groups }: ViewProps) {
   const wallRef = useRef<HTMLDivElement>(null);
   const c = COPY[locale];
   const keysId = useId();
+  // Columns of the widest row on desktop; shorter rows end in empty cells.
+  const cols = Math.max(...groups.map((g) => g.tools.length));
 
   useEffect(() => {
     const wall = wallRef.current;
@@ -286,7 +287,7 @@ export default function LogoSpotlight({ locale, groups }: ViewProps) {
   };
 
   return (
-    <div className="ls">
+    <div className="ls" style={{ "--cols": cols } as CSSProperties}>
       <div
         className="ls-wall"
         ref={wallRef}
@@ -323,7 +324,7 @@ export default function LogoSpotlight({ locale, groups }: ViewProps) {
                   </li>
                 );
               })}
-              {Array.from({ length: COLS - g.tools.length }, (_, i) => (
+              {Array.from({ length: cols - g.tools.length }, (_, i) => (
                 <li key={`f${i}`} className="ls-fill" aria-hidden="true" />
               ))}
             </ul>

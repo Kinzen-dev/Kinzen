@@ -5,8 +5,8 @@ import { stageStore } from "../sequence/store";
 
 /**
  * The hero sequence's quiet controls, top right of the hero under the header: one dot per scene
- * (the one on stage drawn as a short gold bar) and a pause/play button, so the looping motion can
- * be stopped (WCAG 2.2.2). Rendered only while the sequence runs: nothing without scripting or
+ * (the one the viewer sees drawn as a short gold bar; a scene skipped on this device dimmed) and a
+ * pause/play button, so the looping motion can be stopped (WCAG 2.2.2). Rendered only while the sequence runs: nothing without scripting or
  * under reduced motion, where the hero is a still picture. Absolutely placed: no layout shift.
  */
 export function HeroControls({ pause, play }: { pause: string; play: string }) {
@@ -16,8 +16,13 @@ export function HeroControls({ pause, play }: { pause: string; play: string }) {
     <div className="hero-stage-controls" data-hero-controls="">
       {s.scenes.length > 1 ? (
         <ol className="hero-stage-dots" aria-hidden="true">
-          {s.scenes.map((id, i) => (
-            <li key={id} data-on={i === s.index ? "" : undefined} />
+          {s.scenes.map((id) => (
+            <li
+              key={id}
+              data-scene={id}
+              data-on={id === s.visible ? "" : undefined}
+              data-skipped={s.skipped.includes(id) ? "" : undefined}
+            />
           ))}
         </ol>
       ) : null}

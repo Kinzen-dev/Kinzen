@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
  * open request and still opens fast. Behaviour is covered by timeline-cv-palette.spec.ts.
  */
 test.describe("lazy command palette (TECH-05)", () => {
-  for (const route of ["/", "/th", "/cv", "/work/yimwhan-ai"]) {
+  for (const route of ["/", "/th", "/cv", "/work/clinic-receptionist"]) {
     test(`${route}: the server HTML has the trigger but no palette dialog`, async ({ request }) => {
       const html = await (await request.get(route)).text();
       expect(html).toContain('aria-keyshortcuts="Meta+K Control+K"');
@@ -53,7 +53,7 @@ test.describe("lazy command palette (TECH-05)", () => {
 
   test("Cmd/Ctrl+K closes an open palette and reopens it with a fresh query", async ({ page, isMobile }) => {
     test.skip(isMobile, "keyboard shortcut path");
-    await page.goto("/work/yimwhan-ai");
+    await page.goto("/work/clinic-receptionist");
     await page.waitForLoadState("networkidle");
     const dialog = page.getByRole("dialog", { name: "Command palette" });
     await page.keyboard.press("ControlOrMeta+k");

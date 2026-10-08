@@ -8,7 +8,7 @@ import { thai } from "./thai";
  * audit fixed a meaning; layout is covered by the section specs.
  */
 
-const SLUGS = ["yimwhan-ai", "anymind-ec-platform", "helm", "ronglen", "visual-qa-harness", "cadence"];
+const SLUGS = ["clinic-receptionist", "anymind-ec-platform", "helm", "ronglen", "visual-qa-harness", "cadence"];
 const ROUTES = [
   "/",
   "/th",
@@ -80,10 +80,10 @@ test.describe("audit content: claims", () => {
   }
 
   test("the published numbers are unchanged: 500 / 37 and 35 of 38", async ({ request }) => {
-    const yimwhan = flatten(await (await request.get("/work/yimwhan-ai")).text());
-    expect(yimwhan).toContain("500 real customer messages ran through the LINE reply pipeline");
-    expect(yimwhan).toContain("caught 37 rule violations in raw model drafts");
-    expect(yimwhan).toContain("in this test set");
+    const clinic = flatten(await (await request.get("/work/clinic-receptionist")).text());
+    expect(clinic).toContain("500 real customer messages ran through the LINE reply pipeline");
+    expect(clinic).toContain("caught 37 rule violations in raw model drafts");
+    expect(clinic).toContain("in this test set");
     const qa = flatten(await (await request.get("/work/visual-qa-harness")).text());
     expect(qa).toContain("35 of 38 seeded bugs");
     const qaTh = flatten(await (await request.get("/th/work/visual-qa-harness")).text());
@@ -96,7 +96,7 @@ test.describe("audit content: guard demo", () => {
   for (const route of ["/", "/th"] as const) {
     test(`${route} says the demo is scripted before any choice`, async ({ page }) => {
       await page.goto(route);
-      const demo = page.locator("#yimwhan .agent-demo");
+      const demo = page.locator("#clinic .agent-demo");
       await demo.scrollIntoViewIfNeeded();
       const intro = demo.locator("p").first();
       await expect(intro).toContainText(

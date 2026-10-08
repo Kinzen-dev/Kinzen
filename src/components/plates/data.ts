@@ -6,8 +6,8 @@ import type { PlateSpec } from "./types";
  * here may introduce a new number, client or claim.
  */
 
-const yimwhan: PlateSpec = {
-  projectId: "proj-yimwhan",
+const clinic: PlateSpec = {
+  projectId: "proj-clinic",
   drawing: "KZ-01",
   title: {
     en: "Voice and LINE path through the reply rule checks",
@@ -265,8 +265,8 @@ const yimwhan: PlateSpec = {
       ],
       at: [40, 50],
       lines: {
-        en: ["Dedicated phone number,", "in production since July 2026"],
-        th: ["เบอร์โทรเฉพาะ", "ใช้งานจริงตั้งแต่กรกฎาคม 2026"],
+        en: ["Dedicated phone number since July 2026;", "pilot, go-live expected October 2026"],
+        th: ["เบอร์โทรเฉพาะตั้งแต่กรกฎาคม 2026", "ช่วงนำร่อง คาดว่าเปิดใช้งานจริงตุลาคม 2026"],
       },
     },
   ],
@@ -342,7 +342,7 @@ const helm: PlateSpec = {
 };
 
 const PLATES: Record<string, PlateSpec> = {
-  [yimwhan.projectId]: yimwhan,
+  [clinic.projectId]: clinic,
   [helm.projectId]: helm,
 };
 

@@ -10,7 +10,7 @@ import "./more-work.css";
 
 /** Scene illustration per project (v3 ink art). */
 export const PROJECT_ART: Record<string, ArtName> = {
-  "proj-yimwhan": "scene-yimwhan-desk",
+  "proj-clinic": "scene-clinic-desk",
   "proj-anymind-ec": "scene-storefront",
   "proj-helm": "scene-helm-crew",
   "proj-ronglen": "scene-game-night",

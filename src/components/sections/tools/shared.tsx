@@ -5,7 +5,11 @@ import { nobr } from "@/lib/thai-nodes";
 import type { Tool, ToolGroup } from "./types";
 
 /** Short display names for text-only tools when they sit on a ring or in a dock. */
-const SHORT: Record<string, string> = { "Twilio Media Streams": "Twilio" };
+const SHORT: Record<string, string> = {
+  "Twilio Media Streams": "Twilio",
+  "AWS (EKS, MSK, S3)": "AWS",
+  "Helm (Kubernetes charts)": "Helm charts",
+};
 
 /** A tool with its mark resolved: a brand mark, a practice (no brand), or undefined for a text-only chip. */
 export type Token = Tool & { mark: LogoSlug | "practice" | undefined; short: string };

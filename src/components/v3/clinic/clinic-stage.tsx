@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import type { YimwhanCopy } from "@/i18n/v3/yimwhan";
+import type { ClinicCopy } from "@/i18n/v3/clinic";
 import { StickyStage } from "@/motion/sticky-stage";
 import { nobr } from "@/lib/thai-nodes";
 
@@ -27,7 +27,7 @@ const round = (n: number) => Math.round(n * 1000) / 1000;
  * conversation, plus the patient's LINE phone) and a compact one (one card per beat, whole items
  * only, nothing under 10.5px). The mockups are decorative (aria-hidden); the beat list is the text.
  */
-export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
+export function ClinicStage({ copy }: { copy: ClinicCopy }) {
   const [step, setStep] = useState(LAST);
   const [live, setLive] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -65,10 +65,10 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
     const el = cmpRef.current;
     if (!el) return;
     const measure = () => {
-      for (const stack of el.querySelectorAll<HTMLElement>(".yw-stack[data-chat]")) {
+      for (const stack of el.querySelectorAll<HTMLElement>(".cr-stack[data-chat]")) {
         const gap = parseFloat(getComputedStyle(stack).rowGap) || 0;
         let push = 0;
-        for (const f of stack.querySelectorAll<HTMLElement>(":scope > .yw-fresh")) push += f.offsetHeight + gap;
+        for (const f of stack.querySelectorAll<HTMLElement>(":scope > .cr-fresh")) push += f.offsetHeight + gap;
         stack.style.setProperty("--push", `${Math.round(push)}px`);
       }
     };
@@ -93,74 +93,74 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
   }, [step]);
 
   const status = (
-    <span className="yw-status">
+    <span className="cr-status">
       {m.status.map((s, i) => (
-        <span key={s} className="yw-status-chip" data-on={i === step || undefined} data-n={i}>
-          <span className="yw-dot" />
+        <span key={s} className="cr-status-chip" data-on={i === step || undefined} data-n={i}>
+          <span className="cr-dot" />
           {nobr(s)}
         </span>
       ))}
     </span>
   );
   const lights = (
-    <span className="yw-lights">
+    <span className="cr-lights">
       <i />
       <i />
       <i />
     </span>
   );
   const patientWho = (
-    <span className="yw-who">
-      <span className="yw-rec" />
+    <span className="cr-who">
+      <span className="cr-rec" />
       {nobr(m.transcript)} · {nobr(m.patient)} · {m.patientTime}
     </span>
   );
   // Beat 3: the draft types itself in, then the guard's gold scan line runs under the flagged words.
   const draftBubble = (
-    <span className="yw-bubble">
+    <span className="cr-bubble">
       {m.draftBefore ? <Words text={m.draftBefore} from={2.05} to={2.15} /> : null}
-      <span className="yw-flag">
+      <span className="cr-flag">
         <Words parts={m.draftFlaggedWords} from={2.1} to={2.35} scan={[2.5, 2.9]} />
       </span>
       <Words text={m.draftAfter} from={2.35} to={2.45} />
     </span>
   );
   const draftWho = (
-    <span className="yw-who">
-      {nobr(m.draft)} <span className="yw-faint">({nobr(m.notSent)})</span>
+    <span className="cr-who">
+      {nobr(m.draft)} <span className="cr-faint">({nobr(m.notSent)})</span>
     </span>
   );
   const verdict = (k: number) => (
-    <span className="yw-verdict yw-pop" style={at(k)}>
-      {nobr(m.blocked)} · <span className="yw-mono">{failed?.rule}</span>
+    <span className="cr-verdict cr-pop" style={at(k)}>
+      {nobr(m.blocked)} · <span className="cr-mono">{failed?.rule}</span>
     </span>
   );
   const sentWho = (
-    <span className="yw-who yw-who-sent">
-      {nobr(m.sent)} <span className="yw-tick">{"✓✓"}</span>
+    <span className="cr-who cr-who-sent">
+      {nobr(m.sent)} <span className="cr-tick">{"✓✓"}</span>
     </span>
   );
   const callStrip = (state: "auto" | "live") => (
-    <span className="yw-call" data-on={state === "live" ? "" : on(step, 1)}>
-      <span className="yw-call-head">
+    <span className="cr-call" data-on={state === "live" ? "" : on(step, 1)}>
+      <span className="cr-call-head">
         <PhoneIcon />
-        <span className="yw-swap">
+        <span className="cr-swap">
           <span data-show={state === "live" ? undefined : step === 0 || undefined}>{nobr(m.incoming)}</span>
           <span data-show={state === "live" ? "" : step >= 1 || undefined}>{nobr(m.call)}</span>
         </span>
-        <span className="yw-call-time tabular">{m.callTime}</span>
+        <span className="cr-call-time tabular">{m.callTime}</span>
       </span>
-      <span className="yw-call-body">
-        <span className="yw-wave">
+      <span className="cr-call-body">
+        <span className="cr-wave">
           {Array.from({ length: 14 }, (_, i) => (
             <i key={i} style={{ "--i": i } as CSSProperties} />
           ))}
         </span>
-        <span className="yw-swap">
-          <span className="yw-caller tabular" data-show={state === "live" ? undefined : step === 0 || undefined}>
+        <span className="cr-swap">
+          <span className="cr-caller tabular" data-show={state === "live" ? undefined : step === 0 || undefined}>
             {m.caller}
           </span>
-          <span className="yw-caption" data-show={state === "live" ? "" : step >= 1 || undefined}>
+          <span className="cr-caption" data-show={state === "live" ? "" : step >= 1 || undefined}>
             <Words text={m.caption} from={1.05} to={1.55} />
           </span>
         </span>
@@ -170,19 +170,19 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
   const row = (r: (typeof m.rows)[number], i: number, extra?: string, k?: number) => (
     <span
       key={r.name}
-      className={`yw-row ${extra ?? ""} ${k === undefined ? "" : "yw-r"}`}
+      className={`cr-row ${extra ?? ""} ${k === undefined ? "" : "cr-r"}`}
       data-new={i === 0 || undefined}
       style={k === undefined ? undefined : at(k)}
     >
-      <span className="yw-row-top">
-        <span className="yw-tag" data-ch={r.channel === "LINE" ? "line" : "call"}>
+      <span className="cr-row-top">
+        <span className="cr-tag" data-ch={r.channel === "LINE" ? "line" : "call"}>
           {nobr(r.channel)}
         </span>
-        <span className="yw-row-name">{nobr(r.name)}</span>
-        <span className="yw-row-time tabular">{r.time}</span>
+        <span className="cr-row-name">{nobr(r.name)}</span>
+        <span className="cr-row-time tabular">{r.time}</span>
       </span>
-      <span className="yw-row-sum">{nobr(r.summary)}</span>
-      <span className="yw-pill" data-state={i === 0 ? "new" : "done"}>
+      <span className="cr-row-sum">{nobr(r.summary)}</span>
+      <span className="cr-pill" data-state={i === 0 ? "new" : "done"}>
         {nobr(r.status)}
       </span>
     </span>
@@ -196,7 +196,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
         key: `d${i}`,
         from: 0,
         el: (k: number) => (
-          <span className="yw-day yw-r" style={at(k)}>
+          <span className="cr-day cr-r" style={at(k)}>
             {nobr(h.day)}
           </span>
         ),
@@ -205,8 +205,8 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
         key: `q${i}`,
         from: 0,
         el: (k: number) => (
-          <span className="yw-msg yw-msg-old yw-r" style={at(k)}>
-            <span className="yw-bubble">{nobr(h.question)}</span>
+          <span className="cr-msg cr-msg-old cr-r" style={at(k)}>
+            <span className="cr-bubble">{nobr(h.question)}</span>
           </span>
         ),
       },
@@ -214,8 +214,8 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
         key: `a${i}`,
         from: 0,
         el: (k: number) => (
-          <span className="yw-msg yw-msg-old yw-msg-ai yw-r" style={at(k)}>
-            <span className="yw-bubble">{nobr(h.answer)}</span>
+          <span className="cr-msg cr-msg-old cr-msg-ai cr-r" style={at(k)}>
+            <span className="cr-bubble">{nobr(h.answer)}</span>
           </span>
         ),
       },
@@ -224,7 +224,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       key: "today",
       from: 0,
       el: (k) => (
-        <span className="yw-day yw-r" style={at(k)}>
+        <span className="cr-day cr-r" style={at(k)}>
           {nobr(m.today)}
         </span>
       ),
@@ -233,7 +233,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       key: "call",
       from: 1,
       el: (k) => (
-        <span className="yw-r" style={at(k)}>
+        <span className="cr-r" style={at(k)}>
           {callStrip("live")}
         </span>
       ),
@@ -242,9 +242,9 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       key: "patient",
       from: 1,
       el: (k) => (
-        <span className="yw-msg yw-msg-patient yw-r" style={at(k)}>
+        <span className="cr-msg cr-msg-patient cr-r" style={at(k)}>
           {patientWho}
-          <span className="yw-bubble">{nobr(m.message)}</span>
+          <span className="cr-bubble">{nobr(m.message)}</span>
         </span>
       ),
     },
@@ -252,7 +252,7 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       key: "draft",
       from: 2,
       el: (k) => (
-        <span className="yw-msg yw-msg-draft yw-r" style={at(k)}>
+        <span className="cr-msg cr-msg-draft cr-r" style={at(k)}>
           {draftWho}
           {draftBubble}
         </span>
@@ -262,18 +262,18 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       key: "guard",
       from: 3,
       el: (k) => (
-        <span className="yw-guard yw-r" style={at(k)}>
-          <span className="yw-guard-head">
+        <span className="cr-guard cr-r" style={at(k)}>
+          <span className="cr-guard-head">
             <ShieldIcon />
             {nobr(m.guard)}
             {verdict(k + 0.4)}
           </span>
-          <span className="yw-check yw-r" style={at(k + 0.2)}>
-            <span className="yw-check-icon">{"✕"}</span>
-            <span className="yw-check-label">{nobr(failed?.label)}</span>
+          <span className="cr-check cr-r" style={at(k + 0.2)}>
+            <span className="cr-check-icon">{"✕"}</span>
+            <span className="cr-check-label">{nobr(failed?.label)}</span>
           </span>
-          <span className="yw-passed yw-r" style={at(k + 0.55)}>
-            <span className="yw-check-icon">{"✓"}</span>
+          <span className="cr-passed cr-r" style={at(k + 0.55)}>
+            <span className="cr-check-icon">{"✓"}</span>
             {nobr(m.passed)}
           </span>
         </span>
@@ -283,9 +283,9 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       key: "reply",
       from: 4,
       el: (k) => (
-        <span className="yw-msg yw-msg-reply yw-r" style={at(k)}>
+        <span className="cr-msg cr-msg-reply cr-r" style={at(k)}>
           {sentWho}
-          <span className="yw-bubble">{nobr(m.reply)}</span>
+          <span className="cr-bubble">{nobr(m.reply)}</span>
         </span>
       ),
     },
@@ -293,12 +293,12 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       key: "logged",
       from: 4,
       el: (k) => (
-        <span className="yw-logged yw-r" style={at(k)}>
-          <span className="yw-tag" data-ch="line">
+        <span className="cr-logged cr-r" style={at(k)}>
+          <span className="cr-tag" data-ch="line">
             LINE
           </span>
-          <span className="yw-row-name">{nobr(m.patient)}</span>
-          <span className="yw-logged-text">{nobr(m.logged)}</span>
+          <span className="cr-row-name">{nobr(m.patient)}</span>
+          <span className="cr-logged-text">{nobr(m.logged)}</span>
         </span>
       ),
     },
@@ -312,135 +312,135 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
       .map((it) => {
         const isNew = it.from === n;
         const k = isNew ? n + 0.03 + 0.2 * fresh++ : n - 0.5;
-        return <Fragment key={it.key}>{isNew ? <span className="yw-fresh">{it.el(k)}</span> : it.el(k)}</Fragment>;
+        return <Fragment key={it.key}>{isNew ? <span className="cr-fresh">{it.el(k)}</span> : it.el(k)}</Fragment>;
       })
       .reverse();
   };
 
   return (
-    <StickyStage steps={STEPS} vh={85} label={copy.stageLabel} className="yw-track" stageClassName="yw-stage">
+    <StickyStage steps={STEPS} vh={85} label={copy.stageLabel} className="cr-track" stageClassName="cr-stage">
       <div
         ref={rootRef}
-        className="yw-stage-grid"
+        className="cr-stage-grid"
         data-step={step}
         data-live={live || undefined}
         style={{ "--step": step } as CSSProperties}
       >
-        <ol className="yw-beats">
+        <ol className="cr-beats">
           {copy.beats.map((b, i) => (
-            <li key={i} className="yw-beat" data-on={i === step || undefined} data-past={i < step || undefined}>
-              <span className="yw-progress" aria-hidden="true">
-                <span className="yw-count tabular">
-                  <span className="yw-count-now">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="yw-count-of">&nbsp;/&nbsp;{String(STEPS).padStart(2, "0")}</span>
+            <li key={i} className="cr-beat" data-on={i === step || undefined} data-past={i < step || undefined}>
+              <span className="cr-progress" aria-hidden="true">
+                <span className="cr-count tabular">
+                  <span className="cr-count-now">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="cr-count-of">&nbsp;/&nbsp;{String(STEPS).padStart(2, "0")}</span>
                 </span>
-                <span className="yw-segs">
+                <span className="cr-segs">
                   {copy.beats.map((_, n) => (
-                    <span key={n} className="yw-seg" style={{ "--i": n } as CSSProperties} />
+                    <span key={n} className="cr-seg" style={{ "--i": n } as CSSProperties} />
                   ))}
                 </span>
               </span>
-              <p className="yw-beat-n readout">
+              <p className="cr-beat-n readout">
                 {nobr(copy.step)} {i + 1}
               </p>
-              <h4 className="yw-beat-title">{nobr(b.title)}</h4>
+              <h4 className="cr-beat-title">{nobr(b.title)}</h4>
               {/* Fills with the scroll inside this beat, so the page never feels stuck between beats. */}
-              <span className="yw-beat-meter" aria-hidden="true" />
-              <p className="yw-beat-text">{nobr(b.text)}</p>
+              <span className="cr-beat-meter" aria-hidden="true" />
+              <p className="cr-beat-text">{nobr(b.text)}</p>
               {/* Every beat closes on a true line from the record (the replay numbers on beat 4), so the
                   beats are close in height and no beat leaves a band of empty navy. */}
-              {b.stat ? <p className="yw-beat-stat">{nobr(b.stat)}</p> : null}
-              {b.fact ? <p className="yw-beat-fact">{nobr(b.fact)}</p> : null}
+              {b.stat ? <p className="cr-beat-stat">{nobr(b.stat)}</p> : null}
+              {b.fact ? <p className="cr-beat-fact">{nobr(b.fact)}</p> : null}
             </li>
           ))}
         </ol>
 
-        <div className="yw-mock-area">
-          <div className="yw-frame">
-            <span className="yw-illus-at">
-              <span className="yw-illus">{nobr(copy.illustration)}</span>
+        <div className="cr-mock-area">
+          <div className="cr-frame">
+            <span className="cr-illus-at">
+              <span className="cr-illus">{nobr(copy.illustration)}</span>
             </span>
-            <div className="yw-mock" aria-hidden="true">
+            <div className="cr-mock" aria-hidden="true">
               {/* ================= full composition ================= */}
-              <div className="yw-full">
-                <div className="yw-win">
-                  <div className="yw-win-bar">
+              <div className="cr-full">
+                <div className="cr-win">
+                  <div className="cr-win-bar">
                     {lights}
-                    <span className="yw-win-title">
+                    <span className="cr-win-title">
                       {nobr(m.window)} · {nobr(m.clinic)}
                     </span>
-                    <span className="yw-chip yw-chip-ok">
-                      <span className="yw-dot yw-pulse" />
+                    <span className="cr-chip cr-chip-ok">
+                      <span className="cr-dot cr-pulse" />
                       {nobr(m.aiOn)}
                     </span>
                   </div>
-                  <div className="yw-win-body">
-                    <nav className="yw-rail">
-                      <span className="yw-brand-mark">y</span>
+                  <div className="cr-win-body">
+                    <nav className="cr-rail">
+                      <span className="cr-brand-mark">y</span>
                       {/* Two items only: the phone overlaps the lower rail, so nothing may sit there. */}
                       {[0, 1].map((i) => (
-                        <span key={i} className="yw-rail-item" data-active={i === 1 || undefined}>
+                        <span key={i} className="cr-rail-item" data-active={i === 1 || undefined}>
                           <NavIcon i={i} />
-                          {i === 1 ? <span className="yw-badge" data-on={on(step, 4)} style={at(4.6)} /> : null}
+                          {i === 1 ? <span className="cr-badge" data-on={on(step, 4)} style={at(4.6)} /> : null}
                         </span>
                       ))}
                     </nav>
 
-                    <div className="yw-queue">
-                      <p className="yw-kicker">{nobr(m.cases)}</p>
-                      <p className="yw-h">
+                    <div className="cr-queue">
+                      <p className="cr-kicker">{nobr(m.cases)}</p>
+                      <p className="cr-h">
                         {nobr(m.queue)}
-                        <span className="yw-live">
-                          <span className="yw-dot yw-dot-red yw-pulse" />
+                        <span className="cr-live">
+                          <span className="cr-dot cr-dot-red cr-pulse" />
                           {nobr(m.live)} 2
                         </span>
                       </p>
                       {callStrip("auto")}
-                      <div className="yw-rows" data-on={on(step, 4)} style={at(4.3)}>
+                      <div className="cr-rows" data-on={on(step, 4)} style={at(4.3)}>
                         {m.rows.map((r, i) => row(r, i))}
                       </div>
                     </div>
 
-                    <div className="yw-pane">
-                      <div className="yw-pane-head">
-                        <span className="yw-pane-title">
+                    <div className="cr-pane">
+                      <div className="cr-pane-head">
+                        <span className="cr-pane-title">
                           {nobr(m.conversation)}
-                          <span className="yw-tag" data-ch="line">
+                          <span className="cr-tag" data-ch="line">
                             LINE
                           </span>
                         </span>
                         {status}
                       </div>
-                      <div className="yw-feed-view">
-                        <div ref={feedRef} className="yw-feed">
+                      <div className="cr-feed-view">
+                        <div ref={feedRef} className="cr-feed">
                           {m.history.map((h) => (
-                            <span key={h.day} className="yw-hist">
-                              <span className="yw-day" data-at="-1" data-on="">
+                            <span key={h.day} className="cr-hist">
+                              <span className="cr-day" data-at="-1" data-on="">
                                 {nobr(h.day)}
                               </span>
-                              <span className="yw-msg yw-msg-old" data-at="-1" data-on="">
-                                <span className="yw-bubble">{nobr(h.question)}</span>
+                              <span className="cr-msg cr-msg-old" data-at="-1" data-on="">
+                                <span className="cr-bubble">{nobr(h.question)}</span>
                               </span>
-                              <span className="yw-msg yw-msg-old yw-msg-ai" data-at="-1" data-on="">
-                                <span className="yw-bubble">{nobr(h.answer)}</span>
+                              <span className="cr-msg cr-msg-old cr-msg-ai" data-at="-1" data-on="">
+                                <span className="cr-bubble">{nobr(h.answer)}</span>
                               </span>
                             </span>
                           ))}
-                          <span className="yw-day" data-at="-1" data-on="">
+                          <span className="cr-day" data-at="-1" data-on="">
                             {nobr(m.today)}
                           </span>
-                          <Item from={0} step={step} k={0.1} className="yw-msg yw-msg-patient">
+                          <Item from={0} step={step} k={0.1} className="cr-msg cr-msg-patient">
                             {patientWho}
-                            <span className="yw-bubble">
+                            <span className="cr-bubble">
                               <Words text={m.message} from={0.15} to={0.6} />
                             </span>
                           </Item>
-                          <Item from={2} step={step} className="yw-msg yw-msg-draft">
+                          <Item from={2} step={step} className="cr-msg cr-msg-draft">
                             {draftWho}
                             {draftBubble}
                           </Item>
-                          <Item from={3} step={step} k={3.02} className="yw-guard">
-                            <span className="yw-guard-head">
+                          <Item from={3} step={step} k={3.02} className="cr-guard">
+                            <span className="cr-guard-head">
                               <ShieldIcon />
                               {nobr(m.guard)}
                               {verdict(3.75)}
@@ -448,19 +448,19 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                             {m.checks.map((c, i) => (
                               <span
                                 key={c.rule}
-                                className="yw-check yw-r"
+                                className="cr-check cr-r"
                                 data-pass={c.pass || undefined}
                                 style={at(3.2 + i * 0.18)}
                               >
-                                <span className="yw-check-icon">{c.pass ? "✓" : "✕"}</span>
-                                <span className="yw-check-label">{nobr(c.label)}</span>
-                                <span className="yw-mono">{c.rule}</span>
+                                <span className="cr-check-icon">{c.pass ? "✓" : "✕"}</span>
+                                <span className="cr-check-label">{nobr(c.label)}</span>
+                                <span className="cr-mono">{c.rule}</span>
                               </span>
                             ))}
                           </Item>
-                          <Item from={4} step={step} k={4.02} className="yw-msg yw-msg-reply">
+                          <Item from={4} step={step} k={4.02} className="cr-msg cr-msg-reply">
                             {sentWho}
-                            <span className="yw-bubble">{nobr(m.reply)}</span>
+                            <span className="cr-bubble">{nobr(m.reply)}</span>
                           </Item>
                         </div>
                       </div>
@@ -469,92 +469,92 @@ export function YimwhanStage({ copy }: { copy: YimwhanCopy }) {
                 </div>
 
                 {/* ---------- patient's phone (LINE) ---------- */}
-                <div className="yw-phone">
-                  <div className="yw-screen">
-                    <span className="yw-island" />
-                    <span className="yw-sb tabular">
+                <div className="cr-phone">
+                  <div className="cr-screen">
+                    <span className="cr-island" />
+                    <span className="cr-sb tabular">
                       <span>{m.patientTime}</span>
-                      <span className="yw-sb-icons">
+                      <span className="cr-sb-icons">
                         <i />
                         <i />
                         <i />
                       </span>
                     </span>
-                    <span className="yw-line-head">
-                      <span className="yw-back">{"‹"}</span>
-                      <span className="yw-avatar">
+                    <span className="cr-line-head">
+                      <span className="cr-back">{"‹"}</span>
+                      <span className="cr-avatar">
                         <ToothIcon />
                       </span>
-                      <span className="yw-line-name">{nobr(m.clinic)}</span>
+                      <span className="cr-line-name">{nobr(m.clinic)}</span>
                     </span>
-                    <div className="yw-chat-view">
-                      <div ref={chatRef} className="yw-chat">
-                        <span className="yw-day" data-at="-1" data-on="">
+                    <div className="cr-chat-view">
+                      <div ref={chatRef} className="cr-chat">
+                        <span className="cr-day" data-at="-1" data-on="">
                           {nobr(m.today)}
                         </span>
-                        <span className="yw-lb yw-lb-ai" data-at="-1" data-on="">
+                        <span className="cr-lb cr-lb-ai" data-at="-1" data-on="">
                           {nobr(m.greeting)}
                         </span>
-                        <Item from={0} step={step} k={0.02} className="yw-lb yw-lb-me">
-                          <span className="yw-lb-meta">
-                            <span data-on={on(step, 1)} className="yw-read">
+                        <Item from={0} step={step} k={0.02} className="cr-lb cr-lb-me">
+                          <span className="cr-lb-meta">
+                            <span data-on={on(step, 1)} className="cr-read">
                               {nobr(m.read)}
                             </span>
                             {m.patientTime}
                           </span>
-                          <span className="yw-lb-text">{nobr(m.message)}</span>
+                          <span className="cr-lb-text">{nobr(m.message)}</span>
                         </Item>
                         {/* Typing sits over the top of the reply's box, so no gap opens when it lands. */}
-                        <span className="yw-slot">
-                          <span className="yw-lb-typing" data-at="1" data-on={step >= 1 && step < 4 ? "" : undefined}>
+                        <span className="cr-slot">
+                          <span className="cr-lb-typing" data-at="1" data-on={step >= 1 && step < 4 ? "" : undefined}>
                             <i />
                             <i />
                             <i />
                           </span>
-                          <Item from={4} step={step} k={4.08} className="yw-lb yw-lb-ai yw-lb-reply">
+                          <Item from={4} step={step} k={4.08} className="cr-lb cr-lb-ai cr-lb-reply">
                             {nobr(m.reply)}
                           </Item>
                         </span>
                       </div>
                     </div>
-                    <span className="yw-input">
-                      <span className="yw-input-field">{m.input}</span>
+                    <span className="cr-input">
+                      <span className="cr-input-field">{m.input}</span>
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* ================= compact composition: one card per beat ================= */}
-              <div className="yw-cmp">
-                <div className="yw-cmp-bar">
+              <div className="cr-cmp">
+                <div className="cr-cmp-bar">
                   {lights}
-                  <span className="yw-pane-title">
+                  <span className="cr-pane-title">
                     {nobr(m.conversation)}
-                    <span className="yw-tag" data-ch="line">
+                    <span className="cr-tag" data-ch="line">
                       LINE
                     </span>
                   </span>
                   {status}
                 </div>
-                <div ref={cmpRef} className="yw-cmp-stage">
+                <div ref={cmpRef} className="cr-cmp-stage">
                   {/* Beat 1: the inbox, newest on top; rows that do not fit drop whole. */}
                   <Panel n={0} step={step}>
-                    <span className="yw-note yw-r" style={at(-0.3)}>
-                      <span className="yw-row-top">
-                        <span className="yw-tag" data-ch="line">
+                    <span className="cr-note cr-r" style={at(-0.3)}>
+                      <span className="cr-row-top">
+                        <span className="cr-tag" data-ch="line">
                           LINE
                         </span>
-                        <span className="yw-row-name">{nobr(m.patient)}</span>
-                        <span className="yw-row-time tabular">{m.patientTime}</span>
-                        <span className="yw-pill" data-state="new">
+                        <span className="cr-row-name">{nobr(m.patient)}</span>
+                        <span className="cr-row-time tabular">{m.patientTime}</span>
+                        <span className="cr-pill" data-state="new">
                           {nobr(m.rows[0]?.status)}
                         </span>
                       </span>
-                      <span className="yw-note-text">
+                      <span className="cr-note-text">
                         <Words text={m.message} from={0} to={0.4} />
                       </span>
                     </span>
-                    {m.rows.slice(1).map((r, i) => row(r, i + 1, "yw-row-mini", 0.3 + i * 0.12))}
+                    {m.rows.slice(1).map((r, i) => row(r, i + 1, "cr-row-mini", 0.3 + i * 0.12))}
                   </Panel>
                   {/* Beats 2 to 5: the conversation, newest at the bottom like a chat. */}
                   {[1, 2, 3, 4].map((n) => (
@@ -587,7 +587,7 @@ function Item({
   children: ReactNode;
 }) {
   return (
-    <span className={`${className} yw-r`} data-at={from} data-on={on(step, from)} style={at(k)}>
+    <span className={`${className} cr-r`} data-at={from} data-on={on(step, from)} style={at(k)}>
       {children}
     </span>
   );
@@ -622,7 +622,7 @@ function Words({
       {parts.map((w, i) => (
         <span
           key={i}
-          className={scan ? "yw-w yw-fw" : "yw-w"}
+          className={scan ? "cr-w cr-fw" : "cr-w"}
           style={
             {
               "--k": round(from + ((to - from) * i) / last),
@@ -645,8 +645,8 @@ function Words({
  */
 function Panel({ n, step, chat, children }: { n: number; step: number; chat?: boolean; children: ReactNode }) {
   return (
-    <div className="yw-panel" data-on={n === step || undefined} data-past={n < step || undefined}>
-      <div className="yw-stack" data-chat={chat || undefined} style={{ "--n": n } as CSSProperties}>
+    <div className="cr-panel" data-on={n === step || undefined} data-past={n < step || undefined}>
+      <div className="cr-stack" data-chat={chat || undefined} style={{ "--n": n } as CSSProperties}>
         {children}
       </div>
     </div>
@@ -678,7 +678,7 @@ function fit(list: HTMLElement | null, step: number) {
   let shift = 0;
   if (need > 0) {
     const padTop = parseFloat(getComputedStyle(list).paddingTop) || 0;
-    const items = [...list.querySelectorAll<HTMLElement>(":scope > *:not(.yw-hist), :scope > .yw-hist > *")]
+    const items = [...list.querySelectorAll<HTMLElement>(":scope > *:not(.cr-hist), :scope > .cr-hist > *")]
       .map((el) => el.offsetTop - padTop)
       .sort((a, b) => a - b);
     shift = -(items.find((t) => t >= need) ?? need);
@@ -704,7 +704,7 @@ function NavIcon({ i }: { i: number }) {
     "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z",
   ][i];
   return (
-    <svg {...icon} className="yw-icon">
+    <svg {...icon} className="cr-icon">
       <path d={d} />
     </svg>
   );
@@ -712,7 +712,7 @@ function NavIcon({ i }: { i: number }) {
 
 function PhoneIcon() {
   return (
-    <svg {...icon} className="yw-icon">
+    <svg {...icon} className="cr-icon">
       <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z" />
     </svg>
   );
@@ -720,7 +720,7 @@ function PhoneIcon() {
 
 function ShieldIcon() {
   return (
-    <svg {...icon} className="yw-icon">
+    <svg {...icon} className="cr-icon">
       <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" />
       <path d="M9 12l2 2 4-4" />
     </svg>
@@ -729,7 +729,7 @@ function ShieldIcon() {
 
 function ToothIcon() {
   return (
-    <svg {...icon} className="yw-icon">
+    <svg {...icon} className="cr-icon">
       <path d="M7 4c-2 0-3 2-3 4 0 3 1 5 2 8 .5 2 1 4 2.5 4S10 17 12 17s2 3 3.5 3S17 18 18 16c1-3 2-5 2-8 0-2-1-4-3-4-2 0-3 1-5 1S9 4 7 4z" />
     </svg>
   );

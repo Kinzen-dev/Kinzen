@@ -10,14 +10,15 @@ import { nobr } from "@/lib/thai-nodes";
 
 /** Each practice is a sticky note: its paper (area pastel), its drawing and its resting tilt. */
 const NOTE_LOOK: Record<string, { art: ArtName; pastel: string; tilt: number }> = {
-  "ai-teams": { art: "note-notebook", pastel: "pastel-tools", tilt: -3 },
+  "ai-spec": { art: "note-notebook", pastel: "pastel-tools", tilt: -3 },
+  "ai-gates": { art: "note-lighthouse", pastel: "pastel-ai", tilt: 1.6 },
+  "ai-reversible": { art: "note-ship-small", pastel: "pastel-commerce", tilt: -1.4 },
   "ai-evidence": { art: "note-measure", pastel: "pastel-games", tilt: 2.2 },
-  "ai-guards": { art: "note-lighthouse", pastel: "pastel-ai", tilt: -1.4 },
 };
 
 /**
- * How King works with AI agents, as draggable sticky notes (v3). The interactive guard demo
- * that used to sit here now lives in the Yimwhan scene.
+ * AI-assisted engineering: how King works with AI agents, as draggable sticky notes (v3). The interactive guard demo
+ * that used to sit here now lives in the clinic receptionist scene.
  */
 export function Practice({ locale, dict, v3 = getV3(locale) }: { locale: Locale; dict: Dictionary; v3?: V3Copy }) {
   const notes: Note[] = practices.map((p) => {

@@ -23,8 +23,8 @@ export function Doodle({ name, className }: { name: DoodleName; className?: stri
 }
 
 const PROJECT_DOODLES: Record<string, DoodleName> = {
-  yimwhan: "phone-chat",
-  "yimwhan-ai": "phone-chat",
+  clinic: "phone-chat",
+  "clinic-receptionist": "phone-chat",
   helm: "helm",
   ronglen: "party-voice",
   "visual-qa": "magnifier-bug",

@@ -162,7 +162,7 @@ const backend: Builder = (gsap, root, light) => {
   tl.call(light, [["GraphQL"]], "+=0.5");
   tl.fromTo(l3, { autoAlpha: 0, y: 6 }, rise);
 
-  tl.call(light, [["Kafka", "Hexagonal and event-driven design"]], "+=0.45");
+  tl.call(light, [["Kafka", "BullMQ", "Hexagonal and event-driven design"]], "+=0.45");
   const t0 = tl.duration();
   evts.forEach((evt, i) => {
     const at = t0 + i * 0.5;
@@ -214,7 +214,7 @@ const testing: Builder = (gsap, root, light) => {
   };
   run(0, ["Vitest", "Jest"], 0.48, 112, 0, 1.3);
   run(1, ["Playwright"], 0.9, 148, 112, 1.5);
-  run(2, ["GitHub Actions"], 1, 148, 148, 0.7);
+  run(2, ["GitHub Actions", "Helm (Kubernetes charts)", "Terragrunt", "SOPS"], 1, 148, 148, 0.7);
   state(ci, "passed");
   tl.call(light, [[]]);
   tl.fromTo(ci.querySelector(".bl-status"), { scale: 1 }, { scale: 1.06, duration: 0.18, yoyo: true, repeat: 1 });
@@ -241,7 +241,7 @@ const data: Builder = (gsap, root, light) => {
 
   tl.call(light, [["Redis"]], "+=0.35");
   tl.fromTo(cache, { autoAlpha: 0, scale: 0.85, y: 0 }, pop);
-  tl.call(light, [["Docker", "Kubernetes (GKE)"]], "+=0.35");
+  tl.call(light, [["Docker", "Kubernetes (EKS, GKE)", "AWS (EKS, MSK, S3)"]], "+=0.35");
   tl.fromTo(pods, { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(2.4)", stagger: 0.16 });
   tl.call(light, [["Cloudflare", "Fly.io"]], "+=0.3");
   tl.fromTo(edge, { autoAlpha: 0, scale: 0.85, y: 0 }, pop);
