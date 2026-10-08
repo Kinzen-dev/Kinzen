@@ -9,16 +9,19 @@ import { demos as playA } from "./play/registry-a";
 import { demos as playB } from "./play/registry-b";
 import { demos as toolsA } from "./tools/registry-a";
 import { demos as toolsB } from "./tools/registry-b";
+import { demos as numbersA } from "./numbers/registry-a";
+import { demos as numbersB } from "./numbers/registry-b";
 import "./lab.css";
 
-type Kind = "hero" | "play" | "tools";
+type Kind = "hero" | "play" | "tools" | "numbers";
 const SETS: Record<Kind, LabDemo[]> = {
   hero: [...heroA, ...heroB],
   play: [...playA, ...playB],
   tools: [...toolsA, ...toolsB],
+  numbers: [...numbersA, ...numbersB],
 };
 // Built once at module scope (never during render): one lazy chunk per demo.
-const VIEWS = new Map([...SETS.hero, ...SETS.play, ...SETS.tools].map((d) => [d.id, lazy(d.load)]));
+const VIEWS = new Map([...SETS.hero, ...SETS.play, ...SETS.tools, ...SETS.numbers].map((d) => [d.id, lazy(d.load)]));
 
 /** Lab switcher: one demo at a time (hash = demo id), a bar to move between them. */
 export function LabViewer({ kind, locale, banner }: { kind: Kind; locale: Locale; banner: LabBanner }) {
