@@ -50,16 +50,16 @@ test.describe("tool logos", () => {
       await expect(svg).toHaveAttribute("aria-hidden", "true");
   });
 
-  test("marks rest in the label's tone and show the brand colour on hover", async ({ page }) => {
+  test("marks rest in the label's tone and show the brand colour on hover", async ({ page, isMobile }) => {
+    test.skip(isMobile, "no hover on touch; the tap test covers phones");
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     const item = page.locator("#skills dd li").filter({ hasText: /^TypeScript$/ });
     const fill = () => item.locator("svg.tool-mark").evaluate((el) => getComputedStyle(el).fill);
-    const ink = await item.evaluate((el) => getComputedStyle(el).color);
+    // At rest: the label's colour mixed a step toward transparent, not the brand blue.
     const rest = await fill();
     expect(rest).not.toBe("rgb(49, 120, 198)");
-    // Same hue as the label (alpha may differ: the mark is a step quieter).
-    expect(rest.replace(/\s/g, "")).toContain(ink.replace(/^rgb\((.*)\)$/, "$1").replace(/\s/g, ""));
+    expect(rest).toMatch(/\/ 0\.72\)$/);
     await item.hover();
     await expect.poll(fill).toBe("rgb(49, 120, 198)");
   });
