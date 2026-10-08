@@ -1,95 +1,26 @@
 /* ------------------------------------------------------------------
-   Numbers strip (v3-03). Light scene; four pastel cards, symmetric
-   --inset-card padding, figures on a shared baseline row.
+   Numbers section (v4): a light scene right after the hero; a small
+   title, the switcher, and one stage the five views compose into.
    ------------------------------------------------------------------ */
 .numbers {
   padding-top: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
+  /* The editorial view's canvas reaches the screen edges; nothing may scroll sideways. */
+  overflow-x: clip;
 }
-.numbers-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+.numbers-title {
+  margin-bottom: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
-@media (min-width: 64rem) {
-  .numbers-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
-  }
+:lang(th) .numbers-title {
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
 }
-.numbers-card {
-  display: grid;
-  /* note / figure / label: the figures line up across a row whatever the label length. */
-  grid-template-rows: auto auto 1fr;
-  align-content: start;
-  gap: 0.5rem;
-  padding: var(--inset-card);
-  border-radius: var(--radius-card);
-  background: var(--nb-ground);
-  color: var(--pastel-ink);
-  box-shadow:
-    var(--shadow-soft),
-    inset 0 0 0 1px var(--nb-edge);
-}
-/* Light theme: the area pastels as they are. Dark theme: the token's own dark value read as muddy
-   olive and brown on the warm ground, so each card takes a deep, clean jewel tone of the same hue
-   (low chroma, lightness 0.27, well clear of the 0.165 ground), a hairline edge in that hue and
-   its figure in the pastel itself. Declared on the card (light-dark() resolves where declared).
-   Hues follow the --pastel-* tokens: games 90, commerce 50, ai 165, tools 295. */
-.numbers-card {
-  --nb-ground: var(--pastel);
-  --nb-edge: transparent;
-  --nb-figure: var(--pastel-ink);
-}
-.numbers-card.pastel-games {
-  --nb-ground: light-dark(var(--pastel-games), oklch(0.275 0.032 72));
-  --nb-edge: light-dark(transparent, oklch(0.5 0.06 90 / 0.35));
-  --nb-figure: light-dark(var(--pastel-ink), oklch(0.92 0.09 92));
-}
-.numbers-card.pastel-commerce {
-  --nb-ground: light-dark(var(--pastel-commerce), oklch(0.27 0.045 28));
-  --nb-edge: light-dark(transparent, oklch(0.5 0.07 45 / 0.35));
-  --nb-figure: light-dark(var(--pastel-ink), oklch(0.89 0.07 55));
-}
-.numbers-card.pastel-ai {
-  --nb-ground: light-dark(var(--pastel-ai), oklch(0.27 0.04 170));
-  --nb-edge: light-dark(transparent, oklch(0.5 0.06 165 / 0.35));
-  --nb-figure: light-dark(var(--pastel-ink), oklch(0.9 0.07 165));
-}
-.numbers-card.pastel-tools {
-  --nb-ground: light-dark(var(--pastel-tools), oklch(0.27 0.045 292));
-  --nb-edge: light-dark(transparent, oklch(0.52 0.07 295 / 0.35));
-  --nb-figure: light-dark(var(--pastel-ink), oklch(0.88 0.07 295));
-}
-.numbers-note {
-  color: color-mix(in oklab, var(--pastel-ink) 72%, transparent);
-}
-.numbers-value {
-  font-size: clamp(3.25rem, 1.6rem + 5.2vw, 7rem);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  margin-top: clamp(0.75rem, 0.25rem + 1.5vw, 2rem);
-  color: var(--nb-figure);
-}
-.numbers-label {
-  font-size: var(--text-sm);
-  line-height: var(--text-sm--line-height);
-  align-self: end;
-  text-wrap: balance;
-}
-@media (min-width: 48rem) {
-  .numbers-label {
-    font-size: var(--text-base);
-    line-height: 1.45;
-  }
-}
-/* Until the odometer rolls (it waits to be well inside the viewport), its columns sit at 0: never
-   show a resting "0" or "000" as if it were the fact. The figure fades in as it starts rolling. */
-@media (scripting: enabled) {
-  .numbers-value .odometer-digits {
-    transition: opacity 500ms var(--ease-out);
-  }
-  .numbers-value .odometer:not([data-rolled]) .odometer-digits {
-    opacity: 0;
-  }
+/* Every live view fills the stage. */
+.nv-view {
+  height: 100%;
 }
