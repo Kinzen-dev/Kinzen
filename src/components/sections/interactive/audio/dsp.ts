@@ -563,7 +563,40 @@ const KNOCKS: Record<KnockKind, { contact: number; modes: Mode[]; noise: [number
   },
 };
 
-export function synthKnock(kind: KnockKind, seed: number, sr: number): Float32Array {
+/** Materials (the lead's names) mapped onto the props above; paper has its own model. */
+export type KnockMaterial = "ceramic" | "wood" | "paper" | "metal";
+const MATERIAL: Record<Exclude<KnockMaterial, "paper">, KnockKind> = { ceramic: "mug", wood: "desk", metal: "lamp" };
+
+/**
+ * Crumpled paper landing: a soft low bump and a burst of tiny crackles as the folds give, spread
+ * over ~0.1 s (each a few ms of band-passed noise), no ring at all.
+ */
+export function synthPaper(seed: number, sr: number): Float32Array {
+  const rand = rng(seed);
+  const out = new Float32Array(Math.round(0.3 * sr));
+  const exc = new Float32Array(out.length);
+  pulse(exc, 0, 0.004, 1, sr);
+  modal(out, exc, [{ f: 260, tau: 0.02, amp: 1 }, { f: 610, tau: 0.012, amp: 0.4 }], sr);
+  scaleTo(out, 0.35);
+  const n = 10 + Math.floor(rand() * 6);
+  for (let c = 0; c < n; c++) {
+    const at = Math.pow(rand(), 1.6) * 0.12;
+    const len = 0.002 + rand() * 0.006;
+    const grain = noise(new Float32Array(Math.round(len * 4 * sr)), 1, rand);
+    new Biquad("bandpass", 1800 + rand() * 4200, 1 + rand(), sr).apply(grain);
+    envelope(grain, 0.0003, len, sr);
+    scaleTo(grain, (0.25 + rand() * 0.75) * (1 - at * 4));
+    const i0 = Math.round(at * sr);
+    for (let i = 0; i < grain.length && i0 + i < out.length; i++) out[i0 + i] += grain[i];
+  }
+  new Biquad("lowpass", 9000, 0.6, sr).apply(out);
+  tailFade(out, 0.08, sr);
+  return scaleTo(out, 0.7);
+}
+
+export function synthKnock(what: KnockKind | KnockMaterial, seed: number, sr: number): Float32Array {
+  if (what === "paper") return synthPaper(seed, sr);
+  const kind = what in MATERIAL ? MATERIAL[what as Exclude<KnockMaterial, "paper">] : (what as KnockKind);
   const k = KNOCKS[kind];
   const rand = rng(seed);
   const out = new Float32Array(Math.round(k.len * sr));

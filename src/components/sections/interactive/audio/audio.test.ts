@@ -84,6 +84,19 @@ describe("dsp: the modded-linear switch", () => {
   });
 });
 
+describe("dsp: knocks by material", () => {
+  it("each material has its own register; paper does not ring; all stay well under full scale", async () => {
+    const { synthKnock } = await import("./dsp");
+    const c = (m: "ceramic" | "wood" | "paper" | "metal") => centroid(synthKnock(m, 1, SR), SR, 2048);
+    expect(c("ceramic")).toBeGreaterThan(c("wood"));
+    expect(c("paper")).toBeGreaterThan(c("wood"));
+    const paper = synthKnock("paper", 1, SR);
+    const tail = paper.subarray(Math.round(0.2 * SR));
+    expect(peak([tail])).toBeLessThan(peak([paper]) * 0.05);
+    for (const m of ["ceramic", "wood", "paper", "metal"] as const) expect(peak([synthKnock(m, 2, SR)])).toBeLessThanOrEqual(0.8001);
+  });
+});
+
 describe("measure", () => {
   it("reads a full-scale 1 kHz sine in one channel as about -3 LUFS (BS.1770)", () => {
     const x = new Float32Array(SR * 3).map((_, i) => Math.sin((2 * Math.PI * 1000 * i) / SR));
@@ -351,7 +364,16 @@ describe("voices", () => {
     s.splash(0.9);
     s.drop(0.5);
     s.lamp(true);
-    for (const kind of ["mug", "pen", "ball", "desk", "floor", "wall", "phone", "lamp"] as const) {
+    // A knock is one source plus its gain/filter/pan, and the material's buffer is made once.
+    ctx.currentTime += 0.1;
+    s.knock("paper", 0.6);
+    const buffers = ctx.buffers;
+    ctx.currentTime += 0.1;
+    s.knock("paper", 0.6);
+    ctx.currentTime += 0.1;
+    s.knock("paper", 0.6);
+    expect(ctx.buffers - buffers).toBeLessThanOrEqual(1);
+    for (const kind of ["ceramic", "wood", "metal", "mug", "pen", "ball", "desk", "floor", "wall", "phone", "lamp"] as const) {
       ctx.currentTime += 0.1;
       s.knock(kind, 0.7);
     }

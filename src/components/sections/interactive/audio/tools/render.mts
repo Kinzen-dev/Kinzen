@@ -196,6 +196,16 @@ for (const name of names) {
         }),
       ),
     );
+  if (name === "sfx-materials")
+    Object.assign(
+      row,
+      Object.fromEntries(
+        ["ceramic", "wood", "paper", "metal", "paper-soft"].map((k, i) => {
+          const w = win(m, sr, 0.2 + i * 0.8, 0.2 + i * 0.8 + 0.7);
+          return [k, { peakDbfs: r2(db(peak([w]))), lufsShort: r2(lufs([w], sr)), centroidHz: Math.round(centroid(w, sr, 2048)) }];
+        }),
+      ),
+    );
   report[name] = row;
   console.log(name, JSON.stringify(row));
 }

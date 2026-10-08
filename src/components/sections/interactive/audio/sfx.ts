@@ -11,7 +11,9 @@
  *  - drop(weight): one drip into a bowl and the bowl's soft ring; heavier is lower.
  *  - phoneRing(): an old desk phone's bell (two rings); returns a function that silences it.
  *  - lamp(on): a desk lamp's push switch.
- *  - knock(kind, speed): a desk prop hitting something (mug, pen, ball, desk, floor, wall, phone, lamp).
+ *  - knock(material, speed): something landing on the desk: "ceramic" (a mug on wood), "wood" (a
+ *    desk knock, a pen on wood), "paper" (crumpled paper), "metal"; the props' own names (mug, pen,
+ *    ball, desk, floor, wall, phone, lamp) work too.
  *  - thud(speed): a heavy gold letter landing on stone.  purr(): the cat.  chime(): a small reward.
  */
 import { SFX } from "./assets";
@@ -28,14 +30,15 @@ import {
   synthRoomIR,
   synthThud,
   type KnockKind,
+  type KnockMaterial,
 } from "./dsp";
 
-export type { KnockKind };
+export type { KnockKind, KnockMaterial };
 import { cut, loadAudio, toBuffer } from "./loader";
 
 export type Sfx = {
   metalClink(speed: number, size?: number): void;
-  knock(kind: KnockKind, speed: number): void;
+  knock(material: KnockMaterial | KnockKind, speed: number): void;
   thud(speed: number): void;
   purr(): void;
   chime(): void;

@@ -200,6 +200,19 @@ export const scenes: Record<string, { seconds: number; run: Scene }> = {
       };
     },
   },
+  "sfx-materials": {
+    seconds: 4.5,
+    run: (bus) => {
+      const s = createSfx(bus);
+      const mats = ["ceramic", "wood", "paper", "metal"] as const;
+      return {
+        steps: [
+          ...mats.map((m, i) => [0.2 + i * 0.8, () => s.knock(m, 0.8)] as Step),
+          [3.6, () => s.knock("paper", 0.3)],
+        ],
+      };
+    },
+  },
   "sfx-purr-chime": {
     seconds: 4,
     run: (bus) => {
