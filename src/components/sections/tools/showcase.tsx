@@ -41,6 +41,11 @@ function load(id: ViewId): Promise<View> {
 const FIRST: ViewId = "bento";
 /** Auto-advance period; the active tab's progress line is this timer (a CSS animation). */
 const ADVANCE_S = 20;
+/** `?tools-advance=<seconds>` shortens the period (debug and tests only). */
+function advanceSeconds() {
+  const s = Number(new URLSearchParams(window.location.search).get("tools-advance"));
+  return s >= 0.5 && s <= 60 ? s : ADVANCE_S;
+}
 /** Crossfade length; the old view unmounts when it ends. */
 const FADE_MS = 700;
 /** A finger lifted inside the section keeps the timer paused this long. */
@@ -101,6 +106,7 @@ export function ToolsShowcase({
   const [inView, setInView] = useState(false);
   const [held, setHeld] = useState(false);
   const [announce, setAnnounce] = useState("");
+  const [period, setPeriod] = useState(ADVANCE_S);
 
   const activeRef = useRef(active);
   const reducedRef = useRef(reduced);
@@ -154,6 +160,7 @@ export function ToolsShowcase({
     const root = rootRef.current;
     if (!root) return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPeriod(advanceSeconds());
     const sync = () => {
       reducedRef.current = mq.matches;
       setReduced(mq.matches);
@@ -308,7 +315,7 @@ export function ToolsShowcase({
                     key={active}
                     aria-hidden="true"
                     className="tv-progress"
-                    style={{ animationDuration: `${ADVANCE_S}s` }}
+                    style={{ animationDuration: `${period}s` }}
                     onAnimationEnd={advance}
                   />
                 ) : null}

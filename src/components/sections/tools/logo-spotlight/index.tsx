@@ -24,6 +24,13 @@ const COPY = {
   },
 } satisfies Record<Locale, unknown>;
 
+/** On a phone's small cells, long names set as words shorten (the full name stays for screen readers). */
+const PHONE_SHORT: Record<string, string> = {
+  "Hexagonal and event-driven design": "Hexagonal",
+  "Twilio Media Streams": "Twilio",
+  "Real-time speech-to-text": "Speech to text",
+};
+
 /** "mark" for a brand mark, "practice" for a way of working, "text" for a text-only tool. */
 function markKind(name: string): "mark" | "practice" | "text" {
   const mark = toolMark(name);
@@ -297,7 +304,8 @@ export default function LogoSpotlight({ locale, groups }: ViewProps) {
                     ) : (
                       <span className="ls-word" aria-hidden="true">
                         {kind === "practice" ? <ToolMark name={tool.key} /> : null}
-                        <span>{unbroken(label)}</span>
+                        <span className="ls-word-full">{unbroken(label)}</span>
+                        {PHONE_SHORT[tool.key] ? <span className="ls-word-short">{PHONE_SHORT[tool.key]}</span> : null}
                       </span>
                     )}
                     <span className={kind === "mark" ? "ls-name" : "sr-only"}>{unbroken(label)}</span>

@@ -13,7 +13,7 @@
 }
 @media (min-width: 64rem) {
   .tv {
-    --tv-h: 48rem;
+    --tv-h: 50rem;
   }
 }
 
@@ -55,6 +55,19 @@
   transition:
     color var(--dur-2) var(--ease-out),
     background-color var(--dur-2) var(--ease-out);
+}
+/* Phones: all four tabs on one line, in both languages. */
+@media (max-width: 39.99rem) {
+  .tv-tab {
+    padding-inline: 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+@media (max-width: 22.49rem) {
+  .tv-tab {
+    padding-inline: 0.4375rem;
+    font-size: 0.78125rem;
+  }
 }
 .tv-tab:hover {
   color: var(--ink);

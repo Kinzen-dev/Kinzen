@@ -48,9 +48,22 @@
     padding-inline: 0;
     overflow: visible;
   }
-  .bl-t-ai,
-  .bl-t-integrations {
-    grid-column: span 2;
+  /* AI engineering leads the first row: words and tools on the left, its screen beside them. */
+  .bl-grid > .bl-t-ai {
+    grid-column: span 3;
+    display: grid;
+    grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: 1.5rem;
+  }
+  .bl-t-ai > .bl-stage {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+  .bl-t-ai > .bl-tools {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: end;
   }
 }
 
@@ -355,6 +368,9 @@
     background-color 0.35s var(--ease-out),
     box-shadow 0.35s var(--ease-out);
 }
+.bl-pipe li {
+  overflow: hidden;
+}
 .bl-pipe-n {
   font-family: var(--font-mono);
   font-size: 0.625rem;
@@ -611,6 +627,10 @@
   color: var(--ink-2);
   white-space: nowrap;
   overflow: hidden;
+}
+.bl-term-body p {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .bl-term-body p:first-child {
   color: var(--ink);
@@ -1191,7 +1211,7 @@
 /* ---------------------------------------------------------------- phones */
 /* ---------------------------------------------------------------- fit to the stage */
 /* Every tile is as tall as the stage allows; its screen takes what the words and chips leave and
-   drops its least telling parts when that is short (a size container per screen). */
+   drops its least telling parts when that is short (each screen is a size container). */
 .bl-tile {
   gap: 0.625rem;
 }
@@ -1201,19 +1221,86 @@
   overflow: hidden;
   container: bl-stage / size;
 }
+.bl-blurb {
+  font-size: 0.8125rem;
+}
+.bl-tools {
+  gap: 0.3rem;
+}
+.bl-chip {
+  min-height: 1.5rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.71875rem;
+}
+.bl-s-ai {
+  align-content: start;
+}
+/* Short screens: the guard's code scrolls to its rules, the later eval rows go; a narrow or very
+   short screen drops the code. */
+@container bl-stage (max-height: 26rem) {
+  .bl-line:nth-child(-n + 2) {
+    display: none;
+  }
+  .bl-code-body {
+    line-height: 1.6;
+  }
+  .bl-evals li:nth-child(n + 4) {
+    display: none;
+  }
+  .bl-evals ul {
+    align-content: start;
+  }
+}
+@container bl-stage (max-height: 23rem) {
+  .bl-line:nth-child(3),
+  .bl-evals li:nth-child(n + 3) {
+    display: none;
+  }
+}
+/* Narrow screens: the beat strip keeps its words and drops its numbers. */
+@container bl-stage (max-width: 20rem) {
+  .bl-pipe-n {
+    display: none;
+  }
+  .bl-pipe li {
+    gap: 0.375rem;
+    padding-inline: 0.5rem;
+  }
+}
+@container bl-stage (max-width: 30rem) {
+  .bl-code {
+    display: none;
+  }
+}
+@container bl-stage (max-height: 17rem) {
+  .bl-evals,
+  .bl-hello {
+    display: none;
+  }
+}
+/* A phone's screen keeps the conversation whole; the eval list leaves first. */
+@container bl-stage (max-width: 30rem) and (max-height: 34rem) {
+  .bl-evals {
+    display: none;
+  }
+}
+/* Narrow screens (one column of the desktop bento): denser rows and pills on one line. */
+@container bl-stage (max-width: 22rem) {
+  .bl-tr {
+    padding-block: 0.2rem;
+  }
+  .bl-infra {
+    flex-wrap: nowrap;
+    gap: 0.375rem;
+  }
+  .bl-infra .bl-pill,
+  .bl-pods {
+    font-size: 0.625rem;
+  }
+}
 @media (min-width: 64rem) {
   .bl-tile {
     padding: 1.125rem;
-  }
-  .bl-blurb {
-    font-size: 0.8125rem;
-  }
-  .bl-tools {
-    gap: 0.3rem;
-  }
-  .bl-chip {
-    padding: 0.125rem 0.5rem;
-    font-size: 0.71875rem;
   }
 }
 

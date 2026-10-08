@@ -69,8 +69,22 @@ export default function StackPipeline({ locale, groups }: ViewProps) {
     const light = lightRef.current;
     const startTag = startRef.current;
     const endTag = endRef.current;
-    const trails = trailRefs.current;
-    if (!flow || !base || !done || !ret || !retLit || !light || !startTag || !endTag || trails.some((t) => !t)) return;
+    // Snapshots: a detached ref (unmount, Strict Mode) must not reach a running frame.
+    const trails = trailRefs.current.slice();
+    const lis = stationEls.current.slice();
+    if (
+      !flow ||
+      !base ||
+      !done ||
+      !ret ||
+      !retLit ||
+      !light ||
+      !startTag ||
+      !endTag ||
+      trails.some((t) => !t) ||
+      lis.some((li) => !li)
+    )
+      return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const st = ctl.current;
@@ -106,8 +120,8 @@ export default function StackPipeline({ locale, groups }: ViewProps) {
       W = f.width;
       H = f.height;
       setBox({ w: W, h: H });
-      vertical = window.matchMedia("(max-width: 47.99rem)").matches;
-      const docks = stationEls.current.map((li) => {
+      vertical = window.matchMedia("(max-width: 63.99rem)").matches;
+      const docks = lis.map((li) => {
         const r = li!.querySelector<HTMLElement>(".sp-dock")!.getBoundingClientRect();
         const l = r.left - f.left;
         const tp = r.top - f.top;
@@ -193,7 +207,7 @@ export default function StackPipeline({ locale, groups }: ViewProps) {
     const setLit = (i: number, on: boolean) => {
       if (litPrev[i] === on) return;
       litPrev[i] = on;
-      stationEls.current[i]?.toggleAttribute("data-lit", on);
+      lis[i]?.toggleAttribute("data-lit", on);
     };
 
     const draw = (pos: number, onReturn: number, alpha: number, doneAlpha: number) => {
@@ -201,9 +215,9 @@ export default function StackPipeline({ locale, groups }: ViewProps) {
       let cur = -1;
       if (onReturn < 0) for (let i = 0; i < n; i++) if (pos >= enter[i] - 6 && pos <= exit[i] + 6) cur = i;
       if (cur !== current) {
-        stationEls.current[current]?.removeAttribute("data-current");
+        lis[current]?.removeAttribute("data-current");
         current = cur;
-        stationEls.current[cur]?.setAttribute("data-current", "");
+        lis[cur]?.setAttribute("data-current", "");
       }
       // Comet tails on the main path (or on the return arc while going home).
       trails.forEach((p, k) => {
