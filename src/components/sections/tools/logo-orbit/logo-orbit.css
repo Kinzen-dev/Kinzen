@@ -103,6 +103,8 @@
 .lo-detail {
   display: grid;
   margin-top: 1rem;
+  /* The waiting items sit a little low; they never count toward the height. */
+  overflow: clip;
 }
 .lo-detail-item {
   grid-area: 1 / 1;
@@ -443,6 +445,7 @@
 @media (max-width: 63.99rem) {
   .lo-grid {
     grid-template-rows: minmax(0, 1fr) auto;
+    gap: 0.5rem;
   }
   .lo-legend {
     display: grid;
@@ -465,7 +468,7 @@
     display: none;
   }
   .lo-detail {
-    margin-top: 0.75rem;
+    margin-top: 0.625rem;
   }
 }
 @media (min-width: 64rem) {

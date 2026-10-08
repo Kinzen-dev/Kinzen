@@ -46,6 +46,8 @@ function advanceSeconds() {
   const s = Number(new URLSearchParams(window.location.search).get("tools-advance"));
   return s >= 0.5 && s <= 60 ? s : ADVANCE_S;
 }
+/** Share of the section that must be on screen for auto-advance to run. */
+const IN_VIEW = 0.35;
 /** Crossfade length; the old view unmounts when it ends. */
 const FADE_MS = 700;
 /** A finger lifted inside the section keeps the timer paused this long. */
@@ -179,9 +181,14 @@ export function ToolsShowcase({
       { rootMargin: "50% 0px" },
     );
     near.observe(root);
-    const seen = new IntersectionObserver(([e]) => setInView(e.isIntersecting && !document.hidden), {
-      threshold: 0.35,
-    });
+    const seen = new IntersectionObserver(
+      (entries) => {
+        // Several changes can queue up between frames: the last one is now.
+        const e = entries[entries.length - 1];
+        setInView(e.intersectionRatio >= IN_VIEW && !document.hidden);
+      },
+      { threshold: [0, IN_VIEW] },
+    );
     seen.observe(root);
     const onVis = () => {
       if (document.hidden) setInView(false);
@@ -289,7 +296,14 @@ export function ToolsShowcase({
   const panes = leaving && leaving !== active ? [leaving, active] : [active];
 
   return (
-    <div ref={rootRef} className="tv" data-running={running || undefined} data-auto={auto || undefined}>
+    <div
+      ref={rootRef}
+      className="tv"
+      data-running={running || undefined}
+      data-auto={auto || undefined}
+      data-held={held || undefined}
+      data-in-view={inView || undefined}
+    >
       <div className="tv-bar">
         <div ref={tabsRef} role="tablist" aria-label={copy.switcher} className="tv-tabs" onKeyDown={onKeyDown}>
           {VIEW_IDS.map((id) => {

@@ -57,7 +57,8 @@ const selected = (page: Page) => page.locator('#skills [role=tab][aria-selected=
 const activePane = (page: Page) => page.locator("#skills .tv-pane:not([data-state=out])");
 
 async function toSection(page: Page) {
-  await page.locator("#skills .tv").scrollIntoViewIfNeeded();
+  // Centred, so the fixed header never sits over the switcher.
+  await page.locator("#skills .tv").evaluate((el) => el.scrollIntoView({ block: "center" }));
   // Nobody pointing inside the section.
   await page.mouse.move(2, 2).catch(() => {});
 }
@@ -129,26 +130,26 @@ test.describe("switcher", () => {
 
   test("auto-advance runs only while the section is in view and nobody points at it", async ({ page, isMobile }) => {
     test.skip(isMobile, "hover holds: desktop");
-    await page.goto("/?tools-advance=1.5");
+    await page.goto("/?tools-advance=3");
     // Out of view: no advance.
-    await page.waitForTimeout(3_000);
+    await page.waitForTimeout(4_000);
     expect(await selected(page)).toBe("bento");
     await toSection(page);
     await expect(page.locator("#skills .tv-progress")).toHaveCount(1);
-    await expect.poll(() => selected(page), { timeout: 6_000 }).toBe("spotlight");
-    await settled(page, "spotlight");
-    // The change is announced.
-    await expect(page.locator('#skills [aria-live="polite"]')).toHaveText("Now showing: Logo wall");
+    await expect.poll(() => selected(page), { timeout: 8_000, intervals: [100] }).toBe("spotlight");
     // Hovering inside holds it.
-    await page.locator("#skills .tv-stage").hover({ position: { x: 20, y: 20 } });
-    await page.waitForTimeout(3_500);
+    await page.locator("#skills .tv-stage").hover();
+    // The change was announced.
+    await expect(page.locator('#skills [aria-live="polite"]')).toHaveText("Now showing: Logo wall");
+    await settled(page, "spotlight");
+    await page.waitForTimeout(4_500);
     expect(await selected(page)).toBe("spotlight");
     // Pointer leaves: it carries on.
     await page.mouse.move(2, 2);
-    await expect.poll(() => selected(page), { timeout: 6_000 }).toBe("orbit");
+    await expect.poll(() => selected(page), { timeout: 8_000, intervals: [100] }).toBe("orbit");
     // Scrolled away: it holds again.
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(3_500);
+    await page.waitForTimeout(4_500);
     expect(await selected(page)).toBe("orbit");
   });
 
@@ -204,7 +205,9 @@ test.describe("switcher", () => {
 
 test.describe("layout", () => {
   for (const width of [320, 390, 768, 1440]) {
-    test(`${width}px: every view fits its stage and nothing scrolls sideways`, async ({ browser }) => {
+    test(`${width}px: every view fits its stage and nothing scrolls sideways`, async ({ browser, isMobile }) => {
+      test.skip(isMobile, "one run covers every width");
+      test.setTimeout(90_000);
       const ctx = await browser.newContext({ viewport: { width, height: 900 } });
       const page = await ctx.newPage();
       for (const route of ["/", "/th"]) {

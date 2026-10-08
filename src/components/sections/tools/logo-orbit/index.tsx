@@ -560,7 +560,7 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
 
   return (
     <div className="lo">
-      <div className="shell lo-grid">
+      <div className="lo-grid">
         <div className="lo-stage" ref={stageRef} data-focus={focus >= 0 || undefined}>
           <div className="lo-glow" aria-hidden="true" />
           <canvas ref={backRef} className="lo-canvas lo-back" aria-hidden="true" />

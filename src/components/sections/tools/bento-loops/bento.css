@@ -1,6 +1,6 @@
 /* Tools view: bento. Six tiles, each a looping fictional mini product demo. */
 .bl {
-  --bl-pass: light-dark(oklch(0.56 0.13 152), oklch(0.76 0.14 152));
+  --bl-pass: light-dark(oklch(0.5 0.12 152), oklch(0.76 0.14 152));
   --bl-pass-ink: light-dark(oklch(0.99 0.01 150), oklch(0.18 0.03 150));
   --bl-chip: color-mix(in oklch, var(--ink) 5%, var(--surface));
   --bl-mono: 0.75rem;
