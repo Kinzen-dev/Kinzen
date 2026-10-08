@@ -1,15 +1,16 @@
 import type { Locale } from "@/content/schema";
 import { hero } from "./hero";
 import { numbers } from "./numbers";
-import { yimwhan } from "./yimwhan";
+import { clinic } from "./clinic";
 import { helm } from "./helm";
 import { moreWork } from "./moreWork";
 import { notes } from "./notes";
 import { tools } from "./tools";
 import { contact } from "./contact";
+import { interactive } from "./interactive";
 
 /** All v3 section copy, per locale. Each section file is owned by one builder (no shared edits). */
-const sections = { hero, numbers, yimwhan, helm, moreWork, notes, tools, contact };
+const sections = { hero, numbers, clinic, helm, moreWork, notes, tools, interactive, contact };
 
 export type V3Copy = { [K in keyof typeof sections]: (typeof sections)[K]["en"] };
 

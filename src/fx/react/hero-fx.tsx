@@ -1,155 +1,84 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "../fx.css";
-import { setFx } from "../stage/fx-state";
 import { MastheadSync } from "./masthead-sync";
-
-// Everything heavy (engine, shaders, worker, baked mask) lives behind this dynamic import. A chunk
-// that fails to load hands the name straight back to the DOM wordmark instead of throwing.
-const HeroField = dynamic(
-  () =>
-    import("./hero-field").catch(() => ({
-      default: function FieldUnavailable({ onOff }: { onOff: () => void }) {
-        useEffect(() => onOff(), [onOff]);
-        return null;
-      },
-    })),
-  { ssr: false },
-);
 
 type IdleWindow = Window & {
   requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
   cancelIdleCallback?: (id: number) => void;
-  /** Defined by the pre-paint theme script (components/theme-script.tsx). */
-  __kzFxGate?: () => boolean;
 };
 
 /**
- * Is the hero on a dark ground? Since v3 the hero is a dark scene (data-scene="dark") in both
- * themes, so this is true whenever that scene is in place; the check stays so a light hero would
- * still keep the crisp DOM wordmark.
- */
-function isDark(): boolean {
-  const hero = document.querySelector("[data-hero]");
-  if (hero?.closest('[data-scene="dark"]')) return true;
-  const pinned = document.documentElement.dataset.theme;
-  if (pinned === "light" || pinned === "dark") return pinned === "dark";
-  return matchMedia("(prefers-color-scheme: dark)").matches;
-}
-
-/** The first HeroFx of a document is the server-rendered one; later ones are client navigations. */
-let documentHero = true;
-
-/**
- * The hero's FX slot. Server-renders an empty, aria-hidden stage box. Whether the field runs is
- * decided before first paint by the theme script (html[data-fx="pending"], see fx.css): then the
- * DOM wordmark is never shown and the field mounts as soon as the hero is on screen, so the dust
- * condenses out of nothing. Otherwise the chunk loads only after the browser is idle (timeout
- * 1200 ms), and only on the dark ground: the gold dust is emissive light, so the light theme keeps
- * the crisp DOM wordmark and never loads the field (a switch to dark loads it then and it
- * cross-fades in settled). `?fx=off`, Save-Data and prefers-reduced-motion never load it.
+ * The hero's stage slot. Server-renders an empty, aria-hidden box over the wordmark band; the
+ * ink desk itself is server-rendered in the wordmark paragraph (fx/ink/ink-art.tsx), finished, so
+ * it is the still picture without scripting and under reduced motion. With motion allowed, the
+ * sequence (fx/sequence/director.ts: the desk draws itself, then dust, metal, ink in water and
+ * keycaps, forever) is fetched once the page has painted, as a lazy chunk; its GPU scenes are lazy
+ * chunks of their own, loaded one step ahead. `?fx=off` and Save-Data keep the still picture.
+ * Reduced motion switched on mid-visit stops the sequence on the finished drawing.
  */
 export function HeroFx() {
   const ref = useRef<HTMLDivElement>(null);
-  const [mount, setMount] = useState(false);
-  const [off, setOff] = useState(false);
-
-  // Before paint on a client navigation back home: the pre-paint gate ran on another page, so ask
-  // it again here (the server-rendered visit already has its answer).
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    if (!documentHero) {
-      if ((window as IdleWindow).__kzFxGate?.()) root.dataset.fx = "pending";
-      else delete root.dataset.fx;
-    }
-    documentHero = false;
-    return () => {
-      delete root.dataset.fx;
-    };
-  }, []);
 
   useEffect(() => {
     const stage = ref.current;
     const hero = stage?.closest<HTMLElement>("[data-hero]");
-    if (!stage || !hero) return;
-    const root = document.documentElement;
-    const pending = () => root.dataset.fx === "pending";
+    const host = stage?.querySelector<HTMLElement>(".fx-host");
+    const svg = hero?.querySelector<SVGSVGElement>("[data-ink-desk]");
+    const wordmark = hero?.querySelector<HTMLElement>("[data-hero-wordmark]");
+    if (!stage || !hero || !host || !svg || !wordmark) return;
     const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
     const fx = new URLSearchParams(location.search).get("fx");
     const still = matchMedia("(prefers-reduced-motion: reduce)");
-    // ?fx=still is a debugging tier that may run under reduced motion; nothing else does.
-    if (fx === "off" || nav.connection?.saveData || (still.matches && fx !== "still")) {
-      hero.dataset.fxTier = "off";
-      if (pending()) setFx(hero, "off", 0);
+    const done = () => {
+      svg.dataset.state = "done";
+    };
+    if (fx === "off" || nav.connection?.saveData) {
+      done();
       return;
     }
+
+    let stop: (() => void) | null = null;
+    let dead = false;
     const w = window as IdleWindow;
     let idle = 0;
-    let timer = 0;
-    let io: IntersectionObserver | null = null;
-    const arm = () => {
-      if (io || !isDark()) return;
-      io = new IntersectionObserver(
-        ([en]) => {
-          if (!en?.isIntersecting) return;
-          io?.disconnect();
-          setMount(true);
-        },
-        { threshold: 0.02 },
-      );
-      io.observe(stage);
-    };
-    const go = () => {
+    const start = () => {
       idle = 0;
-      timer = 0;
-      arm();
+      if (dead || still.matches) return;
+      void import("../sequence/director")
+        .then(({ startSequence }) => {
+          if (dead || still.matches) return;
+          stop = startSequence({ hero, stage, host, svg, wordmark });
+        })
+        .catch(done);
     };
-    // A switch to light while the field is still on its way hands the name to the DOM wordmark;
-    // a switch to dark arms the field (once the idle wait is over). Once the field has mounted,
-    // the stage handles switches itself.
-    const onTheme = () => {
-      if (!isDark() && pending()) setFx(hero, "off", 200);
-      if (!idle && !timer) arm();
-    };
-    const mo = new MutationObserver(onTheme);
-    mo.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
-    const scheme = matchMedia("(prefers-color-scheme: dark)");
-    scheme.addEventListener("change", onTheme);
-    // Reduced motion switched on mid-visit: drop the field, the static wordmark is the design.
     const onMotion = () => {
-      if (!still.matches || fx === "still") return;
-      hero.dataset.fxTier = "off";
-      setFx(hero, "off", 0);
-      setOff(true);
+      if (still.matches) {
+        stop?.();
+        stop = null;
+        done();
+      } else if (!stop) {
+        delete svg.dataset.state;
+        start();
+      }
     };
     still.addEventListener("change", onMotion);
-    // The field is expected (decided before paint): no idle wait, the wordmark is waiting on it.
-    if (pending()) go();
-    else if (w.requestIdleCallback) idle = w.requestIdleCallback(go, { timeout: 1200 });
-    else timer = window.setTimeout(go, 200);
+    if (still.matches) done();
+    // The first stroke should follow the first paint closely: a short idle wait, not a long one.
+    else if (w.requestIdleCallback) idle = w.requestIdleCallback(start, { timeout: 300 });
+    else start();
     return () => {
+      dead = true;
       if (idle) w.cancelIdleCallback?.(idle);
-      clearTimeout(timer);
-      io?.disconnect();
-      mo.disconnect();
-      scheme.removeEventListener("change", onTheme);
       still.removeEventListener("change", onMotion);
+      stop?.();
     };
   }, []);
 
   return (
     <div ref={ref} className="fx-stage" aria-hidden="true">
-      {mount && !off && (
-        <HeroField
-          onOff={() => {
-            const hero = ref.current?.closest<HTMLElement>("[data-hero]");
-            if (hero) setFx(hero, "off", 200);
-            setOff(true);
-          }}
-        />
-      )}
+      <div className="fx-host" />
       <MastheadSync />
     </div>
   );

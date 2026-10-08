@@ -3,11 +3,11 @@ import { siteContent, type SiteContent, type SiteContentInput } from "./schema";
 
 /**
  * Every public claim below is cleared in the private claims ledger
- * (kittipong-resume/content/CLAIMS.md, resume v1.5). Do not add a number,
+ * (kittipong-resume/content/CLAIMS.md, resume v1.7). Do not add a number,
  * client name or outcome here without a ledger row; `provenance` points at it.
  */
 const content: SiteContentInput = {
-  meta: { updated: "2026-10", claimsLedger: "kittipong-resume/content/CLAIMS.md (v1.5)" },
+  meta: { updated: "2026-10", claimsLedger: "kittipong-resume/content/CLAIMS.md (v1.7)" },
 
   profile: {
     name: "Kittipong Khonthong",
@@ -15,28 +15,33 @@ const content: SiteContentInput = {
     preferredName: "King",
     handle: "Kinzen",
     role: { en: "Senior Full-Stack Engineer", th: "วิศวกร full-stack ระดับ senior" },
+    /** Resume v1.7 headline (King, 2026-10-08): the role line on /cv and in meta descriptions. */
+    headline: {
+      en: "Senior Full-Stack Engineer · TypeScript, Node.js, Next.js · event-driven systems on AWS",
+      th: "วิศวกร full-stack ระดับ senior · TypeScript, Node.js, Next.js · ระบบ event-driven บน AWS",
+    },
     heroLine: {
-      en: "Production software, end to end: TypeScript backends, Shopify platforms, and AI voice and LINE products with guardrails written in code.",
-      th: "ซอฟต์แวร์ที่ใช้งานจริงครบทั้งระบบ: ระบบหลังบ้านด้วย TypeScript แพลตฟอร์ม Shopify และผลิตภัณฑ์ AI รับสายและตอบแชท LINE ที่มีกฎกำกับเขียนไว้ในโค้ด",
+      en: "Production systems, built and run end to end: event-driven TypeScript services on AWS, Shopify platforms, and AI voice and LINE products with guardrails in code.",
+      th: "ระบบที่ใช้งานจริง ผมสร้างและดูแลเองครบทั้งระบบ: บริการ TypeScript แบบ event-driven บน AWS แพลตฟอร์ม Shopify และ AI รับสายและตอบแชท LINE ที่มีกฎอยู่ในโค้ด",
     },
     oneLiner: {
-      en: "Senior full-stack engineer and founder of Vesperwerk. Seven years shipping production TypeScript systems, from Shopify commerce platforms to AI voice and LINE products.",
-      th: "วิศวกร full-stack ระดับ senior และผู้ก่อตั้ง Vesperwerk ทำระบบ TypeScript ที่ใช้งานจริงมา 7 ปี ตั้งแต่แพลตฟอร์มอีคอมเมิร์ซบน Shopify ไปจนถึงผลิตภัณฑ์ AI ด้านเสียงและ LINE",
+      en: "Senior full-stack engineer with seven years of production experience across frontend, backend and DevOps. Builds and runs event-driven services on a real-time transactional platform with 6,000+ daily active users (Kafka, MongoDB, AWS EKS). Former Tech Lead for AnyMind Group's EC Platform, leading 5 to 8 engineers across 10+ Shopify brands. Founder of Vesperwerk, building voice and LINE AI products with human-gated agent workflows.",
+      th: "วิศวกร full-stack ระดับ senior ทำระบบที่ใช้งานจริงมา 7 ปี ครอบคลุมทั้ง frontend, backend และ DevOps สร้างและดูแลบริการแบบ event-driven บนแพลตฟอร์มธุรกรรมแบบเรียลไทม์ที่มีผู้ใช้งานต่อวันมากกว่า 6,000 คน (Kafka, MongoDB, AWS EKS) เคยเป็น Tech Lead ดูแล EC Platform ของ AnyMind Group นำทีมวิศวกร 5 ถึง 8 คน ทำงานให้แบรนด์บน Shopify มากกว่า 10 แบรนด์ และเป็นผู้ก่อตั้ง Vesperwerk สร้างผลิตภัณฑ์ AI ด้านเสียงและ LINE ด้วยทีม AI agent ที่ต้องผ่านการอนุมัติจากคนในทุกด่านสำคัญ",
     },
     bioShort: {
-      en: "I'm King, a senior full-stack engineer in Bangkok. I spent four years as Tech Lead for AnyMind Group's EC Platform, building Shopify storefronts, apps and headless builds. Today I run Vesperwerk, a small software studio, where I build AI voice and LINE products with deterministic guardrails.",
-      th: "ผมคิง วิศวกร full-stack ระดับ senior อยู่กรุงเทพฯ เคยเป็น Tech Lead ดูแล EC Platform ของ AnyMind Group อยู่ 4 ปี ทำหน้าร้าน แอป และระบบ headless บน Shopify ตอนนี้ผมทำ Vesperwerk สตูดิโอซอฟต์แวร์เล็ก ๆ สร้างผลิตภัณฑ์ AI ด้านเสียงและ LINE ที่มีชุดตรวจตามกฎในโค้ด (deterministic)",
+      en: "I'm King, a senior full-stack engineer in Bangkok. I build and run production systems end to end: event-driven services on a real-time platform, four years as Tech Lead for AnyMind Group's EC Platform, and now Vesperwerk, where I build AI voice and LINE products with guardrails in code.",
+      th: "ผมคิง วิศวกร full-stack ระดับ senior อยู่กรุงเทพฯ ผมสร้างและดูแลระบบที่ใช้งานจริงครบทั้งระบบ ทั้งบริการแบบ event-driven บนแพลตฟอร์มเรียลไทม์ งาน Tech Lead ดูแล EC Platform ของ AnyMind Group 4 ปี และตอนนี้ทำ Vesperwerk สร้างผลิตภัณฑ์ AI ด้านเสียงและ LINE ที่มีกฎกำกับเขียนไว้ในโค้ด",
     },
     bioLong: {
       en: [
-        "I'm Kittipong Khonthong, King to most people: a senior full-stack engineer with seven years in production across e-commerce, backend platforms and AI products.",
-        "From 2022 to 2026 I was Tech Lead for AnyMind Group's EC Platform: Shopify storefronts, apps and headless builds for brands such as Mizuno Thailand, built on the Admin GraphQL and Storefront APIs, Liquid, metafields and app proxies. Before that I was a full-stack developer at ZyGen, shipping React, Next.js, Angular and NestJS applications on Docker and GKE.",
-        "Since April 2026 I run Vesperwerk, a small software studio. Its first product, Yimwhan AI, is a phone and LINE receptionist for dental clinics, with deterministic checks in code that review each reply before it reaches a patient, under rules that block diagnoses, dosing advice and cure claims. I also built Helm, a macOS workspace where Claude Code, Codex, Kimi and Cursor agents work side by side.",
+        "I'm Kittipong Khonthong, King to most people: a senior full-stack engineer with seven years of production experience across frontend, backend and DevOps. I build systems end to end and keep running them after they ship.",
+        "Since 2022 I have worked part-time, remotely, on a real-time transactional platform with wallet and ledger for a confidential client: event-driven NestJS services on Kafka and MongoDB, releases to AWS EKS, and a back-office rebuild in Next.js that I co-led. From 2022 to 2026 I was also Tech Lead for AnyMind Group's EC Platform, leading a team of 5 to 8 engineers that delivered Shopify storefronts, apps and headless builds for 10+ brands, including Mizuno Thailand. Before that I was a full-stack developer at ZyGen, shipping React, Next.js, Angular and NestJS applications on Docker and GKE.",
+        "Since April 2026 I run Vesperwerk, a small software studio. Its first product is an AI phone and LINE receptionist for dental clinics, now in pilot with a clinic (go-live expected October 2026). Deterministic checks in code review each reply before it reaches a patient, under rules that block diagnoses, dosing advice and cure claims. I build with teams of AI coding agents in Helm, my own macOS workspace: the spec comes first, and releases wait for my approval.",
       ],
       th: [
-        "ผมชื่อกฤติพงษ์ ก้อนทอง คนส่วนใหญ่เรียกผมว่าคิง เป็นวิศวกร full-stack ระดับ senior ทำระบบที่ใช้งานจริงมา 7 ปี ทั้งอีคอมเมิร์ซ แพลตฟอร์มหลังบ้าน และผลิตภัณฑ์ AI",
-        "ปี 2022 ถึง 2026 ผมเป็น Tech Lead ดูแล EC Platform ของ AnyMind Group ทำหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์อย่าง Mizuno Thailand ด้วย Admin GraphQL API, Storefront API, Liquid, metafields และ app proxy ก่อนหน้านั้นผมเป็นนักพัฒนา full-stack ที่ ZyGen ทำแอปด้วย React, Next.js, Angular และ NestJS บน Docker และ GKE",
-        "ตั้งแต่เมษายน 2026 ผมทำ Vesperwerk สตูดิโอซอฟต์แวร์เล็ก ๆ ผลงานแรกคือ Yimwhan AI ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม มีชุดตรวจตามกฎที่กำหนดไว้ในโค้ด (deterministic) ก่อนส่งคำตอบถึงคนไข้ โดยมีกฎบล็อกการวินิจฉัย การแนะนำขนาดยา และการอ้างว่ารักษาหาย ผมยังสร้าง Helm แอป macOS ที่ให้ agent อย่าง Claude Code, Codex, Kimi และ Cursor ทำงานเคียงข้างกัน",
+        "ผมชื่อกฤติพงษ์ ก้อนทอง คนส่วนใหญ่เรียกผมว่าคิง เป็นวิศวกร full-stack ระดับ senior ทำระบบที่ใช้งานจริงมา 7 ปี ครอบคลุมทั้ง frontend, backend และ DevOps ผมสร้างระบบครบทั้งระบบ และดูแลต่อหลังจากปล่อยใช้งานแล้ว",
+        "ตั้งแต่ปี 2022 ผมรับงานพาร์ตไทม์แบบทำงานทางไกล บนแพลตฟอร์มธุรกรรมแบบเรียลไทม์ที่มี wallet และ ledger ให้ลูกค้าที่ไม่เปิดเผยชื่อ ทั้งบริการ NestJS แบบ event-driven บน Kafka และ MongoDB การ release ขึ้น AWS EKS และการสร้างระบบหลังบ้านใหม่ด้วย Next.js ที่ผมร่วมนำ ช่วงปี 2022 ถึง 2026 ผมยังเป็น Tech Lead ดูแล EC Platform ของ AnyMind Group นำทีมวิศวกร 5 ถึง 8 คน ส่งมอบหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์มากกว่า 10 แบรนด์ รวมถึง Mizuno Thailand ก่อนหน้านั้นผมเป็นนักพัฒนา full-stack ที่ ZyGen ทำแอปด้วย React, Next.js, Angular และ NestJS บน Docker และ GKE",
+        "ตั้งแต่เมษายน 2026 ผมทำ Vesperwerk สตูดิโอซอฟต์แวร์เล็ก ๆ ผลงานแรกคือผู้ช่วย AI รับสายและตอบแชท LINE ให้คลินิกทันตกรรม ตอนนี้อยู่ในช่วงนำร่องกับคลินิกหนึ่งแห่ง (คาดว่าจะเปิดใช้งานจริงตุลาคม 2026) มีชุดตรวจตามกฎที่กำหนดไว้ในโค้ด (deterministic) ตรวจทุกคำตอบก่อนส่งถึงคนไข้ โดยมีกฎบล็อกการวินิจฉัย การแนะนำขนาดยา และการอ้างว่ารักษาหาย ผมทำงานกับทีม AI agent ช่วยเขียนโค้ดใน Helm พื้นที่ทำงานบน macOS ที่ผมสร้างเอง โดยเขียน spec ก่อนเสมอ และทุก release ต้องรอผมอนุมัติ",
       ],
     },
     location: {
@@ -60,33 +65,44 @@ const content: SiteContentInput = {
     },
   },
 
+  // Resume v1.7 "AI-assisted engineering" rows (profile brief section 6). Each names a mechanism,
+  // never a productivity claim; the 500/37 figure lives in the Vesperwerk bullet, not here.
   practices: [
     {
-      id: "ai-teams",
-      title: { en: "Agent teams", th: "ทีม agent" },
+      id: "ai-spec",
+      title: { en: "Spec first", th: "เขียน spec ก่อน" },
       text: {
-        en: "Claude Code and Codex work together in written roles, hand work on in steps, and have one clearly named owner.",
-        th: "Claude Code และ Codex ทำงานร่วมกันตามบทบาทที่กำหนดไว้ ส่งต่องานเป็นขั้นตอน และกำหนดผู้รับผิดชอบหลักไว้อย่างชัดเจน",
+        en: "Architecture, scope and acceptance criteria are set before agent teams build.",
+        th: "กำหนดสถาปัตยกรรม ขอบเขต และเกณฑ์รับงานไว้ก่อน แล้วจึงให้ทีม agent ลงมือสร้าง",
       },
-      provenance: { claimId: "ai-teams", source: "CLAIMS", confidence: "APPROVED" },
+      provenance: { claimId: "ai-practice.spec-first (v1.7)", source: "CLAIMS", confidence: "APPROVED" },
+    },
+    {
+      id: "ai-gates",
+      title: { en: "Human gates", th: "มีคนอนุมัติทุกด่าน" },
+      text: {
+        en: "Trade-offs, production releases and outward actions need my explicit approval.",
+        th: "การตัดสินใจที่ต้องชั่งได้เสีย การ release ขึ้น production และงานที่ส่งออกไปภายนอก ต้องได้รับการอนุมัติจากผมก่อนเสมอ",
+      },
+      provenance: { claimId: "ai-practice.human-gates (v1.7)", source: "CLAIMS", confidence: "APPROVED" },
+    },
+    {
+      id: "ai-reversible",
+      title: { en: "Automate the reversible", th: "ให้อัตโนมัติเฉพาะงานที่ย้อนกลับได้" },
+      text: {
+        en: "Daily routines, and an overnight loop with a ground-truth gate, reviewer agents and rollback.",
+        th: "งานประจำวันรันอัตโนมัติ ส่วนรอบทำงานข้ามคืนมีด่านตรวจกับผลจริง (ground-truth gate) มี agent ผู้ตรวจ และย้อนกลับได้",
+      },
+      provenance: { claimId: "ai-practice.automate-reversible (v1.7)", source: "CLAIMS", confidence: "APPROVED" },
     },
     {
       id: "ai-evidence",
       title: { en: "Evidence before merge", th: "มีหลักฐานก่อน merge" },
       text: {
-        en: "Before anything merges, I run the full test suite on the exact commit, get an independent review and check the UI from screenshots.",
-        th: "ก่อน merge ผมกำหนดให้รันเทสต์ครบชุดบน commit ที่จะนำเข้า ตรวจโค้ดโดยผู้ตรวจอิสระ และตรวจ UI จากภาพหน้าจอ",
+        en: "Tests on the exact commit, screenshot QA, and deterministic filters on LLM output.",
+        th: "รันเทสต์บน commit ที่จะ merge จริง ตรวจ UI จากภาพหน้าจอ และกรองผลลัพธ์จาก LLM ด้วยกฎแบบ deterministic",
       },
       provenance: { claimId: "ai-evidence", source: "CLAIMS", confidence: "APPROVED" },
-    },
-    {
-      id: "ai-guards",
-      title: { en: "Code over prompts", th: "กฎอยู่ในโค้ด ไม่ใช่ใน prompt" },
-      text: {
-        en: "Validators and state machines enforce output rules. Prompts stay thin; the rules that matter live in code and tests.",
-        th: "validator และ state machine เป็นตัวบังคับกฎของคำตอบ prompt สั้นเท่าที่จำเป็น ส่วนกฎที่สำคัญอยู่ในโค้ดและเทสต์",
-      },
-      provenance: { claimId: "ai-guards", source: "CLAIMS", confidence: "APPROVED" },
     },
   ],
 
@@ -108,8 +124,8 @@ const content: SiteContentInput = {
       highlights: [
         {
           text: {
-            en: "Built Yimwhan AI, a phone and LINE receptionist for dental clinics, with a staff back office using Fastify, Twilio and the LINE Messaging API.",
-            th: "สร้าง Yimwhan AI ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมระบบหลังบ้านสำหรับพนักงานคลินิก ด้วย Fastify, Twilio และ LINE Messaging API",
+            en: "Built an AI phone and LINE receptionist for dental clinics, now in pilot with a clinic (go-live expected October 2026), with a staff back office on Fastify, Twilio and the LINE Messaging API.",
+            th: "สร้างผู้ช่วย AI รับสายและตอบแชท LINE ให้คลินิกทันตกรรม ตอนนี้อยู่ในช่วงนำร่องกับคลินิกหนึ่งแห่ง (คาดว่าจะเปิดใช้งานจริงตุลาคม 2026) พร้อมระบบหลังบ้านสำหรับพนักงานคลินิก ด้วย Fastify, Twilio และ LINE Messaging API",
           },
           provenance: { claimId: "exp-founder.bullet-1", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -129,10 +145,64 @@ const content: SiteContentInput = {
         },
         {
           text: {
+            en: "Operates on Fly.io with SQLite and Litestream backups, gated releases and one-step rollback; production has run on a dedicated phone number since July 2026.",
+            th: "รันบน Fly.io ใช้ SQLite และสำรองข้อมูลด้วย Litestream ทุก release ต้องผ่านด่านตรวจและย้อนกลับได้ในขั้นตอนเดียว ระบบ production รันบนเบอร์โทรเฉพาะมาตั้งแต่กรกฎาคม 2026",
+          },
+          provenance: { claimId: "exp-founder.bullet-4", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
             en: "Built Helm in Tauri 2, Rust and TypeScript: a macOS agent workspace used daily as the primary development environment.",
             th: "สร้าง Helm ด้วย Tauri 2, Rust และ TypeScript: พื้นที่ทำงานของ agent บน macOS ที่ผมใช้เป็นเครื่องมือพัฒนาหลักทุกวัน",
           },
           provenance: { claimId: "exp-founder.bullet-5", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+      ],
+    },
+    // Supporting entry (King, 2026-10-08): the client stays unnamed. Only the approved descriptor and
+    // approved v1.7 bullets appear here; no case study, no images, nothing that hints at the domain.
+    {
+      id: "exp-contract",
+      org: { name: "Confidential client", confidential: true },
+      title: { en: "Senior Full-Stack Developer", th: "นักพัฒนา full-stack ระดับ senior" },
+      type: "part-time-contract",
+      start: "2022-04",
+      end: "present",
+      location: { en: "Remote", th: "ทำงานทางไกล" },
+      summary: {
+        en: "Real-time transactional platform with wallet and ledger (confidential client, NDA), part-time contract.",
+        th: "แพลตฟอร์มธุรกรรมแบบเรียลไทม์ที่มี wallet และ ledger (ลูกค้าที่ไม่เปิดเผยชื่อ ภายใต้ NDA) สัญญาจ้างแบบพาร์ตไทม์",
+      },
+      stack: ["TypeScript", "NestJS", "Kafka", "MongoDB", "Next.js", "AWS EKS", "Terragrunt", "GitHub Actions"],
+      visibility: "public",
+      highlights: [
+        {
+          text: {
+            en: "Full-stack and DevOps engineer on a real-time platform with wallet and ledger: 6,000+ daily active users, 18 repositories, web team of up to 13 engineers.",
+            th: "ทำงาน full-stack และ DevOps บนแพลตฟอร์มเรียลไทม์ที่มี wallet และ ledger: ผู้ใช้งานต่อวันมากกว่า 6,000 คน 18 repository และทีมเว็บสูงสุด 13 คน",
+          },
+          provenance: { claimId: "exp-contract.bullet-1 (v1.7)", source: "CLAIMS", confidence: "STATED" },
+        },
+        {
+          text: {
+            en: "Designed a Kafka-fed daily report cache and split reporting into its own autoscaled service, taking heavy queries off the transaction path.",
+            th: "ออกแบบแคชรายงานรายวันที่รับข้อมูลจาก Kafka และแยกงานรายงานออกเป็นบริการของตัวเองที่ขยายขนาดอัตโนมัติ เพื่อย้าย query หนัก ๆ ออกจากเส้นทางของธุรกรรม",
+          },
+          provenance: { claimId: "exp-contract.bullet-3 (v1.7)", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
+            en: "Ran production releases on GitHub Actions, Helm and Terragrunt to AWS EKS with SOPS secrets and a hotfix path; reviewed teammates' code and onboarded new engineers.",
+            th: "ดูแลการ release ขึ้น production ผ่าน GitHub Actions, Helm และ Terragrunt ไปยัง AWS EKS โดยเก็บ secret ด้วย SOPS และมีเส้นทาง hotfix รวมถึงรีวิวโค้ดของเพื่อนร่วมทีมและช่วยวิศวกรใหม่เริ่มงาน",
+          },
+          provenance: { claimId: "exp-contract.bullet-5 (v1.7)", source: "CLAIMS", confidence: "VERIFIED" },
+        },
+        {
+          text: {
+            en: "Co-led the 2026 back-office rebuild in Next.js 16 as a static export on Cloudflare Pages with an auth proxy in Pages Functions.",
+            th: "ร่วมนำการสร้างระบบหลังบ้านใหม่ในปี 2026 ด้วย Next.js 16 แบบ static export บน Cloudflare Pages พร้อม auth proxy ใน Pages Functions",
+          },
+          provenance: { claimId: "exp-contract.bullet-6 (v1.7)", source: "CLAIMS", confidence: "VERIFIED" },
         },
       ],
     },
@@ -145,18 +215,25 @@ const content: SiteContentInput = {
       end: "2026-03",
       location: { en: "Remote", th: "ทำงานทางไกล" },
       summary: {
-        en: "Led engineering for the EC Platform: Shopify storefronts, apps and headless commerce for brands.",
-        th: "นำงานวิศวกรรมของ EC Platform: หน้าร้าน แอป และระบบ headless commerce บน Shopify ให้แบรนด์ต่าง ๆ",
+        en: "Led a team of 5 to 8 engineers on the EC Platform: Shopify storefronts, apps and headless commerce for 10+ brands.",
+        th: "นำทีมวิศวกร 5 ถึง 8 คนใน EC Platform ทำหน้าร้าน แอป และระบบ headless commerce บน Shopify ให้แบรนด์มากกว่า 10 แบรนด์",
       },
       stack: ["Shopify", "GraphQL", "Liquid", "Next.js", "TypeScript"],
       visibility: "public",
       highlights: [
         {
           text: {
-            en: "Took requirements from the PM, estimated the work, delegated it across the team, and delivered stores for brands including Mizuno Thailand.",
-            th: "รับโจทย์จาก PM ประเมินงาน กระจายงานให้ทีม และส่งมอบร้านค้าให้แบรนด์ต่าง ๆ รวมถึง Mizuno Thailand",
+            en: "Led a team of 5 to 8 engineers delivering Shopify storefronts, apps and headless builds for 10+ brands, including Mizuno Thailand.",
+            th: "นำทีมวิศวกร 5 ถึง 8 คน ส่งมอบหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์มากกว่า 10 แบรนด์ รวมถึง Mizuno Thailand",
           },
-          provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "VERIFIED" },
+          provenance: { claimId: "exp-anymind.bullet-1 (v1.7)", source: "CLAIMS", confidence: "STATED" },
+        },
+        {
+          text: {
+            en: "Built shared storefront and app components that new brand launches reused, and drove storefront performance work.",
+            th: "สร้างคอมโพเนนต์หน้าร้านและแอปที่ใช้ร่วมกัน ให้แบรนด์ใหม่นำไปใช้ซ้ำตอนเปิดตัว และผลักดันงานปรับประสิทธิภาพของหน้าร้าน",
+          },
+          provenance: { claimId: "exp-anymind.bullet-2 (v1.7)", source: "CLAIMS", confidence: "STATED" },
         },
         {
           text: {
@@ -174,10 +251,10 @@ const content: SiteContentInput = {
         },
         {
           text: {
-            en: "Reviewed code, ran performance tests and coordinated releases across cross-functional teams.",
-            th: "รีวิวโค้ด ทดสอบประสิทธิภาพ และประสานการออกเวอร์ชันกับทีมที่เกี่ยวข้อง",
+            en: "Reviewed code, mentored a mostly junior and mid-level team, ran performance tests and coordinated releases across cross-functional teams.",
+            th: "รีวิวโค้ด เป็นพี่เลี้ยงให้ทีมที่ส่วนใหญ่เป็นระดับ junior และ mid ทดสอบประสิทธิภาพ และประสานการออกเวอร์ชันกับทีมที่เกี่ยวข้อง",
           },
-          provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "STATED" },
+          provenance: { claimId: "exp-anymind.bullet-5 (v1.7)", source: "CLAIMS", confidence: "STATED" },
         },
       ],
     },
@@ -219,34 +296,22 @@ const content: SiteContentInput = {
         },
       ],
     },
-    {
-      id: "exp-contract",
-      org: { name: "Confidential client", confidential: true },
-      title: { en: "Senior Full-Stack Developer" },
-      type: "part-time-contract",
-      start: "2022-04",
-      end: "present",
-      location: { en: "Remote" },
-      summary: { en: "Part-time contract (kept private)." },
-      stack: ["TypeScript"],
-      visibility: "hidden",
-      highlights: [],
-    },
   ],
 
   projects: [
     {
-      id: "proj-yimwhan",
-      slug: "yimwhan-ai",
-      name: "Yimwhan AI",
-      aliases: ["ยิ้มหวาน"],
+      id: "proj-clinic",
+      slug: "clinic-receptionist",
+      // A descriptive name until the product is renamed (King, 2026-10-08).
+      name: "Clinic AI receptionist",
+      aliases: ["AI receptionist", "dental clinic", "คลินิกทันตกรรม"],
       tagline: {
-        en: "A phone and LINE receptionist for dental clinics, with code that checks replies against set rules.",
-        th: "ผู้ช่วยรับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมโค้ดตรวจคำตอบตามกฎที่กำหนด",
+        en: "An AI phone and LINE receptionist for dental clinics, with code that checks replies against set rules. In pilot; go-live expected October 2026.",
+        th: "ผู้ช่วย AI รับสายและตอบแชท LINE ให้คลินิกทันตกรรม พร้อมโค้ดตรวจคำตอบตามกฎที่กำหนด อยู่ในช่วงนำร่อง คาดว่าจะเปิดใช้งานจริงตุลาคม 2026",
       },
       kind: "product",
       area: "ai",
-      status: "in-production",
+      status: "pilot",
       period: { start: "2026-05", end: "present" },
       role: { en: "Solo build", th: "พัฒนาทั้งระบบด้วยตนเอง" },
       stack: [
@@ -282,8 +347,8 @@ const content: SiteContentInput = {
         },
         {
           text: {
-            en: "Production has run on a dedicated phone number since July 2026, with gated releases and one-step rollback.",
-            th: "ระบบ production รันบนเบอร์โทรเฉพาะมาตั้งแต่กรกฎาคม 2026 ทุก release ต้องผ่านด่านตรวจ และย้อนกลับได้ในขั้นตอนเดียว",
+            en: "In pilot with a dental clinic, go-live expected October 2026. Production has run on a dedicated phone number since July 2026, with gated releases and one-step rollback.",
+            th: "อยู่ในช่วงนำร่องกับคลินิกทันตกรรม คาดว่าจะเปิดใช้งานจริงตุลาคม 2026 ระบบ production รันบนเบอร์โทรเฉพาะมาตั้งแต่กรกฎาคม 2026 ทุก release ต้องผ่านด่านตรวจ และย้อนกลับได้ในขั้นตอนเดียว",
           },
           provenance: { claimId: "exp-founder.bullet-4", source: "CLAIMS", confidence: "VERIFIED" },
         },
@@ -321,8 +386,8 @@ const content: SiteContentInput = {
       name: "AnyMind EC Platform",
       aliases: ["AnyMind", "Mizuno", "Shopify"],
       tagline: {
-        en: "Shopify storefronts, apps and headless builds for brands, led as Tech Lead for four years.",
-        th: "พัฒนาหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์ต่าง ๆ โดยผมดูแลงานในฐานะ Tech Lead เป็นเวลา 4 ปี",
+        en: "Shopify storefronts, apps and headless builds for 10+ brands, with a team of 5 to 8 engineers I led as Tech Lead for four years.",
+        th: "พัฒนาหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์มากกว่า 10 แบรนด์ กับทีมวิศวกร 5 ถึง 8 คนที่ผมนำในฐานะ Tech Lead เป็นเวลา 4 ปี",
       },
       kind: "platform",
       area: "commerce",
@@ -346,10 +411,10 @@ const content: SiteContentInput = {
       outcomes: [
         {
           text: {
-            en: "Led EC Platform engineering: Shopify storefronts, apps and headless builds, including Mizuno Thailand.",
-            th: "นำทีมวิศวกรรม EC Platform ทำหน้าร้าน แอป และระบบ headless บน Shopify รวมถึง Mizuno Thailand",
+            en: "Led a team of 5 to 8 engineers delivering Shopify storefronts, apps and headless builds for 10+ brands, including Mizuno Thailand.",
+            th: "นำทีมวิศวกร 5 ถึง 8 คน ส่งมอบหน้าร้าน แอป และระบบ headless บน Shopify ให้แบรนด์มากกว่า 10 แบรนด์ รวมถึง Mizuno Thailand",
           },
-          provenance: { claimId: "exp-anymind", source: "CLAIMS", confidence: "VERIFIED" },
+          provenance: { claimId: "exp-anymind.bullet-1 (v1.7)", source: "CLAIMS", confidence: "STATED" },
         },
         {
           text: {
@@ -366,16 +431,16 @@ const content: SiteContentInput = {
           provenance: { claimId: "exp-anymind.bullet-3", source: "CLAIMS", confidence: "STATED" },
         },
       ],
-      // King's own account of the role (SPEC-audit owner facts, 2026-10-07). No team size, store,
-      // revenue or speed figures: King declined to publish them.
+      // King's own account of the role (SPEC-audit owner facts, 2026-10-07; scope numbers from resume
+      // v1.7, King 2026-10-08). No store, revenue or speed figures: none exist to publish.
       caseStudy: {
         context: {
-          en: "AnyMind Group's EC Platform built Shopify stores for many brands, Mizuno Thailand and MamyPoko among them. Most of the work was hard custom flows rather than stock themes.",
-          th: "EC Platform ของ AnyMind Group สร้างร้านค้าบน Shopify ให้หลายแบรนด์ รวมถึง Mizuno Thailand และ MamyPoko งานส่วนใหญ่เป็น flow เฉพาะที่ซับซ้อน ไม่ใช่ธีมสำเร็จรูป",
+          en: "AnyMind Group's EC Platform built Shopify stores for 10+ brands, Mizuno Thailand among them. Most of the work was hard custom flows rather than stock themes.",
+          th: "EC Platform ของ AnyMind Group สร้างร้านค้าบน Shopify ให้แบรนด์มากกว่า 10 แบรนด์ รวมถึง Mizuno Thailand งานส่วนใหญ่เป็น flow เฉพาะที่ซับซ้อน ไม่ใช่ธีมสำเร็จรูป",
         },
         scope: {
-          en: "Tech Lead from January 2022 to March 2026, leading delivery on these stores. I was lead and senior developer at once: when a task was hard or the team was overloaded, I took it on myself.",
-          th: "ผมเป็น Tech Lead ตั้งแต่มกราคม 2022 ถึงมีนาคม 2026 ดูแลการส่งมอบงานของร้านเหล่านี้ และทำงานเป็นทั้ง lead และนักพัฒนาระดับ senior ไปพร้อมกัน งานไหนยากหรือทีมงานล้นมือ ผมรับมาทำเอง",
+          en: "Tech Lead from January 2022 to March 2026, leading a team of 5 to 8 engineers, mostly junior and mid-level, on these stores. I was lead and senior developer at once: when a task was hard or the team was overloaded, I took it on myself.",
+          th: "ผมเป็น Tech Lead ตั้งแต่มกราคม 2022 ถึงมีนาคม 2026 นำทีมวิศวกร 5 ถึง 8 คน ส่วนใหญ่เป็นระดับ junior และ mid ดูแลงานของร้านเหล่านี้ และทำงานเป็นทั้ง lead และนักพัฒนาระดับ senior ไปพร้อมกัน งานไหนยากหรือทีมงานล้นมือ ผมรับมาทำเอง",
         },
         approach: {
           en: [
@@ -396,12 +461,12 @@ const content: SiteContentInput = {
           th: "ผมรีวิวโค้ดของทีมก่อนส่งมอบงาน ทดสอบประสิทธิภาพ และประสานการออกเวอร์ชันกับทีมที่เกี่ยวข้อง",
         },
         result: {
-          en: "Stores for brands including Mizuno Thailand were delivered on this platform, with the integrations, the Dev Dashboard migration and the January 2026 Admin API upgrade listed above. Across my career I have worked on 20+ Shopify stores.",
-          th: "ส่งมอบร้านค้าให้แบรนด์ต่าง ๆ รวมถึง Mizuno Thailand บนแพลตฟอร์มนี้ พร้อมงานเชื่อมต่อ การย้ายไป Dev Dashboard และการอัปเกรดไปใช้ Admin API เวอร์ชันมกราคม 2026 ตามรายการด้านบน ตลอดการทำงานที่ผ่านมา ผมทำร้านค้าบน Shopify มาแล้วไม่ต่ำกว่า 20 ร้าน",
+          en: "Stores for 10+ brands, including Mizuno Thailand, were delivered on this platform, on shared storefront and app components that new brand launches reused, with the integrations, the Dev Dashboard migration and the January 2026 Admin API upgrade listed above.",
+          th: "ส่งมอบร้านค้าให้แบรนด์มากกว่า 10 แบรนด์ รวมถึง Mizuno Thailand บนแพลตฟอร์มนี้ โดยใช้คอมโพเนนต์หน้าร้านและแอปที่แบรนด์ใหม่นำไปใช้ซ้ำตอนเปิดตัว พร้อมงานเชื่อมต่อ การย้ายไป Dev Dashboard และการอัปเกรดไปใช้ Admin API เวอร์ชันมกราคม 2026 ตามรายการด้านบน",
         },
         limits: {
-          en: "Client work: this page names two brands only, and gives no store traffic, revenue or team figures.",
-          th: "เป็นงานของลูกค้า หน้านี้จึงระบุชื่อแบรนด์ไว้เพียงสองแบรนด์ และไม่มีตัวเลขยอดเข้าชม รายได้ หรือขนาดทีม",
+          en: "Client work: this page names one brand only, and gives no store traffic, revenue or speed figures.",
+          th: "เป็นงานของลูกค้า หน้านี้จึงระบุชื่อแบรนด์ไว้เพียงแบรนด์เดียว และไม่มีตัวเลขยอดเข้าชม รายได้ หรือความเร็ว",
         },
       },
       caseStudyVisibility: "public",
@@ -534,6 +599,7 @@ const content: SiteContentInput = {
         "Fastify",
         "GraphQL",
         "Kafka",
+        "BullMQ",
         "Python",
         { en: "Hexagonal and event-driven design", th: "สถาปัตยกรรม hexagonal และ event-driven" },
       ],
@@ -541,7 +607,7 @@ const content: SiteContentInput = {
     {
       id: "frontend",
       label: { en: "Frontend and apps", th: "หน้าบ้านและแอป" },
-      items: ["React", "Next.js", "Vite", "Tailwind CSS", "Tauri"],
+      items: ["React", "Next.js", "Vite", "Tailwind CSS", "Three.js", "Phaser", "Tauri"],
     },
     {
       id: "data-cloud",
@@ -551,8 +617,9 @@ const content: SiteContentInput = {
         "PostgreSQL",
         "Redis",
         "SQLite",
+        "AWS (EKS, MSK, S3)",
         "Docker",
-        "Kubernetes (GKE)",
+        "Kubernetes (EKS, GKE)",
         "Fly.io",
         "Cloudflare",
         "Azure",
@@ -561,7 +628,17 @@ const content: SiteContentInput = {
     {
       id: "testing",
       label: { en: "Testing and delivery", th: "การทดสอบและส่งมอบ" },
-      items: ["Playwright", "Vitest", "Jest", "GitHub Actions", "GitLab CI/CD"],
+      // "Helm" here is the Kubernetes chart tool, named in full so it never reads as King's Helm app.
+      items: [
+        "Playwright",
+        "Vitest",
+        "Jest",
+        "GitHub Actions",
+        "GitLab CI/CD",
+        "Helm (Kubernetes charts)",
+        "Terragrunt",
+        "SOPS",
+      ],
     },
     {
       id: "integrations",

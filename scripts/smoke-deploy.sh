@@ -17,7 +17,7 @@ check() { # path expected [headers...]
   local got; got=$(fetch "$base$path" "$@")
   if [[ "$got" != "$want" ]]; then echo "FAIL $path ($*) -> $got, want $want"; fail=1; else echo "ok   $path ${*:+($*)} $got"; fi
 }
-for p in / /th /cv /th/cv /work/yimwhan-ai /th/work/helm /privacy /th/privacy; do
+for p in / /th /cv /th/cv /work/clinic-receptionist /th/work/helm /privacy /th/privacy; do
   check "$p" 200
   check "$p?_rsc=smoke" 200 -H "RSC: 1"
   check "$p?_rsc=smoke" 200 -H "RSC: 1" -H "Next-Router-Prefetch: 1" -H "Next-Router-Segment-Prefetch: /_tree"

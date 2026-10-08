@@ -1,0 +1,288 @@
+/* ------------------------------------------------------------------
+   Play section: a quiet switcher over one dark stage of fixed height
+   per breakpoint (no layout jump between scenes). One live scene; the
+   last frame of the one before fades out over it as a picture.
+   ------------------------------------------------------------------ */
+.iv {
+  /* Phones: a portrait stage the desk's phone camera is composed for. */
+  --iv-h: min(80svh, 128vw);
+}
+@media (min-width: 40rem) {
+  .iv {
+    --iv-h: clamp(30rem, 74svh, 48rem);
+  }
+}
+
+.iv-bar {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: clamp(1rem, 0.75rem + 1vw, 1.5rem);
+}
+@media (min-width: 64rem) {
+  .iv-bar {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 2rem;
+  }
+}
+
+.iv-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  justify-self: start;
+  padding: 0.25rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+.iv-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding-inline: var(--inset-pill);
+  border-radius: 999px;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    color var(--dur-2) var(--ease-out),
+    background-color var(--dur-2) var(--ease-out);
+}
+/* Phones: all four tabs on one line, in both languages. */
+@media (max-width: 39.99rem) {
+  .iv-tab {
+    padding-inline: 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+@media (max-width: 22.49rem) {
+  .iv-tab {
+    padding-inline: 0.4375rem;
+    font-size: 0.78125rem;
+  }
+}
+.iv-tab:hover {
+  color: var(--ink);
+}
+.iv-tab[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 1px var(--rule),
+    0 1px 2px light-dark(oklch(0.2 0.02 65 / 0.06), oklch(0 0 0 / 0.3));
+}
+.iv-tab:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+/* The auto-advance timer, drawn: a gold hairline filling under the active tab. */
+.iv-progress {
+  position: absolute;
+  inset-inline: var(--inset-pill);
+  bottom: 0.3rem;
+  height: 1px;
+  background: var(--gold);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation-name: iv-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  animation-play-state: paused;
+}
+.iv[data-running] .iv-progress {
+  animation-play-state: running;
+}
+@keyframes iv-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* All four hints share one cell: the tallest sets the height, so swapping never moves the stage. */
+.iv-hints {
+  display: grid;
+  max-width: 62ch;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+.iv-hint {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    visibility 0s linear var(--dur-3);
+}
+.iv-hint[data-on] {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+
+/* ---------------------------------------------------------------- stage */
+.iv-stage {
+  position: relative;
+  height: var(--iv-h);
+  border-radius: var(--radius-card);
+  overflow: clip;
+  isolation: isolate;
+  background: #03040a;
+  /* A hairline keeps the card's edge on a dark page. */
+  box-shadow:
+    0 0 0 1px oklch(0.9 0.02 85 / 0.1),
+    var(--shadow-lift);
+  color: var(--ink);
+}
+.iv-pane {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.iv-pane > * {
+  height: 100%;
+}
+.iv-pane[data-state="in"] {
+  animation: iv-in 700ms var(--ease-out) both;
+}
+@keyframes iv-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The server's composed still of the first scene, over the live scene until its ink has drawn in. */
+.iv-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 700ms var(--ease-out);
+}
+.iv-poster[data-hide] {
+  opacity: 0;
+}
+.iv-picture img,
+.iv-poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The scene before, as a picture, fading out over the next one. */
+.iv-ghost {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.iv-ghost canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.iv-ghost[data-on="fade"] {
+  animation: iv-out 700ms var(--ease-out) both;
+}
+@keyframes iv-out {
+  to {
+    opacity: 0;
+    transform: scale(1.012);
+  }
+}
+
+.iv-picture {
+  position: absolute;
+  inset: 0;
+}
+.iv-fail {
+  position: absolute;
+  inset: auto var(--inset-card) var(--inset-card);
+  height: auto;
+  justify-self: start;
+  width: fit-content;
+  max-width: calc(100% - 2 * var(--inset-card));
+  padding: 0.375rem 0.875rem;
+  border-radius: 1rem;
+  background: oklch(0.12 0.02 266 / 0.72);
+  backdrop-filter: blur(8px);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+/* The section's one sound toggle, top right of every scene. */
+.iv-sound {
+  position: absolute;
+  z-index: 4;
+  top: var(--inset-compact, 0.75rem);
+  right: var(--inset-compact, 0.75rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: 0.875rem 1rem;
+  border-radius: 999px;
+  border: 1px solid oklch(0.9 0.02 85 / 0.18);
+  background: oklch(0.14 0.025 266 / 0.55);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  transition:
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+.iv-sound:hover {
+  border-color: oklch(0.9 0.02 85 / 0.4);
+}
+.iv-sound:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.iv-sound[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--gold) 70%, transparent);
+  color: var(--gold);
+}
+.iv-sound svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: currentColor;
+}
+.iv-sound .iv-wave {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+/* Phones: the toggle is the icon alone (its name stays for assistive tech), clear of the desk's clock. */
+@media (max-width: 39.99rem) {
+  .iv-sound {
+    width: 2.75rem;
+    padding: 0;
+    justify-content: center;
+  }
+  .iv-sound span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iv-pane[data-state],
+  .iv-ghost[data-on] {
+    animation: none;
+  }
+  .iv-hint,
+  .iv-poster {
+    transition: none;
+  }
+}

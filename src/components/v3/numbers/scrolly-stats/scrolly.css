@@ -1,0 +1,461 @@
+/* ------------------------------------------------------------------
+   Story (numbers view 3). A navy card filling the stage: one huge
+   morphing numeral on the left (on top on phones), the active step's
+   copy and motif on the right, a numbered rail. Motifs draw from --m
+   (0..1) in CSS; JS only writes numbers.
+   ------------------------------------------------------------------ */
+@property --m {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+.ss {
+  --ss-pad: clamp(1.25rem, 0.5rem + 2.6vw, 3rem);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  column-gap: clamp(1.5rem, 0.5rem + 3vw, 4rem);
+  padding: var(--ss-pad);
+  overflow: clip;
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(70% 60% at 25% 50%, oklch(0.32 0.05 266 / 0.45), transparent 70%),
+    var(--ground);
+  color: var(--ink);
+}
+
+/* ---------------- The numeral ---------------- */
+.ss-numeral {
+  position: relative;
+  align-self: center;
+  height: 0.8em;
+  font-size: clamp(6rem, 1rem + 19vw, 22rem);
+  font-weight: 600;
+  line-height: 0.8;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  pointer-events: none;
+}
+.ss-numeral-inner {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  transform-origin: 0 50%;
+}
+.ss-slot > span,
+.ss-measure {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: pre;
+  will-change: transform, opacity;
+}
+.ss-measure {
+  visibility: hidden;
+  will-change: auto;
+}
+
+/* ---------------- Panels: one shown at a time, all in the reading order ---------------- */
+.ss-panels {
+  position: relative;
+  min-height: 0;
+}
+.ss-panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: clamp(1rem, 0.5rem + 1.4vw, 1.75rem);
+  /* Every stat stays readable (screen readers hear all four); only the active one is seen. */
+  opacity: 0;
+  translate: 0 1rem;
+  pointer-events: none;
+  transition:
+    opacity 450ms var(--ease-out),
+    translate 450ms var(--ease-out);
+}
+.ss-panel[data-on] {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+  transition:
+    opacity 700ms var(--ease-out) 350ms,
+    translate 700ms var(--ease-out) 350ms;
+}
+.ss-copy {
+  display: grid;
+  justify-items: start;
+  gap: 0.625rem;
+}
+.ss-doodle {
+  height: clamp(2.75rem, 2rem + 2vw, 4.5rem);
+  color: color-mix(in oklab, var(--ink) 78%, transparent);
+  transform: rotate(-4deg) scale(calc(0.86 + var(--m) * 0.14));
+  transform-origin: 30% 80%;
+}
+.ss-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.ss-product {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-3);
+}
+.ss-label {
+  font-size: clamp(1.25rem, 0.85rem + 1.2vw, 2.125rem);
+  line-height: 1.18;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  max-width: 24ch;
+}
+:lang(th) .ss-label {
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.ss-caps {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.ss-cap-gold {
+  color: var(--gold);
+}
+
+/* ---------------- 7: seven hops on the year axis ---------------- */
+.ss-years {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+}
+.ss-years svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.ss-axis {
+  stroke: color-mix(in oklab, var(--ink) 22%, transparent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.ss-tick {
+  stroke: color-mix(in oklab, var(--ink) 35%, transparent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+/* No non-scaling-stroke here: it breaks pathLength-based dashes (the arcs would stop short). */
+.ss-hop {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: calc(1 - clamp(0, var(--m) * 7 - var(--k), 1));
+}
+.ss-land {
+  fill: var(--gold);
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: clamp(0, calc((var(--m) * 7 - var(--k) - 0.92) * 14), 1);
+  scale: calc(0.4 + 0.6 * clamp(0, calc((var(--m) * 7 - var(--k) - 0.92) * 14), 1));
+}
+.ss-origin {
+  fill: var(--ground);
+  stroke: var(--gold);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.ss-years-labels {
+  position: relative;
+  height: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+}
+.ss-years-labels span {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  translate: -50% 0;
+}
+.ss-years-labels span:first-child {
+  translate: 0 0;
+}
+.ss-years-labels span:last-child {
+  translate: -100% 0;
+}
+
+/* ---------------- 10+: storefronts drawing in, the plus, the team ---------------- */
+.ss-brands {
+  display: grid;
+  gap: 0.875rem;
+  width: min(100%, 26rem);
+}
+.ss-stores {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: clamp(0.25rem, 0.15rem + 0.4vw, 0.5rem);
+  align-items: center;
+}
+.ss-store {
+  display: block;
+  width: 100%;
+  height: auto;
+  --d: clamp(0, calc(var(--m) * 12 - var(--k)), 1);
+}
+.ss-store path {
+  fill: currentColor;
+  fill-opacity: 0;
+  stroke: color-mix(in oklab, var(--ink) 80%, transparent);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: calc(1 - var(--d));
+}
+.ss-store path:nth-child(2) {
+  fill-opacity: calc(var(--d) * 0.14);
+}
+.ss-store-plus,
+.ss-user-plus {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 0.375rem;
+  background: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 600;
+  line-height: 1;
+}
+.ss-store-plus {
+  font-size: 1rem;
+  opacity: clamp(0, calc(var(--m) * 12 - 10), 1);
+  scale: calc(0.5 + 0.5 * clamp(0, calc(var(--m) * 12 - 10), 1));
+}
+.ss-team {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+.ss-person {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: var(--ink);
+  opacity: clamp(0, calc(var(--m) * 12 - 10.5 - var(--k) * 0.15), 1);
+}
+.ss-person[data-range] {
+  fill: none;
+  stroke: color-mix(in oklab, var(--ink) 55%, transparent);
+  stroke-width: 1.5;
+}
+.ss-team-cap {
+  margin-left: 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  opacity: clamp(0, calc(var(--m) * 12 - 11), 1);
+}
+
+/* ---------------- 6,000+: a field of users, 100 a dot ---------------- */
+.ss-users {
+  display: grid;
+  gap: 0.5rem;
+  width: min(100%, 26rem);
+}
+.ss-users-field {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  gap: clamp(0.3rem, 0.2rem + 0.3vw, 0.5rem);
+  align-items: center;
+}
+.ss-user {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--gold);
+  --d: clamp(0, calc(var(--m) * 62 - var(--k)), 1);
+  opacity: var(--d);
+  scale: calc(0.3 + 0.7 * var(--d));
+}
+.ss-user-plus {
+  grid-column: 13;
+  grid-row: 1 / span 5;
+  aspect-ratio: auto;
+  align-self: stretch;
+  font-size: 1rem;
+  opacity: clamp(0, calc(var(--m) * 62 - 60), 1);
+}
+.ss-legend {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+/* ---------------- 500 / 37: the replay ---------------- */
+.ss-panel-replay {
+  gap: 0.875rem;
+}
+.ss-panel-replay .ss-label {
+  font-size: clamp(1.125rem, 0.85rem + 0.8vw, 1.625rem);
+}
+.ss-replay {
+  display: grid;
+  gap: 0.625rem;
+  width: 100%;
+}
+.ss-replay canvas {
+  display: block;
+  width: min(100%, 24rem);
+  aspect-ratio: 25 / 22.2;
+  color: var(--ink);
+  border-top-color: var(--gold);
+  column-rule-color: oklch(0.68 0.19 30);
+}
+.ss-caught {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.875rem;
+}
+.ss-caught-fig {
+  font-size: clamp(2rem, 1.5rem + 1.4vw, 3rem);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--gold);
+  min-width: 1.25em;
+  transition: opacity 300ms var(--ease-out);
+}
+[data-precatch] .ss-caught-fig {
+  opacity: 0;
+}
+.ss-caught-label {
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--ink) 85%, transparent);
+  text-wrap: pretty;
+}
+.ss-verdict {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: var(--text-sm);
+  color: var(--gold);
+  font-weight: 500;
+  transition:
+    opacity 450ms var(--ease-out),
+    translate 450ms var(--ease-out);
+}
+.ss-verdict svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.2em;
+}
+.ss-panel-replay:not([data-verdict]) .ss-verdict {
+  opacity: 0;
+  translate: 0 0.375rem;
+}
+
+/* ---------------- The rail ---------------- */
+.ss-rail {
+  position: absolute;
+  left: var(--ss-pad);
+  bottom: calc(var(--ss-pad) * 0.5);
+  display: flex;
+  gap: 0.25rem;
+}
+.ss-rail button {
+  position: relative;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding-inline: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  transition: color var(--dur-2) var(--ease-out);
+}
+.ss-rail button::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.625rem;
+  height: 1px;
+  background: var(--gold);
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale var(--dur-3) var(--ease-out);
+}
+.ss-rail button:hover {
+  color: var(--ink);
+}
+.ss-rail button[aria-current] {
+  color: var(--gold);
+}
+.ss-rail button[aria-current]::after {
+  scale: 1 1;
+}
+.ss-rail button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+  border-radius: 0.5rem;
+}
+
+/* ---------------- Phones: the numeral on top, the step below ---------------- */
+@media (max-width: 47.99rem) {
+  .ss {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 36% minmax(0, 1fr);
+    row-gap: 1rem;
+    padding-bottom: 3.5rem;
+  }
+  .ss-numeral {
+    font-size: clamp(8rem, 2rem + 36vw, 13rem);
+  }
+  .ss-panel {
+    align-content: start;
+  }
+  .ss-years-labels span:nth-child(even) {
+    display: none;
+  }
+  .ss-label {
+    font-size: 1.25rem;
+  }
+  .ss-replay canvas {
+    width: 100%;
+    aspect-ratio: 50 / 12.2;
+  }
+  .ss-rail {
+    left: 50%;
+    translate: -50% 0;
+    bottom: 0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-panel,
+  .ss-panel[data-on],
+  .ss-verdict,
+  .ss-caught-fig {
+    transition: none;
+  }
+}
+
+/* Thai: no tracking on the mono labels (spaced Thai reads as broken words). */
+:lang(th) :is(.ss-note, .ss-team-cap) {
+  letter-spacing: 0;
+}

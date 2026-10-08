@@ -1,0 +1,345 @@
+/* ------------------------------------------------------------------
+   Editorial numerals (numbers view 5). The page scene: paper in the
+   light theme, the warm dark ground in the dark theme. One spread at a
+   time: the figure bleeds off the screen edge on one side, the caption
+   sits on the other.
+   ------------------------------------------------------------------ */
+.ed {
+  position: relative;
+  border-top: 1px solid var(--rule);
+}
+.ed-stage {
+  position: absolute;
+  /* The canvas spans the viewport width, so the figure can meet the real screen edge. */
+  inset: 1.5rem calc(50% - 50vw) 3.5rem;
+  pointer-events: none;
+}
+.ed-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ed[data-mode="type"] .ed-canvas {
+  display: none;
+}
+
+/* The figure in gold type: before the ink is up, and when there is no WebGL2. */
+.ed-fig {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ed-fig span {
+  position: absolute;
+  bottom: 0;
+  font-size: min(36rem, 34vw);
+  font-weight: 600;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  background-image: linear-gradient(160deg, var(--gold), oklch(0.68 0.11 78) 45%, var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out);
+}
+.ed-fig span[data-side="left"] {
+  left: -0.08em;
+}
+.ed-fig span[data-side="right"] {
+  right: -0.08em;
+}
+.ed-fig span:nth-child(3) {
+  font-size: min(14rem, 13vw);
+}
+.ed[data-mode="type"] .ed-fig span[data-on] {
+  opacity: 1;
+}
+.ed[data-mode="pending"] .ed-fig span[data-on] {
+  opacity: 0.25;
+}
+
+/* ---- captions: every stat in the DOM, the active one seen ---- */
+.ed-caps {
+  position: absolute;
+  inset: 1.5rem 0 3.5rem;
+}
+.ed-cap {
+  position: absolute;
+  bottom: 0;
+  width: min(28rem, 40%);
+  opacity: 0;
+  translate: 0 1rem;
+  pointer-events: none;
+  transition:
+    opacity 300ms var(--ease-out),
+    translate 300ms var(--ease-out);
+}
+/* Beside the drawn figure (--ed-cap-at, measured from the ink), bottom on its baseline. */
+.ed-cap[data-side="left"] {
+  left: var(--ed-cap-at, 60%);
+}
+.ed-cap[data-side="right"] {
+  right: var(--ed-cap-at, 60%);
+}
+.ed-cap[data-on] {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+  transition-duration: 900ms;
+  transition-delay: 450ms;
+}
+.ed-idx {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.ed-idx::after {
+  content: "";
+  width: 3rem;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.ed-label {
+  margin-top: 0.875rem;
+  font-size: clamp(1.375rem, 0.9rem + 1.2vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  color: var(--ink);
+}
+:lang(th) .ed-label {
+  line-height: 1.38;
+  letter-spacing: 0;
+}
+.ed-second {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.875rem;
+  margin-top: 1rem;
+}
+.ed-second-fig {
+  font-size: clamp(2rem, 1.5rem + 1.2vw, 3rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--gold);
+}
+.ed-second-label {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.ed-outcome {
+  margin-top: 0.75rem;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.ed-source {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.ed-source span {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  translate: 0 0.05em;
+}
+:lang(th) .ed-source span {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  font-size: var(--text-xs);
+}
+
+/* ---- how it was measured (the 500/37 spread) ---- */
+.ed-measure {
+  position: relative;
+  margin-top: 0.25rem;
+}
+.ed-measure-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color var(--dur-2) var(--ease-out);
+}
+.ed-measure-btn:hover {
+  text-decoration-color: var(--gold);
+}
+.ed-measure-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+.ed-measure-btn i {
+  position: relative;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+}
+.ed-measure-btn i::before,
+.ed-measure-btn i::after {
+  content: "";
+  position: absolute;
+  inset: 50% 25% auto;
+  height: 1px;
+  translate: 0 -50%;
+  background: var(--gold);
+  transition: rotate var(--dur-3) var(--ease-out);
+}
+.ed-measure-btn i::after {
+  rotate: 90deg;
+}
+.ed-measure[data-open] .ed-measure-btn i::after {
+  rotate: 0deg;
+}
+/* The note opens upward over the spread, so the stage never grows. */
+.ed-note {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  opacity: 0;
+  translate: 0 0.5rem;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    translate var(--dur-3) var(--ease-out);
+}
+.ed-note p {
+  padding: var(--inset-card);
+  border-left: 2px solid var(--gold);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.ed-measure[data-open] .ed-note {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
+.ed-measure:not([data-open]) .ed-note {
+  visibility: hidden;
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    translate var(--dur-3) var(--ease-out),
+    visibility 0s linear var(--dur-3);
+}
+
+/* ---- step rail ---- */
+.ed-steps {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  gap: 0.25rem;
+}
+.ed-steps button {
+  position: relative;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding-inline: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  transition: color var(--dur-2) var(--ease-out);
+}
+.ed-steps button::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.625rem;
+  height: 1px;
+  background: var(--gold);
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale var(--dur-3) var(--ease-out);
+}
+.ed-steps button:hover {
+  color: var(--ink);
+}
+.ed-steps button[aria-current] {
+  color: var(--gold);
+}
+.ed-steps button[aria-current]::after {
+  scale: 1 1;
+}
+.ed-steps button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+  border-radius: 0.5rem;
+}
+
+/* ---- phones: the figure on top, cropped at its edge; the caption below ---- */
+@media (max-width: 47.99rem) {
+  .ed-stage {
+    inset: 1rem calc(50% - 50vw) auto;
+    height: 40%;
+  }
+  .ed-fig span {
+    font-size: min(17rem, 72vw);
+  }
+  .ed-fig span:nth-child(3) {
+    font-size: 30vw;
+  }
+  .ed-caps {
+    inset: calc(40% + 2.25rem) 0 3.5rem;
+  }
+  .ed-cap,
+  .ed-cap[data-side="left"],
+  .ed-cap[data-side="right"] {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: auto;
+    width: auto;
+  }
+  .ed-label {
+    font-size: 1.375rem;
+  }
+  .ed-steps {
+    left: 50%;
+    translate: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-cap,
+  .ed-cap[data-on],
+  .ed-fig span,
+  .ed-note {
+    transition: none;
+  }
+}

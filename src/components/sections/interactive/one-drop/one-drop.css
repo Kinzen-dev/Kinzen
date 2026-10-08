@@ -1,0 +1,59 @@
+/* One drop (ported from the lab): the bowl fills the pane; one quiet button drops by keyboard. */
+.od {
+  position: relative;
+  height: 100%;
+  background: var(--ground);
+  overflow: clip;
+}
+.od-stage {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  /* Vertical swipes still scroll the page on phones; taps and holds belong to the bowl. */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.od-stage canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.od-btn {
+  position: absolute;
+  left: var(--inset-card);
+  bottom: var(--inset-card);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: var(--inset-btn);
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: oklch(0.14 0.025 266 / 0.55);
+  backdrop-filter: blur(10px);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.od-btn:hover {
+  color: var(--ink);
+  border-color: color-mix(in oklab, var(--gold) 50%, var(--rule));
+}
+.od-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.od-btn > i {
+  width: 0.5rem;
+  height: 0.625rem;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--gold);
+}

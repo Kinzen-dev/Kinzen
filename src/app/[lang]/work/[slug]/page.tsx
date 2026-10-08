@@ -21,6 +21,7 @@ import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
 import { CaseCta } from "@/components/case-cta";
 import { ToolMark } from "@/components/tools/tool-mark";
+import { ToolMarkTap } from "@/components/tools/tool-mark-tap";
 
 export const dynamicParams = false;
 
@@ -165,9 +166,10 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
         <h2 id="stack-title" className="pj-h2">
           {nobr(dict.project.stack)}
         </h2>
+        <ToolMarkTap />
         <ul className="pj-pills">
           {project.stack.map((s) => (
-            <li key={s} className="pj-pill">
+            <li key={s} className="pj-pill" data-tool-host>
               <ToolMark name={s} />
               {s}
             </li>

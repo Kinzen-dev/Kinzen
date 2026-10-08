@@ -28,7 +28,7 @@ function insets(page: Page, box: string, inner: string) {
 }
 
 for (const { route, name, back, outcomes, plate } of [
-  { route: "/work/yimwhan-ai", name: "Yimwhan AI", back: "All work", outcomes: 3, plate: true },
+  { route: "/work/clinic-receptionist", name: "Clinic AI receptionist", back: "All work", outcomes: 3, plate: true },
   { route: "/th/work/helm", name: "Helm", back: "ผลงานทั้งหมด", outcomes: 1, plate: true },
   { route: "/work/ronglen", name: "Ronglen", back: "All work", outcomes: 1, plate: false },
 ]) {
@@ -66,7 +66,7 @@ for (const { route, name, back, outcomes, plate } of [
 }
 
 test("the next-project card is one link to the next page", async ({ page }) => {
-  await page.goto("/work/yimwhan-ai");
+  await page.goto("/work/clinic-receptionist");
   const next = page.locator(".pj-next");
   await expect(next).toHaveAttribute("href", "/work/anymind-ec-platform");
   await next.click();
@@ -77,7 +77,7 @@ test("the next-project card is one link to the next page", async ({ page }) => {
 for (const colorScheme of ["light", "dark"] as const) {
   test(`project page is accessible in the ${colorScheme} theme`, async ({ page }) => {
     await page.emulateMedia({ colorScheme });
-    await page.goto("/th/work/yimwhan-ai");
+    await page.goto("/th/work/clinic-receptionist");
     expect(await seriousViolations(page)).toEqual([]);
   });
 }
@@ -133,7 +133,7 @@ test("phones: Thai ledes and fact chips stay inside their padding; status and ar
 
 test("phones: the plate first fits the card whole, View full size pans it", async ({ page, isMobile }) => {
   test.skip(!isMobile, "phone presentation");
-  await page.goto("/work/yimwhan-ai");
+  await page.goto("/work/clinic-receptionist");
   const scroller = page.locator(".pj-plate .plate-scroll");
   await scroller.scrollIntoViewIfNeeded();
   const fit = await scroller.evaluate((s) => ({ scrolls: s.scrollWidth > s.clientWidth + 1, h: s.clientHeight }));

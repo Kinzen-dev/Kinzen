@@ -5,6 +5,7 @@ import { Hero } from "@/components/sections/hero";
 import { Experience } from "@/components/sections/experience";
 import { Practice } from "@/components/sections/practice";
 import { Skills } from "@/components/sections/skills";
+import { Play } from "@/components/sections/interactive/play";
 import { About } from "@/components/sections/about";
 import { Contact } from "@/components/sections/contact";
 import { JsonLd, profilePageJsonLd } from "@/lib/json-ld";
@@ -13,7 +14,7 @@ import { Doodle } from "@/components/doodles/doodle";
 import { getV3 } from "@/i18n/v3";
 import { SectionHeader } from "@/components/sections/section-header";
 import { NumbersStrip } from "@/components/v3/numbers/numbers-strip";
-import { YimwhanScene } from "@/components/v3/yimwhan/yimwhan-scene";
+import { ClinicScene } from "@/components/v3/clinic/clinic-scene";
 import { HelmScene } from "@/components/v3/helm/helm-scene";
 import { MoreWork } from "@/components/v3/more-work/more-work";
 import { pageOpenGraph } from "@/lib/open-graph";
@@ -46,13 +47,14 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         <div className="shell">
           <SectionHeader id="work" title={dict.sections.work} intro={v3.moreWork.sectionIntro} />
         </div>
-        <YimwhanScene locale={locale} dict={dict} v3={v3} />
+        <ClinicScene locale={locale} dict={dict} v3={v3} />
         <HelmScene locale={locale} dict={dict} v3={v3} />
         <MoreWork locale={locale} dict={dict} v3={v3} />
       </section>
       <Experience locale={locale} dict={dict} />
       <Practice locale={locale} dict={dict} v3={v3} />
       <Skills locale={locale} dict={dict} v3={v3} />
+      <Play locale={locale} v3={v3} />
       <About locale={locale} dict={dict} offClockArt={offClockArt} />
       <Contact locale={locale} dict={dict} v3={v3} />
       <JsonLd data={profilePageJsonLd(locale, dict.meta.title)} />

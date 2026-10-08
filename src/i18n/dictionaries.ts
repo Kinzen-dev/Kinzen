@@ -9,7 +9,7 @@ const en = {
   meta: {
     title: "Kittipong Khonthong (King) | Senior Full-Stack Engineer",
     description:
-      "Senior full-stack engineer and founder of Vesperwerk. Seven years shipping production TypeScript systems, from Shopify commerce platforms to AI voice and LINE products.",
+      "Senior Full-Stack Engineer · TypeScript, Node.js, Next.js · event-driven systems on AWS. Seven years building and running production systems end to end, from frontend to DevOps.",
   },
   a11y: {
     skipToContent: "Skip to content",
@@ -56,8 +56,8 @@ const en = {
     workIntro: "Choose a project to see its work, results and stack.",
     experience: "Experience",
     experienceIntro: "Production systems since 2019, newest first.",
-    practice: "How I work",
-    practiceIntro: "I use AI coding agents as a team, with the rules that matter set in code and tests.",
+    practice: "AI-assisted engineering",
+    practiceIntro: "How I build with AI coding agents: a written spec first, a human at every gate, and evidence before anything merges.",
     skills: "Tools I reach for",
     about: "About",
     offTheClock: "Off the clock",
@@ -86,7 +86,7 @@ const en = {
   status: {
     live: "Live",
     internal: "Internal tool",
-    "in-production": "In production",
+    pilot: "Pilot",
     delivered: "Delivered",
     archived: "Archived",
   },
@@ -109,7 +109,7 @@ const en = {
   colophon: {
     built: "Built",
     from: "from commit",
-    fonts: "Set in Geist and Noto Sans Thai.",
+    fonts: "Set in Google Sans, Google Sans Code and Playpen Sans Thai.",
     privacy: "Privacy",
   },
   project: {
@@ -167,7 +167,7 @@ const en = {
   cv: {
     title: "Kittipong Khonthong CV",
     description:
-      "CV of Kittipong Khonthong, senior full-stack engineer in Bangkok: experience, selected work, skills, education and languages. Prints to A4.",
+      "CV of Kittipong Khonthong, Senior Full-Stack Engineer in Bangkok (TypeScript, Node.js, Next.js, event-driven systems on AWS): experience, selected work, skills, education and languages. Prints to A4.",
     print: "Print or save as PDF",
     contact: "Contact",
     experience: "Experience",
@@ -207,7 +207,7 @@ const th: Dictionary = {
   meta: {
     title: "กฤติพงษ์ ก้อนทอง (คิง) | วิศวกร full-stack ระดับ senior",
     description:
-      "วิศวกร full-stack ระดับ senior และผู้ก่อตั้ง Vesperwerk ทำระบบ TypeScript ที่ใช้งานจริงมา 7 ปี ตั้งแต่แพลตฟอร์มอีคอมเมิร์ซบน Shopify ไปจนถึงผลิตภัณฑ์ AI ด้านเสียงและ LINE",
+      "วิศวกร full-stack ระดับ senior · TypeScript, Node.js, Next.js · ระบบ event-driven บน AWS สร้างและดูแลระบบที่ใช้งานจริงครบทั้งระบบมา 7 ปี ตั้งแต่ frontend ไปจนถึง DevOps",
   },
   a11y: {
     skipToContent: "ข้ามไปที่เนื้อหา",
@@ -255,8 +255,8 @@ const th: Dictionary = {
     workIntro: "เลือกผลงานแต่ละรายการเพื่อดูงานที่ทำ ผลลัพธ์ และเครื่องมือที่ใช้",
     experience: "ประสบการณ์",
     experienceIntro: "ทำระบบที่ใช้งานจริงมาตั้งแต่ปี 2019 เรียงจากล่าสุด",
-    practice: "วิธีทำงานของผม",
-    practiceIntro: "ผมใช้ AI agent ช่วยเขียนโค้ดร่วมกันเป็นทีม โดยกำหนดกฎสำคัญไว้ในโค้ดและการทดสอบ",
+    practice: "งานวิศวกรรมที่มี AI ช่วย",
+    practiceIntro: "วิธีที่ผมทำงานกับทีม AI agent ช่วยเขียนโค้ด: เขียน spec ก่อน มีคนอนุมัติทุกด่าน และต้องมีหลักฐานก่อน merge ทุกครั้ง",
     skills: "เครื่องมือที่ใช้ประจำ",
     about: "เกี่ยวกับผม",
     offTheClock: "นอกเวลางาน",
@@ -285,7 +285,7 @@ const th: Dictionary = {
   status: {
     live: "เปิดใช้งานแล้ว",
     internal: "เครื่องมือภายใน",
-    "in-production": "ใช้งานจริง",
+    pilot: "ช่วงนำร่อง",
     delivered: "ส่งมอบแล้ว",
     archived: "เก็บถาวร",
   },
@@ -307,7 +307,7 @@ const th: Dictionary = {
   colophon: {
     built: "สร้างเว็บไซต์เมื่อ",
     from: "จาก commit",
-    fonts: "ใช้ฟอนต์ Geist และ Noto Sans Thai",
+    fonts: "ใช้ฟอนต์ Google Sans, Google Sans Code และ Playpen Sans Thai",
     privacy: "ความเป็นส่วนตัว",
   },
   project: {
@@ -363,7 +363,7 @@ const th: Dictionary = {
   cv: {
     title: "CV กฤติพงษ์ ก้อนทอง",
     description:
-      "CV ของกฤติพงษ์ ก้อนทอง วิศวกร full-stack ระดับ senior ในกรุงเทพฯ รวมประสบการณ์ ผลงานคัดเลือก ทักษะ การศึกษา และภาษา พิมพ์เป็น A4 ได้",
+      "CV ของกฤติพงษ์ ก้อนทอง วิศวกร full-stack ระดับ senior ในกรุงเทพฯ (TypeScript, Node.js, Next.js และระบบ event-driven บน AWS) รวมประสบการณ์ ผลงานคัดเลือก ทักษะ การศึกษา และภาษา พิมพ์เป็น A4 ได้",
     print: "พิมพ์หรือบันทึกเป็น PDF",
     contact: "ติดต่อ",
     experience: "ประสบการณ์",

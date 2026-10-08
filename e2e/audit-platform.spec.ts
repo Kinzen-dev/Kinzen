@@ -4,10 +4,10 @@ import { thai } from "./thai";
 
 /**
  * Audit track a-02 (platform): TECH-01/02 footer, TECH-03 og:url, TECH-06 privacy page,
- * TECH-08 CSP, TECH-09 content dates, TECH-10 shortcuts, TECH-11 marquee pause.
+ * TECH-08 CSP, TECH-09 content dates, TECH-10 shortcuts. (TECH-11 left with the marquee.)
  */
 
-const SLUGS = ["yimwhan-ai", "anymind-ec-platform", "helm", "ronglen", "visual-qa-harness", "cadence"];
+const SLUGS = ["clinic-receptionist", "anymind-ec-platform", "helm", "ronglen", "visual-qa-harness", "cadence"];
 const NEUTRAL = ["/", "/work", "/cv", ...SLUGS.map((s) => `/work/${s}`), "/privacy"];
 const th = (path: string) => (path === "/" ? "/th" : `/th${path}`);
 /** The 18 content pages, the privacy page in both languages, and the 404 in both. */
@@ -67,16 +67,13 @@ async function scrollThrough(page: Page) {
 }
 
 test.describe("CSP (TECH-08)", () => {
-  test("headers: enforced baseline plus the report-only origin policy", async ({ request }) => {
+  test("headers: enforced CSP baseline, no report-only policy (it had no endpoint; Safari logged an error)", async ({ request }) => {
     for (const path of ["/", "/th/privacy", "/no-such-page"]) {
       const headers = (await request.get(path)).headers();
       expect(headers["content-security-policy"]).toBe(
         "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
       );
-      const report = headers["content-security-policy-report-only"];
-      expect(report).toContain("default-src 'self'");
-      expect(report).toContain("connect-src 'self'");
-      expect(report).not.toMatch(/https?:|\*/);
+      expect(headers["content-security-policy-report-only"]).toBeUndefined();
       expect(headers["x-frame-options"]).toBe("DENY");
     }
   });
@@ -223,7 +220,7 @@ test.describe("shortcuts (TECH-10)", () => {
   test("digits typed outside the demo never change it, even with the demo on screen", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/th");
-    const demo = page.locator("#yimwhan .agent-demo");
+    const demo = page.locator("#clinic .agent-demo");
     const choices = demo.getByRole("group").getByRole("button");
     await demo.scrollIntoViewIfNeeded();
     const before = await choices.evaluateAll((els) => els.map((e) => e.getAttribute("aria-pressed")));
@@ -232,45 +229,5 @@ test.describe("shortcuts (TECH-10)", () => {
     await page.waitForTimeout(200);
     expect(await choices.evaluateAll((els) => els.map((e) => e.getAttribute("aria-pressed")))).toEqual(before);
     await expect(page.getByRole("dialog")).toBeHidden();
-  });
-});
-
-test.describe("marquee pause (TECH-11)", () => {
-  const playState = (page: Page) =>
-    page
-      .locator(".tools-marquee .marquee-track")
-      .first()
-      .evaluate((el) => getComputedStyle(el).animationPlayState);
-
-  test("pause holds when focus and pointer leave, survives a reload, resumes on demand", async ({ page }) => {
-    await page.goto("/");
-    const button = page.getByRole("button", { name: "Pause motion" });
-    await button.scrollIntoViewIfNeeded();
-    expect(await playState(page)).toBe("running");
-    await button.click();
-    await expect(page.getByRole("button", { name: "Resume motion" })).toBeFocused();
-    await page.keyboard.press("Tab");
-    await page.mouse.move(1, 1);
-    expect(await playState(page)).toBe("paused");
-
-    await page.reload();
-    await page.getByRole("button", { name: "Resume motion" }).scrollIntoViewIfNeeded();
-    expect(await playState(page)).toBe("paused");
-    await page.getByRole("button", { name: "Resume motion" }).press("Enter");
-    await expect(page.getByRole("button", { name: "Pause motion" })).toBeVisible();
-    expect(await playState(page)).toBe("running");
-  });
-
-  test("Thai labels; hidden under reduced motion, where the rows are still", async ({ page }) => {
-    await page.goto("/th");
-    await expect(page.getByRole("button", { name: thai("หยุดภาพเคลื่อนไหว") })).toBeVisible();
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await expect(page.getByRole("button", { name: thai("หยุดภาพเคลื่อนไหว") })).toBeHidden();
-    expect(
-      await page
-        .locator(".tools-marquee .marquee-track")
-        .first()
-        .evaluate((el) => getComputedStyle(el).animationName),
-    ).toBe("none");
   });
 });

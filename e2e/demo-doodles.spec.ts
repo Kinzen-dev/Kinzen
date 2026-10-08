@@ -6,12 +6,12 @@ const LABEL = {
   "/th": "ตัวอย่างจำลอง ไม่ใช่ข้อมูลคนไข้จริง",
 } as const;
 
-// The guard demo is the Yimwhan scene's finale (v3-04).
+// The guard demo is the clinic receptionist scene's finale (v3-04).
 test.describe("agent demo", () => {
   for (const route of ["/", "/th"] as const) {
     test(`${route} labels the demo as a scripted illustration`, async ({ page }) => {
       await page.goto(route);
-      const demo = page.locator("#yimwhan .agent-demo");
+      const demo = page.locator("#clinic .agent-demo");
       await demo.scrollIntoViewIfNeeded();
       await expect(demo.getByText(thai(LABEL[route]))).toBeVisible();
     });
@@ -20,7 +20,7 @@ test.describe("agent demo", () => {
   test("keys 1/2/3 choose a patient message only while focus is inside the demo", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    const demo = page.locator("#yimwhan .agent-demo");
+    const demo = page.locator("#clinic .agent-demo");
     const choices = demo.getByRole("group").getByRole("button");
     await expect(choices).toHaveCount(3);
 
@@ -51,11 +51,11 @@ test.describe("agent demo", () => {
 
   test("choices work by click and Enter as plain buttons", async ({ page }) => {
     await page.goto("/th");
-    const choices = page.locator("#yimwhan .agent-demo").getByRole("group").getByRole("button");
+    const choices = page.locator("#clinic .agent-demo").getByRole("group").getByRole("button");
     await choices.nth(2).focus();
     await page.keyboard.press("Enter");
     await expect(choices.nth(2)).toHaveAttribute("aria-pressed", "true");
-    await expect(page.locator("#yimwhan .agent-demo-live del")).toHaveText(thai("ที่นี่รับประกันฟันขาวถาวรตลอดชีวิต"), {
+    await expect(page.locator("#clinic .agent-demo-live del")).toHaveText(thai("ที่นี่รับประกันฟันขาวถาวรตลอดชีวิต"), {
       timeout: 15_000,
     });
   });

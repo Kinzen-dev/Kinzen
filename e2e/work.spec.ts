@@ -63,7 +63,7 @@ test.describe("works ledger", () => {
     const sortBy = (label: RegExp) => page.getByRole("button", { name: label }).filter({ visible: true });
     const before = await rowNames(page);
     // The index opens in a stated order: Year, newest first (ongoing work first).
-    expect(before).toEqual(["Helm", "Yimwhan AI", "Ronglen", "Cadence", "Visual QA harness", "AnyMind EC Platform"]);
+    expect(before).toEqual(["Helm", "Clinic AI receptionist", "Ronglen", "Cadence", "Visual QA harness", "AnyMind EC Platform"]);
     if (!isMobile) await expect(page.locator("#index thead th").nth(3)).toHaveAttribute("aria-sort", "descending");
 
     await sortBy(/Sort by Project/).click();
@@ -100,11 +100,11 @@ test.describe("works ledger", () => {
   });
 
   test("an opened row shows outcomes, the plate and the project link", async ({ page }) => {
-    await page.getByRole("button", { name: "Yimwhan AI", exact: true }).click();
+    await page.getByRole("button", { name: "Clinic AI receptionist", exact: true }).click();
     const panel = page.locator("#index .ledger-panel");
     await expect(panel.getByText("Work and results")).toBeVisible();
     await expect(panel.getByRole("img", { name: /KZ-01/ })).toBeAttached();
-    await expect(panel.getByRole("link", { name: /Open project page/ })).toHaveAttribute("href", "/work/yimwhan-ai");
+    await expect(panel.getByRole("link", { name: /Open project page/ })).toHaveAttribute("href", "/work/clinic-receptionist");
     expect(await seriousViolations(page)).toEqual([]);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
@@ -204,8 +204,8 @@ test.describe("works ledger", () => {
 
 test.describe("project pages", () => {
   for (const { route, lang, heading, marker } of [
-    { route: "/work/yimwhan-ai", lang: "en", heading: "Yimwhan AI", marker: "Work and results" },
-    { route: "/th/work/yimwhan-ai", lang: "th", heading: "Yimwhan AI", marker: "งานและผลลัพธ์" },
+    { route: "/work/clinic-receptionist", lang: "en", heading: "Clinic AI receptionist", marker: "Work and results" },
+    { route: "/th/work/clinic-receptionist", lang: "th", heading: "Clinic AI receptionist", marker: "งานและผลลัพธ์" },
     { route: "/work/ronglen", lang: "en", heading: "Ronglen", marker: "Work and results" },
   ]) {
     test(`${route} is prerendered, indexable and accessible`, async ({ page, request }) => {
@@ -266,7 +266,7 @@ test.describe("seo and sharing", () => {
     expect(await robots.text()).toContain("Sitemap: https://www.kinzen.dev/sitemap.xml");
   });
 
-  for (const route of ["/og.png", "/th/og.png", "/work/yimwhan-ai/og.png", "/th/work/helm/og.png"]) {
+  for (const route of ["/og.png", "/th/og.png", "/work/clinic-receptionist/og.png", "/th/work/helm/og.png"]) {
     test(`${route} is a PNG`, async ({ request }) => {
       const res = await request.get(route);
       expect(res.status()).toBe(200);

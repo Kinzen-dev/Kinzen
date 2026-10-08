@@ -35,9 +35,14 @@ export function Experience({ locale, dict }: { locale: Locale; dict: Dictionary 
                 <div className="md:sticky md:top-[calc(var(--header-h)+1.5rem)] md:col-span-5 md:self-start lg:col-span-4">
                   <div data-reveal className={["era-card", look?.pastel].filter(Boolean).join(" ")}>
                     <div className="flex items-start justify-between gap-4">
-                      <span aria-hidden="true" className="era-icon">
-                        {look?.icon}
-                      </span>
+                      {/* No art, no tile (the confidential entry carries no images): the index stays right. */}
+                      {look ? (
+                        <span aria-hidden="true" className="era-icon">
+                          {look.icon}
+                        </span>
+                      ) : (
+                        <span aria-hidden="true" />
+                      )}
                       <span aria-hidden="true" className="era-index tabular">
                         {String(experience.length - n).padStart(2, "0")}
                       </span>

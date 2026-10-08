@@ -1,0 +1,59 @@
+/* The stage the gold-toss and thock scenes share (ported from the lab's toy frame). */
+.ix-card {
+  position: relative;
+  height: 100%;
+  background: radial-gradient(120% 90% at 50% 20%, oklch(0.2 0.035 262), oklch(0.11 0.022 266) 70%);
+}
+.ix-stage {
+  position: absolute;
+  inset: 0;
+  outline: none;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ix-stage:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+.ix-stage canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The in-world prompt: small, quiet, bottom left. */
+.ix-hint {
+  position: absolute;
+  left: var(--inset-card);
+  bottom: var(--inset-card);
+  pointer-events: none;
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
+  color: oklch(0.9 0.02 85 / 0.8);
+}
+.ix-hint > span {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: oklch(0.12 0.02 266 / 0.6);
+  backdrop-filter: blur(8px);
+}
+.ix-hint > span {
+  transition: opacity var(--dur-4) var(--ease-out);
+}
+.ix-hint > [data-gone] {
+  opacity: 0;
+}
+
+/* A soft vignette: the edges fall into the dark, the middle holds the light. */
+.ix-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 95% at 50% 42%, transparent 55%, oklch(0.08 0.02 266 / 0.55));
+}

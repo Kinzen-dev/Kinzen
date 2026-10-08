@@ -51,12 +51,12 @@
 .hero-kinetic-lead {
   color: var(--ink);
 }
-/* The Thai face arrives late (preload off), and "ผมสร้าง" at display size changes width when it
-   swaps in, which slid the whole phrase box sideways (CLS 0.0115 on /th at 1440). Its width is
-   pinned to its Noto Sans Thai measure (3.293em at every size), so the swap moves nothing. */
+/* "ผมสร้าง" at display size changes width when the Thai face swaps in for the system one, which
+   slid the whole phrase box sideways (CLS 0.0115 on /th at 1440). Its width is pinned to its
+   Google Sans 600 measure (3.115em at every size), so a late swap moves nothing. */
 :lang(th) .hero-kinetic-lead {
   display: inline-block;
-  width: 3.3em;
+  width: 3.12em;
   white-space: nowrap;
 }
 .hero-kinetic-phrase {
@@ -354,5 +354,24 @@
   }
   .kinetic-phone {
     display: inline;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Portrait phones: the band grows so the ink desk reads as a picture
+   (about 340 x 200 at 390 x 844 instead of 220 x 130). The growth is
+   capped by the viewport height so the Email CTA stays in the first
+   screen (iPhone SE 375 x 667: about 75px; 390 x 844: 112px). Half
+   goes above the hidden KINZEN line box and half below, so the name the
+   GPU scenes draw sits in the middle of the band. Server-rendered: no
+   layout shift. The drawing starts under the stage controls' row.
+   ------------------------------------------------------------------ */
+@media (max-width: 47.99rem) and (orientation: portrait) {
+  [data-hero] {
+    --band-grow: clamp(0px, 0.6 * (100svh - 540px), 7rem);
+  }
+  [data-hero] .hero-wordmark {
+    padding-top: calc(clamp(1.5rem, 5vh, 4rem) + var(--band-grow) / 2);
+    padding-bottom: calc(0.06em + var(--band-grow) / 2);
   }
 }

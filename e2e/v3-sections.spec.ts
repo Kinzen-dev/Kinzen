@@ -38,15 +38,19 @@ async function scrollTo(page: Page, id: string) {
 }
 
 test.describe("experience", () => {
-  test("every era has a card with an icon, its dates and a labelled stack list", async ({ page }) => {
+  test("every era has a card with an icon (none for the confidential client), its dates and a stack list", async ({
+    page,
+  }) => {
     await page.goto("/");
     const eras = page.locator("#experience [data-era]");
     const n = await eras.count();
     expect(n).toBeGreaterThanOrEqual(3);
     for (let i = 0; i < n; i++) {
       const era = eras.nth(i);
-      await expect(era.locator(".era-card .era-icon .doodle")).toHaveCount(1);
-      await expect(era.locator(".era-icon")).toHaveAttribute("aria-hidden", "true");
+      // The unnamed client's entry carries no images at all (King, 2026-10-08).
+      const confidential = (await era.locator("h3").textContent()) === "Confidential client";
+      await expect(era.locator(".era-card .era-icon .doodle")).toHaveCount(confidential ? 0 : 1);
+      if (!confidential) await expect(era.locator(".era-icon")).toHaveAttribute("aria-hidden", "true");
       await expect(era.getByRole("list", { name: "Stack" })).toBeVisible();
     }
     await expect(page.locator(".era-thread path")).toHaveAttribute("d", /^M/);
@@ -61,11 +65,11 @@ test.describe("experience", () => {
   });
 });
 
-test.describe("how I work notes", () => {
+test.describe("AI-assisted engineering notes", () => {
   test("the agent demo no longer lives in this section", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("#practice .agent-demo")).toHaveCount(0);
-    await expect(page.locator("#practice [data-note]")).toHaveCount(3);
+    await expect(page.locator("#practice [data-note]")).toHaveCount(4);
   });
 
   test("arrow keys nudge the focused note, Tab moves on, Reset puts it back", async ({ page }) => {
@@ -103,8 +107,9 @@ test.describe("how I work notes", () => {
     await page.mouse.down();
     await page.mouse.move(box.x + box.width / 2 - 120, box.y + box.height / 2 + 40, { steps: 8 });
     await page.mouse.up();
-    // It moved left; it may stop flush against the first note (drops never overlap).
-    await expect.poll(async () => (await noteOffset(note)).x).toBeLessThan(-20);
+    // It moved left; it may stop flush against the first note (drops never overlap), which on the
+    // four-across board is only a short way off.
+    await expect.poll(async () => (await noteOffset(note)).x).toBeLessThan(-8);
 
     // Dragged far past the board's edge, it stops inside the board.
     const b2 = (await note.boundingBox())!;
@@ -200,30 +205,6 @@ test.describe("how I work notes", () => {
       });
       expect(pad[0]).toBe(pad[1]);
     }
-  });
-});
-
-test.describe("tools", () => {
-  test("two marquee rows run in opposite directions; the groups carry the content", async ({ page }) => {
-    await page.goto("/");
-    const marquees = page.locator("#skills .marquee");
-    await expect(marquees).toHaveCount(2);
-    await expect(page.locator("#skills .tools-marquees")).toHaveAttribute("aria-hidden", "true");
-    await expect(marquees.nth(1)).toHaveAttribute("data-reverse", "true");
-    await expect(page.locator("#skills dl dt")).toHaveCount(6);
-  });
-
-  test("reduced motion: still chips that wrap inside the page", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await scrollTo(page, "skills");
-    const track = page.locator("#skills .marquee-track").first();
-    expect(await track.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
-    const width = page.viewportSize()!.width;
-    const overflow = await page
-      .locator("#skills .marquee-row:not([aria-hidden]) .tool-chip")
-      .evaluateAll((els, w) => els.filter((e) => e.getBoundingClientRect().right > w).length, width);
-    expect(overflow).toBe(0);
   });
 });
 

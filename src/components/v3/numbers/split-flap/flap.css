@@ -1,0 +1,393 @@
+/* ------------------------------------------------------------------
+   Split-flap board (numbers view 1). A navy board in both themes; near
+   black flaps with gold figures; captions type in on the board's ink.
+   Fills the showcase stage; font family is inherited (the site face).
+   ------------------------------------------------------------------ */
+.sf {
+  height: 100%;
+}
+.sf-board {
+  --th: clamp(2.25rem, 0.9rem + 2.6vw, 3.5rem);
+  --gap: calc(var(--th) * 0.07);
+  --tw: calc(var(--th) * 0.7);
+  --nw: calc(var(--th) * 0.34);
+  --fig-w: calc(var(--tw) * 5 + var(--nw) + var(--gap) * 5);
+  --row-pad: clamp(0.625rem, 0.3rem + 0.8vw, 1.125rem);
+  --flap: oklch(0.125 0.022 266);
+  --flap-hi: oklch(0.165 0.026 266);
+  --flap-lo: oklch(0.115 0.02 266);
+  --flap-lo2: oklch(0.095 0.018 266);
+  --seam: oklch(0.05 0.015 266);
+  /* One board colour in both themes: the night token's dark value sank the flaps into it. */
+  --ground: oklch(0.205 0.034 266);
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border-radius: var(--radius-card);
+  padding: clamp(1rem, 0.4rem + 2vw, 2.5rem) clamp(1rem, 0.2rem + 2.6vw, 3rem);
+  background:
+    radial-gradient(90% 70% at 50% -10%, oklch(0.36 0.05 266 / 0.35), transparent 65%),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.025), transparent 40%),
+    var(--ground);
+  color: var(--ink);
+  box-shadow:
+    inset 0 0 0 1px oklch(1 0 0 / 0.06),
+    inset 0 1px 0 oklch(1 0 0 / 0.09),
+    0 2.5rem 5rem -2.5rem oklch(0.18 0.04 266 / 0.55);
+}
+/* Four screws in the bezel corners. */
+.sf-board::before {
+  content: "";
+  position: absolute;
+  inset: 0.75rem;
+  pointer-events: none;
+  --s: radial-gradient(circle, oklch(0.42 0.02 266) 0 1.5px, oklch(0.2 0.02 266) 2px 3px, transparent 3.5px);
+  background:
+    var(--s) top left / 8px 8px no-repeat,
+    var(--s) top right / 8px 8px no-repeat,
+    var(--s) bottom left / 8px 8px no-repeat,
+    var(--s) bottom right / 8px 8px no-repeat;
+}
+
+.sf-cols,
+.sf-row {
+  display: grid;
+  grid-template-columns: var(--fig-w) minmax(0, 1fr) minmax(9rem, 14rem);
+  column-gap: clamp(1rem, 0.4rem + 2vw, 2.75rem);
+  align-items: center;
+}
+.sf-cols {
+  padding-bottom: 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.sf-cols span:first-child,
+.sf-cols span:last-child {
+  justify-self: end;
+}
+.sf-rows {
+  display: grid;
+  /* The rows share the board's height; the replay row takes what its three lines need. */
+  grid-template-rows: repeat(3, minmax(0, 1fr)) auto;
+}
+.sf-row {
+  position: relative;
+  padding-block: var(--row-pad);
+  border-top: 1px solid oklch(1 0 0 / 0.08);
+}
+.sf-fig {
+  justify-self: end;
+}
+.sf-tiles {
+  display: flex;
+  gap: var(--gap);
+}
+.sf-label,
+.sf-passed-text {
+  font-size: clamp(1rem, 0.75rem + 0.8vw, 1.5rem);
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+  max-width: 40ch;
+}
+.sf-note {
+  justify-self: end;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.sf-source {
+  margin-top: 0.375rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-3);
+  text-wrap: balance;
+}
+
+/* 500 and 37 share one entry: the 37 line and the verdict sit in the same columns, under it. */
+.sf-group {
+  row-gap: clamp(0.375rem, 0.2rem + 0.5vw, 0.75rem);
+}
+.sf-group > .sf-sub,
+.sf-group > .sf-passed {
+  display: contents;
+}
+.sf-group > .sf-fig {
+  grid-row: 1;
+}
+.sf-note-group {
+  grid-column: 3;
+  grid-row: 1 / span 3;
+  align-self: start;
+  padding-top: calc(var(--th) * 0.5 - 0.75em);
+}
+.sf-fig-sm {
+  grid-column: 1;
+}
+.sf-label-sm {
+  grid-column: 2;
+  font-size: clamp(0.9375rem, 0.75rem + 0.45vw, 1.1875rem);
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+}
+.sf-passed .sf-check {
+  grid-column: 1;
+  justify-self: end;
+  display: block;
+}
+.sf-passed-text {
+  grid-column: 2;
+  font-size: var(--text-base);
+  color: var(--gold);
+}
+.sf-group::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--th) * -0.3);
+  top: calc(var(--row-pad) + var(--th) * 0.2);
+  bottom: calc(var(--row-pad) + 0.4rem);
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--gold) 70%, transparent), color-mix(in oklab, var(--gold) 20%, transparent));
+}
+
+/* ---------------- Flap tile ---------------- */
+.sf-tile {
+  --r: calc(var(--th) * 0.075);
+  position: relative;
+  display: block;
+  width: var(--tw);
+  height: var(--th);
+  perspective: calc(var(--th) * 5);
+  font-size: calc(var(--th) * 0.76);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  line-height: var(--th);
+  color: var(--gold);
+  border-radius: var(--r);
+  box-shadow:
+    0 calc(var(--th) * 0.06) calc(var(--th) * 0.14) oklch(0.04 0.02 266 / 0.55),
+    0 0 0 1px oklch(0 0 0 / 0.4);
+}
+.sf-tile-narrow {
+  width: var(--nw);
+}
+.sf-tile-sm {
+  --th: clamp(1.75rem, 1rem + 1.2vw, 2.25rem);
+  --tw: calc(var(--th) * 0.7);
+}
+.sf-tile[data-blank] {
+  opacity: 0.42;
+}
+.sf-half,
+.sf-leaf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+}
+.sf-top,
+.sf-leaf-top {
+  top: 0;
+  border-radius: var(--r) var(--r) 0 0;
+  background: linear-gradient(to bottom, var(--flap-hi), var(--flap));
+}
+.sf-bot,
+.sf-leaf-bot {
+  top: 50%;
+  border-radius: 0 0 var(--r) var(--r);
+  background: linear-gradient(to bottom, var(--flap-lo), var(--flap-lo2));
+}
+.sf-g {
+  display: block;
+  height: var(--th);
+  text-align: center;
+  /* Gold glyph with a faint inner glow, like a printed flap under board light. */
+  text-shadow: 0 0 calc(var(--th) * 0.18) color-mix(in oklab, var(--gold) 28%, transparent);
+}
+.sf-bot .sf-g,
+.sf-leaf-bot .sf-g {
+  margin-top: calc(var(--th) * -0.5);
+}
+.sf-leaf {
+  z-index: 2;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+.sf-leaf-top {
+  transform-origin: 50% 100%;
+}
+.sf-leaf-bot {
+  transform-origin: 50% 0;
+}
+.sf-shade {
+  position: absolute;
+  inset: 0;
+  background: oklch(0.03 0.01 266);
+  opacity: 0;
+  pointer-events: none;
+}
+/* The seam between the halves, and the two hinge pins at its ends. */
+.sf-tile::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.5px);
+  height: 1px;
+  background: var(--seam);
+}
+.sf-tile::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  top: calc(50% - var(--th) * 0.055);
+  height: calc(var(--th) * 0.11);
+  left: -1px;
+  right: -1px;
+  background: linear-gradient(
+    to right,
+    oklch(0.32 0.02 266) 0 2px,
+    transparent 2px calc(100% - 2px),
+    oklch(0.32 0.02 266) calc(100% - 2px)
+  );
+  border-radius: 1px;
+}
+
+/* ---------------- Typing ---------------- */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .sf[data-armed] .sf-type {
+    --shown: 0;
+  }
+  .sf[data-armed] .sf-type .tp-ch {
+    opacity: clamp(0, calc(var(--shown) - var(--i)), 1);
+    color: color-mix(
+      in oklab,
+      var(--gold) calc(clamp(0, 1 - (var(--shown) - var(--i)) / 12, 1) * 100%),
+      currentColor
+    );
+  }
+  .sf[data-armed] .sf-note {
+    opacity: 0;
+    translate: 0 0.35rem;
+    transition:
+      opacity 600ms var(--ease-out) 900ms,
+      translate 600ms var(--ease-out) 900ms;
+  }
+  .sf[data-armed] [data-lit] .sf-note {
+    opacity: 1;
+    translate: 0 0;
+  }
+  .sf-row {
+    transition: background-color 300ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .sf-row:hover {
+      background-color: oklch(1 0 0 / 0.025);
+    }
+  }
+}
+/* Thai types per word: a slightly longer fade per unit reads smoother. */
+:lang(th) .sf[data-armed] .sf-type .tp-ch {
+  transition: opacity 120ms linear;
+}
+
+/* ---------------- Phones and narrow tablets ---------------- */
+@media (max-width: 47.99rem) {
+  .sf-board {
+    --th: 2.375rem;
+    --fig-w: auto;
+  }
+  .sf-cols {
+    display: none;
+  }
+  .sf-board {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .sf-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 0.875rem;
+    row-gap: 0.375rem;
+    align-content: center;
+  }
+  .sf-row:first-child {
+    border-top: 0;
+  }
+  .sf-row .sf-fig {
+    justify-self: start;
+  }
+  .sf-row:not(.sf-group) .sf-label {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .sf-row:not(.sf-group) .sf-note {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+  .sf-group .sf-label:not(.sf-label-sm) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .sf-note-group {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    padding-top: 0;
+  }
+  .sf-source {
+    display: none;
+  }
+  .sf-group > .sf-sub,
+  .sf-group > .sf-passed {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    column-gap: 0.75rem;
+    align-items: center;
+  }
+  .sf-fig-sm,
+  .sf-passed .sf-check {
+    grid-column: 1;
+    justify-self: start;
+  }
+  .sf-label-sm,
+  .sf-passed-text {
+    grid-column: 2;
+  }
+  .sf-label {
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    max-width: none;
+  }
+  .sf-label-sm,
+  .sf-passed-text {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+  .sf-tile-sm {
+    --th: 1.75rem;
+  }
+  .sf-group::before {
+    display: none;
+  }
+}
+
+/* Thai: no tracking on the mono labels (spaced Thai reads as broken words). */
+:lang(th) :is(.sf-note, .sf-cols) {
+  letter-spacing: 0;
+}

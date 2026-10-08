@@ -1,0 +1,499 @@
+/* Tools view: orbit. The six groups on tilted orbits around a gold core. */
+.lo {
+  height: 100%;
+}
+.lo-grid {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 1rem;
+  height: 100%;
+}
+/* The node tiles carry the contrast for light and dark marks; the marks need no tile of their own. */
+.lo .lo-node .tool-mark[data-badge] {
+  background: none;
+  box-shadow: none;
+}
+@media (min-width: 64rem) {
+  .lo-grid {
+    grid-template-columns: minmax(19rem, 25rem) minmax(0, 1fr);
+    grid-template-areas: "list stage";
+    grid-template-rows: minmax(0, 1fr);
+    column-gap: clamp(1.5rem, 3vw, 3.5rem);
+    row-gap: 0;
+  }
+  .lo-list {
+    grid-area: list;
+  }
+  .lo-stage {
+    grid-area: stage;
+  }
+}
+
+/* The legend: one row per ring, the active one opens to its line and its tools. */
+.lo-legend {
+  margin-top: 1.5rem;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+.lo-row {
+  border-bottom: 1px solid var(--rule);
+}
+.lo-row-btn {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: 2.875rem;
+  padding-block: 0.5rem;
+  text-align: start;
+  color: var(--ink-2);
+  transition: color 0.3s var(--ease-out);
+}
+.lo-row-btn:hover,
+.lo-row[data-active] .lo-row-btn {
+  color: var(--ink);
+}
+.lo-row-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+.lo-row-idx {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  transition: color 0.3s;
+}
+.lo-row[data-active] .lo-row-idx {
+  color: var(--gold);
+}
+.lo-row-label {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.lo-row-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+:lang(th) .lo-row-count {
+  font-family: var(--font-sans);
+}
+/* Tour progress: a gold hairline filling under the row the tour is on. */
+.lo-row-bar {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -1px;
+  height: 1px;
+  width: 100%;
+  background: var(--gold);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+.lo-row[data-active] .lo-row-bar {
+  transform: scaleX(1);
+  transition: transform 0.5s var(--ease-out);
+}
+.lo-legend[data-touring] .lo-row[data-active] .lo-row-bar {
+  transform: scaleX(var(--tour-p, 0));
+  transition: none;
+}
+/* The detail block: all groups in one grid cell (its height is the tallest), crossfading. */
+.lo-detail {
+  display: grid;
+  margin-top: 1rem;
+  /* The waiting items sit a little low; they never count toward the height. */
+  overflow: clip;
+}
+.lo-detail-item {
+  grid-area: 1 / 1;
+  opacity: 0;
+  translate: 0 0.375rem;
+  visibility: hidden;
+  transition:
+    opacity 0.35s var(--ease-out),
+    translate 0.5s var(--ease-out),
+    visibility 0s linear 0.35s;
+}
+.lo-detail-item[data-on] {
+  opacity: 1;
+  translate: 0 0;
+  visibility: visible;
+  transition:
+    opacity 0.45s var(--ease-out) 0.1s,
+    translate 0.6s var(--ease-out) 0.1s,
+    visibility 0s;
+}
+.lo-detail-line {
+  color: var(--ink);
+  font-size: var(--text-sm);
+}
+.lo-detail-overview {
+  color: var(--ink-3);
+}
+.lo-detail-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 0.875rem;
+  padding-top: 0.625rem;
+  list-style: none;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+.lo-detail-tools li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.lo-detail-tools .tool-mark {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+.lo-detail-tools i {
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-inline: 0.3rem;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+
+/* ---------- the stage ---------- */
+.lo-stage {
+  position: relative;
+  height: clamp(18rem, 80vw, 20.5rem);
+  border-radius: var(--radius-card);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+@media (min-width: 40rem) {
+  .lo-stage {
+    height: clamp(30rem, 62vw, 40rem);
+  }
+}
+@media (min-width: 64rem) {
+  .lo-stage {
+    height: min(42rem, calc(100svh - var(--header-h) - 7rem));
+    min-height: 32rem;
+  }
+}
+.lo-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 34% 30% at 50% 50%, color-mix(in oklch, var(--gold) 16%, transparent), transparent 70%),
+    radial-gradient(ellipse 60% 44% at 50% 52%, color-mix(in oklch, var(--gold) 6%, transparent), transparent 75%);
+}
+.lo-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.lo-back {
+  z-index: 1;
+}
+.lo-front {
+  z-index: 61;
+}
+.lo-nodes {
+  position: absolute;
+  inset: 0;
+}
+
+/* The core: a gold orb with the wordmark, a slow sheen and a breathing halo. */
+.lo-core {
+  position: absolute;
+  z-index: 59;
+  left: 50%;
+  top: 50%;
+  width: var(--core, 8rem);
+  height: var(--core, 8rem);
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.lo-core > * {
+  grid-area: 1 / 1;
+}
+.lo-core-halo {
+  width: 210%;
+  height: 210%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklch, var(--gold) 26%, transparent) 0%,
+    color-mix(in oklch, var(--gold) 8%, transparent) 38%,
+    transparent 66%
+  );
+  animation: lo-breathe 5.5s ease-in-out infinite;
+}
+.lo-core-orb {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at var(--lx, 34%) var(--ly, 28%),
+    oklch(0.98 0.04 95) 0%,
+    oklch(0.88 0.11 88) 16%,
+    oklch(0.76 0.13 80) 42%,
+    oklch(0.58 0.11 70) 74%,
+    oklch(0.44 0.08 62) 100%
+  );
+  box-shadow:
+    inset 0 -0.5rem 1.25rem oklch(0.38 0.07 60 / 0.55),
+    inset 0 0.25rem 0.75rem oklch(1 0.03 92 / 0.6),
+    0 0.75rem 2.5rem -0.5rem oklch(0.6 0.12 75 / 0.55),
+    0 0 0 1px oklch(0.5 0.09 70 / 0.35);
+  position: relative;
+  overflow: hidden;
+}
+/* The sheen turns; the lit side of the orb stays put. */
+.lo-core-orb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    oklch(1 0.03 92 / 0.32) 30deg,
+    transparent 80deg,
+    transparent 180deg,
+    oklch(1 0.03 92 / 0.18) 220deg,
+    transparent 270deg
+  );
+  mix-blend-mode: soft-light;
+  animation: lo-sheen 14s linear infinite;
+}
+.lo-core-word {
+  font-weight: 700;
+  font-size: calc(var(--core, 8rem) * 0.155);
+  letter-spacing: 0.06em;
+  color: oklch(0.27 0.05 62);
+  text-shadow: 0 1px 0 oklch(0.95 0.06 90 / 0.6);
+  padding-inline-start: 0.06em;
+}
+@keyframes lo-breathe {
+  50% {
+    transform: scale(1.08);
+    opacity: 0.75;
+  }
+}
+@keyframes lo-sheen {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* Tokens: a surface disc per brand mark, a word pill per text-only tool. */
+.lo-node {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: var(--node, 46px);
+  height: var(--node, 46px);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow:
+    inset 0 0 0 1px var(--rule),
+    0 0.5rem 1.25rem -0.75rem oklch(0.2 0.02 60 / 0.45);
+  will-change: transform, opacity;
+  transition:
+    box-shadow 0.45s var(--ease-out),
+    background-color 0.45s var(--ease-out);
+  cursor: pointer;
+}
+.lo-node .tool-mark {
+  width: 46%;
+  height: 46%;
+}
+.lo-node[data-text] {
+  width: auto;
+  padding-inline: calc(var(--node, 46px) * 0.32);
+  border-radius: 999px;
+  font-size: calc(var(--node, 46px) * 0.3);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.lo-node[data-lit] {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--gold) 75%, transparent),
+    0 0 0 calc(var(--node, 46px) * 0.09) color-mix(in oklch, var(--gold) 14%, transparent),
+    0 0.75rem 2rem -0.75rem color-mix(in oklch, var(--gold) 70%, transparent);
+}
+/* A light mark (React, Vitest, LiveKit) lit in the light theme sits on an ink disc; a dark mark
+   (SQLite, Fly.io) lit in the dark theme on a paper disc. */
+.lo-node[data-lit]:has(.tool-mark[data-badge="light"]) {
+  background: light-dark(oklch(0.24 0.015 65), var(--surface));
+}
+.lo-node[data-lit]:has(.tool-mark[data-badge="dark"]) {
+  background: light-dark(var(--surface), oklch(0.95 0.012 85));
+}
+
+.lo-tip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 200;
+  padding: 0.25rem 0.55rem;
+  border-radius: 0.4rem;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.lo-tip[data-on] {
+  opacity: 1;
+}
+
+.lo-tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: pre;
+  color: var(--gold);
+  pointer-events: none;
+  opacity: 0;
+}
+:lang(th) .lo-tag {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+.lo-pause {
+  position: absolute;
+  z-index: 210;
+  top: 0.5rem;
+  inset-inline-end: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+.lo-pause:hover {
+  color: var(--ink);
+}
+.lo-pause:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.lo-pause-icon {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-inline: 0.18rem solid currentColor;
+  border-block: 0;
+}
+.lo-pause-icon[data-paused] {
+  border: 0;
+  border-inline-start: 0.6rem solid currentColor;
+  border-block: 0.32rem solid transparent;
+  height: 0;
+}
+
+/* Phones: stage first under the heading; the pause control shrinks to an icon pill. */
+@media (max-width: 39.99rem) {
+  .lo-legend {
+    margin-top: 0.5rem;
+  }
+  .lo-pause {
+    top: auto;
+    bottom: 0;
+    min-height: 2rem;
+    padding-inline: 0.625rem;
+  }
+}
+
+/* ---------- fit to the stage ---------- */
+/* The orbit takes the stage's height: beside the legend on desktop, above it on phones and
+   tablets (where the legend packs into two columns). */
+.lo-stage,
+.lo-stage[class] {
+  height: 100%;
+  min-height: 0;
+}
+.lo-list {
+  min-width: 0;
+}
+@media (max-width: 63.99rem) {
+  .lo-grid {
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+  .lo-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.25rem;
+    margin-top: 0;
+    border-top: 0;
+  }
+  .lo-row:nth-child(-n + 2) {
+    border-top: 1px solid var(--rule);
+  }
+  .lo-row-btn {
+    grid-template-columns: 1.625rem minmax(0, 1fr) auto;
+    min-height: 2.375rem;
+    padding-block: 0.3rem;
+    line-height: 1.3;
+    font-size: var(--text-sm);
+  }
+  .lo-row-count {
+    display: none;
+  }
+  .lo-detail {
+    margin-top: 0.625rem;
+  }
+}
+@media (min-width: 64rem) {
+  .lo-list {
+    align-self: center;
+  }
+  .lo-legend {
+    margin-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lo-core-halo,
+  .lo-core-orb::after {
+    animation: none;
+  }
+  .lo-detail-item,
+  .lo-detail-item[data-on],
+  .tool-mark,
+  .lo-node {
+    transition: none;
+  }
+}
+
+/* A slow device (measured in the frame loop): the sheen holds still. */
+.lo-stage[data-lite] .lo-core-orb::after,
+.lo-stage[data-lite] .lo-core-halo {
+  animation: none;
+}
