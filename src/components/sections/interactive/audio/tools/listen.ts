@@ -97,3 +97,8 @@ on("#ring", "click", () => {
 on("#ring-stop", "click", () => silence?.());
 on("#lamp-on", "click", () => sfx.lamp(true));
 on("#lamp-off", "click", () => sfx.lamp(false));
+for (const k of ["mug", "pen", "ball", "desk", "floor", "wall", "phone", "lamp"] as const)
+  on(`#knock-${k}`, "click", () => sfx.knock(k, speed()));
+on("#thud", "click", () => sfx.thud(speed()));
+on("#purr", "click", () => sfx.purr());
+on("#chime", "click", () => sfx.chime());

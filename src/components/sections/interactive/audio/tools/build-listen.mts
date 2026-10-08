@@ -83,6 +83,9 @@ const html = `<!doctype html>
     <button id="clink">Gold clink</button><button id="splash">Splash</button><button id="drop">Drop</button>
     <button id="ring">Phone ring</button><button id="ring-stop">Silence phone</button>
     <button id="lamp-on">Lamp on</button><button id="lamp-off">Lamp off</button>
+    <p>Knocks (desk props) and the rest:</p>
+    ${["mug", "pen", "ball", "desk", "floor", "wall", "phone", "lamp"].map((k) => `<button id="knock-${k}">Knock ${k}</button>`).join("")}
+    <button id="thud">Gold thud</button><button id="purr">Purr</button><button id="chime">Chime</button>
   </section>
 </main>
 <script>${shim}</script>

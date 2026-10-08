@@ -187,6 +187,26 @@ export const scenes: Record<string, { seconds: number; run: Scene }> = {
       return { settle: 0.8, steps: [[0.3, () => s.drop(0.15)], [2, () => s.drop(0.85)]] };
     },
   },
+  "sfx-knocks": {
+    seconds: 6,
+    run: (bus) => {
+      const s = createSfx(bus);
+      const kinds = ["mug", "pen", "ball", "desk", "floor", "wall", "phone", "lamp"] as const;
+      return {
+        steps: [
+          ...kinds.map((k, i) => [0.2 + i * 0.6, () => s.knock(k, 0.7)] as Step),
+          [5, () => s.thud(0.9)],
+        ],
+      };
+    },
+  },
+  "sfx-purr-chime": {
+    seconds: 4,
+    run: (bus) => {
+      const s = createSfx(bus);
+      return { steps: [[0.2, () => s.purr()], [1.8, () => s.chime()]] };
+    },
+  },
   "sfx-desk": {
     seconds: 5,
     run: (bus) => {

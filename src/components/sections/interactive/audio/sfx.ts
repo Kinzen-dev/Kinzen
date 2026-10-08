@@ -5,20 +5,40 @@
  * switch; see dsp.ts). The sprite loads on the first call after unlock; until it arrives the
  * recorded voices are silent rather than late.
  *
- *  - metalClink(speed): a coin strike; faster impacts ring higher, brighter and louder.
+ *  - metalClink(speed, size?): a coin strike; faster impacts ring higher, brighter and louder; a
+ *    bigger object (size > 1) rings lower.
  *  - splash(size): a small object into water; bigger is lower, longer and layered.
  *  - drop(weight): one drip into a bowl and the bowl's soft ring; heavier is lower.
  *  - phoneRing(): an old desk phone's bell (two rings); returns a function that silences it.
  *  - lamp(on): a desk lamp's push switch.
+ *  - knock(kind, speed): a desk prop hitting something (mug, pen, ball, desk, floor, wall, phone, lamp).
+ *  - thud(speed): a heavy gold letter landing on stone.  purr(): the cat.  chime(): a small reward.
  */
 import { SFX } from "./assets";
 import { canPlay, isOffline, isUnlocked, type AudioBus } from "./audio-bus";
 import { clock } from "./clock";
-import { rng, synthBowlRing, synthLampClick, synthPhoneBell, synthRoomIR } from "./dsp";
+import {
+  rng,
+  synthBowlRing,
+  synthChime,
+  synthKnock,
+  synthLampClick,
+  synthPhoneBell,
+  synthPurr,
+  synthRoomIR,
+  synthThud,
+  type KnockKind,
+} from "./dsp";
+
+export type { KnockKind };
 import { cut, loadAudio, toBuffer } from "./loader";
 
 export type Sfx = {
-  metalClink(speed: number): void;
+  metalClink(speed: number, size?: number): void;
+  knock(kind: KnockKind, speed: number): void;
+  thud(speed: number): void;
+  purr(): void;
+  chime(): void;
   splash(size: number): void;
   drop(weight: number): void;
   phoneRing(): () => void;
@@ -135,13 +155,14 @@ export function createSfx(bus: AudioBus): Sfx {
   };
 
   return {
-    metalClink(speed) {
+    metalClink(speed, size = 1) {
       if (stopped || !canPlay(bus) || !allow()) return;
       const v = clamp(speed);
       if (v < 0.02) return;
+      const big = Math.max(0.6, Math.min(1.6, 1 / Math.sqrt(Math.max(0.25, size))));
       play(pick(clinks), {
         gain: 0.12 + 0.88 * Math.pow(v, 1.3),
-        rate: (0.9 + 0.22 * v) * (0.985 + rand() * 0.03),
+        rate: (0.9 + 0.22 * v) * big * (0.985 + rand() * 0.03),
         lowpass: 2600 + 13000 * v,
         pan: (rand() * 2 - 1) * 0.25,
         wet: 0.9,
@@ -187,6 +208,46 @@ export function createSfx(bus: AudioBus): Sfx {
           // Already ended.
         }
       };
+    },
+    knock(kind, speed) {
+      if (stopped || !canPlay(bus) || !allow()) return;
+      const v = clamp(speed);
+      if (v < 0.03) return;
+      // Two takes per material, alternated, so a bouncing object never repeats itself exactly.
+      const take = Math.floor(rand() * 2);
+      play(
+        made(`knock-${kind}-${take}`, () => synthKnock(kind, 40 + take, sr)),
+        {
+          gain: 0.1 + 0.9 * Math.pow(v, 1.2),
+          rate: 0.97 + rand() * 0.06,
+          lowpass: 1500 + 14000 * v,
+          pan: (rand() * 2 - 1) * 0.2,
+          wet: 0.8,
+        },
+      );
+    },
+    thud(speed) {
+      if (stopped || !canPlay(bus) || !allow()) return;
+      const v = clamp(speed);
+      if (v < 0.03) return;
+      play(
+        made("thud", () => synthThud(8, sr)),
+        { gain: 0.15 + 0.85 * Math.pow(v, 1.2), rate: 0.95 + rand() * 0.1, pan: (rand() * 2 - 1) * 0.2, wet: 0.5 },
+      );
+    },
+    purr() {
+      if (stopped || !canPlay(bus)) return;
+      play(
+        made("purr", () => synthPurr(12, sr)),
+        { gain: 0.7, rate: 0.95 + rand() * 0.1, wet: 0.3 },
+      );
+    },
+    chime() {
+      if (stopped || !canPlay(bus)) return;
+      play(
+        made("chime", () => synthChime(sr)),
+        { gain: 0.6, wet: 1.4 },
+      );
     },
     lamp(on) {
       if (stopped || !canPlay(bus)) return;

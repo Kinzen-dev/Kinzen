@@ -185,6 +185,17 @@ for (const name of names) {
       small: { peakDbfs: r2(db(peak([win(m, sr, 0.3, 1.9)]))), centroidHz: Math.round(centroid(win(m, sr, 0.3, 1.9), sr)) },
       big: { peakDbfs: r2(db(peak([win(m, sr, 2, 3.9)]))), centroidHz: Math.round(centroid(win(m, sr, 2, 3.9), sr)) },
     });
+  if (name === "sfx-knocks")
+    Object.assign(
+      row,
+      Object.fromEntries(
+        ["mug", "pen", "ball", "desk", "floor", "wall", "phone", "lamp", "thud"].map((k, i) => {
+          const a = i < 8 ? 0.2 + i * 0.6 : 5;
+          const w = win(m, sr, a, a + 0.55);
+          return [k, { peakDbfs: r2(db(peak([w]))), centroidHz: Math.round(centroid(w, sr, 2048)) }];
+        }),
+      ),
+    );
   report[name] = row;
   console.log(name, JSON.stringify(row));
 }

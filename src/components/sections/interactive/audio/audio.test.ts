@@ -142,6 +142,21 @@ describe("audio bus", () => {
     expect(seen).toHaveBeenCalledTimes(calls);
   });
 
+  it("setAway fades out and suspends like a hidden tab, and comes back", async () => {
+    const { getAudioBus } = await import("./audio-bus");
+    const bus = getAudioBus();
+    await bus.unlock();
+    vi.useFakeTimers();
+    bus.setAway(true);
+    vi.advanceTimersByTime(400);
+    vi.useRealTimers();
+    await flush();
+    expect(bus.ctx.state).toBe("suspended");
+    bus.setAway(false);
+    await flush();
+    expect(bus.ctx.state).toBe("running");
+  });
+
   it("unlocks itself on the first gesture anywhere", async () => {
     const { getAudioBus } = await import("./audio-bus");
     const bus = getAudioBus();
@@ -193,7 +208,18 @@ describe("voices", () => {
     expect(shape(createRain(bus))).toEqual(["setIntensity", "stop", "thunder"]);
     expect(shape(createCozyMusic(bus))).toEqual(["setVolume", "start", "stop"]);
     expect(shape(createThock(bus))).toEqual(["press", "release", "spaceRipple", "stop"]);
-    expect(shape(createSfx(bus))).toEqual(["drop", "lamp", "metalClink", "phoneRing", "splash", "stop"]);
+    expect(shape(createSfx(bus))).toEqual([
+      "chime",
+      "drop",
+      "knock",
+      "lamp",
+      "metalClink",
+      "phoneRing",
+      "purr",
+      "splash",
+      "stop",
+      "thud",
+    ]);
   });
 
   it("nothing plays or downloads before unlock", async () => {
@@ -325,7 +351,16 @@ describe("voices", () => {
     s.splash(0.9);
     s.drop(0.5);
     s.lamp(true);
-    expect(ctx.count("source")).toBeGreaterThanOrEqual(6);
+    for (const kind of ["mug", "pen", "ball", "desk", "floor", "wall", "phone", "lamp"] as const) {
+      ctx.currentTime += 0.1;
+      s.knock(kind, 0.7);
+    }
+    ctx.currentTime += 0.1;
+    s.thud(0.8);
+    s.purr();
+    s.chime();
+    s.metalClink(0.5, 2);
+    expect(ctx.count("source")).toBeGreaterThanOrEqual(18);
     s.stop();
     runTimers();
     const conv = ctx.nodes.find((n) => n.kind === "convolver") as unknown as { buffer: unknown };

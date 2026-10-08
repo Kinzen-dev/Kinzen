@@ -462,3 +462,190 @@ export function synthRoomIR(seconds: number, seed: number, sr: number): [Float32
   }
   return out;
 }
+
+/* ------------------------------------------------------------------------------------------------
+ * Night-desk props and the other scenes' small events: struck objects as a contact pulse (shorter
+ * = harder material) into the object's own modes, plus a puff of filtered noise for the contact.
+ * --------------------------------------------------------------------------------------------- */
+
+export type KnockKind = "mug" | "pen" | "ball" | "desk" | "floor" | "wall" | "phone" | "lamp";
+
+const KNOCKS: Record<KnockKind, { contact: number; modes: Mode[]; noise: [number, number, number]; len: number }> = {
+  // Glazed ceramic: bright, inharmonic, rings a little.
+  mug: {
+    contact: 0.0004,
+    modes: [
+      { f: 1320, tau: 0.16, amp: 1 },
+      { f: 3150, tau: 0.08, amp: 0.45 },
+      { f: 5230, tau: 0.04, amp: 0.2 },
+      { f: 420, tau: 0.03, amp: 0.5 },
+    ],
+    noise: [2500, 0.004, 0.25],
+    len: 0.6,
+  },
+  // A plastic pen: tiny, high, dry.
+  pen: {
+    contact: 0.0003,
+    modes: [
+      { f: 2650, tau: 0.02, amp: 1 },
+      { f: 4380, tau: 0.012, amp: 0.5 },
+      { f: 1150, tau: 0.015, amp: 0.4 },
+    ],
+    noise: [4000, 0.003, 0.3],
+    len: 0.15,
+  },
+  // A rubber ball: soft contact, low and short.
+  ball: {
+    contact: 0.004,
+    modes: [
+      { f: 210, tau: 0.035, amp: 1 },
+      { f: 520, tau: 0.02, amp: 0.4 },
+    ],
+    noise: [900, 0.01, 0.2],
+    len: 0.2,
+  },
+  // The wooden desk top.
+  desk: {
+    contact: 0.0012,
+    modes: [
+      { f: 185, tau: 0.06, amp: 1 },
+      { f: 410, tau: 0.04, amp: 0.7 },
+      { f: 780, tau: 0.022, amp: 0.45 },
+      { f: 1350, tau: 0.012, amp: 0.25 },
+    ],
+    noise: [1800, 0.005, 0.3],
+    len: 0.35,
+  },
+  // A wooden floor, heard from the desk: low and dull.
+  floor: {
+    contact: 0.002,
+    modes: [
+      { f: 92, tau: 0.09, amp: 1 },
+      { f: 165, tau: 0.07, amp: 0.7 },
+      { f: 310, tau: 0.04, amp: 0.4 },
+    ],
+    noise: [700, 0.012, 0.35],
+    len: 0.45,
+  },
+  // A plastered wall.
+  wall: {
+    contact: 0.0016,
+    modes: [
+      { f: 125, tau: 0.05, amp: 1 },
+      { f: 270, tau: 0.035, amp: 0.6 },
+      { f: 495, tau: 0.02, amp: 0.3 },
+    ],
+    noise: [1200, 0.008, 0.35],
+    len: 0.3,
+  },
+  // Bakelite, and the bell inside answering faintly.
+  phone: {
+    contact: 0.0008,
+    modes: [
+      { f: 690, tau: 0.03, amp: 1 },
+      { f: 1420, tau: 0.018, amp: 0.5 },
+      { f: 1175, tau: 0.35, amp: 0.12 },
+      { f: 2726, tau: 0.18, amp: 0.05 },
+    ],
+    noise: [2200, 0.004, 0.25],
+    len: 0.6,
+  },
+  // The lamp's metal shade.
+  lamp: {
+    contact: 0.0005,
+    modes: [
+      { f: 742, tau: 0.22, amp: 1 },
+      { f: 1890, tau: 0.12, amp: 0.5 },
+      { f: 3260, tau: 0.06, amp: 0.25 },
+    ],
+    noise: [3000, 0.003, 0.2],
+    len: 0.7,
+  },
+};
+
+export function synthKnock(kind: KnockKind, seed: number, sr: number): Float32Array {
+  const k = KNOCKS[kind];
+  const rand = rng(seed);
+  const out = new Float32Array(Math.round(k.len * sr));
+  const exc = new Float32Array(out.length);
+  pulse(exc, 0, k.contact, 1, sr);
+  modal(
+    out,
+    exc,
+    k.modes.map((m) => ({ ...m, f: m.f * (0.97 + rand() * 0.06), amp: m.amp * (0.85 + rand() * 0.3) })),
+    sr,
+  );
+  scaleTo(out, 1);
+  const [nf, ntau, namp] = k.noise;
+  const puff = noise(new Float32Array(Math.round(Math.min(k.len, ntau * 10) * sr)), 1, rand);
+  new Biquad("bandpass", nf, 0.8, sr).apply(puff);
+  envelope(puff, 0.0003, ntau, sr);
+  scaleTo(puff, namp);
+  for (let i = 0; i < puff.length; i++) out[i] += puff[i];
+  tailFade(out, Math.min(0.1, k.len * 0.3), sr);
+  return scaleTo(out, 0.8);
+}
+
+/** A cat's purr: low noise pulsing at ~25 Hz (the larynx), swelling in and out over ~1.2 s. */
+export function synthPurr(seed: number, sr: number): Float32Array {
+  const rand = rng(seed);
+  const out = noise(new Float32Array(Math.round(1.3 * sr)), 1, rand);
+  new Biquad("lowpass", 260, 0.7, sr).apply(out);
+  new Biquad("highpass", 45, 0.7, sr).apply(out);
+  for (let i = 0; i < out.length; i++) {
+    const t = i / sr;
+    const pulse = Math.pow(0.5 + 0.5 * Math.sin(2 * Math.PI * 25 * t), 2);
+    const swell = Math.sin(Math.PI * Math.min(1, t / 1.3)) ** 0.6;
+    out[i] *= (0.25 + 0.75 * pulse) * swell;
+  }
+  return scaleTo(out, 0.6);
+}
+
+/** A heavy gold letter landing on stone: a short dropping body tone and a low puff. */
+export function synthThud(seed: number, sr: number): Float32Array {
+  const rand = rng(seed);
+  const out = new Float32Array(Math.round(0.35 * sr));
+  let ph = 0;
+  for (let i = 0; i < out.length; i++) {
+    const t = i / sr;
+    ph += (2 * Math.PI * (52 + 68 * Math.exp(-t / 0.04))) / sr;
+    out[i] = Math.sin(ph) * Math.min(1, t / 0.001) * Math.exp(-t / 0.08);
+  }
+  const puff = noise(new Float32Array(Math.round(0.12 * sr)), 1, rand);
+  new Biquad("lowpass", 700, 0.7, sr).apply(puff);
+  envelope(puff, 0.0005, 0.02, sr);
+  scaleTo(puff, 0.35);
+  for (let i = 0; i < puff.length; i++) out[i] += puff[i];
+  // The stone's own short click on top (gold is soft; it barely rings).
+  const click = new Float32Array(Math.round(0.05 * sr));
+  const exc = new Float32Array(click.length);
+  pulse(exc, 0, 0.0006, 1, sr);
+  modal(click, exc, [{ f: 1900, tau: 0.008, amp: 1 }, { f: 3100, tau: 0.005, amp: 0.5 }], sr);
+  scaleTo(click, 0.18);
+  for (let i = 0; i < click.length; i++) out[i] += click[i];
+  tailFade(out, 0.08, sr);
+  return scaleTo(out, 0.8);
+}
+
+/** A small reward chime: four bell notes rising (G5 B5 D6 G6), 70 ms apart. */
+export function synthChime(sr: number): Float32Array {
+  const out = new Float32Array(Math.round(1.8 * sr));
+  const exc = new Float32Array(out.length);
+  [784, 988, 1175, 1568].forEach((f, i) => {
+    const e = new Float32Array(out.length);
+    pulse(e, i * 0.07, 0.0008, 1, sr);
+    modal(
+      exc,
+      e,
+      [
+        { f, tau: 0.45, amp: 1 },
+        { f: f * 2.01, tau: 0.18, amp: 0.25 },
+        { f: f * 3.0, tau: 0.08, amp: 0.08 },
+      ],
+      sr,
+    );
+  });
+  out.set(exc);
+  tailFade(out, 0.4, sr);
+  return scaleTo(out, 0.45);
+}

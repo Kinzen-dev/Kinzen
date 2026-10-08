@@ -5,7 +5,8 @@
  * Sound is on by default; the choice is remembered in localStorage "kz-sound" ("off" or "on").
  * The context is created lazily and suspended; nothing plays until unlock() runs inside the
  * visitor's first gesture (getAudioBus also listens for that gesture itself, once). While muted
- * or hidden the context is suspended after the fade, so a muted page costs no audio CPU.
+ * or hidden the context is suspended after the fade, so a muted page costs no audio CPU. The section
+ * also calls setAway(true) while it is scrolled off screen: same fade, same suspend.
  *
  * The limiter is a WaveShaper curve, not a DynamicsCompressorNode: Chrome's compressor delays the
  * whole mix by its ~6 ms lookahead, which a key press would hear. The mix is levelled with
@@ -20,6 +21,8 @@ export type AudioBus = {
   setMuted(m: boolean): void;
   unlock(): Promise<void>;
   onChange(cb: () => void): () => void;
+  /** The section is off screen: fade out and suspend like a hidden tab (not persisted). */
+  setAway(away: boolean): void;
 };
 
 export const STORAGE_KEY = "kz-sound";
@@ -90,10 +93,11 @@ export function createAudioBus(ctx: BaseAudioContext, opts: { offline?: boolean;
   const subs = new Set<() => void>();
   const state: BusState = { unlocked: offline, offline };
   let hidden = false;
+  let away = false;
   let token = 0;
   const notify = () => subs.forEach((cb) => cb());
 
-  const audible = () => state.unlocked && !bus.muted && !hidden;
+  const audible = () => state.unlocked && !bus.muted && !hidden && !away;
 
   /** Fade toward the right level; suspend after a fade out, resume before a fade in. */
   const settle = () => {
@@ -146,6 +150,11 @@ export function createAudioBus(ctx: BaseAudioContext, opts: { offline?: boolean;
       }
       settle();
       if (first) notify();
+    },
+    setAway(a) {
+      if (a === away) return;
+      away = a;
+      settle();
     },
     onChange(cb) {
       subs.add(cb);
