@@ -55,7 +55,7 @@ const en: Copy = {
     {
       key: "shopify",
       figure: "20+",
-      label: "Shopify stores built",
+      label: "Shopify stores worked on",
       note: "across my career",
       source: "Career total",
     },
@@ -100,7 +100,7 @@ const th: Copy = {
     {
       key: "shopify",
       figure: "20+",
-      label: "ร้านค้าบน Shopify ที่ผมสร้าง",
+      label: "ร้านค้าบน Shopify ที่ผมทำมา",
       note: "ตลอดการทำงานที่ผ่านมา",
       source: "รวมทั้งหมดตลอดการทำงาน",
     },
