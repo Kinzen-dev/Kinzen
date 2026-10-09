@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useId, useRef, type CSSProperties, type KeyboardEvent } from "react";
 import type { Locale } from "@/content/schema";
 import { nobr } from "@/lib/thai-nodes";
+import { frameLoop, type After, type Loop, type Tick } from "@/motion/frame-governor";
 import { ToolMark } from "@/components/tools/tool-mark";
 import { toolMark } from "@/components/tools/tool-marks";
 import type { ViewProps } from "../types";
@@ -98,20 +99,16 @@ export default function LogoSpotlight({ locale, groups }: ViewProps) {
     let pointerUntil = 0; // the pointer (or a tap) owns the light until this time
     let focused = -1;
     let group: string | null = null;
-    let visible = false;
-    let raf = 0;
-    let last = 0;
+    let loop: Loop | null = null;
     let lite = false;
     let probeFrames = 0;
     let probeTime = 0;
     let start = performance.now();
 
-    const frame = (now: number) => {
-      raf = 0;
-      const dt = Math.min(0.05, (now - (last || now)) / 1000);
-      last = now;
-      // A slow device (frames well over budget once warm) drops the glow under each lit mark.
-      if (!lite && dt > 0) {
+    const frame = ({ now, dt, mode }: Tick): After => {
+      // A slow device (frames well over budget once warm) drops the glow under each lit mark
+      // (judged in full mode only: the idle light mode's slower pace is deliberate).
+      if (!lite && dt > 0 && mode === "full") {
         if (++probeFrames > 20) probeTime += dt;
         if (probeFrames === 80 && probeTime / 60 > 0.024) {
           lite = true;
@@ -147,12 +144,9 @@ export default function LogoSpotlight({ locale, groups }: ViewProps) {
           cell.style.setProperty("--k", next.toFixed(3));
         }
       });
-      if (moving && visible) raf = requestAnimationFrame(frame);
-      else last = 0;
+      return moving ? undefined : false;
     };
-    const kick = () => {
-      if (!raf && visible) raf = requestAnimationFrame(frame);
-    };
+    const kick = () => loop?.wake();
 
     // Group names: hover or focus lights the row; a tap toggles it.
     const lightGroup = (id: string | null, from?: HTMLElement) => {
@@ -236,19 +230,15 @@ export default function LogoSpotlight({ locale, groups }: ViewProps) {
       kick();
     });
     ro.observe(wall);
-    const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting;
-      if (visible) kick();
-    });
-    io.observe(wall);
     measure();
     Object.assign(pos, { x: w * 0.3, y: h * 0.4 });
-    kick();
+    // The frame governor: 60 on phones, only on screen, half rate when the visitor is idle.
+    loop = frameLoop({ name: "tools/spotlight", host: wall, heavy: true }, frame);
 
     return () => {
-      cancelAnimationFrame(raf);
+      loop?.stop();
+      loop = null;
       ro.disconnect();
-      io.disconnect();
       wall.removeEventListener("pointermove", onMove);
       wall.removeEventListener("pointerdown", onDown);
       wall.removeEventListener("pointerleave", onLeave);

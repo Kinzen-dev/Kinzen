@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { nobr } from "@/lib/thai-nodes";
+import { frameLoop, type After, type Loop, type Tick } from "@/motion/frame-governor";
 import { ToolMark } from "@/components/tools/tool-mark";
 import { toolMark } from "@/components/tools/tool-marks";
 import { groupById, type GroupId, type ViewProps } from "../types";
@@ -106,9 +107,7 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
     let tpy = 0;
     let tourClock = 0;
     let nextBeam = 0.6;
-    let last = 0;
-    let raf = 0;
-    let running = false;
+    let loop: Loop | null = null;
     let lite = false;
     let probeFrames = 0;
     let probeTime = 0;
@@ -190,12 +189,11 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
       ctx.ellipse(0, -lift[i] * (phone ? 8 : 18), rx, ry, 0, a0, a1);
     };
 
-    const frame = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
+    const frame = ({ now, dt, mode }: Tick): After => {
       // A slow device (frames well over budget once warm) drops the depth blur, the comets and the
-      // beam glow, and draws the rings at a lower resolution.
-      if (!lite && moving0()) {
+      // beam glow, and draws the rings at a lower resolution. Judged in full mode only: the idle
+      // light mode's slower pace is deliberate, not a slow device.
+      if (!lite && moving0() && mode === "full") {
         if (++probeFrames > 20) probeTime += dt;
         if (probeFrames === 80) {
           if (probeTime / 60 > 0.024) {
@@ -458,16 +456,13 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
         ctx.globalAlpha = 1;
       }
 
-      if (visible && (moving || !settled || beams.length > 0)) raf = requestAnimationFrame(frame);
-      else running = false;
+      // Paused (or reduced motion) and nothing easing: settled until the next input or change.
+      return moving || !settled || beams.length > 0 ? undefined : false;
     };
 
-    const kick = () => {
-      if (running || !visible) return;
-      running = true;
-      last = performance.now();
-      raf = requestAnimationFrame(frame);
-    };
+    // The frame governor: 60 on phones, only on screen, half rate when the visitor is idle.
+    loop = frameLoop({ name: "tools/orbit", host: stage, heavy: true }, frame);
+    const kick = () => loop?.wake();
     st.kick = kick;
 
     const local = (e: PointerEvent) => {
@@ -540,8 +535,8 @@ export default function LogoOrbit({ locale, groups }: ViewProps) {
     kick();
 
     return () => {
-      cancelAnimationFrame(raf);
-      running = false;
+      loop?.stop();
+      loop = null;
       st.kick = () => {};
       stage.removeEventListener("pointermove", onMove);
       stage.removeEventListener("pointerleave", onLeave);

@@ -5,6 +5,7 @@ import { bangkokHours, clockText, skyAt, type Phase } from "./clock";
 import type { SpotId } from "./copy";
 import { SHARED, inkPass } from "./ink";
 import { DESK_Y, push, settled, step, type Prop } from "./physics";
+import { canvasDpr, frameLoop, type Loop } from "@/motion/frame-governor";
 import { softwareGl } from "../kit/loop";
 
 /*
@@ -93,7 +94,8 @@ export function createNightDesk(o: EngineOpts): Engine {
   const camera = new THREE.PerspectiveCamera(phone ? 36 : 30, 1, 0.2, 14);
 
   // Off-screen colour (+ id in alpha) and depth, mipmapped for the bloom taps.
-  let dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.75 : 2);
+  const dpr0 = canvasDpr(phone ? 1.75 : 2);
+  let dpr = dpr0;
   const rt = new THREE.WebGLRenderTarget(4, 4, {
     type: THREE.HalfFloatType,
     minFilter: THREE.LinearMipmapLinearFilter,
@@ -146,6 +148,12 @@ export function createNightDesk(o: EngineOpts): Engine {
 
   let focus: SpotId | null = null;
   let dirty = true;
+  let loop: Loop | null = null;
+  /** Something changed: draw it (the reduced-motion loop sleeps between changes). */
+  const touch = () => {
+    dirty = true;
+    loop?.wake();
+  };
   let t = 0;
   let lampOn = true;
   let lamp = 1;
@@ -241,7 +249,7 @@ export function createNightDesk(o: EngineOpts): Engine {
     focus = s;
     room.agents.speed = s === "monitor" ? 0.75 : 1;
     o.onFocus(s);
-    dirty = true;
+    touch();
   };
 
   const toggleLamp = () => {
@@ -249,7 +257,7 @@ export function createNightDesk(o: EngineOpts): Engine {
     lampFlicker = lampOn ? 0.35 : 0;
     headV += lampOn ? 2.4 : -2.4;
     sound.click(lampOn);
-    dirty = true;
+    touch();
   };
 
   const ring = () => {
@@ -276,7 +284,7 @@ export function createNightDesk(o: EngineOpts): Engine {
         (clip?.buffer.duration ?? 8) * 1000 + 600,
       );
     }
-    dirty = true;
+    touch();
   };
 
   const activate = (s: SpotId) => {
@@ -287,7 +295,7 @@ export function createNightDesk(o: EngineOpts): Engine {
       noteV += 3;
       sound.purr();
       if (!phone && !still) setFocus(focus === "cat" ? null : "cat");
-      dirty = true;
+      touch();
       return;
     }
     if (s === "monitor") {
@@ -306,7 +314,7 @@ export function createNightDesk(o: EngineOpts): Engine {
         const h = stillHours ?? bangkokHours();
         stillHours = marks.find((m) => m > h + 0.5) ?? marks[0];
         if (stillHours === 1 && h >= 1 && h < 6.3) stillHours = 6.3;
-        dirty = true;
+        touch();
         return;
       }
       if (phone) return timeLapse();
@@ -317,7 +325,7 @@ export function createNightDesk(o: EngineOpts): Engine {
   const timeLapse = () => {
     if (still) {
       stillHours = null;
-      dirty = true;
+      touch();
       return;
     }
     lapse = lapse >= 0 ? -1 : 0;
@@ -421,7 +429,7 @@ export function createNightDesk(o: EngineOpts): Engine {
       par.tx = (x / W) * 2 - 1;
       par.ty = (y / H) * 2 - 1;
     }
-    dirty = true;
+    touch();
   };
   const up = (e: PointerEvent) => {
     if (!drag || drag.id !== e.pointerId) return;
@@ -768,26 +776,31 @@ export function createNightDesk(o: EngineOpts): Engine {
   };
 
   /* ---------------- loop ---------------- */
-  let raf = 0;
-  let last = 0;
-  let visible = true;
+  // The frame governor (src/motion/frame-governor): paced to 60 on phones, only on screen, light
+  // when idle, and the pixel ratio follows its adaptive scale. The room is never still (boil,
+  // steam, the window's traffic), so the live loop never settles; reduced motion draws on demand.
   let n = 0;
   let work = 0;
   let windowStart = 0;
-  let slow = 0;
   const w = window as unknown as { __labFps?: { fps: number; frameMs: number; frames: number; dpr: number } };
-  const frame = (now: number) => {
-    raf = requestAnimationFrame(frame);
-    const dt = last ? Math.min((now - last) / 1000, 1 / 20) : 1 / 60;
-    last = now;
+  const onScale = (q: number) => {
+    dpr = Math.max(1, dpr0 * q);
+    resize();
+  };
+  const frame = ({ now, dt, raw }: { now: number; dt: number; raw: number }) => {
     if (still) {
       // On demand: draw when something changed (and while a call or a physics settle is live).
       const busy = call !== "idle" || !settled(room.props);
-      if (!dirty && !busy) return;
+      if (!dirty && !busy) return false;
       dirty = false;
       sim(dt);
       render();
       return;
+    }
+    if (raw === 0) {
+      windowStart = 0;
+      n = 0;
+      work = 0;
     }
     const t0 = performance.now();
     sim(dt);
@@ -796,41 +809,12 @@ export function createNightDesk(o: EngineOpts): Engine {
     n++;
     if (!windowStart) windowStart = now;
     if (now - windowStart >= 1000) {
-      const fps = (n * 1000) / (now - windowStart);
-      w.__labFps = { fps, frameMs: work / n, frames: n, dpr };
-      // Adaptive resolution: two slow seconds in a row step the pixel ratio down.
-      slow = fps < 48 ? slow + 1 : 0;
-      if (slow >= 2 && dpr > 1) {
-        dpr = Math.max(1, dpr - 0.25);
-        slow = 0;
-        resize();
-      }
+      w.__labFps = { fps: (n * 1000) / (now - windowStart), frameMs: work / n, frames: n, dpr };
       n = 0;
       work = 0;
       windowStart = now;
     }
   };
-  let compiled = false;
-  const sync = () => {
-    const on = compiled && visible && !document.hidden;
-    if (on && !raf) {
-      last = 0;
-      windowStart = 0;
-      n = 0;
-      work = 0;
-      dirty = true;
-      raf = requestAnimationFrame(frame);
-    } else if (!on && raf) {
-      cancelAnimationFrame(raf);
-      raf = 0;
-    }
-  };
-  const io = new IntersectionObserver(([e]) => {
-    visible = !!e?.isIntersecting;
-    sync();
-  });
-  io.observe(host);
-  document.addEventListener("visibilitychange", sync);
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   resize();
@@ -839,8 +823,11 @@ export function createNightDesk(o: EngineOpts): Engine {
   let dead = false;
   const begin = () => {
     if (dead) return;
-    compiled = true;
-    sync();
+    dirty = true;
+    loop = frameLoop(
+      { name: "play/night-desk", host, heavy: true, adaptive: still ? undefined : { onScale } },
+      frame,
+    );
   };
   // The room draws into the ink pass's target (its programs differ from the screen's), the pass to the screen.
   renderer.setRenderTarget(rt);
@@ -858,11 +845,8 @@ export function createNightDesk(o: EngineOpts): Engine {
     timeLapse,
     destroy: () => {
       dead = true;
-      cancelAnimationFrame(raf);
-      raf = 0;
-      io.disconnect();
+      loop?.stop();
       ro.disconnect();
-      document.removeEventListener("visibilitychange", sync);
       canvas.removeEventListener("pointerdown", down);
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);

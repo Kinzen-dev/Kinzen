@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { DRIFT, type Loop } from "@/motion/frame-governor";
 import { readProfile, runLoop, softwareGl } from "../kit/loop";
-import { fpsGuard, studio, tokenColor } from "../kit/three-kit";
+import { qualitySteps, studio, tokenColor } from "../kit/three-kit";
 import type { ThockSound } from "./sound";
 
 /*
@@ -530,6 +531,12 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
   let spaceHeld = 0;
   let nextRing = 0;
   let dirty = true;
+  let loop: Loop | null = null;
+  /** Something changed: draw it (and react at full pace, the loop may be resting). */
+  const touch = () => {
+    dirty = true;
+    loop?.wake();
+  };
 
   const press = (k: Key, strength = 1, by: "ptr" | "kbd" = "ptr") => {
     if (!played) {
@@ -555,13 +562,13 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
       spaceHeld = performance.now();
       nextRing = 0.22;
     }
-    dirty = true;
+    touch();
   };
   const release = (k: Key) => {
     k.down = Math.max(0, k.down - 1);
     if (!k.down) sound.release(k.code || "Field");
     if (k === space && !k.down) spaceHeld = 0;
-    dirty = true;
+    touch();
   };
 
   const shipKeys = SHIP_CODES.map((c) => byCode.get(c)!);
@@ -574,7 +581,7 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
     });
     onShip(on);
     if (on) window.setTimeout(() => sound.chime(), 420);
-    dirty = true;
+    touch();
   };
   const applyLook = (k: Key, to: "ship" | "home") => {
     const i = shipKeys.indexOf(k);
@@ -621,7 +628,7 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
         if (hoverKey) hoverKey.hover = false;
         if (k) k.hover = true;
         hoverKey = k;
-        dirty = true;
+        touch();
       }
       stage.style.cursor = k ? "pointer" : "";
     }
@@ -635,7 +642,7 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
   const onLeave = () => {
     if (hoverKey) hoverKey.hover = false;
     hoverKey = null;
-    dirty = true;
+    touch();
   };
 
   // Real keyboard: while the toy is on screen (or focused), keys press their caps.
@@ -685,12 +692,11 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
   window.addEventListener("keyup", onKeyUp);
   window.addEventListener("blur", onBlur);
 
-  const guard = fpsGuard((level) => {
-    if (level === 1) renderer.setPixelRatio(Math.min(dpr0, 1.25));
-    else {
-      renderer.shadowMap.enabled = false;
-      renderer.setPixelRatio(1);
-    }
+  // Adaptive quality (the governor's resolution scale): a lower pixel ratio first; at the floor,
+  // no shadows for the rest of the visit.
+  const onScale = qualitySteps((level) => {
+    if (level === 2) renderer.shadowMap.enabled = false;
+    renderer.setPixelRatio(level === 0 ? dpr0 : level === 1 ? Math.min(dpr0, 1.25) : 1);
     layout();
   });
 
@@ -819,17 +825,25 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
     renderer.render(scene, camera);
   };
 
+  /** The water under the caps still carries a wave. */
+  const waving = () => {
+    for (let c = 0; c < wh.length; c++) if (Math.abs(wh[c]) > 2e-3 || Math.abs(wv[c]) > 2e-2) return true;
+    return false;
+  };
   const frame = (_t: number, dt: number) => {
-    guard(dt);
     if (prof.still) {
       // Reduced motion: nothing travels; caps glow when pressed and the frame redraws only then.
       const busy = step(dt);
       if (busy || dirty) render();
       dirty = busy;
-      return;
+      return busy;
     }
-    step(dt);
+    const busy = step(dt);
     render();
+    dirty = false;
+    // Caps still, no SHIP glow, water calm: only the camera's slow breath is left (sub-pixel per
+    // frame), drawn at the rest rate until the next key or pointer.
+    return busy || shipOn || waving() ? undefined : DRIFT;
   };
   // Shaders compile in parallel first (KHR_parallel_shader_compile): no long task on the first frame.
   let dead = false;
@@ -839,11 +853,12 @@ totalEmissiveRadiance += uGold * vec3(1.0, 0.8, 0.45) * vTop * smoothstep(0.25, 
     if (dead) return;
     step(1 / 60);
     render();
-    stopLoop = runLoop(stage, frame);
+    loop = runLoop(stage, frame, { name: "play/thock", adaptive: { onScale } });
+    stopLoop = loop.stop;
   }
   const ro = new ResizeObserver(() => {
     layout();
-    dirty = true;
+    touch();
   });
   ro.observe(stage);
 

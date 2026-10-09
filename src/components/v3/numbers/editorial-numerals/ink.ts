@@ -1,4 +1,5 @@
 import { readPalette } from "@/fx/engine/palette";
+import { DRIFT, frameLoop, type After, type Loop, type Tick } from "@/motion/frame-governor";
 
 /**
  * Editorial numerals (numbers view 5): one figure at a time drawn in gold ink, on the section's
@@ -228,7 +229,7 @@ export function createInk(
   let pending: { figure: string; side: "left" | "right" } | null = null;
   let fade = 1;
   const ptr = { x: -1e5, y: -1e5, z: 0, goal: 0, at: 0 };
-  let raf = 0;
+  let loop: Loop | null = null;
   let visible = false;
   let last = 0;
   const t0 = performance.now();
@@ -247,11 +248,8 @@ export function createInk(
     gl!.drawArrays(gl!.TRIANGLES, 0, 3);
   }
 
-  function frame(now: number) {
-    raf = requestAnimationFrame(frame);
+  function frame({ now }: Tick): After {
     const busy = leaveFrom >= 0 || (revealFrom >= 0 && reveal < 1) || now - ptr.at < 1500 || ptr.z > 0.01;
-    // The marbling drifts slowly: 30 fps is enough at rest, full rate while it reacts.
-    if (!busy && now - last < 32) return;
     const dt = Math.min(0.05, last ? (now - last) / 1000 : 1 / 60);
     last = now;
     if (leaveFrom >= 0) {
@@ -273,16 +271,18 @@ export function createInk(
     }
     ptr.z += (ptr.goal - ptr.z) * Math.min(1, dt * 5);
     draw(now);
+    // The marbling drifts slowly: the rest rate is enough at rest, full rate while it reacts.
+    return busy ? undefined : DRIFT;
   }
 
   const start = () => {
-    if (raf || opts.reduced) return;
+    if (loop || opts.reduced) return;
     last = 0;
-    raf = requestAnimationFrame(frame);
+    loop = frameLoop({ name: "numbers/editorial-numerals", host: canvas, heavy: true, wakeOn: host }, frame);
   };
   const stop = () => {
-    cancelAnimationFrame(raf);
-    raf = 0;
+    loop?.stop();
+    loop = null;
   };
   const sync = () => (visible && !document.hidden ? start() : stop());
 
@@ -326,10 +326,13 @@ export function createInk(
   return {
     show(figure, side) {
       if (figure === opts.figure && side === opts.side && !pending) {
-        if (revealFrom < 0 && !opts.reduced) revealFrom = performance.now();
+        if (revealFrom < 0 && !opts.reduced) {
+          revealFrom = performance.now();
+          loop?.wake();
+        }
         return;
       }
-      if (opts.reduced || !raf) {
+      if (opts.reduced || !loop) {
         // Still (or off screen): swap at once, fully drawn.
         opts.figure = figure;
         opts.side = side;
@@ -343,6 +346,7 @@ export function createInk(
       }
       pending = { figure, side };
       if (leaveFrom < 0) leaveFrom = performance.now();
+      loop.wake();
     },
     destroy() {
       stop();

@@ -7,7 +7,7 @@ import { wordmarkBitmap } from "../kit/glyphs";
 import { readProfile, runLoop, softwareGl } from "../kit/loop";
 import { traceGlyphs, type Glyph } from "../kit/contours";
 import { createFluid } from "./fluid";
-import { brushedTexture, fpsGuard, studio, tokenColor } from "../kit/three-kit";
+import { brushedTexture, qualitySteps, studio, tokenColor } from "../kit/three-kit";
 import type { GoldSound } from "./sound";
 
 /*
@@ -352,7 +352,8 @@ void main(){
   scene.add(ledge);
 
   // Water: a mirror (reflection rendered from below the plane) that also carries the ink.
-  let reflScale = lite ? 0.5 : 0.6;
+  const reflBase = lite ? 0.5 : 0.6;
+  let reflScale = reflBase;
   const water = new Reflector(new THREE.PlaneGeometry(70, 70), {
     textureWidth: 512,
     textureHeight: 512,
@@ -986,17 +987,18 @@ void main(){
   window.addEventListener("touchcancel", onTouchEnd);
   stage.addEventListener("keydown", onKey);
 
-  const guard = fpsGuard((level) => {
-    if (level === 1) {
-      renderer.setPixelRatio(Math.min(dpr0, 1.25));
-      reflScale *= 0.6;
-      layout();
-    } else {
+  // Adaptive quality (the governor's resolution scale): a lower pixel ratio and reflection first;
+  // at the floor, no shadows and a cheaper fluid solve for the rest of the visit.
+  let floored = false;
+  const onScale = qualitySteps((level) => {
+    if (level === 2 && !floored) {
+      floored = true;
       renderer.shadowMap.enabled = false;
-      renderer.setPixelRatio(1);
       fluid.setIterations(8);
-      layout();
     }
+    renderer.setPixelRatio(level === 0 ? dpr0 : level === 1 ? Math.min(dpr0, 1.25) : 1);
+    reflScale = reflBase * (level === 0 ? 1 : 0.6);
+    layout();
   });
 
   // The loop.
@@ -1205,7 +1207,6 @@ void main(){
 
   const frame = (_t: number, dt: number) => {
     time += dt;
-    guard(dt);
     physics(dt);
     updateLetters(dt);
     updateDrops(dt);
@@ -1256,7 +1257,8 @@ void main(){
       rings[0].z = 0.6;
       render(0);
     } else {
-      stopLoop = runLoop(stage, frame);
+      // The water is never still (its ripples run on time): paced, light when idle, never settled.
+      stopLoop = runLoop(stage, frame, { name: "play/gold-toss", adaptive: { onScale } }).stop;
     }
   };
   renderer.compileAsync(scene, camera).then(begin, begin);

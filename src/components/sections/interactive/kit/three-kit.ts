@@ -96,31 +96,18 @@ export function tokenColor(host: HTMLElement, name: string, fallback: string): T
 }
 
 /**
- * Frame-rate guard: after a warm-up, watches the rolling fps and calls `degrade(level)` (1, 2, ...)
- * when the device cannot hold the target, at most `max` times, with a cool-down between steps.
+ * Quality steps driven by the frame governor's adaptive resolution scale (1 down to 0.6, see
+ * src/motion/frame-governor): level 0 at full scale, 1 below 0.95, 2 at the floor (0.65 or
+ * less). `apply(level)` runs on each change; the scale is judged against the loop's own pace, so
+ * a deliberately slower frame rate (light mode, a slow drift) is never read as a slow GPU. A scene
+ * may treat level 2 as one-way (a shader rebuild should not flip back and forth).
  */
-export function fpsGuard(degrade: (level: number) => void, max = 2, floor = 48) {
+export function qualitySteps(apply: (level: 0 | 1 | 2) => void): (scale: number) => void {
   let level = 0;
-  let frames = 0;
-  let acc = 0;
-  let wait = 1.5;
-  return (dt: number) => {
-    if (level >= max) return;
-    if (wait > 0) {
-      wait -= dt;
-      return;
-    }
-    frames++;
-    acc += dt;
-    if (acc >= 2) {
-      const fps = frames / acc;
-      frames = 0;
-      acc = 0;
-      if (fps < floor) {
-        level++;
-        degrade(level);
-        wait = 1.5;
-      }
-    }
+  return (scale) => {
+    const next = scale >= 0.95 ? 0 : scale > 0.65 ? 1 : 2;
+    if (next === level) return;
+    level = next;
+    apply(next);
   };
 }

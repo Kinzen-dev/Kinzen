@@ -169,6 +169,7 @@ export function createNumeralStage(
   const tier: "full" | "lite" = opts.coarse || small ? "lite" : "full";
   const cfg = TIERS[tier];
   const engine = new ParticleEngine(gl, canvas, cfg);
+  engine.name = "numbers/gold-numerals";
   const N = engine.N;
   const G = Math.round(N * (1 - DUST));
 
