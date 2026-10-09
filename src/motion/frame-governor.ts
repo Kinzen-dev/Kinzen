@@ -64,7 +64,10 @@ let lastInput = 0;
 let idleTimer = 0;
 let listening = false;
 const modeSubs = new Set<(m: Mode) => void>();
-const INPUTS = ["pointerdown", "pointermove", "touchstart", "keydown", "wheel", "scroll"] as const;
+// Same inputs as perf-css's motion governor (src/motion/governor.ts), which this adapter mirrors:
+// pointer, touch, key and wheel anywhere, and the page's own scroll only (an element's scroll can
+// be programmatic, a demo's log following its tail).
+const INPUTS = ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"] as const;
 
 function setMode(m: Mode) {
   if (m === mode) return;
@@ -90,7 +93,8 @@ function listen() {
   if (listening) return;
   listening = true;
   lastInput = performance.now();
-  for (const t of INPUTS) window.addEventListener(t, onInput, { capture: true, passive: true });
+  for (const t of INPUTS) document.addEventListener(t, onInput, { capture: true, passive: true });
+  window.addEventListener("scroll", onInput, { passive: true });
   idleTimer = window.setTimeout(checkIdle, IDLE_MS + 50);
 }
 

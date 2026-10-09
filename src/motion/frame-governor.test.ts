@@ -200,7 +200,7 @@ describe("frame governor", () => {
   });
 
   it("drops to light mode after 45 s without input and back to full on the next input", async () => {
-    const { win } = setup(true);
+    const { win, doc } = setup(true);
     const g = await load();
     let n = 0;
     const l = g.frameLoop({ name: "x", host: new Target() as unknown as Element, heavy: true }, () => void n++);
@@ -212,7 +212,7 @@ describe("frame governor", () => {
     vi.advanceTimersByTime(1000);
     expect(n).toBeGreaterThanOrEqual(29);
     expect(n).toBeLessThanOrEqual(31);
-    win.dispatch("pointermove");
+    doc.dispatch("pointermove");
     expect(g.idleMode()).toBe("full");
     // Full mode within one frame of the input: the next 60 fps slot draws.
     n = 0;
@@ -223,7 +223,7 @@ describe("frame governor", () => {
     expect(n).toBeGreaterThanOrEqual(58);
     // Input keeps it full; silence again goes light again.
     vi.advanceTimersByTime(40_000);
-    win.dispatch("keydown");
+    win.dispatch("scroll");
     vi.advanceTimersByTime(40_000);
     expect(g.idleMode()).toBe("full");
     vi.advanceTimersByTime(6_000);
