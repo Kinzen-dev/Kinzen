@@ -11,6 +11,8 @@ import { useEffect, useState, useSyncExternalStore, type RefObject } from "react
  *   html[data-page-hidden] while the tab is hidden, data-inview="true|false" on every section in
  *   main, the footer, [data-motion-root] and every element that hosts an infinite CSS loop. governor.css
  *   turns those into --loop-play: paused, which the loops read as their animation-play-state.
+ * - Idle rest: a loop is not frozen mid-pass (a sweep would stop half gold). It finishes the pass
+ *   it is in and stops at its resting frame; the next input sets it looping again.
  */
 
 export const IDLE_MS = 45_000;
@@ -190,7 +192,9 @@ function findLoopHosts(root: Element) {
 
 /** Loops a state switches on later (a demo step adding a class) announce themselves here. */
 function onAnimationStart(e: AnimationEvent) {
-  if (e.target instanceof Element && !roots.has(e.target)) trackLoops(e.target.getAnimations());
+  if (!(e.target instanceof Element)) return;
+  if (!roots.has(e.target)) trackLoops(e.target.getAnimations());
+  if (idle) restLoops(e.target.getAnimations());
 }
 
 /** Finds section roots (again after a route change) and drops the ones that left the DOM. */
@@ -202,12 +206,38 @@ export function scanRoots() {
 
 let started = false;
 
+// ---------- idle rest ----------
+
+const resting = new Set<Animation>();
+
+/** Lets every infinite CSS loop finish its current pass, then stop (fill none: its resting frame). */
+function restLoops(animations: Animation[]) {
+  for (const a of animations) {
+    if (!(a instanceof CSSAnimation) || !a.effect || resting.has(a)) continue;
+    if (a.effect.getTiming().iterations !== Infinity) continue;
+    const it = a.effect.getComputedTiming().currentIteration;
+    if (it == null) continue;
+    a.effect.updateTiming({ iterations: it + 1 });
+    resting.add(a);
+  }
+}
+
+/** Back to looping. CSS play-state control (off screen, hidden tab) is untouched by the round trip. */
+function wakeLoops() {
+  for (const a of resting) a.effect?.updateTiming({ iterations: Infinity });
+  resting.clear();
+}
+
 /** Wires the DOM contract once per page load. */
 export function startGovernor() {
   if (started || typeof document === "undefined") return;
   started = true;
   const html = document.documentElement;
-  onIdleChange((on) => html.toggleAttribute("data-idle", on));
+  onIdleChange((on) => {
+    html.toggleAttribute("data-idle", on);
+    if (on) restLoops(document.getAnimations());
+    else wakeLoops();
+  });
   const vis = () => html.toggleAttribute("data-page-hidden", document.hidden);
   document.addEventListener("visibilitychange", vis);
   vis();

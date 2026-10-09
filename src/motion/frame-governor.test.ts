@@ -180,7 +180,8 @@ describe("frame governor", () => {
   });
 
   it("draws a slow drift at its rest rate and goes back to full pace on wake", async () => {
-    setup(true);
+    // Desktop: the heavy pace is the display's 120, the drift rests at 60.
+    setup(false);
     const g = await load();
     const host = new Target();
     let n = 0;
@@ -192,13 +193,13 @@ describe("frame governor", () => {
     vi.advanceTimersByTime(1000);
     n = 0;
     vi.advanceTimersByTime(1000);
-    expect(n).toBeGreaterThanOrEqual(29);
-    expect(n).toBeLessThanOrEqual(31);
+    expect(n).toBeGreaterThanOrEqual(59);
+    expect(n).toBeLessThanOrEqual(61);
     drifting = false;
     host.dispatch("pointerdown");
     n = 0;
     vi.advanceTimersByTime(1000);
-    expect(n).toBeGreaterThanOrEqual(58);
+    expect(n).toBeGreaterThanOrEqual(118);
     l.stop();
   });
 

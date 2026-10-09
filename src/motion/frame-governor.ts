@@ -140,8 +140,9 @@ export type Tick = {
  */
 export type After = void | boolean | number | { fps: number };
 
-/** The rest rate for a slow ambient drift (the light still slides, nothing reacts). */
-export const DRIFT = { fps: 30 } as const;
+/** The rest rate for a slow ambient drift (the light still slides, nothing reacts): a steady 60,
+ *  never lower, so a slow pan never steps (light mode halves it like everything else). */
+export const DRIFT = { fps: 60 } as const;
 
 export type LoopOptions = {
   /** Debug name (window.__kzFrames). */
