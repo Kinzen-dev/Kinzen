@@ -485,6 +485,8 @@ export function createNightDesk(o: EngineOpts): Engine {
 
   /* ---------------- per-frame ---------------- */
   const proj = new THREE.Vector3();
+  // What each element was last given: a still camera writes nothing (no style recalc per frame).
+  const placed = new WeakMap<HTMLElement, { tf: string; hidden: string }>();
   const placeEl = (el: HTMLElement | null | undefined, p: THREE.Vector3, show = true) => {
     if (!el) return;
     proj.copy(p).project(camera);
@@ -492,8 +494,12 @@ export function createNightDesk(o: EngineOpts): Engine {
     // Kept clear of the stage edges so a label never clips (phones label every dot).
     const x = THREE.MathUtils.clamp(((proj.x + 1) / 2) * W, 44, W - 44);
     const y = ((1 - proj.y) / 2) * H;
-    el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-    el.dataset.hidden = vis ? "false" : "true";
+    const tf = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    const hidden = vis ? "false" : "true";
+    let last = placed.get(el);
+    if (!last) placed.set(el, (last = { tf: "", hidden: "" }));
+    if (tf !== last.tf) el.style.transform = last.tf = tf;
+    if (hidden !== last.hidden) el.dataset.hidden = last.hidden = hidden;
   };
   let lastClock = "";
   let lastPhase = "";
@@ -750,7 +756,7 @@ export function createNightDesk(o: EngineOpts): Engine {
         cursor = "pointer";
       } else if (focus) cursor = "zoom-out";
       hoverRange = r;
-      canvas.style.cursor = cursor;
+      if (canvas.style.cursor !== cursor) canvas.style.cursor = cursor;
     }
     if (hoverRange) ink.uniforms.uHover.value.set(hoverRange[0], hoverRange[1]);
     hoverK += ((hoverRange ? 1 : 0) - hoverK) * Math.min(1, dt * 10);

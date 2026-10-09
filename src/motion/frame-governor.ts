@@ -185,9 +185,18 @@ export type Loop = {
 
 type Entry = { state: "running" | "settled" | "paused"; fps: number; drawn: number; cap: number; scale: number };
 type Debug = { cls: DeviceClass; mode: Mode; cap: number; loops: Record<string, Entry> };
+/** The ?perf HUD's view (perf-lab): the global mode, class, cap, lowest scale, loops drawing. */
+type HudView = {
+  mode: Mode;
+  deviceClass: DeviceClass;
+  fpsCap: number;
+  scale: number;
+  active: number;
+};
 declare global {
   interface Window {
     __kzFrames?: Debug;
+    __kzGovernor?: HudView;
   }
 }
 const entries = new Map<string, () => Entry>();
@@ -200,6 +209,26 @@ function publish() {
   dbg.mode = mode;
   dbg.cap = mode === "light" ? Math.round(d.heavyFps * LIGHT_SHARE) : d.heavyFps;
   window.__kzFrames = dbg;
+  if (!window.__kzGovernor) {
+    const loops = () => Object.values(window.__kzFrames?.loops ?? {});
+    window.__kzGovernor = {
+      get mode() {
+        return mode;
+      },
+      get deviceClass() {
+        return deviceProfile().cls;
+      },
+      get fpsCap() {
+        return window.__kzFrames?.cap ?? 0;
+      },
+      get scale() {
+        return loops().reduce((m, l) => (l.state === "running" ? Math.min(m, l.scale) : m), 1);
+      },
+      get active() {
+        return loops().filter((l) => l.state === "running").length;
+      },
+    };
+  }
 }
 
 /** Live loop entries, computed on read (nobody pays for the debug surface unless it is read). */
