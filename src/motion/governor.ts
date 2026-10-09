@@ -148,8 +148,19 @@ export function useIdle(): boolean {
 
 const roots = new Map<Element, () => void>();
 
+/** Stops observing elements that left the DOM (a remounted demo node, a previous page). */
+function dropDetached() {
+  for (const [el, stop] of roots) {
+    if (!el.isConnected) {
+      stop();
+      roots.delete(el);
+    }
+  }
+}
+
 function track(el: Element) {
   if (roots.has(el)) return;
+  dropDetached();
   roots.set(
     el,
     observeInView(
@@ -185,12 +196,7 @@ function onAnimationStart(e: AnimationEvent) {
 /** Finds section roots (again after a route change) and drops the ones that left the DOM. */
 export function scanRoots() {
   if (typeof document === "undefined") return;
-  for (const [el, stop] of roots) {
-    if (!el.isConnected) {
-      stop();
-      roots.delete(el);
-    }
-  }
+  dropDetached();
   document.querySelectorAll(ROOTS).forEach(track);
 }
 
