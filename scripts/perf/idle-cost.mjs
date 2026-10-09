@@ -72,6 +72,45 @@ export async function idleSections(page, cdp, { url, settleMs = 2500, windowMs =
   return rows;
 }
 
+/**
+ * Long idle (SPEC-perf decision 2): with a section on screen, a window right after settling, a
+ * window after `idleMs` with no input (light mode expected), then one pointer move and a short
+ * window (full mode expected at once). The governor's mode is read in each window when published.
+ */
+export async function idleLong(page, cdp, { url, sections = ["top", "play"], idleMs = 50_000, windowMs = 5000 } = {}) {
+  await step("load home", 75_000, () => load(page, url));
+  const tagged = await tagSections(page);
+  const rows = [];
+  for (const label of sections) {
+    const s = tagged.find((x) => x.label === label);
+    if (!s) continue;
+    try {
+      const row = await step(`long idle #${label}`, idleMs + 4 * windowMs + 60_000, async () => {
+        await page.evaluate(
+          (i) =>
+            document
+              .querySelector(`[data-perf-section="${i}"]`)
+              ?.scrollIntoView({ block: "start", behavior: "instant" }),
+          s.i,
+        );
+        await sleep(2500);
+        const fresh = await idleWindow(page, cdp, windowMs);
+        await sleep(Math.max(0, idleMs - windowMs - 2500));
+        const idle = await idleWindow(page, cdp, windowMs);
+        const vp = page.viewportSize() ?? { width: 390, height: 844 };
+        await page.mouse.move(vp.width / 2, vp.height / 2);
+        await page.mouse.move(vp.width / 2 + 20, vp.height / 2 + 10, { steps: 4 });
+        const input = await idleWindow(page, cdp, 1000);
+        return { section: label, fresh, idle, input };
+      });
+      rows.push(row);
+    } catch (e) {
+      rows.push({ section: label, error: String(e.message ?? e) });
+    }
+  }
+  return rows;
+}
+
 /** Idle cost per page, at the top and at the bottom. Case pages are found from the work index. */
 export async function idlePages(page, cdp, { url, settleMs = 2500, windowMs = 5000 } = {}) {
   const base = new URL(url);

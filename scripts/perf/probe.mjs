@@ -246,6 +246,7 @@ export function reading(page) {
     return {
       t: performance.now(),
       scrollY: Math.round(scrollY),
+      governor: window.__kzGovernor ? JSON.parse(JSON.stringify(window.__kzGovernor)) : null,
       rafCalls: L.rafCalls,
       rafFrames: L.rafFrames,
       drawCalls: L.drawCalls,
@@ -285,6 +286,7 @@ export function between(a, z) {
     glBuffers: live.map((g) => `#${g.id} ${g.drawingBuffer}${g.onScreen ? "" : "(off)"}`).join(", "),
     longTasks: z.longSupported ? z.longCount - a.longCount : null,
     longMs: z.longSupported ? Math.round(z.longTotal - a.longTotal) : null,
+    governor: z.governor?.mode ?? null,
   };
 }
 

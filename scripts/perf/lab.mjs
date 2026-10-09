@@ -4,7 +4,7 @@
 //
 //   pnpm perf:lab [url]                      default https://www.kinzen.dev/
 //     --engines chromium,webkit  --classes phone,desktop  --cpu 1,4 (Chromium; WebKit runs at 1x)
-//     --only idle,pages,interaction  --sections hero,contact  --window 5000  --play 4000  --views 3000
+//     --only idle,pages,interaction[,long] (long = 50 s idle per hero and Play, light mode then input; opt-in)  --sections hero,contact  --window 5000  --play 4000  --views 3000
 //     --writes 2000 (attribute-write sampling per section; 0 = off; default on at 1x only)
 //     --out <dir> (default test-results/perf/<timestamp>)
 //
@@ -13,7 +13,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { cpus as hostCpus, loadavg } from "node:os";
 import { join, resolve } from "node:path";
-import { idlePages, idleSections } from "./idle-cost.mjs";
+import { idleLong, idlePages, idleSections } from "./idle-cost.mjs";
 import { interactions } from "./interaction.mjs";
 import { CLASSES, launch, openPage, step } from "./probe.mjs";
 
@@ -83,6 +83,12 @@ for (const cfg of configs) {
         idlePages(page, cdp, { url, windowMs }),
       );
       console.error(`[perf-lab]   idle pages ${entry.pages.rows.length} rows ${entry.pages.error ?? ""}`);
+    }
+    if (only.includes("long")) {
+      entry.long = await phase(browser, cfg, "long idle", 10 * 60_000, (page, cdp) =>
+        idleLong(page, cdp, { url, windowMs }),
+      );
+      console.error(`[perf-lab]   long idle ${entry.long.rows.length} rows ${entry.long.error ?? ""}`);
     }
     if (only.includes("interaction")) {
       entry.interaction = await phase(browser, cfg, "interaction", 15 * 60_000, (page, cdp) =>
@@ -282,6 +288,31 @@ for (const c of report.configs) {
                 `${r.glLive} ${r.glBuffers}`,
                 longCell(r),
               ],
+        ),
+      ),
+      "",
+    );
+  }
+  if (c.long) {
+    md.push(
+      `### Long idle (light mode after 45 s, full on input)${c.long.error ? ` (phase error: ${c.long.error})` : ""}`,
+      "",
+    );
+    md.push(
+      table(
+        ["section", "window", "governor", "task", "rAF fr/s", "drawing", "anims on/off (non-comp)"],
+        c.long.rows.flatMap((r) =>
+          r.error
+            ? [errRow(r.section, r, 7)]
+            : ["fresh", "idle", "input"].map((w) => [
+                r.section,
+                w,
+                na(r[w].governor),
+                na(r[w].cpu?.task),
+                r[w].rafFrames,
+                r[w].canvasFps || "0",
+                anim(r[w]),
+              ]),
         ),
       ),
       "",
