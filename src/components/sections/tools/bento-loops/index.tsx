@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { idleMode, onModeChange } from "@/motion/frame-governor";
+import { frameLoop, idleMode, onModeChange } from "@/motion/frame-governor";
 import { loadMotion } from "@/motion/gsap";
 import type { GroupId, ViewProps } from "../types";
 import { BentoMarkup } from "./markup";
 import { BUILDERS, type Timeline } from "./loops";
 
-type Loop = { tl: Timeline | null; visible: boolean; held: boolean; started: boolean };
+type Loop = { tl: Timeline | null; visible: boolean; held: boolean; started: boolean; wait: number };
 
 /**
  * Bento of the six tool groups; every tile loops a small fictional product demo (one GSAP
  * timeline per pass, rebuilt from the finished state each time, so a pass never rewinds).
  * Loops run only in view, start staggered, and pause while hovered, focused or tapped, and while
  * the visitor is idle (the frame governor's light mode: 45 s without input; any input resumes).
+ * Each timeline is driven by the frame governor, not GSAP's ticker: 60 fps on phones (a demo loop
+ * is a heavy scene there), display rate on desktops, and no frames at all while it is paused.
  * Reduced motion: the markup is the finished frame, so nothing runs and nothing is missing.
  */
 export default function BentoLoops({ locale, groups }: ViewProps) {
@@ -37,24 +39,34 @@ export default function BentoLoops({ locale, groups }: ViewProps) {
         const light = (keys: string[]) => {
           for (const chip of chips) chip.toggleAttribute("data-lit", keys.includes(chip.dataset.tool ?? ""));
         };
-        const loop: Loop = { tl: null, visible: false, held: false, started: false };
+        const loop: Loop = { tl: null, visible: false, held: false, started: false, wait: 0 };
         const running = () => loop.visible && !loop.held && idleMode() === "full";
-        const sync = () => {
-          const run = running();
-          tile.toggleAttribute("data-held", loop.held);
-          if (run && !loop.started) {
-            loop.started = true;
-            pass(0.35 + i * 0.55);
-          } else loop.tl?.paused(!run);
-        };
         const pass = (delay: number) => {
           loop.tl?.kill();
           const tl = BUILDERS[id](gsap, tile, light);
-          tl.delay(delay);
+          tl.paused(true);
           tl.eventCallback("onUpdate", () => bar && gsap.set(bar, { scaleX: tl.progress() }));
-          tl.eventCallback("onComplete", () => pass(0));
           loop.tl = tl;
-          tl.paused(!running());
+          loop.wait = delay;
+        };
+        const frames = frameLoop({ name: `tools/bento/${id}`, host: tile, heavy: true, wakeOn: null }, ({ dt }) => {
+          const tl = loop.tl;
+          if (!tl || !running()) return false;
+          if (loop.wait > 0) {
+            loop.wait -= dt;
+            return;
+          }
+          tl.totalTime(Math.min(tl.totalDuration(), tl.totalTime() + dt));
+          if (tl.totalTime() >= tl.totalDuration()) pass(0);
+        });
+        const sync = () => {
+          tile.toggleAttribute("data-held", loop.held);
+          if (!running()) return;
+          if (!loop.started) {
+            loop.started = true;
+            pass(0.35 + i * 0.55);
+          }
+          frames.wake();
         };
         syncs.push(sync);
         const io = new IntersectionObserver(([e]) => {
@@ -91,6 +103,7 @@ export default function BentoLoops({ locale, groups }: ViewProps) {
           tile.removeEventListener("pointerup", onPointerUp);
           tile.removeEventListener("focusin", hold);
           tile.removeEventListener("focusout", onFocusOut);
+          frames.stop();
           loop.tl?.kill();
         });
       });
