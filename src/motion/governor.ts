@@ -8,14 +8,14 @@ import { useEffect, useState, useSyncExternalStore, type RefObject } from "react
  * - Idle: no pointer, touch, key, wheel or page scroll for IDLE_MS. Any input wakes the page
  *   synchronously, inside the event handler (isIdle / onIdleChange / useIdle).
  * - DOM contract (startGovernor, mounted once by <MotionGovernor/>): html[data-idle] while idle,
- *   html[data-page-hidden] while the tab is hidden, data-inview="true|false" on section roots,
- *   the footer, [data-motion-root] and every element that hosts an infinite CSS loop. governor.css
+ *   html[data-page-hidden] while the tab is hidden, data-inview="true|false" on every section in
+ *   main, the footer, [data-motion-root] and every element that hosts an infinite CSS loop. governor.css
  *   turns those into --loop-play: paused, which the loops read as their animation-play-state.
  */
 
 export const IDLE_MS = 45_000;
 const ROOT_MARGIN = "48px 0px";
-const ROOTS = "main section[id], main > section, footer, [data-motion-root]";
+const ROOTS = "main section, footer, [data-motion-root]";
 const INPUT = ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"] as const;
 
 // ---------- in view ----------
@@ -163,14 +163,23 @@ function track(el: Element) {
   );
 }
 
-/** Every element running an infinite CSS loop inside root gets its own in-view flag, so a loop in
- *  a tall section rests while the part of the section it sits in is off screen. */
-function findLoopHosts(root: Element) {
-  for (const a of root.getAnimations({ subtree: true })) {
+/** Every element running an infinite CSS loop gets its own in-view flag, so a loop in a tall
+ *  section rests while the part of the section it sits in is off screen. */
+function trackLoops(animations: Animation[], except?: Element) {
+  for (const a of animations) {
     if (!(a instanceof CSSAnimation) || a.timeline !== document.timeline) continue;
     const target = (a.effect as KeyframeEffect | null)?.target;
-    if (target && target !== root && a.effect?.getTiming().iterations === Infinity) track(target);
+    if (target && target !== except && a.effect?.getTiming().iterations === Infinity) track(target);
   }
+}
+
+function findLoopHosts(root: Element) {
+  trackLoops(root.getAnimations({ subtree: true }), root);
+}
+
+/** Loops a state switches on later (a demo step adding a class) announce themselves here. */
+function onAnimationStart(e: AnimationEvent) {
+  if (e.target instanceof Element && !roots.has(e.target)) trackLoops(e.target.getAnimations());
 }
 
 /** Finds section roots (again after a route change) and drops the ones that left the DOM. */
@@ -196,5 +205,6 @@ export function startGovernor() {
   const vis = () => html.toggleAttribute("data-page-hidden", document.hidden);
   document.addEventListener("visibilitychange", vis);
   vis();
+  document.addEventListener("animationstart", onAnimationStart, { capture: true, passive: true });
   scanRoots();
 }
