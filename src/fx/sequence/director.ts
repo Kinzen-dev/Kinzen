@@ -617,7 +617,9 @@ export function startSequence(els: StageEls): () => void {
     // The safety net already showed the finished drawing (a slow load): start from the hold.
     if (d.shown) t = DRAW_S;
     svg.style.opacity = "1";
-    stageStore.set({ running: true, scenes: ["desk"], skipped: [], visible: cur });
+    // All five dots from the first frame (the loop is the plan); setOrder() trims them later if this
+    // device cannot run the GPU scenes, so the controls never open as a lone, lopsided button.
+    stageStore.set({ running: true, scenes: ORDER, skipped: [], visible: cur });
     publish();
     sync();
     // The GPU comes in once the drawing is under way (after first paint, when the browser is idle).

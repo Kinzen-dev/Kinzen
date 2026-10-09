@@ -63,7 +63,7 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
           <InkArt />
         </p>
 
-        <div className="hero-body grid gap-6 border-t border-rule pt-6 pb-12 md:grid-cols-12 md:gap-x-6 md:gap-y-8 md:pt-7 md:pb-14">
+        <div className="hero-body grid gap-6 pt-6 pb-12 md:grid-cols-12 md:gap-x-6 md:gap-y-8 md:pt-7 md:pb-14">
           <div className="hero-head md:col-span-12">
             <h1 id="hero-title" className="hero-title">
               <span>{nobr(t(profile.displayName, locale))}</span>{" "}
