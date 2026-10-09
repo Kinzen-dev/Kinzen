@@ -65,6 +65,8 @@
   padding: var(--beam-w, 1.5px);
   border-radius: inherit;
   container-type: size;
+  /* The turning square is larger than the parent: keep it out of the parent's scrollable area. */
+  overflow: clip;
   pointer-events: none;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
