@@ -480,6 +480,7 @@
   background: var(--hw-amber);
   box-shadow: 0 0 0.6em var(--hw-amber);
   animation: hw-breathe 2.4s ease-in-out infinite;
+  animation-play-state: var(--loop-play, running);
 }
 .hw-crumb {
   margin-inline: auto;
@@ -588,6 +589,7 @@
 }
 .helm-stage:is([data-step="2"], [data-step="3"]) .hw-space.is-active .hw-glyph::after {
   animation: hw-glyph 1.8s var(--hw-ease) infinite;
+  animation-play-state: var(--loop-play, running);
 }
 .hw-tag {
   margin-left: auto;
@@ -1072,6 +1074,7 @@
 .helm-stage:is([data-step="2"], [data-step="3"], [data-step="4"]) .hw-strip::after {
   opacity: calc(1 - var(--v4));
   animation: hw-run 2.6s linear infinite;
+  animation-play-state: var(--loop-play, running);
   animation-delay: calc(var(--i) * -0.7s);
 }
 .helm-stage[data-step="4"] .hw-strip::before {
@@ -1163,6 +1166,7 @@
   margin-top: 0.15em;
   background: var(--hw-amber);
   animation: hw-blink 1.05s steps(1) infinite;
+  animation-play-state: var(--loop-play, running);
 }
 
 /* ---------- message in flight (beat 4), seeked by scroll ---------- */
@@ -1196,6 +1200,7 @@
 }
 .helm-stage[data-step="3"] .hw-arc path {
   animation: hw-march 0.9s linear infinite;
+  animation-play-state: var(--loop-play, running);
 }
 .hw-note {
   position: absolute;

@@ -12,6 +12,7 @@ import { HeroScale } from "./hero-scale";
 import { InkArt } from "@/fx/ink/ink-art";
 import { HeroControls } from "@/fx/react/hero-controls";
 import "./hero.css";
+import { BeamRing } from "@/motion/loops";
 
 /**
  * The first screen. Its top band is a stage (v4): the ink desk, server-rendered finished inside
@@ -92,6 +93,7 @@ export function Hero({ locale, dict, fx, v3 }: { locale: Locale; dict: Dictionar
             <div className="hero-ctas mt-7">
               {email ? (
                 <a href={email.href} className="hero-cta hero-cta-primary beam">
+                  <BeamRing />
                   {nobr(dict.hero.ctaEmail)}
                   <svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="none">
                     <path

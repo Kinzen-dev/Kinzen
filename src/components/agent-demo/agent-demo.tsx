@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ClinicCopy } from "@/i18n/v3/clinic";
 import "./agent-demo.css";
 import { nobr } from "@/lib/thai-nodes";
+import { BeamRing } from "@/motion/loops";
 
 type Copy = ClinicCopy["demo"];
 type Scenario = Copy["scenarios"][number];
@@ -286,6 +287,7 @@ export function AgentDemo({ copy }: { copy: Copy }) {
                 onClick={() => choose(i)}
                 className={`agent-demo-choice grid min-h-11 grid-cols-[auto_1fr] items-baseline gap-2 rounded-[var(--radius-sm)] border border-rule bg-surface px-3 py-3 text-left transition-colors duration-200 hover:border-rule-strong md:gap-3 md:px-4 ${scenario === i ? "beam" : ""}`}
               >
+                {scenario === i ? <BeamRing /> : null}
                 <kbd className="readout" aria-hidden="true">
                   {i + 1}
                 </kbd>

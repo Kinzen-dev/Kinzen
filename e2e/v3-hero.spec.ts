@@ -165,13 +165,15 @@ test.describe("hero v3", () => {
 
   test("the beam runs on the pill's own edge, never outside it", async ({ page }) => {
     await page.goto("/");
+    // The ring (src/motion/loops.tsx) covers exactly the pill's border box.
     const inset = await hero(page)
       .locator(".hero-cta-primary")
       .evaluate((el) => {
-        const b = getComputedStyle(el, "::before");
-        return [b.top, b.right, b.bottom, b.left];
+        const a = el.getBoundingClientRect();
+        const r = el.querySelector(".beam-ring")!.getBoundingClientRect();
+        return [r.top - a.top, a.right - r.right, a.bottom - r.bottom, r.left - a.left].map((v) => Math.round(v));
       });
-    expect(inset).toEqual(["0px", "0px", "0px", "0px"]);
+    expect(inset).toEqual([0, 0, 0, 0]);
   });
 
   test("phone CTA row: the primary takes the full row, the two secondaries share the next", async ({ page }) => {

@@ -139,19 +139,18 @@
 /* The beam runs ON the pill's edge: a pale glint travelling round the gold border (gold light on
    a gold fill would vanish, and a ring floating outside read as a misregistered print). Above the
    fill (z-index 0 inside the pill's isolation), never over the label (the ring is 1.5px). */
-.hero-cta-primary.beam::before {
-  inset: 0;
-  z-index: 0;
-  padding: 2px;
-  background: conic-gradient(
-    from var(--beam),
+.hero-cta-primary.beam {
+  --beam-inset: 0;
+  --beam-z: 0;
+  --beam-w: 2px;
+  --beam-paint: conic-gradient(
     transparent 0 60%,
     color-mix(in oklab, white 40%, transparent) 78%,
     color-mix(in oklab, white 92%, var(--gold)) 88%,
     transparent 93%
   );
 }
-.hero-cta-primary > * {
+.hero-cta-primary > :not(.beam-ring) {
   position: relative;
   z-index: 1;
 }
@@ -262,6 +261,7 @@
   border-radius: inherit;
   background: var(--gold);
   animation: hero-live 2.4s var(--ease-out) infinite;
+  animation-play-state: var(--loop-play, running);
 }
 @keyframes hero-live {
   from {
@@ -275,7 +275,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   /* A still ring 5px out would read as a focus ring: the filled pill is enough on its own. */
-  .hero-cta-primary.beam::before {
+  .hero-cta-primary.beam > .beam-ring {
     display: none;
   }
   .hero-live::after {

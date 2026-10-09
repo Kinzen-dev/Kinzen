@@ -10,6 +10,7 @@ import { Art } from "@/components/art/art";
 import { HelmWindow } from "./helm-window";
 import { HelmArm } from "./helm-arm";
 import "./helm.css";
+import { Sweep } from "@/motion/loops";
 
 /**
  * Helm sticky scrollytelling scene (ticket v3-05). A light scene: copy on the left, a Helm
@@ -35,8 +36,8 @@ export function HelmScene({ locale, v3 }: { locale: Locale; dict: Dictionary; v3
                   <i aria-hidden="true" />
                   {nobr(copy.kicker)}
                 </p>
-                <h3 id="helm-title" className="helm-title sweep">
-                  {project?.name ?? "Helm"}
+                <h3 id="helm-title" className="helm-title">
+                  <Sweep>{project?.name ?? "Helm"}</Sweep>
                 </h3>
               </div>
               <span className="helm-art">
