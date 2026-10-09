@@ -9,6 +9,7 @@ import { Art } from "@/components/art/art";
 import { AgentDemo } from "@/components/agent-demo/agent-demo";
 import { ClinicStage } from "./clinic-stage";
 import "./clinic.css";
+import { Sweep } from "@/motion/loops";
 
 /**
  * Clinic receptionist showcase (ticket v3-04): a navy scene card inside the page gutter. Intro with the
@@ -34,7 +35,7 @@ export function ClinicScene({ locale, v3 }: { locale: Locale; dict: Dictionary; 
               {nobr(copy.eyebrow)}
             </p>
             <h3 id="clinic-title" className="cr-title">
-              {head} <span className="sweep">{tail}</span>
+              {head} <Sweep>{tail}</Sweep>
             </h3>
             <p className="cr-lede">{nobr(t(project.tagline, locale))}</p>
             <p>

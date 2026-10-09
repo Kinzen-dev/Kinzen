@@ -232,6 +232,7 @@
     transparent 66%
   );
   animation: lo-breathe 5.5s ease-in-out infinite;
+  animation-play-state: var(--loop-play, running);
 }
 .lo-core-orb {
   width: 100%;
@@ -270,6 +271,7 @@
   );
   mix-blend-mode: soft-light;
   animation: lo-sheen 14s linear infinite;
+  animation-play-state: var(--loop-play, running);
 }
 .lo-core-word {
   font-weight: 700;

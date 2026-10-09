@@ -131,21 +131,34 @@
 }
 /* "present": the live gold dot. */
 .era-live {
+  position: relative;
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
   background: var(--gold);
-  box-shadow: 0 0 0 0 color-mix(in oklch, var(--gold) 60%, transparent);
 }
+/* The ripple: a gold disc scaling to 1.4rem (a 0.45rem ring) as it fades; compositor only. */
 @media (prefers-reduced-motion: no-preference) {
-  .era-live {
+  .era-live::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--gold);
+    opacity: 0;
     animation: era-live 2.4s var(--ease-out) infinite;
+    animation-play-state: var(--loop-play, running);
   }
 }
 @keyframes era-live {
+  0% {
+    opacity: 0.6;
+    scale: 1;
+  }
   70%,
   100% {
-    box-shadow: 0 0 0 0.45rem color-mix(in oklch, var(--gold) 0%, transparent);
+    opacity: 0;
+    scale: 2.8;
   }
 }
 /* Stack tags: pill shape, the pill inset. */

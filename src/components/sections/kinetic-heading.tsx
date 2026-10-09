@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { Sweep } from "@/motion/loops";
 
 /**
  * A heading whose words enter one after another (blur to sharp, a small rise) once it scrolls
@@ -47,7 +48,7 @@ export function KineticHeading({
         <span key={i}>
           {i > 0 && joiner ? joiner : null}
           <span className={i === keyIndex ? "kin-unit kin-key" : "kin-unit"} style={{ ["--i" as string]: i }}>
-            {i === keyIndex ? <span className="sweep">{u}</span> : u}
+            {i === keyIndex ? <Sweep>{u}</Sweep> : u}
           </span>
         </span>
       ))}

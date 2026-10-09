@@ -41,6 +41,7 @@
   display: flex;
   width: max-content;
   animation: marquee var(--marquee-s, 40s) linear infinite;
+  animation-play-state: var(--loop-play, running);
 }
 .marquee[data-reverse] .marquee-track {
   animation-direction: reverse;
