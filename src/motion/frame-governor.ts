@@ -275,6 +275,11 @@ export function frameLoop(opts: LoopOptions, frame: (tick: Tick) => After): Loop
   let winN = 0;
   let good = 0;
   let cool = 0;
+  // The display's frame period: the shortest gap between rAF callbacks lately (a 60 Hz screen
+  // never shows a 120 cap's pace, and that is not a slow GPU).
+  const gaps = new Float32Array(120);
+  let gapI = 0;
+  let prevCb = 0;
 
   const active = () => !stopped && inView && !asleep && !document.hidden;
 
@@ -285,7 +290,11 @@ export function frameLoop(opts: LoopOptions, frame: (tick: Tick) => After): Loop
     ema = ema ? ema * 0.9 + raw * 0.1 : raw;
     if (++winN < AD_WINDOW || now < cool) return;
     winN = 0;
-    const target = 1000 / c;
+    let vsync = Infinity;
+    for (const g of gaps) if (g > 2 && g < vsync) vsync = g;
+    // The pace a frame must hold: the cap, but never faster than the display, and only ever
+    // defended down to 60 fps (resolution is not traded to chase 120).
+    const target = Math.max(1000 / c, Number.isFinite(vsync) ? vsync : 0, 1000 / 60);
     if (ema > target * 1.3 && scale > minScale + 1e-3) {
       scale = Math.max(minScale, +(scale - 0.1).toFixed(2));
       good = 0;
@@ -307,6 +316,8 @@ export function frameLoop(opts: LoopOptions, frame: (tick: Tick) => After): Loop
     raf = 0;
     if (!active()) return;
     raf = requestAnimationFrame(tick);
+    if (prevCb) gaps[gapI++ % gaps.length] = now - prevCb;
+    prevCb = now;
     const raw = cap.accept(now);
     if (raw < 0) return;
     const dt = last ? Math.min((now - last) / 1000, 1 / 20) : 1 / 60;
@@ -346,6 +357,7 @@ export function frameLoop(opts: LoopOptions, frame: (tick: Tick) => After): Loop
       if (raf) return;
       if (fresh) {
         last = 0;
+        prevCb = 0;
         cap.reset();
       }
       raf = requestAnimationFrame(tick);

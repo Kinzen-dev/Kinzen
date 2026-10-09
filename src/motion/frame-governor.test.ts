@@ -25,8 +25,9 @@ class Target {
 
 let ioCb: ((e: { target: unknown; isIntersecting: boolean }[]) => void) | null = null;
 const HZ = 120;
-/** Vsyncs each frame misses (a slow GPU): 0 = every vsync is on time. */
-let miss = 0;
+/** Vsyncs each frame misses (a slow GPU): 0 = every vsync is on time; a list cycles per frame. */
+let miss: number | number[] = 0;
+let missI = 0;
 
 function setup(coarse: boolean) {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance", "Date"] });
@@ -48,7 +49,9 @@ function setup(coarse: boolean) {
     const id = ++frameId;
     const now = performance.now();
     const period = 1000 / HZ;
-    const at = (Math.floor(now / period + 1e-6) + 1 + miss) * period;
+    const m = typeof miss === "number" ? miss : miss[missI++ % miss.length];
+    // Fake timers round delays to whole ms: snap to the nearest slot, then the next one.
+    const at = (Math.round(now / period) + 1 + m) * period;
     frames.set(
       id,
       setTimeout(() => {
@@ -235,8 +238,8 @@ describe("frame governor", () => {
     setup(false);
     const g = await load();
     const scales: number[] = [];
-    // A slow GPU: every frame misses two vsyncs (40 fps against a 120 pace).
-    miss = 2;
+    // A slow GPU: frames miss one to three vsyncs, unevenly (about 37 fps, the display can do 60+).
+    miss = [1, 3, 2, 3];
     const l = g.frameLoop(
       { name: "x", host: new Target() as unknown as Element, heavy: true, adaptive: { onScale: (s) => scales.push(s) } },
       () => {},
@@ -247,6 +250,22 @@ describe("frame governor", () => {
     expect(l.scale).toBeGreaterThanOrEqual(0.6);
     miss = 0;
     vi.advanceTimersByTime(30_000);
+    expect(l.scale).toBe(1);
+    l.stop();
+  });
+
+  it("never reads a 60 Hz screen (or a steady power-saving cap) under a 120 cap as a slow GPU", async () => {
+    setup(false);
+    const g = await load();
+    const scales: number[] = [];
+    // A 60 Hz display: every callback lands on every other 120 Hz slot.
+    miss = 1;
+    const l = g.frameLoop(
+      { name: "x", host: new Target() as unknown as Element, heavy: true, adaptive: { onScale: (s) => scales.push(s) } },
+      () => {},
+    );
+    vi.advanceTimersByTime(10_000);
+    expect(scales).toEqual([]);
     expect(l.scale).toBe(1);
     l.stop();
   });
