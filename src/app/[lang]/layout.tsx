@@ -9,6 +9,7 @@ import { pageOpenGraph } from "@/lib/open-graph";
 import { ThemeScript } from "@/components/theme-script";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { PerfHudGate } from "@/components/perf-hud/perf-hud-gate";
 import { fontVariables } from "../fonts";
 import "../globals.css";
 
@@ -68,6 +69,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           {children}
         </main>
         <SiteFooter locale={lang} dict={dict} />
+        <PerfHudGate />
         <Analytics />
         <SpeedInsights />
       </body>
