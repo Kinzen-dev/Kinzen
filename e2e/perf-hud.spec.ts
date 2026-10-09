@@ -14,12 +14,8 @@ async function hudChunks(page: Page) {
       .map((e) => e.name)
       .filter((n) => n.endsWith(".js")),
   );
-  const found: string[] = [];
-  for (const url of urls) {
-    const body = await (await page.request.get(url)).text();
-    if (body.includes("Performance monitor")) found.push(new URL(url).pathname);
-  }
-  return found;
+  const bodies = await Promise.all(urls.map(async (url) => [url, await (await page.request.get(url)).text()] as const));
+  return bodies.filter(([, body]) => body.includes("Performance monitor")).map(([url]) => new URL(url).pathname);
 }
 
 /** Counts every requestAnimationFrame the page asks for, from before any page script runs. */
@@ -38,7 +34,9 @@ const rafCalls = (page: Page) => page.evaluate(() => (window as Window & { __raf
 
 test.describe("perf HUD (p-03)", () => {
   test("off by default: no overlay, the HUD chunk is never fetched", async ({ page }) => {
-    await page.goto("/?perf=1");
+    // Reads every script the page loaded to find the HUD's: slow on a loaded machine.
+    test.setTimeout(60_000);
+    await page.goto("/cv?perf=1");
     await expect(hud(page)).toBeVisible();
     const chunks = await hudChunks(page);
     expect(chunks.length).toBeGreaterThan(0);

@@ -10,8 +10,9 @@ export type DeviceClass = "phone" | "tablet" | "desktop";
 /** One governed render loop as the frame governor publishes it. */
 export type GovernedLoop = { state?: string; fps?: number; scale?: number };
 
-/** The frame governor's read-only debug surface, `window.__kzFrames` (perf-gpu); every field optional. */
+/** The frame governor's read-only debug surfaces (perf-gpu); every field optional. */
 export type Frames = { cls?: string; mode?: string; cap?: number; loops?: Record<string, GovernedLoop> };
+export type GovernorGlobal = { mode?: string; deviceClass?: string; fpsCap?: number; scale?: number; active?: number };
 
 /** What the HUD shows of the governor: its mode line and the loops that are drawing. */
 export type Governor = { cls?: string; mode: string; loops: string };
@@ -20,9 +21,14 @@ export type Governor = { cls?: string; mode: string; loops: string };
  * "full cap 60" plus "2 run 3 settled: night-desk 60 x0.75, hero 30": running loops first, busiest
  * first, at most three named (the part after the last slash).
  */
-export function readGovernor(frames: Frames | null | undefined): Governor | null {
-  if (!frames?.mode) return null;
-  const loops = Object.entries(frames.loops ?? {});
+export function readGovernor(
+  frames: Frames | null | undefined,
+  global: GovernorGlobal | null | undefined = undefined,
+): Governor | null {
+  const mode = frames?.mode ?? global?.mode;
+  if (!mode) return null;
+  const cap = frames?.cap ?? global?.fpsCap;
+  const loops = Object.entries(frames?.loops ?? {});
   const count = (state: string) => loops.filter(([, l]) => l.state === state).length;
   const running = loops
     .filter(([, l]) => l.state === "running")
@@ -34,8 +40,8 @@ export function readGovernor(frames: Frames | null | undefined): Governor | null
     });
   const counts = [`${count("running")} run`, `${count("settled")} settled`, `${count("paused")} paused`].join(" ");
   return {
-    cls: frames.cls,
-    mode: [frames.mode, frames.cap ? `cap ${frames.cap}` : ""].filter(Boolean).join(" "),
+    cls: frames?.cls ?? global?.deviceClass,
+    mode: [mode, cap ? `cap ${cap}` : ""].filter(Boolean).join(" "),
     loops: loops.length ? `${counts}${running.length ? `: ${running.join(", ")}` : ""}` : "none",
   };
 }
@@ -169,7 +175,8 @@ export function startMonitor() {
       const rafPerSec = (rafCalls * 1000) / Math.max(1, now - rafSince);
       rafCalls = 0;
       rafSince = now;
-      const governor = readGovernor((window as Window & { __kzFrames?: Frames }).__kzFrames);
+      const w = window as Window & { __kzFrames?: Frames; __kzGovernor?: GovernorGlobal };
+      const governor = readGovernor(w.__kzFrames, w.__kzGovernor);
       return {
         fps: lastSecond,
         p95: percentile(sorted, 95),

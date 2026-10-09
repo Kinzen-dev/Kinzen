@@ -3,6 +3,9 @@
 // and CPU throttles (Chromium). Writes report.json and report.md; prints the markdown.
 //
 //   pnpm perf:lab [url]                      default https://www.kinzen.dev/
+//   pnpm perf:lab <urlA> <urlB>              A/B: each configuration runs on A and B back to back
+//                                            (order alternates per configuration), so both sides
+//                                            see the same host load; rows are labelled A and B
 //     --engines chromium,webkit  --classes phone,desktop  --cpu 1,4 (Chromium; WebKit runs at 1x)
 //     --only idle,pages,interaction[,long] (long = 50 s idle per hero and Play, light mode then input; opt-in)  --sections hero,contact  --window 5000  --play 4000  --views 3000
 //     --writes 2000 (attribute-write sampling per section; 0 = off; default on at 1x only)
@@ -23,7 +26,11 @@ const flag = (name, dflt) => {
   return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : dflt;
 };
 const list = (name, dflt) => flag(name, dflt).split(",").filter(Boolean);
-const url = argv.find((a, i) => /^https?:\/\//.test(a) && !argv[i - 1]?.startsWith("--")) ?? "https://www.kinzen.dev/";
+const given = argv.filter((a, i) => /^https?:\/\//.test(a) && !argv[i - 1]?.startsWith("--")).slice(0, 2);
+const targets = (given.length ? given : ["https://www.kinzen.dev/"]).map((url, i, all) => ({
+  url,
+  side: all.length > 1 ? "AB"[i] : "",
+}));
 const engines = list("engines", "chromium,webkit");
 const classes = list("classes", "phone,desktop").filter((c) => c in CLASSES);
 const cpus = list("cpu", "1,4").map(Number);
@@ -61,49 +68,59 @@ async function phase(browser, cfg, name, budgetMs, fn) {
 
 // Host load matters: CPU throttling multiplies whatever else the machine is doing.
 const load = () => loadavg().map((x) => +x.toFixed(1));
-const report = { url, startedAt: new Date().toISOString(), host: { cores: hostCpus().length }, configs: [] };
+const report = {
+  urls: targets.map((t) => (t.side ? `${t.side} ${t.url}` : t.url)),
+  startedAt: new Date().toISOString(),
+  host: { cores: hostCpus().length },
+  configs: [],
+};
 const save = () => writeFileSync(join(out, "report.json"), JSON.stringify(report, null, 2));
 
-for (const cfg of configs) {
-  const label = `${cfg.engine} ${cfg.cls} cpu ${cfg.cpu}x`;
-  console.error(`[perf-lab] ${label}`);
-  const writes = Number(writesFlag ?? (cfg.cpu === 1 ? 2000 : 0));
-  const entry = { label, ...cfg, loadBefore: load() };
-  let browser;
-  try {
-    browser = await step("launch", 60_000, () => launch(cfg.engine));
-    if (only.includes("idle")) {
-      entry.idle = await phase(browser, cfg, "idle sections", 15 * 60_000, (page, cdp) =>
-        idleSections(page, cdp, { url, windowMs, culpritMs: writes, only: sections }),
-      );
-      console.error(`[perf-lab]   idle sections ${entry.idle.rows.length} rows ${entry.idle.error ?? ""}`);
+for (const [n, cfg] of configs.entries()) {
+  // A/B: alternate which side goes first, so neither always meets the warmer (or busier) machine.
+  for (const { url, side } of n % 2 ? [...targets].reverse() : targets) {
+    const label = `${side ? side + " " : ""}${cfg.engine} ${cfg.cls} cpu ${cfg.cpu}x`;
+    console.error(`[perf-lab] ${label}`);
+    const writes = Number(writesFlag ?? (cfg.cpu === 1 ? 2000 : 0));
+    const entry = { label, side, url, ...cfg, loadBefore: load() };
+    let browser;
+    try {
+      browser = await step("launch", 60_000, () => launch(cfg.engine));
+      if (only.includes("idle")) {
+        entry.idle = await phase(browser, cfg, "idle sections", 15 * 60_000, (page, cdp) =>
+          idleSections(page, cdp, { url, windowMs, culpritMs: writes, only: sections }),
+        );
+        console.error(`[perf-lab]   idle sections ${entry.idle.rows.length} rows ${entry.idle.error ?? ""}`);
+      }
+      if (only.includes("pages")) {
+        entry.pages = await phase(browser, cfg, "idle pages", 15 * 60_000, (page, cdp) =>
+          idlePages(page, cdp, { url, windowMs }),
+        );
+        console.error(`[perf-lab]   idle pages ${entry.pages.rows.length} rows ${entry.pages.error ?? ""}`);
+      }
+      if (only.includes("long")) {
+        entry.long = await phase(browser, cfg, "long idle", 10 * 60_000, (page, cdp) =>
+          idleLong(page, cdp, { url, windowMs }),
+        );
+        console.error(`[perf-lab]   long idle ${entry.long.rows.length} rows ${entry.long.error ?? ""}`);
+      }
+      if (only.includes("interaction")) {
+        entry.interaction = await phase(browser, cfg, "interaction", 15 * 60_000, (page, cdp) =>
+          interactions(page, cdp, { url, playMs, viewMs }),
+        );
+        console.error(
+          `[perf-lab]   interaction ${entry.interaction.rows.length} rows ${entry.interaction.error ?? ""}`,
+        );
+      }
+    } catch (e) {
+      entry.error = String(e.message ?? e);
+    } finally {
+      if (browser) await step("browser close", 20_000, () => browser.close()).catch(() => {});
     }
-    if (only.includes("pages")) {
-      entry.pages = await phase(browser, cfg, "idle pages", 15 * 60_000, (page, cdp) =>
-        idlePages(page, cdp, { url, windowMs }),
-      );
-      console.error(`[perf-lab]   idle pages ${entry.pages.rows.length} rows ${entry.pages.error ?? ""}`);
-    }
-    if (only.includes("long")) {
-      entry.long = await phase(browser, cfg, "long idle", 10 * 60_000, (page, cdp) =>
-        idleLong(page, cdp, { url, windowMs }),
-      );
-      console.error(`[perf-lab]   long idle ${entry.long.rows.length} rows ${entry.long.error ?? ""}`);
-    }
-    if (only.includes("interaction")) {
-      entry.interaction = await phase(browser, cfg, "interaction", 15 * 60_000, (page, cdp) =>
-        interactions(page, cdp, { url, playMs, viewMs }),
-      );
-      console.error(`[perf-lab]   interaction ${entry.interaction.rows.length} rows ${entry.interaction.error ?? ""}`);
-    }
-  } catch (e) {
-    entry.error = String(e.message ?? e);
-  } finally {
-    if (browser) await step("browser close", 20_000, () => browser.close()).catch(() => {});
+    entry.loadAfter = load();
+    report.configs.push(entry);
+    save();
   }
-  entry.loadAfter = load();
-  report.configs.push(entry);
-  save();
 }
 report.finishedAt = new Date().toISOString();
 save();
@@ -119,7 +136,12 @@ const longCell = (r) => (r.longTasks === null || r.longTasks === undefined ? "n/
 const anim = (r) => `${r.animsOn}/${r.animsOff} (${r.animsNonComposited})`;
 const errRow = (name, r, width) => [name, `ERROR: ${r.error}`, ...Array(width - 2).fill("")];
 
-const md = [`# Perf lab report`, "", `URL ${url}, ${report.startedAt} to ${report.finishedAt}.`, ""];
+const md = [`# Perf lab report`, "", `${report.urls.join(", ")}; ${report.startedAt} to ${report.finishedAt}.`, ""];
+md.push(
+  `Host load average is recorded per run (1-minute value in the summary, ${report.host.cores} cores). CPU throttling multiplies ` +
+    "whatever else the host is doing: read absolute numbers as relative, and compare A and B from the same report.",
+  "",
+);
 md.push(
   "Columns: main-thread ms per second (task = all main-thread work; script, style recalc, layout are parts of it; Chromium only), " +
     "page rAF frames/s (frames in which page code ran a rAF callback) and rAF callbacks/s, canvases drawing (WebGL draws or 2D paints in the window), " +
@@ -140,6 +162,7 @@ const summary = report.configs.map((c) => {
   const play = ix.filter((r) => r.step.startsWith("play"));
   return [
     c.label,
+    `${c.loadBefore[0]} / ${c.loadAfter[0]}`,
     na(median(idle.map((r) => r.cpu?.task))),
     na(idle.length ? Math.max(...idle.map((r) => r.cpu?.task ?? -1)) : null).replace("-1", "n/a"),
     na(median(idle.map((r) => r.rafFrames))),
@@ -156,6 +179,7 @@ md.push(
   table(
     [
       "config",
+      "load 1m (before / after)",
       "idle task ms/s (median)",
       "idle task ms/s (worst)",
       "idle rAF fr/s (median)",
@@ -174,6 +198,7 @@ for (const c of report.configs) {
   md.push(
     `## ${c.label}`,
     "",
+    ...(c.url ? [`URL ${c.url}`, ""] : []),
     `Host load average (1/5/15 min, ${report.host.cores} cores): ${c.loadBefore.join(" ")} before, ${c.loadAfter.join(" ")} after.`,
     "",
   );

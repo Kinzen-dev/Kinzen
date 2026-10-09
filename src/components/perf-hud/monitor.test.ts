@@ -53,6 +53,17 @@ describe("readGovernor", () => {
     });
   });
 
+  it("falls back to window.__kzGovernor for mode, cap and class", () => {
+    expect(readGovernor(undefined, { mode: "full", deviceClass: "tablet", fpsCap: 60, active: 0 })).toEqual({
+      cls: "tablet",
+      mode: "full cap 60",
+      loops: "none",
+    });
+    expect(readGovernor({ loops: { hero: { state: "running", fps: 60 } } }, { mode: "light" })?.loops).toBe(
+      "1 run 0 settled 0 paused: hero 60",
+    );
+  });
+
   it("says none when no loop is registered", () => {
     expect(readGovernor({ mode: "full", loops: {} })?.loops).toBe("none");
   });

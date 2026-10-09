@@ -247,7 +247,14 @@ export function reading(page) {
       t: performance.now(),
       scrollY: Math.round(scrollY),
       // The frame governor's debug surface (perf-gpu), when the build publishes one.
-      governor: window.__kzFrames ? JSON.parse(JSON.stringify(window.__kzFrames)) : null,
+      governor:
+        window.__kzFrames || window.__kzGovernor
+          ? {
+              mode: window.__kzFrames?.mode ?? window.__kzGovernor?.mode,
+              cap: window.__kzFrames?.cap ?? window.__kzGovernor?.fpsCap,
+              loops: JSON.parse(JSON.stringify(window.__kzFrames?.loops ?? {})),
+            }
+          : null,
       rafCalls: L.rafCalls,
       rafFrames: L.rafFrames,
       drawCalls: L.drawCalls,
