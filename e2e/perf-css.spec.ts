@@ -74,12 +74,17 @@ test.describe("motion governor (perf-css)", () => {
 
     await page.clock.fastForward(16_000);
     await expect(html).toHaveAttribute("data-idle", "");
-    // Each loop finishes the pass it is in (a few seconds at most), then stops: no CSS animation runs.
+    // Each loop finishes the pass it is in (a few seconds at most), then stops: no time-driven CSS
+    // animation runs (a scroll-driven one only moves when the page scrolls).
     const anyRunning = () =>
       page.evaluate(
-        () => document.getAnimations().filter((a) => a instanceof CSSAnimation && a.playState === "running").length,
+        () =>
+          document
+            .getAnimations()
+            .filter((a) => a instanceof CSSAnimation && a.timeline === document.timeline && a.playState === "running")
+            .map((a) => `${(a as CSSAnimation).animationName} ${a.effect?.getTiming().iterations}`),
       );
-    await expect.poll(anyRunning, { timeout: 16_000 }).toBe(0);
+    await expect.poll(anyRunning, { timeout: 16_000 }).toEqual([]);
 
     await page.keyboard.press("Shift");
     await expect(html).not.toHaveAttribute("data-idle");

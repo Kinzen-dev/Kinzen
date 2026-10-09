@@ -182,7 +182,7 @@ test.describe("frame governor", () => {
 // WebGL scenes need a GPU (see the launch options at the top): on a software renderer the play
 // scenes rightly show their pictures, so there is nothing to pace.
 test.describe("frame governor, GPU scenes", () => {
-  test("a slow drift rests at 30 fps and reacts at full pace", async ({ page }) => {
+  test("a slow drift rests at 60 fps and reacts at full pace", async ({ page }, info) => {
     await page.goto("/en");
     const renderer = await page.evaluate(() => {
       const gl = document.createElement("canvas").getContext("webgl2");
@@ -193,12 +193,12 @@ test.describe("frame governor, GPU scenes", () => {
     await showView(page, "#play", "data-scene-id", "thock");
     await page.locator("#play .iv-stage").first().scrollIntoViewIfNeeded();
     await expect.poll(async () => (await loop(page, "play/thock"))?.state, { timeout: 20_000 }).toBe("running");
-    // Untouched (once warm): only the camera's slow breath moves, drawn at the 30 fps rest rate.
+    // Untouched (once warm): only the camera's slow breath moves, drawn at the 60 fps rest rate (a phone's heavy pace is 60 anyway; desktop's is 120).
     await expect
       .poll(
         async () => {
           const fps = (await loop(page, "play/thock"))?.fps ?? 0;
-          return fps >= 20 && fps <= 32;
+          return fps >= 45 && fps <= 63;
         },
         { timeout: 15_000 },
       )
@@ -207,6 +207,6 @@ test.describe("frame governor, GPU scenes", () => {
     const key = await page.evaluate(() => (window as unknown as { __thock: (c: string) => { x: number; y: number } }).__thock("KeyG"));
     await page.mouse.click(key.x, key.y);
     await page.waitForTimeout(500);
-    expect((await loop(page, "play/thock"))!.fps).toBeGreaterThan(40);
+    expect((await loop(page, "play/thock"))!.fps).toBeGreaterThan(info.project.name === "desktop" ? 70 : 45);
   });
 });
