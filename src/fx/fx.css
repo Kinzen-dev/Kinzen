@@ -40,7 +40,8 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+  /* Even inset on every side: with no dots the pill is a circle around the button, never an oval. */
+  padding: 0.25rem;
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--ink) 12%, transparent);
   background: color-mix(in oklab, var(--ground) 62%, transparent);
@@ -50,6 +51,8 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
+  /* The dots' side of the pill matches the button's inset (0.25rem pill + 0.5rem). */
+  padding-inline-start: 0.5rem;
 }
 .hero-stage-dots li {
   width: 0.375rem;

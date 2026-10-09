@@ -76,6 +76,7 @@
 }
 .sf-row {
   position: relative;
+  isolation: isolate;
   padding-block: var(--row-pad);
   border-top: 1px solid oklch(1 0 0 / 0.08);
 }
@@ -292,12 +293,21 @@
     opacity: 1;
     translate: 0 0;
   }
-  .sf-row {
+  /* The hover wash is a rounded plate wider than the row, so the figure and the context never sit
+     on its edge. */
+  .sf-row::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0 calc(-1 * var(--inset-card));
+    border-radius: var(--radius-sm);
+    background-color: transparent;
     transition: background-color 300ms var(--ease-out);
+    pointer-events: none;
   }
   @media (hover: hover) {
-    .sf-row:hover {
-      background-color: oklch(1 0 0 / 0.025);
+    .sf-row:hover::after {
+      background-color: oklch(1 0 0 / 0.035);
     }
   }
 }
