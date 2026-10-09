@@ -1,4 +1,5 @@
 import { FrameCap } from "@/fx/engine/frame-cap";
+import { isIdle, onIdleChange } from "./governor";
 
 /*
  * The frame governor: one scheduler for every canvas, WebGL and rAF-driven view on the site.
@@ -29,7 +30,7 @@ export type Device = {
 };
 
 /** No input for this long: light mode. */
-export const IDLE_MS = 45_000;
+export { IDLE_MS } from "./governor";
 /** Light mode runs a loop at this share of its full-mode rate. */
 const LIGHT_SHARE = 0.5;
 /** Display-rate loops (not heavy) in light mode. */
@@ -60,14 +61,8 @@ export function canvasDpr(max = Infinity): number {
 /* ---------------------------------- idle ---------------------------------- */
 
 let mode: Mode = "full";
-let lastInput = 0;
-let idleTimer = 0;
-let listening = false;
+let subscribed = false;
 const modeSubs = new Set<(m: Mode) => void>();
-// Same inputs as perf-css's motion governor (src/motion/governor.ts), which this adapter mirrors:
-// pointer, touch, key and wheel anywhere, and the page's own scroll only (an element's scroll can
-// be programmatic, a demo's log following its tail).
-const INPUTS = ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"] as const;
 
 function setMode(m: Mode) {
   if (m === mode) return;
@@ -76,26 +71,13 @@ function setMode(m: Mode) {
   for (const cb of [...modeSubs]) cb(m);
 }
 
-function checkIdle() {
-  idleTimer = 0;
-  const left = IDLE_MS - (performance.now() - lastInput);
-  if (left <= 0) setMode("light");
-  else idleTimer = window.setTimeout(checkIdle, left + 50);
-}
-
-function onInput() {
-  lastInput = performance.now();
-  if (mode !== "full") setMode("full");
-  if (!idleTimer) idleTimer = window.setTimeout(checkIdle, IDLE_MS + 50);
-}
-
+// The idle signal is the motion governor's (src/motion/governor.ts), so CSS loops and canvas
+// scenes go light, and come back, on the same input at the same moment.
 function listen() {
-  if (listening) return;
-  listening = true;
-  lastInput = performance.now();
-  for (const t of INPUTS) document.addEventListener(t, onInput, { capture: true, passive: true });
-  window.addEventListener("scroll", onInput, { passive: true });
-  idleTimer = window.setTimeout(checkIdle, IDLE_MS + 50);
+  if (subscribed || typeof window === "undefined") return;
+  subscribed = true;
+  mode = isIdle() ? "light" : "full";
+  onIdleChange((idle) => setMode(idle ? "light" : "full"));
 }
 
 /** Full while the visitor is around; light after IDLE_MS without input. */
