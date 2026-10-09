@@ -246,7 +246,8 @@ export function reading(page) {
     return {
       t: performance.now(),
       scrollY: Math.round(scrollY),
-      governor: window.__kzGovernor ? JSON.parse(JSON.stringify(window.__kzGovernor)) : null,
+      // The frame governor's debug surface (perf-gpu), when the build publishes one.
+      governor: window.__kzFrames ? JSON.parse(JSON.stringify(window.__kzFrames)) : null,
       rafCalls: L.rafCalls,
       rafFrames: L.rafFrames,
       drawCalls: L.drawCalls,
@@ -286,7 +287,13 @@ export function between(a, z) {
     glBuffers: live.map((g) => `#${g.id} ${g.drawingBuffer}${g.onScreen ? "" : "(off)"}`).join(", "),
     longTasks: z.longSupported ? z.longCount - a.longCount : null,
     longMs: z.longSupported ? Math.round(z.longTotal - a.longTotal) : null,
-    governor: z.governor?.mode ?? null,
+    governor: z.governor?.mode
+      ? [z.governor.mode, z.governor.cap ? `cap ${z.governor.cap}` : ""].join(" ").trim()
+      : null,
+    governedRunning: Object.entries(z.governor?.loops ?? {})
+      .filter(([, l]) => l.state === "running")
+      .map(([name, l]) => `${name} ${l.fps}${l.scale && l.scale !== 1 ? ` x${l.scale}` : ""}`)
+      .join(", "),
   };
 }
 

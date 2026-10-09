@@ -41,7 +41,7 @@ const ms = (v: number | null) => (v === null ? "-" : v.toFixed(1));
  * Field perf HUD for a real phone (?perf=1): fps over the last second, frame-time p95 over the last
  * 5 s, long tasks per minute (long frames where the browser has no long-task timing), page rAF
  * requests per second, running animations (on screen), canvases that drew in the last second, the
- * device class and the frame governor's mode when it publishes one.
+ * device class, and the frame governor's mode and drawing loops when it publishes them.
  */
 export function PerfHud({ onClose }: { onClose: () => void }) {
   const [s, setS] = useState<Sample | null>(null);
@@ -54,18 +54,6 @@ export function PerfHud({ onClose }: { onClose: () => void }) {
       monitor.stop();
     };
   }, []);
-
-  const g = s?.governor;
-  const gov = g?.mode
-    ? [
-        g.mode,
-        g.fpsCap ? `${g.fpsCap}cap` : "",
-        g.scale ? `x${g.scale}` : "",
-        g.active !== undefined ? `${g.active} live` : "",
-      ]
-        .filter(Boolean)
-        .join(" ")
-    : "n/a";
 
   return (
     <aside aria-label="Performance monitor" data-perf-hud="" style={box}>
@@ -81,8 +69,9 @@ export function PerfHud({ onClose }: { onClose: () => void }) {
             anims {s.animations} ({s.animationsOnScreen} on screen) · canvases {s.canvasesDrawing}
           </span>
           <span>
-            {s.deviceClass} · DPR {s.dpr} · gov {gov}
+            {s.deviceClass} · DPR {s.dpr} · gov {s.governor?.mode ?? "n/a"}
           </span>
+          {s.governor ? <span>loops {s.governor.loops}</span> : null}
         </>
       ) : (
         <span>perf: measuring</span>

@@ -300,14 +300,24 @@ for (const c of report.configs) {
     );
     md.push(
       table(
-        ["section", "window", "governor", "task", "rAF fr/s", "drawing", "anims on/off (non-comp)"],
+        [
+          "section",
+          "window",
+          "governor",
+          "governed loops running",
+          "task",
+          "rAF fr/s",
+          "drawing",
+          "anims on/off (non-comp)",
+        ],
         c.long.rows.flatMap((r) =>
           r.error
-            ? [errRow(r.section, r, 7)]
+            ? [errRow(r.section, r, 8)]
             : ["fresh", "idle", "input"].map((w) => [
                 r.section,
                 w,
                 na(r[w].governor),
+                r[w].governedRunning || "-",
                 na(r[w].cpu?.task),
                 r[w].rafFrames,
                 r[w].canvasFps || "0",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deviceClass, percentile } from "./monitor";
+import { deviceClass, percentile, readGovernor } from "./monitor";
 
 describe("percentile", () => {
   it("is the nearest-rank value of an ascending list", () => {
@@ -25,5 +25,35 @@ describe("deviceClass", () => {
     expect(deviceClass(true, 820)).toBe("tablet");
     expect(deviceClass(false, 390)).toBe("desktop");
     expect(deviceClass(false, 900)).toBe("desktop");
+  });
+});
+
+describe("readGovernor", () => {
+  it("is nothing until the governor publishes a mode", () => {
+    expect(readGovernor(undefined)).toBeNull();
+    expect(readGovernor({ loops: {} })).toBeNull();
+  });
+
+  it("names the busiest running loops and counts the rest", () => {
+    const g = readGovernor({
+      cls: "phone",
+      mode: "light",
+      cap: 60,
+      loops: {
+        hero: { state: "settled", fps: 0, scale: 1 },
+        "play/night-desk": { state: "running", fps: 60, scale: 0.75 },
+        "numbers/gold-numerals": { state: "running", fps: 30, scale: 1 },
+        "tools/orbit": { state: "paused", fps: 0, scale: 1 },
+      },
+    });
+    expect(g).toEqual({
+      cls: "phone",
+      mode: "light cap 60",
+      loops: "2 run 1 settled 1 paused: night-desk 60 x0.75, gold-numerals 30",
+    });
+  });
+
+  it("says none when no loop is registered", () => {
+    expect(readGovernor({ mode: "full", loops: {} })?.loops).toBe("none");
   });
 });

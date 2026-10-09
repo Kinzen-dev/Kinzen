@@ -104,17 +104,22 @@ test.describe("perf HUD (p-03)", () => {
     await expect(hud(page)).toHaveCount(0);
   });
 
-  test("shows the frame governor's mode when the page publishes one", async ({ page }) => {
+  test("shows the frame governor's mode and drawing loops when the page publishes them", async ({ page }) => {
     await page.addInitScript(() => {
-      (window as Window & { __kzGovernor?: object }).__kzGovernor = {
+      (window as Window & { __kzFrames?: object }).__kzFrames = {
+        cls: "phone",
         mode: "light",
-        fpsCap: 30,
-        scale: 0.75,
-        active: 1,
+        cap: 60,
+        loops: {
+          "play/night-desk": { state: "running", fps: 30, scale: 0.75 },
+          hero: { state: "settled", fps: 0, scale: 1 },
+        },
       };
     });
     await page.goto("/cv?perf=1");
-    await expect(hud(page)).toContainText("gov light 30cap x0.75 1 live");
+    await expect(hud(page)).toContainText("phone · DPR");
+    await expect(hud(page)).toContainText("gov light cap 60");
+    await expect(hud(page)).toContainText("loops 1 run 1 settled 0 paused: night-desk 30 x0.75");
   });
 
   test("the overlay is accessible and leaves the page axe clean", async ({ page }) => {
