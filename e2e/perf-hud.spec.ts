@@ -109,8 +109,8 @@ test.describe("perf HUD (p-03)", () => {
         mode: "light",
         cap: 60,
         loops: {
-          "play/night-desk": { state: "running", fps: 30, scale: 0.75 },
-          hero: { state: "settled", fps: 0, scale: 1 },
+          "play/night-desk": { state: "running", fps: 30, drawn: 30, cap: 30, scale: 0.75 },
+          hero: { state: "settled", fps: 0, drawn: 0, cap: 60, scale: 1 },
         },
       };
     });
