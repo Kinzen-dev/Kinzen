@@ -1,9 +1,9 @@
 import { isSoftwareRenderer } from "@/fx/engine/capability";
+import { canvasDpr, frameLoop, type After, type Loop, type LoopOptions } from "@/motion/frame-governor";
 
 /**
- * Runtime helpers shared by the lab-hero-a demos: an rAF loop that pauses off screen and in a
- * hidden tab and reports its own frame rate, the pointer as seen by the banner, and the
- * device profile each demo sizes itself by.
+ * Runtime helpers shared by the play scenes: a governed frame loop that reports its own frame
+ * rate, the pointer as seen by the banner, and the device profile each scene sizes itself by.
  */
 
 export type Profile = {
@@ -30,7 +30,7 @@ export function readProfile(maxDpr = 2): Profile {
   return {
     still: matchMedia("(prefers-reduced-motion: reduce)").matches,
     phone,
-    dpr: Math.min(devicePixelRatio || 1, phone ? Math.min(maxDpr, 2) : maxDpr),
+    dpr: canvasDpr(maxDpr),
   };
 }
 
@@ -43,61 +43,49 @@ declare global {
 }
 
 /**
- * Calls `frame(t, dt)` every animation frame while `host` is on screen and the tab is visible.
- * dt is in seconds, clamped to 1/20 so a stall never explodes a simulation. Returns a stop
- * function that cancels everything it started.
+ * Calls `frame(t, dt)` on the frame governor's schedule (src/motion/frame-governor): paced to
+ * 60 fps on phones, only while `host` is on screen and the tab is visible, at half rate in the
+ * idle light mode. dt is in seconds, clamped to 1/20 so a stall never explodes a simulation.
+ * `frame` may return false when the scene is settled (nothing would change on screen): the loop
+ * then sleeps until input inside `host` or `loop.wake()`; or a number of ms to sleep before the
+ * next frame. Returns the loop (`stop()` cancels everything it started).
  */
-export function runLoop(host: Element, frame: (t: number, dt: number) => void): () => void {
-  let raf = 0;
-  let visible = true;
-  let last = 0;
-  let acc = 0;
+export function runLoop(
+  host: Element,
+  frame: (t: number, dt: number) => After,
+  opts: { name: string; adaptive?: LoopOptions["adaptive"] },
+): Loop {
   let work = 0;
   let n = 0;
   let windowStart = 0;
-  const tick = (now: number) => {
-    raf = requestAnimationFrame(tick);
-    const dt = last ? Math.min((now - last) / 1000, 1 / 20) : 1 / 60;
-    last = now;
+  const loop = frameLoop({ name: opts.name, host, heavy: true, adaptive: opts.adaptive }, ({ now, dt, raw }) => {
+    if (raw === 0) {
+      windowStart = 0;
+      n = 0;
+      work = 0;
+    }
     const t0 = performance.now();
-    frame(now / 1000, dt);
+    const after = frame(now / 1000, dt);
     work += performance.now() - t0;
     n++;
     if (!windowStart) windowStart = now;
-    acc = now - windowStart;
-    if (acc >= 1000) {
-      window.__labFps = { fps: (n * 1000) / acc, frameMs: work / n, frames: n };
+    if (now - windowStart >= 1000) {
+      window.__labFps = { fps: (n * 1000) / (now - windowStart), frameMs: work / n, frames: n };
       n = 0;
       work = 0;
       windowStart = now;
     }
-  };
-  const sync = () => {
-    const on = visible && !document.hidden;
-    if (on && !raf) {
-      last = 0;
-      windowStart = 0;
-      n = 0;
-      work = 0;
-      raf = requestAnimationFrame(tick);
-    } else if (!on && raf) {
-      cancelAnimationFrame(raf);
-      raf = 0;
-    }
-  };
-  const io = new IntersectionObserver(([e]) => {
-    visible = !!e?.isIntersecting;
-    sync();
+    return after;
   });
-  io.observe(host);
-  document.addEventListener("visibilitychange", sync);
-  sync();
-  return () => {
-    io.disconnect();
-    document.removeEventListener("visibilitychange", sync);
-    cancelAnimationFrame(raf);
-    raf = 0;
-    delete window.__labFps;
+  return {
+    wake: loop.wake,
+    get scale() {
+      return loop.scale;
+    },
+    stop: () => {
+      loop.stop();
+      delete window.__labFps;
+    },
   };
 }
 

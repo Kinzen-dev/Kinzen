@@ -1,5 +1,5 @@
 import type { TierConfig } from "./capability";
-import { FrameCap } from "./frame-cap";
+import { frameLoop, type Loop } from "@/motion/frame-governor";
 import type { Level } from "./governor";
 import type { Palette } from "./palette";
 import { blurFS, compFS, downFS, pointFS, pointVS, quadVS, simFS } from "./shaders";
@@ -9,8 +9,9 @@ import type { Burst, Rgb, Targets } from "../targets/types";
 // texture ping-pong sim (position + velocity), gaussian points drawn additively into an HDR
 // target, two-level bloom, hue-preserving composite. Changes for the portfolio: fixed planar
 // camera (particles register with the DOM wordmark), targets arrive as data from a worker,
-// per-particle role, raw-delta frame callback for the governor, frame cap, DPR cap + pixel
-// budget + resolution scale, row-subset simulation, parallel shader compile (no long task).
+// per-particle role, raw-delta frame callback, frames scheduled by the site's frame governor
+// (src/motion/frame-governor: frame cap, phone pacing, idle light mode, adaptive resolution
+// scale), DPR cap + pixel budget, row-subset simulation, parallel shader compile (no long task).
 
 export type Params = {
   spring: number;
@@ -135,11 +136,11 @@ export class ParticleEngine {
   private pulseIdx = 0;
   private mouse = { world: [0, 0, 0] as [number, number, number], on: 0 };
   private time = 0;
-  private raf = 0;
+  private loop: Loop | null = null;
   private running = false;
   private needResize = true;
   private ro: ResizeObserver | null = null;
-  private cap: FrameCap;
+  private capFps: number;
   private hasTargets = false;
   // Paper ink (light theme only), tuned against filmstrips: landed-ink gain and its blur radius
   // (in point sizes, so small wordmarks stay crisp), airborne-dust gain and its coverage cap.
@@ -153,7 +154,8 @@ export class ParticleEngine {
   frames = 0;
   private framesLeft = -1;
   private onSettled: (() => void) | null = null;
-  private frame = (now: number) => this.tick(now);
+  /** The loop's name in the governor's debug surface. */
+  name = "fx/particles";
 
   constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, cfg: TierConfig) {
     this.gl = gl;
@@ -161,7 +163,7 @@ export class ParticleEngine {
     this.cfg = cfg;
     this.side = cfg.side;
     this.N = cfg.side * cfg.side;
-    this.cap = new FrameCap(cfg.fps);
+    this.capFps = cfg.fps;
     this.simFmt = gl.getExtension("EXT_color_buffer_float") ? gl.RGBA32F : gl.RGBA16F;
     if (this.simFmt === gl.RGBA16F) gl.getExtension("EXT_color_buffer_half_float");
     for (let i = 0; i < 4; i++) this.pulses[i * 4 + 3] = -100;
@@ -233,25 +235,42 @@ export class ParticleEngine {
     return true;
   }
 
-  /** The frame cap in force (the stage drops it to 30 for the idle drift). */
+  /** The frame cap in force in full mode (the governor halves it in idle light mode). */
   get fps(): number {
-    return this.cap.fps;
+    return this.capFps;
   }
 
   setFps(fps: number): void {
-    this.cap.fps = fps;
+    if (fps === this.capFps) return;
+    this.capFps = fps;
+    if (this.running) {
+      this.stop();
+      this.start();
+    }
   }
 
   start(): void {
     if (this.running || !this.progs || !this.hasTargets) return;
     this.running = true;
-    this.cap.reset();
-    this.raf = requestAnimationFrame(this.frame);
+    // The governor paces it (60 on phones), runs it only while the canvas is on screen, halves it
+    // when the visitor is idle, and scales the resolution down while frames miss the pace.
+    this.loop = frameLoop(
+      {
+        name: this.name,
+        host: this.canvas,
+        heavy: true,
+        fps: this.capFps,
+        wakeOn: null,
+        adaptive: { onScale: (scale) => this.setLevel({ scale, shift: this.level.shift }) },
+      },
+      ({ now, raw }) => this.tick(now, raw),
+    );
   }
 
   stop(): void {
     this.running = false;
-    cancelAnimationFrame(this.raf);
+    this.loop?.stop();
+    this.loop = null;
   }
 
   get isRunning(): boolean {
@@ -504,11 +523,8 @@ export class ParticleEngine {
 
   /* ---------- frame ---------- */
 
-  private tick(now: number): void {
+  private tick(now: number, raw: number): void {
     if (!this.running) return;
-    this.raf = requestAnimationFrame(this.frame);
-    const raw = this.cap.accept(now);
-    if (raw < 0) return;
     const dt = raw <= 0 ? 1 / 60 : Math.min(0.05, Math.max(0.0005, raw / 1000));
     this.renderFrame(dt);
     this.onFrame?.(raw, now);

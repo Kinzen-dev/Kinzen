@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { nobr } from "@/lib/thai-nodes";
+import { frameLoop, type After, type Loop, type Tick } from "@/motion/frame-governor";
 import { ToolMark } from "@/components/tools/tool-mark";
 import { groupById, type GroupId, type ViewProps } from "../types";
 import { tokens, toolName } from "../shared";
@@ -103,10 +104,7 @@ export default function StackPipeline({ locale, groups }: ViewProps) {
     let phases: Phase[] = [];
     let cycle = 0;
     let t = 0;
-    let last = 0;
-    let raf = 0;
-    let running = false;
-    let visible = true;
+    let loop: Loop | null = null;
     let guardShown = false;
     let modeShown = "";
 
@@ -239,10 +237,8 @@ export default function StackPipeline({ locale, groups }: ViewProps) {
       light.style.opacity = String(alpha * (onReturn >= 0 ? 0.7 : 1));
     };
 
-    const frame = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      let keep = visible;
+    const frame = ({ now, dt }: Tick): After => {
+      let keep = true;
       {
         if (!st.paused) t = (t + dt) % cycle;
         // Find the phase at time t.
@@ -290,16 +286,13 @@ export default function StackPipeline({ locale, groups }: ViewProps) {
         draw(pos, onReturn, alpha, doneAlpha);
         if (st.paused) keep = false;
       }
-      if (keep) raf = requestAnimationFrame(frame);
-      else running = false;
+      // Paused: this frame shows where the light stopped, then nothing until play or input.
+      return keep ? undefined : false;
     };
 
-    const kick = () => {
-      if (running || !visible || reduce) return;
-      running = true;
-      last = performance.now();
-      raf = requestAnimationFrame(frame);
-    };
+    // The frame governor: 60 on phones, only on screen, half rate when the visitor is idle.
+    if (!reduce) loop = frameLoop({ name: "tools/pipeline", host: flow, heavy: true }, frame);
+    const kick = () => loop?.wake();
     st.kick = kick;
 
     layout();
@@ -316,24 +309,12 @@ export default function StackPipeline({ locale, groups }: ViewProps) {
       kick();
     });
     ro.observe(flow);
-    const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting;
-      if (visible) kick();
-    });
-    io.observe(flow);
-    const onVis = () => {
-      visible = !document.hidden;
-      if (visible) kick();
-    };
-    document.addEventListener("visibilitychange", onVis);
 
     return () => {
-      cancelAnimationFrame(raf);
-      running = false;
+      loop?.stop();
+      loop = null;
       st.kick = () => {};
       ro.disconnect();
-      io.disconnect();
-      document.removeEventListener("visibilitychange", onVis);
     };
   }, [stations]);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { idleMode, onModeChange } from "@/motion/frame-governor";
 import { loadMotion } from "@/motion/gsap";
 import type { GroupId, ViewProps } from "../types";
 import { BentoMarkup } from "./markup";
@@ -11,7 +12,8 @@ type Loop = { tl: Timeline | null; visible: boolean; held: boolean; started: boo
 /**
  * Bento of the six tool groups; every tile loops a small fictional product demo (one GSAP
  * timeline per pass, rebuilt from the finished state each time, so a pass never rewinds).
- * Loops run only in view, start staggered, and pause while hovered, focused or tapped.
+ * Loops run only in view, start staggered, and pause while hovered, focused or tapped, and while
+ * the visitor is idle (the frame governor's light mode: 45 s without input; any input resumes).
  * Reduced motion: the markup is the finished frame, so nothing runs and nothing is missing.
  */
 export default function BentoLoops({ locale, groups }: ViewProps) {
@@ -22,6 +24,8 @@ export default function BentoLoops({ locale, groups }: ViewProps) {
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let dead = false;
     const cleanups: (() => void)[] = [];
+    const syncs: (() => void)[] = [];
+    cleanups.push(onModeChange(() => syncs.forEach((sync) => sync())));
 
     void loadMotion().then(({ gsap }) => {
       if (dead) return;
@@ -34,8 +38,9 @@ export default function BentoLoops({ locale, groups }: ViewProps) {
           for (const chip of chips) chip.toggleAttribute("data-lit", keys.includes(chip.dataset.tool ?? ""));
         };
         const loop: Loop = { tl: null, visible: false, held: false, started: false };
+        const running = () => loop.visible && !loop.held && idleMode() === "full";
         const sync = () => {
-          const run = loop.visible && !loop.held;
+          const run = running();
           tile.toggleAttribute("data-held", loop.held);
           if (run && !loop.started) {
             loop.started = true;
@@ -49,8 +54,9 @@ export default function BentoLoops({ locale, groups }: ViewProps) {
           tl.eventCallback("onUpdate", () => bar && gsap.set(bar, { scaleX: tl.progress() }));
           tl.eventCallback("onComplete", () => pass(0));
           loop.tl = tl;
-          tl.paused(!(loop.visible && !loop.held));
+          tl.paused(!running());
         };
+        syncs.push(sync);
         const io = new IntersectionObserver(([e]) => {
           loop.visible = e.isIntersecting;
           sync();
