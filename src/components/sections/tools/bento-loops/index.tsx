@@ -69,10 +69,15 @@ export default function BentoLoops({ locale, groups }: ViewProps) {
           frames.wake();
         };
         syncs.push(sync);
-        const io = new IntersectionObserver(([e]) => {
-          loop.visible = e.isIntersecting;
-          sync();
-        });
+        // A quarter of the tile in view: a strip left under the header after scrolling on is not
+        // worth animating.
+        const io = new IntersectionObserver(
+          ([e]) => {
+            loop.visible = e.isIntersecting && e.intersectionRatio >= 0.25;
+            sync();
+          },
+          { threshold: [0, 0.25] },
+        );
         io.observe(tile);
         const hold = () => {
           loop.held = true;
