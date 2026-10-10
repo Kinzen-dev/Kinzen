@@ -73,8 +73,11 @@ async function showView(page: Page, section: string, attr: string, id: string) {
 
 test.describe("frame governor", () => {
   test("paces heavy scenes to 60 fps on a phone's 120 Hz screen (display rate on desktop)", async ({ page }, info) => {
-    // A 120 Hz display, whatever the machine: rAF callbacks every 8.33 ms on vsync timestamps.
+    // A 120 Hz display on a full-size machine, whatever runs the test (a 2-core CI runner is a
+    // "small machine" and rightly gets 60): rAF callbacks every 8.33 ms on vsync timestamps.
     await page.addInitScript(() => {
+      Object.defineProperty(navigator, "hardwareConcurrency", { get: () => 8 });
+      Object.defineProperty(navigator, "deviceMemory", { get: () => 8 });
       const period = 1000 / 120;
       let id = 0;
       const timers = new Map<number, ReturnType<typeof setTimeout>>();
