@@ -64,7 +64,7 @@ const en = {
         },
         {
           title: "localStorage",
-          body: "Two values, each saved only when you choose: theme (light or dark) and kz-sound (sound on or off in the play section), so your next visit opens the same way. A third, kz-notrack, exists only on the site owner's own devices: it leaves his visits out of the counts above.",
+          body: "Two values, each saved only when you choose: theme (light or dark) and kz-sound (sound on or off in the play section), so your next visit opens the same way. A third, kz-notrack, exists only on the site owner's own devices and leaves the owner's visits out of the counts above.",
           points: [],
           source: null,
         },
