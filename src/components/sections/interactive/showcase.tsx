@@ -17,6 +17,7 @@ import { nobr } from "@/lib/thai-nodes";
 import { wakeWithin } from "@/motion/frame-governor";
 import { SCENE_IDS, type SceneId, type SceneProps } from "./types";
 import "./showcase.css";
+import { track } from "@/lib/analytics";
 
 type Scene = ComponentType<SceneProps>;
 type Bus = ReturnType<typeof import("./sound").getAudioBus>;
@@ -219,6 +220,7 @@ export function PlayShowcase({ locale, copy, poster }: { locale: Locale; copy: C
   const pick = useCallback(
     (to: SceneId) => {
       stopAuto();
+      track("view_pick", { section: "play", view: to });
       setSelected(to);
       void show(to);
     },

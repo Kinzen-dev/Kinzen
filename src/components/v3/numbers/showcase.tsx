@@ -17,6 +17,7 @@ import type { NumbersCopy } from "@/i18n/v3/numbers";
 import { nobr } from "@/lib/thai-nodes";
 import { VIEW_IDS, type ViewId, type ViewProps } from "./types";
 import "./showcase.css";
+import { track } from "@/lib/analytics";
 
 type View = ComponentType<ViewProps>;
 
@@ -135,6 +136,7 @@ export function NumbersShowcase({ locale, copy, children }: { locale: Locale; co
   const pick = useCallback(
     (to: ViewId) => {
       setAuto(false);
+      track("view_pick", { section: "numbers", view: to });
       writePicked();
       setSelected(to);
       void show(to);
