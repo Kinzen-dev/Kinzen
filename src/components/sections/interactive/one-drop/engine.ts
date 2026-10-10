@@ -154,11 +154,13 @@ export function createBowl(
   let R = 100;
   let cx = 0;
   let cy = 0;
+  /** The governor's adaptive resolution scale (the display pass only; the sims keep their size). */
+  let quality = 1;
   const layout = () => {
     const r = host.getBoundingClientRect();
     cssW = Math.max(1, r.width);
     cssH = Math.max(1, r.height);
-    fitCanvas(canvas, cssW, cssH, prof.dpr, prof.phone ? 2_200_000 : 4_200_000);
+    fitCanvas(canvas, cssW, cssH, prof.dpr * quality, prof.phone ? 2_200_000 : 4_200_000);
     // The bowl spans about -0.4R (rim back) .. +0.56R (foot front); the bead forms ~0.45R above
     // the water, so the stage holds about 1.5R of height.
     R = Math.min(cssW * (prof.phone ? 0.46 : 0.3), cssH / 1.55);
@@ -559,11 +561,20 @@ export function createBowl(
     ro2.observe(host);
     stop = () => ro2.disconnect();
   } else {
-    stop = runLoop(host, (_t, dt) => {
-      update(dt);
-      sim(dt);
-      draw();
-    });
+    // The ink never rests (the currents keep unfurling it): paced, light when idle, never settled.
+    const onScale = (q: number) => {
+      quality = q;
+      layout();
+    };
+    stop = runLoop(
+      host,
+      (_t, dt) => {
+        update(dt);
+        sim(dt);
+        draw();
+      },
+      { name: "play/one-drop", adaptive: { onScale } },
+    ).stop;
   }
 
   return {

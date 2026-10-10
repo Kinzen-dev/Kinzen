@@ -12,6 +12,7 @@ import { KineticHeading } from "./kinetic-heading";
 import { plain } from "@/lib/thai";
 import { nobr } from "@/lib/thai-nodes";
 import "./contact.css";
+import { BeamRing } from "@/motion/loops";
 
 /**
  * Contact (v3): the closing dark scene. Kinetic heading, the address as a big link, a primary
@@ -58,6 +59,7 @@ export function Contact({ locale, dict, v3 = getV3(locale) }: { locale: Locale; 
                 </a>
                 <div className="contact-actions">
                   <a href={email.href} className="contact-cta beam">
+                    <BeamRing />
                     {nobr(dict.contact.emailMe)}
                     <svg
                       aria-hidden="true"

@@ -29,23 +29,35 @@
   color: var(--ink-2);
 }
 .contact-live {
+  position: relative;
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
   background: var(--gold);
 }
+/* The ripple is a gold disc scaling from the dot to 1.5rem (a 0.5rem ring) as it fades:
+   transform and opacity only. */
 @media (prefers-reduced-motion: no-preference) {
-  .contact-live {
+  .contact-live::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--gold);
+    opacity: 0;
     animation: contact-live 2.4s var(--ease-out) infinite;
+    animation-play-state: var(--loop-play, running);
   }
 }
 @keyframes contact-live {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in oklch, var(--gold) 60%, transparent);
+    opacity: 0.6;
+    scale: 1;
   }
   70%,
   100% {
-    box-shadow: 0 0 0 0.5rem color-mix(in oklch, var(--gold) 0%, transparent);
+    opacity: 0;
+    scale: 3;
   }
 }
 
@@ -156,10 +168,11 @@
   font-weight: 600;
   box-shadow: 0 10px 30px -12px color-mix(in oklch, var(--gold) 70%, transparent);
 }
-.contact-cta.beam::before {
-  inset: -3px;
-  padding: 2px;
-  background: conic-gradient(from var(--beam), transparent 0 62%, var(--ink) 80%, transparent 100%);
+.contact-cta.beam {
+  --beam-inset: -3px;
+  --beam-w: 2px;
+  --beam-paint: conic-gradient(transparent 0 62%, var(--ink) 80%, transparent 100%);
+  --beam-still: var(--beam-paint);
 }
 .contact-cta:hover {
   background: color-mix(in oklch, var(--gold) 88%, var(--ink));

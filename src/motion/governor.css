@@ -1,0 +1,7 @@
+/* Motion governor (governor.ts): every infinite CSS loop declares
+   `animation-play-state: var(--loop-play, running)`, so it rests off screen and on a hidden tab.
+   After 45 s without input the governor lets each loop finish its pass and stop (governor.ts). The property inherits, so a paused root pauses everything inside. */
+html[data-page-hidden],
+[data-inview="false"] {
+  --loop-play: paused;
+}

@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { TextCycler } from "@/motion/text-cycler";
 import { DrawPath } from "@/motion/draw-path";
+import { Sweep } from "@/motion/loops";
 
 /** A marker stroke with a small return flick: hand-drawn, wider than tall (viewBox 600 x 28). */
 const UNDERLINE = "M6 17 C 120 9 250 6 390 9 C 470 11 540 13 594 9 M520 21 C 548 19 570 18 588 16";
@@ -71,7 +72,7 @@ export function HeroKinetic({
       <span className="hero-kinetic-lead">
         {lead}
         {join}
-        <span className="sweep">{word}</span>
+        <Sweep>{word}</Sweep>
       </span>{" "}
       {/* One display line when it fits ("I build" + the widest phrase); otherwise the phrase box
           wraps as a whole, the same for every phrase, so cycling never reflows. */}

@@ -114,6 +114,19 @@ describe("target sampling", () => {
 });
 
 describe("frame cap", () => {
+  it("a jittery 120 Hz stream: a 120 cap draws every frame, a 60 cap every other one", () => {
+    // Real rAF gaps on a busy machine swing between about 6.6 and 10.4 ms around 8.33.
+    const stamps: number[] = [];
+    for (let i = 0, t = 0; i < 240; i++) stamps.push((t += 8.333 + (i % 2 ? 1.9 : -1.7)));
+    const count = (fps: number) => {
+      const cap = new FrameCap(fps);
+      return stamps.filter((t) => cap.accept(t) >= 0).length;
+    };
+    expect(count(120)).toBeGreaterThanOrEqual(236);
+    expect(count(60)).toBeGreaterThanOrEqual(118);
+    expect(count(60)).toBeLessThanOrEqual(122);
+  });
+
   it("caps a 240 Hz stream to about 120 fps and reports raw deltas", () => {
     const cap = new FrameCap(120);
     let rendered = 0;

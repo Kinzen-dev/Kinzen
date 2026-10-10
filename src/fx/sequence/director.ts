@@ -1,5 +1,6 @@
 import { WORDMARK_EM } from "@/fx/baked/geometry";
 import { hasFloatTargets, isSoftwareRenderer, rendererOf } from "@/fx/engine/capability";
+import { canvasDpr, frameLoop, type Loop, type Tick } from "@/motion/frame-governor";
 import { createDesk, DRAW_S, type Desk } from "./desk";
 import { trackPointer } from "./kit/pointer";
 import { stageStore } from "./store";
@@ -16,9 +17,12 @@ import type { Geom, Gpu, GpuScene, GpuSceneId, Rgb, Role, SceneFactory, SceneId 
  * directly, the three.js scenes (metal, keys) through one renderer wrapping it. Each scene is
  * loaded and built one step ahead and disposed when it is two steps behind.
  * The clock runs only while the hero is on screen, the tab is visible and the visitor has not
- * paused it; everything resumes exactly where it was. The first seconds of each GPU scene are
- * measured: below about 50 fps the canvas resolution steps down, and a heavy scene (water, keys)
- * that still cannot hold it is skipped from then on (remembered for the session).
+ * paused it; everything resumes exactly where it was. Frames come from the site's frame governor
+ * (src/motion/frame-governor): 60 fps on phones (every other vsync on a 120 Hz screen), half that
+ * after 45 s without input, full again on the next input. The first seconds of each GPU scene are
+ * measured (in full mode only, a deliberately slower pace is not a slow GPU): below about 50 fps
+ * the canvas resolution steps down, and a heavy scene (water, keys) that still cannot hold it is
+ * skipped from then on (remembered for the session).
  */
 
 const DUR: Record<SceneId, number> = { desk: DRAW_S + 6, particles: 12, gold3d: 12, fluid: 12, keycaps: 12 };
@@ -189,7 +193,7 @@ export function startSequence(els: StageEls): () => void {
   };
 
   // ---------- geometry ----------
-  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const dpr = canvasDpr(2);
   const geom: Geom = { cssW: 1, cssH: 1, pxW: 1, pxH: 1, k: 1, slot: { x: 0, y: 0, w: 1, h: 1 }, phone };
   const measure = () => {
     const cssW = stage.offsetWidth || 1;
@@ -499,16 +503,18 @@ export function startSequence(els: StageEls): () => void {
   });
 
   // ---------- loop ----------
-  let raf = 0;
-  let last = 0;
+  let loop: Loop | null = null;
   let inView = true;
+  let lastMode = "full";
   const running = () => inView && !document.hidden && !stageStore.get().paused && !dead && !!desk;
-  const tick = (now: number) => {
-    raf = requestAnimationFrame(tick);
-    const raw = last ? now - last : 1000 / 60;
-    last = now;
-    judge(raw);
-    const d = Math.min(raw / 1000, 1 / 20) * speed;
+  const frame = ({ raw, mode }: Tick) => {
+    if (raw === 0 || mode !== lastMode) {
+      // A fresh start (on screen again, tab back, resumed) or a change of pace: measure anew.
+      lastMode = mode;
+      soloAt = performance.now();
+      samples = [];
+    } else if (mode === "full") judge(raw);
+    const d = Math.min((raw || 1000 / 60) / 1000, 1 / 20) * speed;
     advance(d);
     publish();
     debug.t = t;
@@ -518,14 +524,13 @@ export function startSequence(els: StageEls): () => void {
   const sync = () => {
     const on = running();
     debug.running = on;
-    if (on && !raf) {
-      last = 0;
+    if (on && !loop) {
       soloAt = performance.now();
       samples = [];
-      raf = requestAnimationFrame(tick);
-    } else if (!on && raf) {
-      cancelAnimationFrame(raf);
-      raf = 0;
+      loop = frameLoop({ name: "hero", host: stage, heavy: true, wakeOn: null }, frame);
+    } else if (!on && loop) {
+      loop.stop();
+      loop = null;
     }
   };
   const io = new IntersectionObserver(([e]) => {
@@ -627,7 +632,8 @@ export function startSequence(els: StageEls): () => void {
 
   return () => {
     dead = true;
-    cancelAnimationFrame(raf);
+    loop?.stop();
+    loop = null;
     cancelAnimationFrame(pendingLayout);
     clearTimeout(timer);
     if (idle) w.cancelIdleCallback?.(idle);

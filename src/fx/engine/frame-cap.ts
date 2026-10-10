@@ -18,7 +18,9 @@ export class FrameCap {
     }
     const min = 1000 / this.fps;
     const since = now - this.anchor;
-    if (since < min - 0.5) return -1;
+    // A quarter interval of slack: rAF timestamps jitter, and a frame that lands a little early
+    // must still count (a 120 cap on a 120 Hz screen draws every frame, a 60 cap every other one).
+    if (since < min - Math.max(0.5, min / 4)) return -1;
     // Advance the anchor by whole intervals (the remainder carries cadence). A plain
     // `since % min` breaks when a frame lands a hair under `min`: the anchor would not move.
     this.anchor = since > min * 4 ? now : this.anchor + min * Math.max(1, Math.floor((since + 0.5) / min));

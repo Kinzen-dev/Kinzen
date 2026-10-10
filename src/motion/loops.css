@@ -1,0 +1,106 @@
+/* ---------- gold sweep (loops.tsx) ----------
+   The window spans the word and fades in and out over 72% of its width (the old 300% gradient's
+   38-62% band); it travels from one width left to one width right, so the light enters and leaves
+   fully outside the word, as before. The window reaches 0.25em past the line box so ascenders,
+   descenders and Thai marks stay inside it. */
+.sweep {
+  position: relative;
+  display: inline-block;
+  color: var(--ink);
+}
+.sweep-hl {
+  position: absolute;
+  inset: -0.25em 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(100deg, transparent 14%, #000 50%, transparent 86%);
+  mask-image: linear-gradient(100deg, transparent 14%, #000 50%, transparent 86%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  translate: -100% 0;
+  animation: sweep-window 4s var(--ease-in-out) infinite;
+  animation-play-state: var(--loop-play, running);
+}
+.sweep-hl-in {
+  display: block;
+  padding-block: 0.25em;
+  color: var(--gold);
+  white-space: nowrap;
+  translate: 100% 0;
+  animation: sweep-copy 4s var(--ease-in-out) infinite;
+  animation-play-state: var(--loop-play, running);
+}
+.sweep-hl-in::before {
+  content: attr(data-text);
+}
+@keyframes sweep-window {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 100% 0;
+  }
+}
+@keyframes sweep-copy {
+  from {
+    translate: 100% 0;
+  }
+  to {
+    translate: -100% 0;
+  }
+}
+
+/* ---------- border beam (loops.tsx) ----------
+   The ring is the parent's edge (mask: border box minus content box); inside it a square conic
+   light, larger than the parent's diagonal, turns (rotate only). A variant sets --beam-inset,
+   --beam-w, --beam-z, --beam-paint and, for reduced motion, --beam-still. */
+.beam {
+  position: relative;
+  isolation: isolate;
+}
+.beam > .beam-ring {
+  position: absolute;
+  inset: var(--beam-inset, -1px);
+  z-index: var(--beam-z, -1);
+  padding: var(--beam-w, 1.5px);
+  border-radius: inherit;
+  container-type: size;
+  /* The turning square is larger than the parent: keep it out of the parent's scrollable area. */
+  overflow: clip;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.beam-ring::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150cqmax;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: var(--beam-paint, conic-gradient(transparent 0 70%, var(--gold) 85%, transparent 100%));
+  animation: beam 3.2s linear infinite;
+  animation-play-state: var(--loop-play, running);
+}
+@keyframes beam {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep-hl {
+    display: none;
+  }
+  .beam > .beam-ring {
+    opacity: 0.6;
+  }
+  .beam-ring::before {
+    animation: none;
+    background: var(--beam-still, var(--gold));
+  }
+}

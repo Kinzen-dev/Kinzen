@@ -397,6 +397,7 @@
   background: var(--gold);
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--gold) 22%, transparent);
   animation: bl-pulse 1s ease-in-out infinite;
+  animation-play-state: var(--loop-play, running);
 }
 .bl-pipe li.is-done {
   color: var(--ink-2);
@@ -567,6 +568,7 @@
   height: 100%;
   background: var(--gold);
   animation: bl-blink 1s steps(2, jump-none) infinite;
+  animation-play-state: var(--loop-play, running);
 }
 @keyframes bl-blink {
   50% {
@@ -750,6 +752,7 @@
 .bl-ci[data-state="running"] .bl-status::before {
   background: var(--gold);
   animation: bl-pulse 1s ease-in-out infinite;
+  animation-play-state: var(--loop-play, running);
 }
 .bl-ci[data-state="passed"] .bl-status {
   background: color-mix(in oklch, var(--bl-pass) 16%, transparent);
@@ -806,6 +809,7 @@
   border: 1.5px solid color-mix(in oklch, var(--gold) 25%, transparent);
   border-top-color: var(--gold);
   animation: bl-spin 0.7s linear infinite;
+  animation-play-state: var(--loop-play, running);
 }
 @keyframes bl-spin {
   to {

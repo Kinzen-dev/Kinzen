@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { observeInView } from "./governor";
 import "./primitives.css";
 
 /**
  * Kinetic phrase cycler: one phrase at a time, blur-to-sharp in, rise out. Whole phrases only
  * (never split into letters), so Thai graphemes stay intact. Screen readers get every phrase once
- * as a list; the moving copy is aria-hidden. Reduced motion: the first phrase, still.
+ * as a list; the moving copy is aria-hidden. Holds its phrase off screen and on a hidden tab.
+ * Reduced motion: the first phrase, still.
  */
 export function TextCycler({
   phrases,
@@ -18,18 +20,24 @@ export function TextCycler({
   className?: string;
 }) {
   const [i, setI] = useState(0);
+  const root = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    if (phrases.length < 2 || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let id = 0;
+    const el = root.current;
+    if (!el || phrases.length < 2 || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let inView = true;
+    const stop = observeInView(el, (v) => (inView = v));
     const tick = () => {
-      if (!document.hidden) setI((n) => (n + 1) % phrases.length);
+      if (inView && !document.hidden) setI((n) => (n + 1) % phrases.length);
     };
-    id = window.setInterval(tick, ms);
-    return () => window.clearInterval(id);
+    const id = window.setInterval(tick, ms);
+    return () => {
+      window.clearInterval(id);
+      stop();
+    };
   }, [phrases.length, ms]);
 
   return (
-    <span className={["cycler", className].filter(Boolean).join(" ")}>
+    <span ref={root} className={["cycler", className].filter(Boolean).join(" ")}>
       <span className="sr-only">
         {phrases.map((p, n) => (
           <span key={n}>

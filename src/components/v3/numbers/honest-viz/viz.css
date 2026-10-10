@@ -289,16 +289,31 @@
   background: var(--gold);
   box-shadow: 0 0 0 5px color-mix(in oklab, var(--gold) 22%, transparent);
 }
+/* Live: the halo gives way to a ripple, a gold disc scaling to 12px past the dot as it fades
+   (transform and opacity only). */
 [data-card="production"][data-state="done"] .hv-axis-head span,
 [data-card="production"]:not([data-state]) .hv-axis-head span {
+  box-shadow: none;
+}
+[data-card="production"][data-state="done"] .hv-axis-head span::after,
+[data-card="production"]:not([data-state]) .hv-axis-head span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--gold);
+  opacity: 0;
   animation: hv-pulse 2.4s var(--ease-out) infinite;
+  animation-play-state: var(--loop-play, running);
 }
 @keyframes hv-pulse {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 45%, transparent);
+    opacity: 0.45;
+    scale: 1;
   }
   100% {
-    box-shadow: 0 0 0 12px color-mix(in oklab, var(--gold) 0%, transparent);
+    opacity: 0;
+    scale: calc(1 + 24 / 13);
   }
 }
 .hv-axis-cap {
@@ -442,6 +457,7 @@
 @media (prefers-reduced-motion: no-preference) {
   [data-card="users"][data-state="done"] .hv-user {
     animation: hv-breathe 3.6s ease-in-out calc(var(--k) * -0.61s) infinite;
+    animation-play-state: var(--loop-play, running);
   }
 }
 @keyframes hv-breathe {

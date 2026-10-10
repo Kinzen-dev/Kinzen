@@ -14,6 +14,7 @@ import {
 import type { Locale } from "@/content/schema";
 import type { InteractiveCopy } from "@/i18n/v3/interactive";
 import { nobr } from "@/lib/thai-nodes";
+import { wakeWithin } from "@/motion/frame-governor";
 import { SCENE_IDS, type SceneId, type SceneProps } from "./types";
 import "./showcase.css";
 
@@ -84,6 +85,8 @@ function writePicked() {
  */
 function snapshot(pane: HTMLElement): Promise<HTMLCanvasElement | null> {
   return new Promise((resolve) => {
+    // A paced or settled scene may not draw in every frame: have it draw in this one.
+    wakeWithin(pane);
     requestAnimationFrame(() => {
       const box = pane.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
