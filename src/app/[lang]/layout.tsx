@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { locales, type Locale } from "@/content/schema";
 import { getDictionary, getPlainDictionary } from "@/i18n/dictionaries";
 import { SITE_URL, alternates, localePath } from "@/lib/site-url";
@@ -10,6 +8,7 @@ import { ThemeScript } from "@/components/theme-script";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PerfHudGate } from "@/components/perf-hud/perf-hud-gate";
+import { SiteAnalytics } from "@/components/site-analytics";
 import { MotionGovernor } from "@/motion/motion-governor";
 import { fontVariables } from "../fonts";
 import "../globals.css";
@@ -72,8 +71,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         <SiteFooter locale={lang} dict={dict} />
         <MotionGovernor />
         <PerfHudGate />
-        <Analytics />
-        <SpeedInsights />
+        <SiteAnalytics />
       </body>
     </html>
   );
