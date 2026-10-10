@@ -5,6 +5,7 @@ import type { PaletteData } from "./palette-data";
 import type { PaletteDialog, PaletteHandle } from "./palette-dialog";
 import "./palette.css";
 import { plain } from "@/lib/thai-plain";
+import { track } from "@/lib/analytics";
 
 const loadDialog = () => import("./palette-dialog");
 /** Fetch the dialog early (page idle, hover, focus, a held Cmd/Ctrl), so the first open only renders it. */
@@ -35,6 +36,7 @@ export function CommandPalette({ data }: { data: PaletteData }) {
   const shortcut = apple ? "⌘K" : "Ctrl K";
 
   const open = useCallback(() => {
+    track("palette_open");
     // Mounting the dialog opens it; once mounted, it opens through its handle. A chunk that
     // fails to load (offline) leaves the trigger inert, like any other unreachable page.
     if (handle.current) handle.current.open();

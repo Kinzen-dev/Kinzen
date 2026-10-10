@@ -21,3 +21,11 @@ red, and never report a red or unwatched run as a success.
 
 `cancelled` runs are expected only when a newer push to the same branch superseded them
 (`concurrency: cancel-in-progress` in ci.yml); the newest run must still be green.
+
+## Performance on every device
+
+Every change that adds or touches motion, canvas, WebGL, audio, scroll effects or a home section must
+follow `docs/PERFORMANCE.md`: nothing works off screen, settled scenes stop drawing, idle is cheap,
+heavy scenes go through `src/motion/frame-governor.ts` (60 fps on phones), CSS loops through
+`src/motion/governor.ts` (compositor-only), and the change is checked A/B against production with
+`pnpm perf:lab` on phone and desktop before merge.

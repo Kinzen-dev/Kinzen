@@ -3,33 +3,25 @@
 import { useEffect, useState } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-
-/** Set on the owner's own devices (open any page with ?notrack=1; ?notrack=0 undoes it). */
-const KEY = "kz-notrack";
-
-/**
- * Visits that are not a visitor never reach the counts: the owner's own devices (flagged once
- * per browser) and automated browsers (navigator.webdriver: the lab, e2e and review runs).
- * Decided per event, so the flag holds from the first page view of the visit that sets it.
- */
-function counted(): boolean {
-  try {
-    if (navigator.webdriver) return false;
-    const param = new URLSearchParams(window.location.search).get("notrack");
-    if (param === "1") localStorage.setItem(KEY, "1");
-    if (param === "0") localStorage.removeItem(KEY);
-    return localStorage.getItem(KEY) !== "1";
-  } catch {
-    // Storage blocked: an automated browser is still left out above; a person is counted.
-    return true;
-  }
-}
+import { counted, loadPostHog, PH_KEY } from "@/lib/analytics";
 
 function keep<E>(event: E): E | null {
   return counted() ? event : null;
 }
 
 export function SiteAnalytics() {
+  useEffect(() => {
+    if (!PH_KEY) return;
+    const start = () => loadPostHog();
+    const ric = window.requestIdleCallback;
+    if (ric) {
+      const id = ric(start, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const t = window.setTimeout(start, 2500);
+    return () => window.clearTimeout(t);
+  }, []);
+
   // A quiet confirmation for the owner when the switch is used, so the phone shows it took.
   const [note, setNote] = useState<string | null>(null);
   useEffect(() => {

@@ -8,7 +8,12 @@ const DOCS = {
   analytics: "https://vercel.com/docs/analytics/privacy-policy",
   speed: "https://vercel.com/docs/speed-insights/privacy-policy",
   notice: "https://vercel.com/legal/privacy-policy",
+  posthog: "https://posthog.com/privacy",
+  cookieless: "https://posthog.com/docs/privacy/data-collection",
 };
+
+/** PostHog runs only when the build carries its key (src/lib/analytics.ts); the page says so only then. */
+const POSTHOG = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 
 const en = {
   title: "Privacy",
@@ -44,9 +49,21 @@ const en = {
           points: ["the route and URL", "network speed", "browser, device type and operating system", "the country"],
           source: { label: "Vercel: Speed Insights privacy", href: DOCS.speed },
         },
+        ...(POSTHOG
+          ? [
+              {
+                title: "PostHog (product analytics)",
+                body: "Records which pages are opened and what is clicked or chosen on them (for example which view of a section, which demo scene), how far a page is scrolled, and the time. It runs in cookieless mode: it sets no cookie and stores nothing in your browser; PostHog counts visitors with a hash computed on its servers. No account, name or email is attached, and screens are not recorded. Data is held by PostHog in its EU cloud. It loads after the page has finished loading.",
+                points: [],
+                source: { label: "PostHog: cookieless mode", href: DOCS.cookieless },
+              },
+            ]
+          : []),
         {
           title: "Nothing else",
-          body: "Both scripts load from this site's own domain and report to it. Automated browsers (tests) are not counted. The site sends no custom events and never calls Vercel's identify feature. Fonts are served from this site too. Pages make no requests to other domains; LinkedIn or GitHub open only when you follow a link there.",
+          body: POSTHOG
+            ? "The Vercel scripts load from this site's own domain and report to it; PostHog reports to PostHog's EU servers. Automated browsers (tests) are not counted. Fonts are served from this site too. LinkedIn or GitHub open only when you follow a link there."
+            : "Both scripts load from this site's own domain and report to it. Automated browsers (tests) are not counted. The site sends no custom events and never calls Vercel's identify feature. Fonts are served from this site too. Pages make no requests to other domains; LinkedIn or GitHub open only when you follow a link there.",
           points: [],
           source: null,
         },
@@ -143,9 +160,21 @@ const th: PrivacyCopy = {
           points: ["route และ URL", "ความเร็วเครือข่าย", "เบราว์เซอร์ ประเภทอุปกรณ์ และระบบปฏิบัติการ", "ประเทศ"],
           source: { label: "เอกสาร Speed Insights ของ Vercel", href: DOCS.speed },
         },
+        ...(POSTHOG
+          ? [
+              {
+                title: "PostHog (สถิติการใช้งาน)",
+                body: "บันทึกว่ามีการเปิดหน้าไหน และกดหรือเลือกอะไรบ้างในหน้านั้น (เช่น เลือกดูแบบไหนของแต่ละส่วน หรือเล่นฉากไหนในเดโม) เลื่อนลงไปถึงไหน และเวลา ทำงานแบบไม่ใช้คุกกี้ ไม่ตั้งคุกกี้และไม่เก็บอะไรในเบราว์เซอร์ของคุณ PostHog นับผู้เข้าชมด้วยค่า hash ที่คำนวณบนเซิร์ฟเวอร์ของ PostHog เอง ไม่ผูกกับบัญชี ชื่อ หรืออีเมล และไม่บันทึกหน้าจอ ข้อมูลเก็บไว้ที่คลาวด์ฝั่ง EU ของ PostHog และโหลดหลังจากหน้าเว็บโหลดเสร็จแล้ว",
+                points: [],
+                source: { label: "PostHog: โหมดไม่ใช้คุกกี้", href: DOCS.cookieless },
+              },
+            ]
+          : []),
         {
           title: "นอกจากนี้ไม่มีอะไรอีก",
-          body: "สคริปต์ทั้งสองโหลดจากโดเมนของเว็บไซต์นี้เอง และส่งข้อมูลกลับมาที่โดเมนเดียวกัน ไม่นับเบราว์เซอร์อัตโนมัติที่ใช้ทดสอบ เว็บไซต์ไม่ส่ง custom event หรือเหตุการณ์ที่กำหนดเอง และไม่ใช้ฟีเจอร์ identify หรือการระบุตัวผู้ใช้ของ Vercel ฟอนต์ก็โหลดจากเว็บไซต์นี้ หน้าเว็บไม่ส่งคำขอไปโดเมนอื่น LinkedIn หรือ GitHub จะเปิดก็ต่อเมื่อคุณกดลิงก์ไปเอง",
+          body: POSTHOG
+            ? "สคริปต์ของ Vercel โหลดจากโดเมนของเว็บไซต์นี้เอง และส่งข้อมูลกลับมาที่โดเมนเดียวกัน ส่วน PostHog ส่งข้อมูลไปที่เซิร์ฟเวอร์ฝั่ง EU ของ PostHog ไม่นับเบราว์เซอร์อัตโนมัติที่ใช้ทดสอบ ฟอนต์ก็โหลดจากเว็บไซต์นี้ LinkedIn หรือ GitHub จะเปิดก็ต่อเมื่อคุณกดลิงก์ไปเอง"
+            : "สคริปต์ทั้งสองโหลดจากโดเมนของเว็บไซต์นี้เอง และส่งข้อมูลกลับมาที่โดเมนเดียวกัน ไม่นับเบราว์เซอร์อัตโนมัติที่ใช้ทดสอบ เว็บไซต์ไม่ส่ง custom event หรือเหตุการณ์ที่กำหนดเอง และไม่ใช้ฟีเจอร์ identify หรือการระบุตัวผู้ใช้ของ Vercel ฟอนต์ก็โหลดจากเว็บไซต์นี้ หน้าเว็บไม่ส่งคำขอไปโดเมนอื่น LinkedIn หรือ GitHub จะเปิดก็ต่อเมื่อคุณกดลิงก์ไปเอง",
           points: [],
           source: null,
         },

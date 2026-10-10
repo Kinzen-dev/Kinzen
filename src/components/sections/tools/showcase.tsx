@@ -17,6 +17,7 @@ import type { ToolsCopy } from "@/i18n/v3/tools";
 import { nobr } from "@/lib/thai-nodes";
 import { VIEW_IDS, type ToolGroup, type ViewId, type ViewProps } from "./types";
 import "./showcase.css";
+import { track } from "@/lib/analytics";
 
 type View = ComponentType<ViewProps>;
 
@@ -143,6 +144,7 @@ export function ToolsShowcase({
   const pick = useCallback(
     (to: ViewId) => {
       setAuto(false);
+      track("view_pick", { section: "tools", view: to });
       writePicked();
       setSelected(to);
       void show(to);
