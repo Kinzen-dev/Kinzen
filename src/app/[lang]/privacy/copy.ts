@@ -46,7 +46,7 @@ const en = {
         },
         {
           title: "Nothing else",
-          body: "Both scripts load from this site's own domain and report to it. The site sends no custom events and never calls Vercel's identify feature. Fonts are served from this site too. Pages make no requests to other domains; LinkedIn or GitHub open only when you follow a link there.",
+          body: "Both scripts load from this site's own domain and report to it. Automated browsers (tests) are not counted. The site sends no custom events and never calls Vercel's identify feature. Fonts are served from this site too. Pages make no requests to other domains; LinkedIn or GitHub open only when you follow a link there.",
           points: [],
           source: null,
         },
@@ -64,7 +64,7 @@ const en = {
         },
         {
           title: "localStorage",
-          body: "Two values, each saved only when you choose: theme (light or dark) and kz-sound (sound on or off in the play section), so your next visit opens the same way.",
+          body: "Two values, each saved only when you choose: theme (light or dark) and kz-sound (sound on or off in the play section), so your next visit opens the same way. A third, kz-notrack, exists only on the site owner's own devices and leaves the owner's visits out of the counts above.",
           points: [],
           source: null,
         },
@@ -145,7 +145,7 @@ const th: PrivacyCopy = {
         },
         {
           title: "นอกจากนี้ไม่มีอะไรอีก",
-          body: "สคริปต์ทั้งสองโหลดจากโดเมนของเว็บไซต์นี้เอง และส่งข้อมูลกลับมาที่โดเมนเดียวกัน เว็บไซต์ไม่ส่ง custom event หรือเหตุการณ์ที่กำหนดเอง และไม่ใช้ฟีเจอร์ identify หรือการระบุตัวผู้ใช้ของ Vercel ฟอนต์ก็โหลดจากเว็บไซต์นี้ หน้าเว็บไม่ส่งคำขอไปโดเมนอื่น LinkedIn หรือ GitHub จะเปิดก็ต่อเมื่อคุณกดลิงก์ไปเอง",
+          body: "สคริปต์ทั้งสองโหลดจากโดเมนของเว็บไซต์นี้เอง และส่งข้อมูลกลับมาที่โดเมนเดียวกัน ไม่นับเบราว์เซอร์อัตโนมัติที่ใช้ทดสอบ เว็บไซต์ไม่ส่ง custom event หรือเหตุการณ์ที่กำหนดเอง และไม่ใช้ฟีเจอร์ identify หรือการระบุตัวผู้ใช้ของ Vercel ฟอนต์ก็โหลดจากเว็บไซต์นี้ หน้าเว็บไม่ส่งคำขอไปโดเมนอื่น LinkedIn หรือ GitHub จะเปิดก็ต่อเมื่อคุณกดลิงก์ไปเอง",
           points: [],
           source: null,
         },
@@ -163,7 +163,7 @@ const th: PrivacyCopy = {
         },
         {
           title: "localStorage",
-          body: "เก็บสองค่า และเก็บเฉพาะตอนที่คุณเลือกเอง คือ theme (โหมดสว่างหรือมืด) กับ kz-sound (เปิดหรือปิดเสียงในส่วน play) เพื่อให้ครั้งหน้าเปิดมาเป็นแบบเดิม",
+          body: "เก็บสองค่า และเก็บเฉพาะตอนที่คุณเลือกเอง คือ theme (โหมดสว่างหรือมืด) กับ kz-sound (เปิดหรือปิดเสียงในส่วน play) เพื่อให้ครั้งหน้าเปิดมาเป็นแบบเดิม ส่วนค่าที่สาม kz-notrack มีเฉพาะในเครื่องของเจ้าของเว็บไซต์ ใช้ไม่ให้นับการเข้าชมของเขาเองในสถิติด้านบน",
           points: [],
           source: null,
         },
